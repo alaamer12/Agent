@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Screen Set — Gallery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Device viewport for the previews, as UNITLESS numbers — aspect-ratio rejects values with
+       units, and a fixed scale leaves a gap because it can't know the card width. fit() below
+       derives the real scale from the card, so the iframe always renders at the device's true
+       viewport and ratio. mobile 412x850 · tablet 834x1112 · desktop 1440x900. */
+    :root { --dev-w: 412; --dev-h: 850; }
+    .preview-box { overflow: hidden; background: #000; }
+    .preview-box iframe {
+      width: calc(var(--dev-w) * 1px);
+      height: calc(var(--dev-h) * 1px);
+      border: 0;
+      transform-origin: top left;
+      pointer-events: none;               /* the gallery is for looking; open a tab to click */
+    }
+  </style>
+</head>
+<body class="bg-neutral-950 text-neutral-100 font-sans antialiased">
+
+  <div class="mx-auto max-w-[1300px] px-5 py-8 pb-20">
+
+    <!-- 1. Header: what this set is, and the spec it implements -->
+    <header class="mb-10 border-b border-neutral-800 pb-7 text-center">
+      <div class="mb-3 inline-block rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+        Fidelity · source of truth
+      </div>
+      <h1 class="mb-2 text-3xl font-bold tracking-tight">Product Screen Set</h1>
+      <p class="mx-auto max-w-2xl text-[15px] leading-relaxed text-neutral-400">
+        Every screen of the flow as a standalone frameless mockup. Each preview is the live file,
+        and every state below is reachable by URL — no clicking through to review.
+      </p>
+      <a href="../Docs/spec.md" class="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 text-[13px] font-medium text-sky-400 hover:bg-neutral-800">
+        Read the spec this implements →
+      </a>
+    </header>
+
+    <!-- 2. One card per screen, generated from SCREENS + the shared state table -->
+    <main id="grid" class="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"></main>
+
+    <!-- 3. Set-level notes: rules that bind every screen, each with its source -->
+    <section class="grid grid-cols-1 gap-6 rounded-2xl border border-neutral-800 bg-neutral-900 p-7 sm:grid-cols-3">
+      <div>
+        <h3 class="mb-2 text-base font-bold">Tokens</h3>
+        <p class="text-[13px] leading-relaxed text-neutral-400">One palette, one type scale, one
+          spacing rhythm — named where they come from, not restated per screen.</p>
+      </div>
+      <div>
+        <h3 class="mb-2 text-base font-bold">Laws</h3>
+        <p class="text-[13px] leading-relaxed text-neutral-400">The constraints that decide what
+          may not appear on a screen (and why), so nobody re-adds it later.</p>
+      </div>
+      <div>
+        <h3 class="mb-2 text-base font-bold">States</h3>
+        <p class="text-[13px] leading-relaxed text-neutral-400">Every screen's loading / empty /
+          error surface is chosen by the failure mapping, not invented per screen.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- The screens read this same file to render ?state=; the gallery reads it to build the chips.
+       One owner, so the gallery can never drift from the screens. -->
+  <script src="assets/states.js"></script>
+  <script>
+    // Gallery-only metadata: where each screen sits, and what it decides.
+    const SCREENS = [
+      { file: 'home.html', tag: 'Tab 1 • /tabs/home', title: 'Home Feed',
+        notes: 'Vertical swipe feed, topic pills, right action rail. Following is topics, not creators — no subscribe control anywhere.' },
+      { file: 'search.html', tag: 'Tab 2 • /tabs/search', title: 'Search',
+        notes: 'Pill search bar with voice input, fixed filter vocabulary, recent history, and a topic discovery grid.' },
+      { file: 'settings.html', tag: 'Sub-screen • /more/settings', title: 'Settings',
+        notes: 'Pushed sub-screen. Language picker sheet, destructive actions confirm-guarded. Dark-only, so no theme switch.' },
+    ];
+
+    // Fallback only if the set has no shared states file: keep this the source, not a copy.
+    const FALLBACK = { 'home': { states: { loading: { label: 'Loading' }, error: { label: 'Failed' } } } };
+    const TABLE = window.SCREEN_STATES || FALLBACK;
+
+    const grid = document.getElementById('grid');
+
+    for (const s of SCREENS) {
+      const page = s.file.replace(/\.html$/, '');
+      const states = TABLE[page]?.states || {};
+
+      const card = document.createElement('article');
+      card.className = 'flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900';
+      card.innerHTML = `
+        <div class="preview-box border-b border-neutral-800">
+          <iframe src="${s.file}" title="${s.title} preview" loading="lazy"></iframe>
+        </div>
+        <div class="flex flex-1 flex-col p-4">
+          <span class="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-sky-400">${s.tag}</span>
+          <h2 class="mb-1.5 text-lg font-bold">${s.title}</h2>
+          <p class="mb-4 flex-1 text-[13px] leading-snug text-neutral-400">${s.notes}</p>
+          <a class="flex items-center justify-center gap-1.5 rounded-full bg-white px-3 py-2.5 text-[13px] font-semibold text-neutral-900 hover:bg-neutral-200"
+             href="${s.file}" target="_blank" rel="noopener">Open Screen</a>
+        </div>`;
+      grid.appendChild(card);
+
+      const body = card.querySelector('div:last-child');
+      const frame = card.querySelector('iframe');
+      const launch = card.querySelector('a');
+
+      // State strip — generated from the table, never typed.
+      if (Object.keys(states).length) {
+        const strip = document.createElement('div');
+        strip.className = 'mt-4 flex flex-wrap gap-1.5 border-t border-neutral-800 pt-4';
+        strip.innerHTML = '<span class="w-full text-[10px] font-bold uppercase tracking-wider text-neutral-500">States — each is a URL</span>';
+
+        const select = (id) => {
+          frame.src = id ? `${s.file}?state=${id}` : s.file;
+          launch.href = frame.src;                       // the opened tab lands on the same state
+          strip.querySelectorAll('button').forEach(b => {
+            const on = b.dataset.state === (id || '');
+            b.classList.toggle('bg-white', on);
+            b.classList.toggle('text-neutral-900', on);
+          });
+        };
+
+        for (const [id, meta] of [['', { label: 'Screen' }], ...Object.entries(states)]) {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.dataset.state = id;
+          chip.textContent = meta.label;
+          chip.title = `${s.file}${id ? '?state=' + id : ''}`;
+          chip.className = 'rounded-full border border-neutral-700 px-2.5 py-1 text-[11px] font-medium text-neutral-400 hover:bg-neutral-800 hover:text-white';
+          if (!id) chip.classList.add('bg-white', 'text-neutral-900');
+          chip.onclick = () => select(id);
+          strip.appendChild(chip);
+        }
+        body.appendChild(strip);
+      }
+    }
+
+    // If screens post navigation to a parent, route it to the frame that sent it.
+    addEventListener('message', (e) => {
+      if (e.data?.type !== 'NAVIGATE_TAB') return;
+      try {
+        const fr = e.source?.frameElement;
+        if (fr?.closest('.preview-box')) fr.src = `${e.data.tab}.html`;
+      } catch { /* cross-origin frame: nothing to route */ }
+    });
+
+    /* Size each preview box to the device ratio and derive the scale from the card, so the
+       screen renders at its true viewport instead of believing the card is the phone. */
+    const DEV = { w: 412, h: 850 };
+    function fit() {
+      for (const box of document.querySelectorAll('.preview-box')) {
+        const scale = box.clientWidth / DEV.w;
+        box.style.height = `${box.clientWidth * (DEV.h / DEV.w)}px`;
+        box.querySelector('iframe').style.transform = `scale(${scale})`;
+      }
+    }
+    addEventListener('resize', fit);
+    fit();
+  </script>
+</body>
+</html>

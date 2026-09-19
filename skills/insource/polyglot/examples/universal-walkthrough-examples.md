@@ -143,3 +143,36 @@ The agent inspects the application's domain and asks the user:
   - Hybrid relational-document model (structured relational core with JSON metadata)
 The agent documents the user's decision along with explicit trade-offs.
 ```
+
+---
+
+## Pattern 4: Illustrative Option Notation (Bracket / "Example Option" Convention)
+
+Pattern 3 already avoids forcing a decision. This pattern goes one step further: fixing the *notation* itself, so a reader — human or agent — can't mistake a set of examples for a closed, exhaustive menu even at a glance, before reading any of the surrounding prose.
+
+**Anti-pattern (numbered list reads as a form to fill out, regardless of how the surrounding prose hedges it):**
+```markdown
+Choose a caching eviction policy:
+1. LRU
+2. LFU
+3. TTL-based
+```
+
+**Polyglot standard — bracket notation for short options:**
+```markdown
+Eviction policy: `[LRU — recency-based]` vs `[LFU — suits stable long-tail access patterns]`
+vs `[TTL-based expiry — suits data with a known staleness tolerance]`. These are illustrative;
+a hybrid (e.g. LRU with a TTL ceiling) or an unlisted policy is equally valid if it fits the
+component's actual access pattern.
+```
+
+**Polyglot standard — "Example Option" prefix for longer or clause-heavy options, where brackets would be visually noisy:**
+```markdown
+Consistency model — Example Option: strong consistency, where every read sees the latest
+write at the cost of availability during a network partition. Example Option: eventual
+consistency, where the system stays available and fast but a read can briefly return stale
+data. Neither is "correct" in the abstract; state which one this component actually needs
+and why, or describe a tunable/hybrid approach if the real answer is more nuanced than either.
+```
+
+Both variants do the same job Pattern 1 and Pattern 2 do for code — signal "this is an example of the shape of the thing, not the only valid instance" — just applied to decision menus instead of code snippets. Use bracket notation as the default for short, single-phrase options; switch to the "Example Option" prefix once an option needs a full clause to explain, since brackets around a long clause get visually noisy fast.

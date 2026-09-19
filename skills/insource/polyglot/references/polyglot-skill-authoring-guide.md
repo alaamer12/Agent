@@ -12,6 +12,7 @@ This reference provides actionable methodologies for creating AI agent skills th
 | **Forced Constraints** | Hardcoding arbitrary requirements as mandates (e.g. "All tables must be in 3NF", "All errors must have fix messages"). | Frame constraints as architectural trade-offs; prompt the agent to ask and agree with the user. |
 | **Rigid Fixed Lists** | Restricting choices to fixed options: "You must choose Option 1, Option 2, or Option 3". | Teach the agent to analyze the domain and dynamically formulate tailored solutions with trade-offs. |
 | **Vendor Coupling** | Tying relational design to Postgres/MySQL, UI to React/Tailwind, or errors to HTTP status codes. | Use engine-agnostic concepts (Dumb Store, Relational Invariants, UI Component Boundaries, Domain Result contracts). |
+| **Hardcoded Option Lists** | Presenting decision menus as a closed, numbered, exhaustive set (e.g. "pick Option 1, 2, or 3") that an agent reads as the full space of valid answers rather than a starting point. | Mark each choice as illustrative — `[bracket notation]` or an explicit "Example Option" prefix — and state once, near the top of the file, that a hybrid or unlisted answer is always acceptable. See §4 below. |
 
 ---
 
@@ -70,3 +71,35 @@ Always show:
 - **Go:** Use explicit error returns, `context.Context` as first parameter, unexported struct fields, and interfaces at consumer sites.
 - **C#:** Use records, `IReadOnlyList<T>`, nullable reference types (`?`), and `CancellationToken`.
 - **Rust:** Use `Result<T, E>`, ownership/borrowing semantics, newtype structs, and explicit trait bounds.
+
+---
+
+## 4. Notation for Illustrative (Non-Hardcoded) Options
+
+Section 1's "Rigid Fixed Lists" anti-pattern is about *content* — forcing the agent's actual decision into one of a small set. This section is about *notation* — even a well-designed, genuinely open-ended trade-off spectrum can still read as mandatory to an agent if it's formatted like a form to fill out rather than a set of examples. The two problems compound: a numbered list ("Option 1, Option 2, Option 3") is both rigid in content and rigid-looking in notation, but a skill can accidentally have the second problem even after fixing the first — e.g. a genuinely well-reasoned trade-off spectrum that still gets typeset as a flat numbered list, which an agent then treats as exhaustive purely from the formatting.
+
+**The fix has two parts, and both matter:**
+
+1. **Mark each option as illustrative at the point of use** — either `[bracket notation]`, e.g. `[strict 3NF]` vs `[pragmatic denormalization]` vs `[hybrid relational-document]`, or an explicit "Example Option:" / "e.g." prefix where brackets would be visually noisy around a longer clause.
+2. **State the escape hatch once, near the top of the file** — a short standing note that these are examples to reason from, not a closed set, and that a hybrid or an option not listed at all is always an acceptable answer. Repeating this after every single choice is noise; stating it once and trusting the notation to carry it thereafter is enough.
+
+### Before / After
+
+**Before (reads as a mandate — the classic "Rigid Fixed Lists" failure, made worse by numbered notation):**
+```markdown
+Which normalization strategy should be used? Choose one:
+1. Strict 3NF
+2. Pragmatic denormalization
+3. Hybrid relational-document model
+```
+
+**After (reads as an illustrative menu, in prose, with the escape hatch already established once elsewhere in the file):**
+```markdown
+Which normalization strategy fits this workload — `[strict 3NF/BCNF, zero redundancy, high consistency]`
+vs `[pragmatic denormalization, selective pre-aggregated columns for high-throughput reads]`
+vs `[a hybrid relational-document model, structured relational core with JSON metadata]`?
+These are illustrative starting points, not an exhaustive set — the right answer may be a
+different variant of one of these or a combination the workload actually calls for.
+```
+
+The "After" version is not longer because it adds more caveats per line — it's the same information, typeset so an agent reads "these are examples" from the punctuation itself, with the standing escape-hatch sentence doing the rest of the work once rather than being repeated at every decision point.

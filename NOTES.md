@@ -1,0 +1,1 @@
+note the senior-refactor skill needs both [orthogonal-scout-empirical, orthogonal-scout-structural] agents
