@@ -2,6 +2,8 @@
 
 **Source type:** <"Codebase / GitHub" | "Visual / design references" | other — state what kind of source this task actually points at>
 
+**Independence model:** <"True independents — every candidate a distinct, unrelated instance" | "Industry/products — sources are whole products/platforms; one product may contribute several candidates" — settled with the user before discovery started; if the user didn't specify, ask which they want first (workflow.md → "True-independents or industry/products — settle this before discovery")>
+
 **Budget:** <"N sources" | "~X minutes/hours">
 <!--
   For a count-based budget, N is fixed by the user (or by "top 20" style

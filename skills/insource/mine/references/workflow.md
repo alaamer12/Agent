@@ -143,6 +143,25 @@ apply:
    anything it doesn't cover or doesn't answer well — the two aren't
    mutually exclusive within a single run.
 
+### True-independents or industry/products — settle this before discovery
+
+A second reading of the task decides what counts as a source: whether the
+user wants **true independents** — every candidate a distinct, unrelated
+instance (for codebases, a different project; for visuals, a screenshot
+from a different product each), maximising breadth — or
+**industry/products** — sources are whole products/platforms in the
+domain, so one product may legitimately contribute several candidates
+(e.g. mining "50 dashboard designs" via Airflow's dashboard plus four
+other real products' dashboards). The two readings change discovery
+(search "best <N> <topic> projects" vs search per-product), the
+distinctness check, and dedup pressure — which is why this must be
+settled *before* the "Finding candidates" step below, not after a
+candidate list already exists. When the user didn't specify, ask
+explicitly which they want before starting discovery — unlike source type
+or criteria, this one isn't reliably guessable from wording. State the
+chosen reading plainly in the plan (alongside "Source type") so it can be
+corrected.
+
 ### Finding candidates
 
 Use search to build the candidate list, adapted to the source type:
@@ -167,7 +186,10 @@ Use search to build the candidate list, adapted to the source type:
 If the user gave no explicit "top by what" or selection criteria, use
 judgment on the most natural reading for the topic and state that basis
 plainly in the plan's "Discovery method" field — the user corrects it at
-approval time if it's wrong, rather than being asked up front.
+approval time if it's wrong, rather than being asked up front. (The
+independence model is *not* resolved this way — see the question before
+this section; discovery searches are shaped by whichever model was
+settled on.)
 
 The user may also specify mining categories instead of one flat count —
 e.g. "5 frontend, 5 mobile, 5 microservices" rather than "15 projects";
@@ -265,8 +287,20 @@ teaches still applies to a mining brief:
 - **Autonomy bounds** — an executor, not a decision-maker: surface any
   choice and stop instead of deciding.
 - **Output contract** — return the complete checkpoint file itself,
-  written to the run's `checkpoints/` directory under its numbered name
-  (same free-form rules as Phase 2 step 4) — never a summary.
+  written to the run directory's `experience/` subdirectory under its
+  numbered name (same free-form rules as Phase 2 step 4) — never a
+  summary.
+
+With many subagents, don't repeat the common context in every spawn —
+write one shared brief file once (e.g. `research/SHARED-MINING-BRIEF.md`,
+like the worked example in this repo), containing the full `/subagent`
+structure — Root, Role, Domain, the per-source process steps, hard
+boundaries, Autonomy Bounds, Output Contract, and any output format spec
+(e.g. an ASCII-map or checkpoint-skeleton convention). Each spawn then
+carries only what differs: the assigned source(s) and exact output
+paths, plus "read `<shared-brief-path>` first and follow it exactly."
+One canonical brief also keeps every agent consistent, makes mid-run
+corrections a single-file edit, and costs nothing to reuse across runs.
 
 The parent then treats each returned checkpoint as a claim, not a fact:
 spot-check a sample of sources' evidence before Phase 4 distills from
@@ -275,6 +309,25 @@ is still reported by the parent, covering whichever agent actually did
 the digging.
 
 ## Phase 2 — Mine each source
+
+### The run directory
+
+Every run gets one conventional directory named after the task:
+`./mine/<kebab-cased-task>` (e.g. `./mine/50-dashboard-designs`) — this is
+the default location; if the user names a different output location, use
+that instead, keeping the same naming and subdirectory conventions below.
+The directory has a fixed three-subdirectory shape:
+
+| Dir | What goes in it |
+|---|---|
+| `sources/` | The approved plan, and everything collected to reach the sources — cloned checkouts, fetched images, raw fetch results |
+| `experience/` | One checkpoint file per mined source — what was learned from each (step 4 below) |
+| `distillation/` | The final document plus the true full journey of the run — how discovery actually went, category quotas met or missed, substitutions/dedup removals, budget reality vs estimate, tools used |
+
+Create the directory at the start of Phase 2; every path this workflow
+mentions ("a working directory for this run", "the run's checkpoints
+directory") means these subdirectories. Solo and subagent runs write to
+the same place — a subagent's output contract is its `experience/` file.
 
 For each approved candidate, in order:
 
@@ -316,8 +369,10 @@ For each approved candidate, in order:
    surfacing — move on. Don't pad a source with restated findings just to
    look thorough; move the saved time to the next source instead.
 4. **Write a checkpoint file for this source before moving to the next
-   one.** One file per source, saved to a working directory for this run
-   (e.g. `checkpoints/01-<source-name>.md`, numbered in mining order).
+   one.** One file per source, saved to the run directory's `experience/`
+   subdirectory (see "The run directory" above; e.g.
+   `./mine/50-dashboard-designs/experience/01-<source-name>.md`, numbered
+   in mining order).
    This is the agent's own durable notes on what was just learned — the
    same habit a person doing this kind of research would have, jotting
    down what they took from each thing they studied rather than trying to
@@ -402,9 +457,12 @@ source type — a run mining visual designs earns exactly as much
 free-form synthesis as one mining codebases, not a more structured
 "gallery" format just because the sources were visual.
 
-The per-source checkpoint files from Phase 2 are the raw material for
-this phase — re-read them before writing, rather than relying purely on
-whatever's still fresh in working context, especially on a long run.
+The per-source checkpoint files in the run directory's `experience/`
+subdirectory are the raw material for this phase — re-read them before
+writing, rather than relying purely on whatever's still fresh in working
+context, especially on a long run. Write the final document to the run
+directory's `distillation/` subdirectory, alongside the true full journey
+of the run (see "The run directory" in Phase 2).
 
 There is no fixed structure to fill in here beyond this: it should read as
 one coherent piece of understanding, not a report, not a table, not a

@@ -1,6 +1,6 @@
 ---
 name: summarize
-description: "Use this skill whenever the user wants to shorten a piece of content without losing its meaning — summarize, condense, distill, recap, abridge, or extract the key points from an article, report, transcript, thread, email chain, or document, including requests for a TL;DR, executive summary, abstract, digest, or brief. Trigger even on a bare \"summarize this,\" \"shorten this,\" or \"give me the key points,\" with no further instruction. Also trigger when the user asks for the shortest, tightest, or most extreme possible version of something. Do not use for line-level copyediting or proofreading that keeps the original length — see process-business-writing for that."
+description: "Use this skill whenever the user wants to shorten content without losing its meaning — summarize, condense, distill, recap, abridge, or extract key points from an article, report, transcript, thread, email chain, conversation, or document, including TL;DR, executive summary, abstract, digest, or brief requests. Trigger even on a bare \"summarize this\" with no further instruction, and when the user wants the shortest/most extreme version. Also trigger for conversation/Q&A summarization with role-specific instructions (\"keep my questions, summarize the agent's answers\") and for requests specifying a custom output structure (\"put questions on top under headers, answers below\") — this skill decides whether the request preserves the source's shape or needs a new one. Not for line-level copyediting/proofreading at the same length — see process-business-writing."
 license: Apache-2.0
 ---
 
@@ -38,14 +38,24 @@ Reduce a longer source into a shorter one **without losing the meaning the reade
 
 Full rules for both modes: **references/02-selection.md**.
 
+## Reserved structure vs. custom structure
+
+Before applying mode or selection, check whether the request also specifies how the *output* should be arranged — this matters most for conversations, Q&A threads, and other multi-turn sources with distinct roles (user/agent, interviewer/interviewee, etc.).
+
+- **Reserved structure (default).** The request describes a *content operation* — what to compress, what to keep verbatim, what to focus on — with no different arrangement implied. The source's own shape carries over unchanged (e.g., a conversation stays turn-by-turn, in order). Example: *"Summarize this, keeping my questions and just summarizing the agent's answers."*
+- **Custom structure (explicit).** The request describes a *layout* — a new grouping, ordering, or set of sections/headers that doesn't mirror the source's shape. Build directly to that spec. Example: *"Write all my questions on top, tagged with header sections, then the agent's answers below."*
+
+Full rules, the content-vs-layout test, role-aware compression, and how to keep questions/answers traceable once separated: **references/07-conversation-and-custom-structure.md**.
+
 ## Workflow
 
 1. Read the whole source; find its point, not just its topic. → **references/01-reading-for-the-point.md**
-2. Sort content into must-keep / should-keep / can-cut, per the active mode. → **references/02-selection.md**
-3. Compress by rewriting the idea, not shortening each sentence. → **references/03-compression-method.md**
-4. Structure bottom-line-first, at a deliberate length. → **references/04-structure-and-length.md**
-5. Check every claim against the source before delivering. → **references/05-faithfulness-check.md**
-6. Deliver to the right place and report the size reduction. → **references/06-output-and-reporting.md**
+2. Decide reserved vs. custom structure, especially for conversational/multi-role sources. → **references/07-conversation-and-custom-structure.md**
+3. Sort content into must-keep / should-keep / can-cut, per the active mode (per role, if structure is reserved and roles are treated differently). → **references/02-selection.md**
+4. Compress by rewriting the idea, not shortening each sentence — except a role the user asked to preserve, which is lifted, not rewritten. → **references/03-compression-method.md**
+5. Structure bottom-line-first at a deliberate length (reserved structure) or to the requested layout (custom structure). → **references/04-structure-and-length.md**
+6. Check every claim against the source before delivering. → **references/05-faithfulness-check.md**
+7. Deliver to the right place and report the size reduction. → **references/06-output-and-reporting.md**
 
 Apply `process-business-writing` (if available) as a final pass once content is locked.
 
@@ -59,6 +69,7 @@ Apply `process-business-writing` (if available) as a final pass once content is 
 | `references/04-structure-and-length.md` | Bottom-line-first structure; length calibration table |
 | `references/05-faithfulness-check.md` | Verifying the summary against the source before delivery |
 | `references/06-output-and-reporting.md` | Where the summary goes (file vs. chat); size-reduction reporting |
+| `references/07-conversation-and-custom-structure.md` | Conversations/roles; reserved vs. custom output structure; keeping split content traceable |
 
 ## Templates
 
@@ -69,10 +80,14 @@ Apply `process-business-writing` (if available) as a final pass once content is 
 | `templates/structured-digest.md` | Longer or multi-topic sources |
 | `templates/meeting-recap.md` | Transcripts, calls, long threads |
 | `templates/extreme-digest.md` | Extreme mode output |
+| `templates/conversation-role-preserving.md` | Reserved-structure conversation summaries (e.g., keep questions, summarize answers) |
+
+For a custom structure the user specifies directly (a new layout, not one of the above), build to their spec rather than forcing it into one of these templates — see references/07-conversation-and-custom-structure.md.
 
 ## Examples
 
-`examples/normal-vs-extreme.md` — the same source summarized in both modes, side by side.
+- `examples/normal-vs-extreme.md` — the same source summarized in both modes, side by side.
+- `examples/reserved-vs-custom-structure.md` — the same conversation summarized once with structure reserved and once with a user-specified custom layout, side by side.
 
 ## Scripts
 
