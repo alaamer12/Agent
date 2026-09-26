@@ -8,10 +8,15 @@
 
   Per-source checkpoint files (Phase 2) are a different, looser kind of
   writing — the agent's own working notes, not held to this same
-  prose-quality bar. See workflow.md's Phase 2, step 4 for what a
-  checkpoint needs to accomplish; there's no example file for it the way
-  there is for Phase 4, on purpose — checkpoints are meant to vary by
-  source rather than converge on one demonstrated shape.
+  prose-quality bar. See workflow.md → Phase 2 → "Write a checkpoint file"
+  for the content floor every one must clear (ground census, why/cost, and a
+  closing source ledger), search-and-mining-technique.md → "The ground
+  census" for the numbers it opens with, and "The source ledger" for the URLs
+  it ends with. There's still no example checkpoint file, on purpose: the floor
+  fixes what must be *answerable* from the file, never what it looks like, and
+  checkpoints are meant to vary by source rather than converge on one
+  demonstrated shape. The thin-vs-grounded opening pair in the census section
+  shows that difference without becoming a shape to copy.
 -->
 
 Almost every one of these projects arrives at a plugin boundary eventually,

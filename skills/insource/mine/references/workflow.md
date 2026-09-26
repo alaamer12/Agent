@@ -20,32 +20,65 @@ from each other, and the digging on each one goes past the surface (past
 "here's what this is" into "here's why it's this way and not the obvious
 alternative").
 
-## This skill is task-based, not GitHub-only
+A different task asks a different question, and the goal generalizes to it: not
+"why is this the way it is" but "which of these should I use — and prove it."
+"Find the best 5 OCR libraries and test them on hard scans" doesn't want a
+description of five libraries; it wants five of them *run* against inputs that
+break the weak ones, and a ranked, evidence-backed pick. Same engine (plan real,
+distinct candidates and get them approved; interrogate each past the surface;
+accumulate cross-checked evidence; distill once at the end), different
+interrogation: *read* the source to understand it, or *run* it to decide between
+it and its rivals. `references/run-mining.md` is that second mode in full; the
+four phases below are written to serve both.
+
+## This skill is task-based — what a source is, how you mine it, where candidates come from
 
 `/mine` is not a GitHub skill that happens to also work elsewhere — it's a
 general deep-research skill whose *sources* and *mining technique* adapt
 to whatever the task actually points at. "Mine the top 20 enterprise
-projects" points at GitHub repositories. "Mine 50 dashboard website
-designs" points at visual design references (screenshots, a design
-reference library, a Figma file). Something else entirely might point at
-a different source type again. The four-phase shape (plan → mine → track
-budget → distill) and the general discipline (chase why, not just what;
-checkpoint after every source; no templated final output) stay constant
-across all of them. What changes per task is: what counts as a
-"candidate," what tool is best for reaching it, and what "what → why"
-concretely means for that kind of source.
+projects" points at GitHub repositories. "Mine 50 dashboard designs" points
+at visual design references. "Mine how the major frameworks document
+migration" points at *documentation sets*. "Mine the research on X" points
+at papers. "Mine the last decade of incident postmortems about Y" points at
+an ecosystem of org-authored writing. The four-phase shape (plan → mine →
+track budget → distill) and the general discipline (chase why, not just
+what; census every source before interpreting it; checkpoint after every
+source; no templated final output) stay constant across all of them. What
+changes per task is: what counts as a "candidate," what tool is best for
+reaching it, what its census numbers are, and what "what → why" concretely
+means for that kind of source.
 
-`references/search-and-mining-technique.md` has parallel sections for
-source types this skill has needed technique for so far (codebase/GitHub,
-visual/design) — read whichever section(s) actually match the task. That
-file's sections are illustrations of the same underlying approach applied
-to two domains, not an exhaustive list of what this skill supports: a
-task pointing at a source type with no dedicated section yet still
-follows the same general discipline (search professionally for both
-candidates and a fitting tool, chase what → why → cost, checkpoint after
-every source, distill without a template) — apply that discipline to the
-new domain rather than treating the absence of a matching section as a
-reason to fall back to something narrower.
+Start at `references/source-ecosystems.md` — one block per ecosystem this
+skill knows how to reach (codebases, visual/design, documentation sets,
+research literature, specs and standards, package registries, discussion
+corpora, postmortems and org writing, datasets), each answering the same six
+questions: candidate, discovery, reach, census, why, dedup/traps. Those
+blocks are the accumulated result of actually doing runs, and they're
+additive — the list is not a whitelist. `references/search-and-mining-technique.md`
+then holds the long-form technique for the ecosystems where the digging
+itself needs more room than a block gives (GitHub codebases, visual/design).
+A task pointing at something with no block and no section yet still follows
+the same general discipline: work "The generic shape" at the end of
+`source-ecosystems.md`, apply it to the new domain rather than treating the
+absence as permission to fall back to something narrower, and write the
+block afterward.
+
+What a source *is* is only the first axis. The **second** is how you interrogate
+it: **read-mining** (the default throughout this file — reach, census, chase the
+why) answers "what does this class of thing look like, and why"; **run-mining**
+(put each candidate through an identical, measured trial) answers "which of these
+is best — prove it," which is what "find the best 5 OCR libraries and test them on
+hard scans" or "try 5 styles on this screen" actually wants. The **third** is
+where candidates come from: **found** instances you discover, or **authored**
+approaches you build yourself to one spec before any trial can compare them (a
+styles bake-off has no five ready-made artifacts to fetch — you make them).
+`references/run-mining.md` is the second mode in full; it reuses this spine —
+plan → mine → budget → distill, and census → dig → why → checkpoint → ledger —
+with each part given a run-mode reading, so nothing here is GitHub-only or
+read-only. The axes compose freely: a run-mine of authored candidates is usually
+*seeded* by a quick read-mine of the credible option space. Which method and
+which provenance a task wants is settled at the top of Phase 1, exactly like its
+source type.
 
 ## Phase 1 — Build and propose the plan
 
@@ -56,11 +89,18 @@ Do not start mining on an unapproved plan.
 ### Identify the source type and check for the best tool first
 
 Before discovery search, work out what kind of source this task actually
-points at (codebase/GitHub, visual/design references, or something else),
-since that decides both where candidates come from and what tool is worth
-checking for. This is a judgment call from the task's wording — state it
-plainly in the plan's "Source type" field so the user can correct it at
-approval time if it's wrong, rather than asking up front.
+points at, since that decides both where candidates come from and what tool
+is worth checking for. Name the ecosystem from `references/source-ecosystems.md`
+(codebase, visual/design, documentation set, research literature,
+spec/standard, package registry, discussion corpus, postmortem or org
+writing, dataset — or none of them, in which case use that file's "generic
+shape"). This is a judgment call from the task's wording — state it plainly
+in the plan's "Source type" field so the user can correct it at approval
+time if it's wrong, rather than asking up front. Two mistakes are common in
+both directions: reading a documentation or research task as if it were
+really a codebase task because that's the best-documented ecosystem here,
+and reading a task as "too vague for /mine" because no block matches it —
+the second is exactly what the generic shape exists to handle.
 
 **The principle: manual search-and-fetch is the fallback, not the
 default.** For almost any source type, some purpose-built tool may exist
@@ -81,7 +121,7 @@ and if I don't already know of one, go find out"* — treat an unfamiliar
 source type exactly like a familiar one: search for a fitting tool before
 concluding manual work is the only option.
 
-Two examples of what this looks like in practice, for illustration only —
+A few examples of what this looks like in practice, for illustration only —
 not an exhaustive or authoritative list, and not a claim that these
 remain the best (or only) option going forward:
 
@@ -94,10 +134,23 @@ remain the best (or only) option going forward:
   to search and fetch full images for visual inspection — can replace ad
   hoc image search/scraping, when access to it is available (tools like
   this are sometimes paid, so availability isn't guaranteed).
+- *For documentation sets*, the fitting tool may already be installed
+  alongside this skill rather than needing a connector at all: a docs
+  scraper (in this repo, the `scrape` skill) turns a whole documentation
+  site into local Markdown you can grep properly, which is a different
+  class of evidence from reading pages one at a time. Check for a
+  sibling skill with a name matching the source type before assuming
+  hand-fetching.
+- *For research literature, specs, registries, and discussion corpora*,
+  the platform's own public API is usually the tool — a search endpoint that
+  returns an honest total count and structured metadata in one request beats
+  any number of web searches against the human-facing site, which typically
+  hides both. `source-ecosystems.md` names the specific endpoints per
+  ecosystem, with what's been verified here and what hasn't.
 
-Don't treat either of these as *the* answer for their category, and don't
+Don't treat any of these as *the* answer for their category, and don't
 stop looking once one of them is found to not apply — if a task's source
-type doesn't obviously match either example, that's not a signal to fall
+type doesn't obviously match one of them, that's not a signal to fall
 back to manual work; it's a signal to search for what does fit.
 
 The check-and-offer sequence, for whatever tool (if any) turns out to
@@ -143,6 +196,37 @@ apply:
    anything it doesn't cover or doesn't answer well — the two aren't
    mutually exclusive within a single run.
 
+### Settle the mining method and the candidate provenance first
+
+Two more readings shape the run before discovery, and both go on the plan so the
+user can correct them at approval, exactly like "Source type":
+
+- **Method — read-mining or run-mining.** The task's verb is usually a strong
+  tell. "Understand / how does / why / what do they do" points to **reading** the
+  sources. "Find the best N / which one / test them / benchmark / compare / try N
+  versions / see what happens" points to **running** each candidate through a
+  trial (`references/run-mining.md`). Name the chosen method in the plan's
+  "Mining method" field. Ask before discovery only when it's genuinely ambiguous
+  — "look into OCR libraries" could be a survey *or* a bake-off — because the two
+  plan different candidates and cost very differently: installing and running one
+  candidate can outweigh reading five, so picking the wrong method mis-sizes the
+  whole budget.
+- **Candidate provenance — found or authored.** "Best 5 OCR libraries" names
+  **found** candidates that already exist, to discover and then run; "try 5
+  styles on this screen" names **authored** candidates — approaches you build
+  yourself to one spec before anything can compare them. State which, because it
+  changes discovery (search a registry vs enumerate the credible option set, often
+  via a short read-mine first), the distinctness check (two authored styles that
+  collapse to the same thing are one candidate, and you catch that before building
+  all five), and the plan's cost. Record it in "Candidate provenance."
+
+Method and provenance cross-cut the ecosystem and independence choices below,
+they don't replace them: a run-mine still names its source type (usually a package
+registry, a model hub, or authored implementations) and still settles
+true-independents vs industry/products for its contenders. The four phases then run
+identically; only the interrogation step inside Phase 2 swaps from reading to
+testing, and the Phase 4 deliverable from a distillation to a verdict.
+
 ### True-independents or industry/products — settle this before discovery
 
 A second reading of the task decides what counts as a source: whether the
@@ -164,7 +248,10 @@ corrected.
 
 ### Finding candidates
 
-Use search to build the candidate list, adapted to the source type:
+Use search to build the candidate list, adapted to the source type — the
+"Discovery" line of the matching block in `references/source-ecosystems.md`
+says where candidates come from in that ecosystem. Concretely, for the two
+that need the most explanation:
 
 - **Codebase/GitHub**: something like `"best <N> <topic> projects
   github"`, refined by whatever criteria the user gave (a year, "by
@@ -182,6 +269,16 @@ Use search to build the candidate list, adapted to the source type:
 - **Other source types**: apply the same underlying principle — find
   real, existing instances of the thing the task asks about, from
   sources that actually contain it, not secondary commentary about it.
+  A documentation task's candidates are doc *sets*, not articles about
+  documentation; a research task's are the papers themselves, not a
+  survey's summary of them (a survey is a fine *discovery* instrument and
+  a poor *source* — the same distinction as an awesome-list versus the
+  repos it lists); a standards task's are the normative documents, not
+  blog explainers of them.
+
+Whatever the ecosystem, prefer the domain's own index or search API over
+general web search when it has one — it returns real counts and structured
+metadata, and general search quietly returns commentary instead.
 
 If the user gave no explicit "top by what" or selection criteria, use
 judgment on the most natural reading for the topic and state that basis
@@ -197,7 +294,7 @@ when they do, build the candidate list to those per-category quotas
 (each category mined with its own discovery search), and show the
 categories as such in the plan.
 
-### Distinctness at planning time — real for codebases, not for visuals
+### Distinctness at planning time — reliable only where content can't be copied
 
 Two candidates count as distinct if they're plausibly different on their
 face. For codebase sources, a glance-level judgment (different primary
@@ -210,14 +307,20 @@ that convergence is itself a piece of gained knowledge worth including in
 the final document — it is not evidence the plan was flawed, and not a
 reason to swap the candidate out mid-run.
 
-For visual/design sources, this glance-level check is **not** reliable —
-two dashboard screenshots can look meaningfully different by name/source
-and still turn out to be near-duplicates (the same product, a template
-reused across products, two crops of the same screen) only once actually
-looked at. Don't try to pre-filter this hard at plan time for visual
-candidates; it isn't where this problem can actually be caught. Collect
-first, then dedup by visual inspection — see "Phase 2 →
-visual/design-specific: dedup after collection" below.
+For source types whose content can be copied, this glance-level check is
+**not** reliable — and how far that reaches depends on the ecosystem, not on
+how careful the planner is. Two dashboard screenshots can look meaningfully
+different by name/source and still turn out to be near-duplicates (the same
+product, a template reused across products, two crops of the same screen)
+only once actually looked at. The same failure has an exact analogue
+elsewhere: one paper as its preprint and its published version, one doc set
+reachable through four versioned URLs, one package and its thin fork, one
+postmortem retold as a conference talk. Don't try to pre-filter this hard at
+plan time for those ecosystems; it isn't where the problem can actually be
+caught. Collect first, then dedup on the content — see "Phase 2 → dedup
+after collection" below. (Codebases are the exception where the glance
+genuinely holds: two large real projects rarely collide structurally by
+accident.)
 
 ### Verifying links
 
@@ -248,6 +351,16 @@ the topic's likely complexity — a codebase generally takes longer to mine
 deeply than a single screenshot) purely to size the initial list — state
 this estimate and its basis in the plan so the user can adjust the count
 before approving.
+
+Per-source effort differs by an order of magnitude across ecosystems, and the
+difference is worth naming in the plan: a screen, a registry entry, or a
+forum thread is minutes; a documentation set, a postmortem, or a paper is
+tens of minutes; a long specification is more; a large codebase is the most
+expensive thing on the list. Note too that for API-reachable ecosystems
+(registries, literature, specs, discussion corpora) *discovery* is nearly
+free while *full-text reach* is the bottleneck — listing 200 papers takes
+seconds, reading 20 of them does not — so size the plan against reading, not
+against finding.
 
 This estimate is a **planning tool, not a runtime cap.** Once mining
 starts, per-source time is not fixed or equally divided — some sources
@@ -288,15 +401,28 @@ teaches still applies to a mining brief:
   choice and stop instead of deciding.
 - **Output contract** — return the complete checkpoint file itself,
   written to the run directory's `experience/` subdirectory under its
-  numbered name (same free-form rules as Phase 2 step 4) — never a
-  summary.
+  numbered name, satisfying everything Phase 2 → "Write a checkpoint file"
+  puts on the floor. Spell the census out in the brief rather than assuming
+  it's implied: the parent never sees the subagent's checkout and cannot
+  re-derive a file count, language split, or directory map afterwards, so
+  those facts exist in the run only if the returned file carries them.
+  Something like "the file must state what the source is in countable terms,
+  what you actually read as a fraction of the whole, and why it's shaped that
+  way — and it must end with the ledger of URLs you actually touched, because
+  that's the only way I can check any of it once your checkout is gone" works,
+  and "be detailed" does not. Never accept a returned message summarising the
+  file instead of being the file.
 
 With many subagents, don't repeat the common context in every spawn —
 write one shared brief file once (e.g. `research/SHARED-MINING-BRIEF.md`,
 like the worked example in this repo), containing the full `/subagent`
 structure — Root, Role, Domain, the per-source process steps, hard
 boundaries, Autonomy Bounds, Output Contract, and any output format spec
-(e.g. an ASCII-map or checkpoint-skeleton convention). Each spawn then
+(e.g. an ASCII-map or checkpoint-skeleton convention). Copy the census step
+and the checkpoint floor into that brief near-verbatim rather than
+paraphrasing them short: with a dozen agents running blind and in parallel,
+the brief is the only thing standing between them and twelve private
+definitions of "be thorough". Each spawn then
 carries only what differs: the assigned source(s) and exact output
 paths, plus "read `<shared-brief-path>` first and follow it exactly."
 One canonical brief also keeps every agent consistent, makes mid-run
@@ -304,11 +430,35 @@ corrections a single-file edit, and costs nothing to reuse across runs.
 
 The parent then treats each returned checkpoint as a claim, not a fact:
 spot-check a sample of sources' evidence before Phase 4 distills from
-them. Either way, the progress line after each source (Phase 2 step 5)
+them. Include the census numbers in what you spot-check — they're the
+cheapest claims in the file to verify (a file count or language split is one
+API call) and the easiest to get subtly wrong, since a plausible number and a
+measured one are indistinguishable on paper. And fetch one or two entries from
+each sampled file's ledger: a URL that 404s, resolves to something unrelated,
+or whose cited lines aren't in the page is how an invented citation shows
+itself, and it is the cheapest early warning that a whole checkpoint is
+unreliable rather than merely thin. Either way, the progress line
+after each source (Phase 2 → "report one short progress line")
 is still reported by the parent, covering whichever agent actually did
 the digging.
 
 ## Phase 2 — Mine each source
+
+Everything below reads for **read-mining**, the default. In a **run-mining** run,
+the *interrogation* steps (0 reach, 2 dig, 3 push past what into why) become one
+fair, identical **trial** instead of a read — `references/run-mining.md` holds the
+whole mode. Every other Phase 2 obligation is unchanged and still applies: the
+same run directory; "census before you interpret," but the census is a **run
+record** (exact version/build, environment, install command, how many fixtures you
+actually executed vs the frozen set, the score) instead of a file count; the same
+one checkpoint file per candidate; the same closing **ledger**, now pinned to
+registry+version+checksum (or commit) and the path to the probe you ran; the same
+single progress line. Map the numbered steps: "Reach the source" → obtain and get
+it running, in a sandbox, untrusted-code-safe; "ground census" → run record;
+"dig / chase why" → run the trial, then chase result→cause→cost; "checkpoint" →
+the probe note. Budget bites hardest in this phase, because getting one candidate
+to build can consume the run — time-box a single build and record a candidate that
+fails it as *did-not-run-in-budget*, never as a silent drop.
 
 ### The run directory
 
@@ -320,9 +470,9 @@ The directory has a fixed three-subdirectory shape:
 
 | Dir | What goes in it |
 |---|---|
-| `sources/` | The approved plan, and everything collected to reach the sources — cloned checkouts, fetched images, raw fetch results |
-| `experience/` | One checkpoint file per mined source — what was learned from each (step 4 below) |
-| `distillation/` | The final document plus the true full journey of the run — how discovery actually went, category quotas met or missed, substitutions/dedup removals, budget reality vs estimate, tools used |
+| `sources/` | The approved plan, and everything collected to reach the sources — cloned checkouts, fetched images, raw fetch/API responses (each cached artifact carrying the URL it came from, so the ledger is reconstructable from disk and not just from memory). In run-mining, also the frozen fixture set, each candidate's thin adapter, the one runner, and cached installs/builds/artifacts, so a result is re-runnable without re-paying the setup |
+| `experience/` | One checkpoint file per mined source — its ground census (what the source physically is, and what of it was actually reached), then what was learned from it and why, closing with the source ledger of URLs it touched (see "Write a checkpoint file" below) |
+| `distillation/` | The final document plus the true full journey of the run — how discovery actually went, the cross-source ground table if you built one, the union of the per-source ledgers as the run's bibliography, category quotas met or missed, substitutions/dedup removals, budget reality vs estimate, tools used. In run-mining, the score table and ranked verdict live here too, and the reproducible probe is kept so the user can re-run or extend it |
 
 Create the directory at the start of Phase 2; every path this workflow
 mentions ("a working directory for this run", "the run's checkpoints
@@ -354,21 +504,53 @@ For each approved candidate, in order:
      each collected image before moving to analysis — the dedup step
      below needs all collected images available together, not fetched
      one-by-one and discarded immediately after each individual analysis.
-1. Dig into the source using the technique appropriate to its type — see
+   - Any other ecosystem: follow the **Reach** line of its block in
+     `references/source-ecosystems.md` (a docs scraper for documentation
+     sets, an API plus full-text fetch for literature and specs, and so
+     on). Two rules hold everywhere the source is remote: cache what you
+     reached under `sources/` — the raw JSON, the downloaded PDF, the
+     scraped Markdown — so a claim can be re-checked without re-fetching
+     and the run survives an endpoint going down mid-run; and check size
+     before downloading, since documentation sets and datasets are the
+     largest disk hazards this skill meets. A partial reach that's
+     honestly labelled beats a bulk download that eats the sandbox.
+1. **Take the ground census before interpreting anything.** Get the countable
+   facts about what this source physically *is* — its identity (exact
+   instance, branch/version, license), magnitude (how many files, bytes, LOC,
+   screens, entries), composition (what languages/materials/parts it's made
+   of), arrangement (its top-level structure, with counts), and which method
+   got you in. See `search-and-mining-technique.md` → "The ground census" for
+   the five fields, copy-paste commands that produce them in seconds, and the
+   traps that make a census quietly wrong. Run it *early*, not at write-up
+   time: it costs one command on a checkout or one cached API response without
+   one, and it also tells you how much of the source you're about to describe.
+   A number you couldn't measure gets written as "not measured: <reason>" —
+   never left blank, because a blank and an unavailable look identical to
+   whoever reads this after the context is gone.
+   The same step starts your **source ledger**: from the first fetch onward,
+   write down each URL as you touch it (`tee -a` into a scratch file, or put
+   the URL in the header of each artifact you cache under `sources/`). The
+   ledger is a by-product of digging and is trivially accurate while you're
+   digging; reconstructed from memory at write-up time it becomes a list of
+   plausible-looking links, some of which you never requested — which is worse
+   than having no list, because the parent verifies against it. See
+   `search-and-mining-technique.md` → "The source ledger" for the role tags,
+   commit/DOI pinning, and the credential-scrub rule.
+2. Dig into the source using the technique appropriate to its type — see
    `search-and-mining-technique.md` for concrete method per source type
    (GitHub: README/docs/ADRs/PRs/commit history; visual: layout, color,
    spacing, hierarchy, and what a design choice trades off). Not a fixed
    checklist regardless of type — chase whatever this specific source
    actually offers.
-2. Keep pushing past the first-level "what" into "why": why does this
+3. Keep pushing past the first-level "what" into "why": why does this
    look the way it does, why was it chosen over an apparent alternative,
    what tradeoff or constraint forced the decision, what's stated
    explicitly versus only inferable from the source itself.
-3. When you've reached a point of genuinely diminishing returns on a
+4. When you've reached a point of genuinely diminishing returns on a
    source — the same observation keeps repeating with nothing new
    surfacing — move on. Don't pad a source with restated findings just to
    look thorough; move the saved time to the next source instead.
-4. **Write a checkpoint file for this source before moving to the next
+5. **Write a checkpoint file for this source before moving to the next
    one.** One file per source, saved to the run directory's `experience/`
    subdirectory (see "The run directory" above; e.g.
    `./mine/50-dashboard-designs/experience/01-<source-name>.md`, numbered
@@ -391,34 +573,77 @@ For each approved candidate, in order:
    screen don't have the same things worth saying about them anyway.
    Write it the way *you'd* actually want to read it back later with zero
    memory of having done this mining — full sentences or notes, dense or
-   sparse, in whatever order the source's own logic suggests. The only
-   real requirements: it should capture the *why* and *cost* behind
-   what's notable about this source, not just a "what was found" list;
-   it should say plainly where a conclusion is inferred rather than
-   stated, so that distinction survives into Phase 4; and it should be
-   usable on its own — complete enough that a fresh instance of the agent
-   picking the run back up from just this file (plus the others like it)
-   wouldn't need to redo the mining to reconstruct what was learned. A
-   "mined successfully, see above" placeholder fails that test even
-   though it's technically a file.
-5. **Separately, report one short progress line** before continuing:
+   sparse, in whatever order the source's own logic suggests.
+
+   That rule is about **shape and voice**, and it is not a license to skip
+   content. Below is the *floor* — what must exist somewhere in the file, in
+   whatever form fits. Every one of these has a reason, and each one fails the
+   run differently if missing:
+
+   - **The ground census** (step 1 above). Without them the reader cannot
+     weigh a single claim: "they hand-rolled their ORM" is a different act of
+     engineering in a 40-contributor repo than in a 460-contributor one, and
+     the parent writing the comparison cannot align this source against the
+     others at all. Size, language/material composition, and the top-level
+     arrangement are the shared spine of the whole run.
+   - **What you actually reached, as a count next to the total.** "Read 15
+     files of 32,818" or "viewed 1 screen of the 9-step flow" is what makes
+     every absence claim honest, and it is the difference between a
+     well-hedged conclusion and an unfalsifiable one.
+   - **The *why* and *cost*** behind what's structurally notable, not a "what
+     was found" list.
+   - **`stated` vs `inferred` labels** on conclusions, each with its evidence
+     pointer (file path, doc name, PR/issue, commit range, or "the design
+     itself" for a visual inference), so the distinction survives into Phase 4.
+   - **Anything the source refused to explain** — dead ends, contradictions
+     between sources, questions you aimed and got nothing back from. A
+     checkpoint that reads as though everything worked is less useful than one
+     marking where the trail went cold.
+   - **Self-sufficiency** — complete enough that a fresh instance of the agent
+     picking the run back up from just this file (plus the others like it)
+     wouldn't need to redo the mining to reconstruct what was learned. A
+     "mined successfully, see above" placeholder fails that test even
+     though it's technically a file.
+   - **A source ledger as the file's last block** — every URL actually
+     touched, tagged `reached` / `read` / `searched` / `partial` / `failed`,
+     pinned to a commit or DOI+version where the thing can change underneath
+     you, with credentials and signed-URL query strings scrubbed. This is what
+     turns the evidence pointers above into things a person can click a month
+     from now, after the checkout is gone; a path cited with no URL behind it
+     is re-derivable only by whoever re-mines the source. Collected during the
+     dig (step 1), not invented at the end.
+
+   Before closing the file, test it cold: could a reader who has never seen
+   this source say roughly how big it is, what it's built from, how it's
+   arranged, what you actually looked at, why it's shaped that way — and
+   **where to go look to check you**? If any one of those six fails, that's
+   missing work — finish it while the source is still open rather than leaving
+   a note to come back. The floor says *what must be answerable*, never what
+   heading to write it under.
+
+6. **Separately, report one short progress line** before continuing:
    `Finished <source> — now moving to <next source>.` This is simple
    user-facing feedback, distinct from the checkpoint file (which is the
    agent's own working notes, not shown to the user unless asked) — both
    happen after every source, they're not alternatives to each other.
 
-### Visual/design-specific: dedup after collection
+### Dedup after collection — wherever content can be copied
 
-For visual/design sources specifically (not codebases — see "Distinctness
-at planning time" in Phase 1 for why codebases don't need this), once a
-batch of candidate images has actually been collected, look at all of
+For source types where two nominally different entries can be the same
+content (visuals above all, but also papers, doc sets, package forks, and
+retold postmortems — see "Distinctness at planning time" in Phase 1 for why
+codebases generally don't need this), once a batch of candidates has actually
+been collected, look at all of
 them together before doing deep per-image analysis on any of them, and
 remove near-duplicates (the same screen, a trivial crop/resolution
-variant, the same template reused across two listed products). This is a
-visual judgment, not a metadata one — file names or source URLs looking
+variant, the same template reused across two listed products; and in the
+other ecosystems, one paper's preprint and its journal version, four versioned
+URLs for one doc page, a package that is its upstream with a rename).
+The judgment is on the *content*, not the
+metadata — file names, DOIs, titles or source URLs looking
 different doesn't mean the content is different. Do this once, after
 collection and before the deep analysis pass, so the expensive step (full
-what/why/cost analysis per image) isn't spent on redundant sources. If a
+what/why/cost analysis per source) isn't spent on redundant sources. If a
 removal drops the candidate count below what the plan called for, pull in
 a replacement from the same discovery method used originally, rather than
 silently finishing with fewer sources than planned.
@@ -442,6 +667,18 @@ the list or silently rushing through remaining sources shallowly.
 
 ## Phase 4 — the final document
 
+The deliverable's *shape* depends on the method settled in Phase 1. A
+**read-mining** run ends as one free-form distilled document — everything below
+this line, unchanged. A **run-mining** run ends as a tested **verdict**: a score
+table (candidate × metric, gate-failures and reach bounds shown), a ranked
+recommendation with the *cause* and *cost* behind each placement, and a
+"when you'd still pick the other one" clause — `references/run-mining.md` → "What
+run-mining ends in." Only that comparison table is structured, and only
+deliberately: the score *is* the point there, which makes it the one place the
+no-template rule yields — exactly as the ground census is the one fixed part of a
+read checkpoint. The reasoning written *around* a verdict follows every
+free-form-synthesis rule below, verbatim, and keeps the reproducible probe with it.
+
 This is the actual deliverable, and it is deliberately **not a template.**
 Do not organize it by source-by-source sections, and do not organize it
 by imposed cross-cutting themes either (no "Section 1: State Management
@@ -463,6 +700,20 @@ writing, rather than relying purely on whatever's still fresh in working
 context, especially on a long run. Write the final document to the run
 directory's `distillation/` subdirectory, alongside the true full journey
 of the run (see "The run directory" in Phase 2).
+
+Re-reading them has a second payoff: the census line at the top of each
+checkpoint is the run's quantitative spine, and it's the only material that
+could support a size- or composition-based comparison. Decide from those
+numbers whether such a comparison exists before writing — if several sources
+line up on a threshold that tracks a qualitative difference you noticed,
+that's a conclusion worth stating (as an observation about these sources,
+never as a universal law). Where the numbers would help a later reader, keep
+a plain cross-source table in `distillation/` — source, magnitude,
+composition, how it was reached — as part of the run's journey, not as a
+section of the distillation itself; the document stays prose. Label any column
+measured inconsistently ("4 of 20 sources were reached without a tree listing,
+so their cell is method-limited, not zero"), because a blank in a table reads
+as a real measurement of nothing.
 
 There is no fixed structure to fill in here beyond this: it should read as
 one coherent piece of understanding, not a report, not a table, not a

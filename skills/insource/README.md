@@ -7,7 +7,7 @@ Total skills available: **44**
 ## Quick Index
 
 - [backend-db-debugging](./backend-db-debugging/SKILL.md) — Universal workflows, patterns, and templates for debugging backend services, databases, schema drift, migrations, enviro...
-- [binary-reverse-engineering](./binary-reverse-engineering/SKILL.md) — Universal software reverse engineering and black-box system inspection across all layers: web/JS bundles, runtime tracin...
+- [dig-binary](./dig-binary/SKILL.md) — Universal software reverse engineering and black-box system inspection across all layers: web/JS bundles, runtime tracin...
 - [blockiya](./blockiya/SKILL.md) — Enforce and apply the Blockiya architectural pattern for UI construction across component frameworks. Use when designing...
 - [check-violations](./check-violations/SKILL.md) — Universal, language-agnostic agent skill to audit codebases, architectures, contracts, and visual/data invariants for ru...
 - [chekr](./chekr/SKILL.md) — >- Run and remediate SNDUK Chekr architectural checks (@chekr/cli v0.3.2). Use when fixing check-violations, writing cus...
@@ -22,16 +22,15 @@ Total skills available: **44**
 - [gitter](./gitter/SKILL.md) — Structures git workflow practices. Use when making any code change, committing, branching, resolving conflicts, splittin...
 - [how-to-do](./how-to-do/SKILL.md) — Maintains a persistent .htd/ folder of generalized "how to do X in this codebase" procedures, so multi-step tasks are do...
 - [idk](./idk/SKILL.md) — Use this skill whenever the user directly signals they don't know what they want or need — phrases like "idk", "I don't ...
-- [investigate-and-search](./investigate-and-search/SKILL.md) — Universal, robust, and high-precision investigation and search methodology across heterogeneous file formats (plain text...
-- [investigating-skill](./investigating/SKILL.md) — Investigate Agent Skills from SkillsMP, GitHub, and other public sources without installing them. Use when asked to comp...
+- [investigate](./investigate/SKILL.md) — Investigate local files, codebases, datasets, and external Agent Skills. Use for high-precision searches across heterogeneous formats, diagnosing unfamiliar architectures, inspecting...
 - [like-a-pro](./like-a-pro/SKILL.md) — Root meta-skill orchestrator that reproduces production-grade engineering standards and conventions across applications....
 - [mine](./mine/SKILL.md) — Runs a deep, budgeted, multi-source research dig to understand not just what a class of thing looks like, but WHY — the ...
 - [no-framework](./no-framework/SKILL.md) — > Build Single Page Applications using NoF (No Frameworks) — a lightweight architecture defaulting to VanJS (~1KB, fine-...
-- [package-audit-and-cleanup](./package-audit-and-cleanup/SKILL.md) — Audit and cleanup of project dependencies in a monorepo. Use when identifying unused libraries, removing redundancy, or ...
-- [persona-context](./persona-context/SKILL.md) — > Construct deep, professional, context-aware personas for subagents of any role — not just a job title, but a full beha...
+- [audit-deps](./audit-deps/SKILL.md) — Audit and cleanup of project dependencies in a monorepo. Use when identifying unused libraries, removing redundancy, or ...
+- [persona](./persona/SKILL.md) — > Construct deep, professional, context-aware personas for subagents of any role — not just a job title, but a full beha...
 - [planner](./planner/SKILL.md) — Enforce rigorous, systematic, language-agnostic planning before implementation. Captures the full request, first clarifi...
 - [polyglot](./polyglot/SKILL.md) — Teaches AI agents how to design and author universal, general, and language-agnostic agent skills, and how to write bala...
-- [pvc-architecture](./pvc-architecture/SKILL.md) — Apply PVC (Page-View-Component) role-based UI construction architecture for web apps across any component framework. Use...
+- [pvc-fy](./pvc-fy/SKILL.md) — Apply PVC (Page-View-Component) role-based UI construction architecture for web apps across any component framework. Use...
 - [scrape](./scrape/SKILL.md) — Fetch full framework documentation as clean local Markdown files. Commands per framework (currently `ionic` covering all...
 - [scraper-optimizer](./scraper-optimizer/SKILL.md) — Universal systems engineering standards, architectural patterns, and cross-runtime playbooks for high-throughput, memory...
 - [search-deeply](./search-deeply/SKILL.md) — Perform multi-pass deep technical research and produce implementation-oriented architecture studies for complex systems ...
@@ -66,9 +65,9 @@ A project-agnostic, production-grade guide for inspecting database schemas, vali
 
 ---
 
-### 2. [binary-reverse-engineering](./binary-reverse-engineering/SKILL.md)
+### 2. [dig-binary](./dig-binary/SKILL.md)
 
-- **Directory:** `binary-reverse-engineering`
+- **Directory:** `dig-binary`
 - **Title:** Universal Software Reverse Engineering & Black-Box Inspection
 - **Description:** Universal software reverse engineering and black-box system inspection across all layers: web/JS bundles, runtime tracing, network protocols, native binaries (PE, ELF, Mach-O), bytecode (JVM, Dalvik, Python, .NET), archives (ZIP, JAR, APK, TAR, ASAR), and local data stores. Use when source code is missing, obfuscated, or partial and internal models, APIs, hidden behaviors, or error causes must be uncovered.
 
@@ -228,25 +227,14 @@ The user knows *something* is off, or wants *something* to change, or has a feel
 
 ---
 
-### 17. [investigate-and-search](./investigate-and-search/SKILL.md)
+### 17. [investigate](./investigate/SKILL.md)
 
-- **Directory:** `investigate-and-search`
-- **Title:** Universal Investigation & Search Skill
-- **Description:** Universal, robust, and high-precision investigation and search methodology across heterogeneous file formats (plain text, massive source trees, binary blobs, raw bytes, Parquet, SQLite, archives ZIP/TAR/JAR, JSON/JSONL). Use when searching through thousands of files, diagnosing unfamiliar architectures, extracting needles from complex data stores, or synthesizing findings into structured tabular reports with reusable search scripts.
-
-**Overview & Usage:**
-A comprehensive methodology and executable toolkit for autonomous agents and engineers conducting high-stakes investigations across complex file systems, massive datasets, and diverse data formats. It guarantees **robustness and precision** (never missing subtle needles or edge cases) combined with **high throughput** (leveraging smart pruning, early filtering, streaming I/O, and zero-dependency dispatching).
-
----
-
-### 18. [investigating-skill](./investigating/SKILL.md)
-
-- **Directory:** `investigating`
-- **Title:** Investigating Skills
-- **Description:** Investigate Agent Skills from SkillsMP, GitHub, and other public sources without installing them. Use when asked to compare Skills, understand a Skill's implementation or file structure, use a web Skill temporarily, or create/remix a new Skill from existing Skills. Prefer SkillsMP for discovery and direct raw GitHub retrieval for complete file contents.
+- **Directory:** `investigate`
+- **Title:** Investigation & Search
+- **Description:** Investigate local files, codebases, datasets, and external Agent Skills. Use for high-precision searches across heterogeneous formats, diagnosing unfamiliar architectures, inspecting or comparing Skills from SkillsMP, GitHub, and other public sources, temporarily using or remixing external Skills, and synthesizing evidence into structured reports. Does not install external Skills unless explicitly requested.
 
 **Overview & Usage:**
-Investigate external Agent Skills as source material before comparing, reusing, or remixing them.
+A comprehensive methodology and executable toolkit for investigating complex local filesystems, datasets, and diverse data formats, as well as inspecting, comparing, temporarily using, and remixing public Agent Skills. It emphasizes robust evidence gathering, high-throughput search, source integrity, progressive disclosure, and safe handling of untrusted external content.
 
 ---
 
@@ -283,9 +271,9 @@ Simplicity over complexity, performance by default, full control over the codeba
 
 ---
 
-### 22. [package-audit-and-cleanup](./package-audit-and-cleanup/SKILL.md)
+### 22. [audit-deps](./audit-deps/SKILL.md)
 
-- **Directory:** `package-audit-and-cleanup`
+- **Directory:** `audit-deps`
 - **Title:** Package Audit and Cleanup
 - **Description:** Audit and cleanup of project dependencies in a monorepo. Use when identifying unused libraries, removing redundancy, or optimizing package sizes across workspaces.
 
@@ -294,9 +282,9 @@ In a large monorepo, dependencies can quickly become redundant, outdated, or unu
 
 ---
 
-### 23. [persona-context](./persona-context/SKILL.md)
+### 23. [persona](./persona/SKILL.md)
 
-- **Directory:** `persona-context`
+- **Directory:** `persona`
 - **Title:** Persona & Context Construction
 - **Description:** > Construct deep, professional, context-aware personas for subagents of any role — not just a job title, but a full behavioral specification of how the agent thinks, investigates, judges quality, and communicates. Use this whenever building, prompting, or orchestrating a subagent (security reviewer, database engineer, testing engineer, frontend engineer, DevOps/SRE, technical writer, code reviewer, or any other domain specialist) and a generic "you are a senior X" persona would be too shallow. Especially relevant for multi-agent orchestration systems (e.g. contribute-agents) that need distinct professional perspectives per role, and for any task asking to "give this agent a persona," "make this agent think like a senior X," or "construct context for a subagent." The method is role-agnostic — it applies identically whether the role is testing, security, database, frontend, or something else entirely.
 
@@ -327,9 +315,9 @@ Enforce a disciplined, hypothesis-driven, **universal** planning process. The sk
 
 ---
 
-### 26. [pvc-architecture](./pvc-architecture/SKILL.md)
+### 26. [pvc-fy](./pvc-fy/SKILL.md)
 
-- **Directory:** `pvc-architecture`
+- **Directory:** `pvc-fy`
 - **Title:** PVC Architecture — Page, View, Component
 - **Description:** Apply PVC (Page-View-Component) role-based UI construction architecture for web apps across any component framework. Use when designing, reviewing, refactoring, or scaffolding UI structure, pages, views, components, decorations, aligners, or UI elements. Works for React, Vue, Svelte, Solid, Angular, and similar. Triggers include PVC, Page View Component architecture, role-based UI, semantic UI composition, View vs Component distinction, project structure for UI, UI hierarchy rules, architectural classification of components, Vue PVC, React PVC, framework-agnostic UI architecture.
 
