@@ -1,0 +1,3821 @@
+{
+  "schemaVersion": 1,
+  "catalog": {
+    "name": "Impeccable Slop catalog",
+    "url": "https://impeccable.style/slop/",
+    "snapshotDate": "2026-10-06",
+    "patternCount": 67,
+    "detectorRuleCount": 61,
+    "designReviewCount": 6,
+    "localSourceCount": 60
+  },
+  "sourceMap": "../source-map.md",
+  "localRegistry": {
+    "builtInCount": 60,
+    "sourceFile": "../../registry.rs",
+    "scopes": [
+      "type",
+      "layout"
+    ],
+    "ruleEngineSupport": {
+      "regex": [
+        "source",
+        "page-analyzer"
+      ],
+      "static-html": [
+        "element",
+        "page"
+      ],
+      "browser": [
+        "element",
+        "page",
+        "layout"
+      ],
+      "visual": [
+        "visual-contrast"
+      ]
+    },
+    "immediateTierRuleIds": [
+      "broken-image",
+      "text-overflow",
+      "body-text-viewport-edge",
+      "low-contrast",
+      "gray-on-color",
+      "tiny-text",
+      "gradient-text",
+      "dark-glow",
+      "design-system-font",
+      "design-system-color",
+      "design-system-radius",
+      "design-system-font-size"
+    ],
+    "supportsRuntimeExtension": true
+  },
+  "patterns": [
+    {
+      "id": "design-system-font",
+      "name": "Font outside DESIGN.md",
+      "category": "design-system",
+      "catalogBadge": "Your design system",
+      "catalogSection": "Your design system",
+      "catalogDescription": "This font is not in your documented type system. Use an approved font, or update DESIGN.md if the addition is intentional.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "design-system-font",
+        "category": "quality",
+        "name": "Font outside DESIGN.md",
+        "description": "A font is used that is not declared in DESIGN.md typography. Use the documented type system or update DESIGN.md if this is an intentional brand addition.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/design-system-font/knowledge.md",
+      "detectionGuide": "../patterns/design-system-font/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/design-system-font/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "design-system-color",
+      "name": "Color outside DESIGN.md",
+      "category": "design-system",
+      "catalogBadge": "Your design system",
+      "catalogSection": "Your design system",
+      "catalogDescription": "This color falls outside your documented palette. Use a palette color, or add the new color to your design system.",
+      "sourceEngineScopes": [],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "design-system-color",
+        "category": "quality",
+        "name": "Color outside DESIGN.md",
+        "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+        "scopes": [],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/design-system-color/knowledge.md",
+      "detectionGuide": "../patterns/design-system-color/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/design-system-color/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "design-system-radius",
+      "name": "Radius outside DESIGN.md",
+      "category": "design-system",
+      "catalogBadge": "Your design system",
+      "catalogSection": "Your design system",
+      "catalogDescription": "This corner radius is not in your documented scale. Use an existing radius, or update the system to include the new shape.",
+      "sourceEngineScopes": [],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "design-system-radius",
+        "category": "quality",
+        "name": "Radius outside DESIGN.md",
+        "description": "A border-radius value is outside the DESIGN.md rounded scale. Use a documented radius token or update the design system if the new shape is intentional.",
+        "scopes": [],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/design-system-radius/knowledge.md",
+      "detectionGuide": "../patterns/design-system-radius/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/design-system-radius/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "design-system-font-size",
+      "name": "Font size outside DESIGN.md",
+      "category": "design-system",
+      "catalogBadge": "Your design system",
+      "catalogSection": "Your design system",
+      "catalogDescription": "This font size is not in your documented type scale. Use an existing size, or add a new step to the system.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "design-system-font-size",
+        "category": "quality",
+        "name": "Font size outside DESIGN.md",
+        "description": "A literal font-size is off the type ramp documented in DESIGN.md typography. Use a documented size step or update the design system if the new step is intentional.",
+        "scopes": [
+          "type"
+        ],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/design-system-font-size/knowledge.md",
+      "detectionGuide": "../patterns/design-system-font-size/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/design-system-font-size/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "codex-grid-background",
+      "name": "Decorative grid-line background",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Visual Details",
+      "catalogDescription": "A decorative grid adds lines without helping people use the page. Keep grids for canvases, maps, or tasks that need measurement.",
+      "sourceEngineScopes": [],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "codex-grid-background",
+        "category": "slop",
+        "name": "Decorative grid-line background",
+        "description": "A decorative grid or line-field background drawn with hairline linear-gradient layers tiled by a fixed pixel cell is a recurring generated-UI signature. Reserve grid overlays for actual canvas, map, blueprint, or measurement surfaces; elsewhere use product structure or a plain surface.",
+        "scopes": [],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/codex-grid-background/knowledge.md",
+      "detectionGuide": "../patterns/codex-grid-background/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/codex-grid-background/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "border-accent-on-rounded",
+      "name": "Border accent on rounded element",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Visual Details",
+      "catalogDescription": "A thick colored border makes a rounded card’s outline compete with its content. Try a lighter border, or let the background define the card.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "border-accent-on-rounded",
+        "category": "slop",
+        "name": "Border accent on rounded element",
+        "description": "Thick accent border on a rounded card — the border clashes with the rounded corners. Remove the border or the border-radius.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/border-accent-on-rounded/knowledge.md",
+      "detectionGuide": "../patterns/border-accent-on-rounded/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/border-accent-on-rounded/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "glassmorphism-everywhere",
+      "name": "Glassmorphism everywhere",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Visual Details",
+      "catalogDescription": "Blur effects, glass cards, and glow borders used as decoration rather than to solve a real layering problem.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "visual-contextual-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "design-review",
+        "currentDisposition": "visual-contextual-review",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": null,
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "lazy-cool"
+        ]
+      },
+      "knowledge": "../patterns/glassmorphism-everywhere/knowledge.md",
+      "detectionGuide": "../patterns/glassmorphism-everywhere/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/glassmorphism-everywhere/",
+        "disposition": "visual-context-calibration-pending"
+      }
+    },
+    {
+      "id": "side-tab",
+      "name": "Side-tab accent border",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Visual Details",
+      "catalogDescription": "A thick colored stripe turns an ordinary card into something that looks like an alert. Remove it when there is no status or warning to communicate.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "side-tab",
+        "category": "slop",
+        "name": "Side-tab accent border",
+        "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "side-tab-cards"
+        ]
+      },
+      "knowledge": "../patterns/side-tab/knowledge.md",
+      "detectionGuide": "../patterns/side-tab/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/side-tab/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "gpt-thin-border-wide-shadow",
+      "name": "Hairline border with wide shadow",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Visual Details",
+      "catalogDescription": "A thin border and a broad shadow both define the same card. Choose the edge or the shadow to give the surface a clearer shape.",
+      "sourceEngineScopes": [],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "gpt-thin-border-wide-shadow",
+        "category": "slop",
+        "name": "Hairline border with wide shadow",
+        "description": "Every card of this row wears a hairline border paired with a wide, diffuse shadow, which is a recurring generated-UI signature. One floating panel earns both; a whole row wearing them reads as a default nobody chose. Across the row, commit to one: a defined edge or a soft elevation.",
+        "scopes": [],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/gpt-thin-border-wide-shadow/knowledge.md",
+      "detectionGuide": "../patterns/gpt-thin-border-wide-shadow/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/gpt-thin-border-wide-shadow/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "repeating-stripes-gradient",
+      "name": "Repeating-gradient stripes",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Visual Details",
+      "catalogDescription": "Repeating stripes fill empty space with visual noise. Use a plain surface, or a texture that belongs to the design.",
+      "sourceEngineScopes": [],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "repeating-stripes-gradient",
+        "category": "slop",
+        "name": "Repeating-gradient stripes",
+        "description": "Repeating-gradient stripes used as surface decoration are a recurring generated-UI signature. Reach for a deliberate texture or leave the surface plain.",
+        "scopes": [],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/repeating-stripes-gradient/knowledge.md",
+      "detectionGuide": "../patterns/repeating-stripes-gradient/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/repeating-stripes-gradient/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "extreme-border-radius-on-cards",
+      "name": "Extreme border-radius on cards",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Visual Details",
+      "catalogDescription": "Large corner radii can squeeze the content and make every card look alike. Reduce the curve to suit the card’s size and give its contents room.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "visual-contextual-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "design-review",
+        "currentDisposition": "visual-contextual-review",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": null,
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/extreme-border-radius-on-cards/knowledge.md",
+      "detectionGuide": "../patterns/extreme-border-radius-on-cards/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/extreme-border-radius-on-cards/",
+        "disposition": "visual-context-calibration-pending"
+      }
+    },
+    {
+      "id": "rough-svg-illustrations",
+      "name": "Rough SVG illustrations",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Visual Details",
+      "catalogDescription": "A hastily drawn mascot or scene can make a finished page feel unfinished. Use a well-made illustration or photo, or leave it out.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "visual-contextual-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "design-review",
+        "currentDisposition": "visual-contextual-review",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": null,
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/rough-svg-illustrations/knowledge.md",
+      "detectionGuide": "../patterns/rough-svg-illustrations/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/rough-svg-illustrations/",
+        "disposition": "visual-context-calibration-pending"
+      }
+    },
+    {
+      "id": "kicker-above-heading",
+      "name": "Label above a heading",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Typography",
+      "catalogDescription": "A small label above a heading adds another line to read. Remove it if it repeats the heading, or work the useful words into the heading itself.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "kicker-above-heading",
+        "category": "slop",
+        "name": "Kicker / eyebrow label above heading",
+        "description": "A tiny tracked uppercase or small-caps label sitting as its own block directly above a heading is banned outright, repeated or not. Generated kickers never earn their place: the heading carries its own weight. Delete the label and let the heading speak; if the words matter, work them into the heading or the body.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/kicker-above-heading/knowledge.md",
+      "detectionGuide": "../patterns/kicker-above-heading/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/kicker-above-heading/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "undersized-ui-text",
+      "name": "Tiny interface text",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Typography",
+      "catalogDescription": "Navigation, links, and controls are hard to use when their text is too small. Increase the size so people can read them without zooming.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "undersized-ui-text",
+        "category": "quality",
+        "name": "Undersized functional text",
+        "description": "Interactive and content-bearing UI text (links, buttons, nav items, labels, table cells, meta rows, timecodes) below 11px is a legibility failure, not a style choice. WCAG sets no absolute pixel floor, but functional text under 11px is a defensible quality bar: it fails on high-DPI and small viewports and it degrades tap and read targets. The 11px floor holds even inside a footer; only non-interactive legal smallprint gets the softer 10px floor. Being ON the DESIGN.md size ramp does not exempt a value here: adding 8px to the ramp launders the token but not the legibility problem, and that is exactly the escape hatch this rule closes. Exempts sup/sub, visually-hidden (sr-only) text, and code/terminal contexts. Decorative letterspaced micro-labels are still functional and stay in scope.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "inter-everywhere"
+        ]
+      },
+      "knowledge": "../patterns/undersized-ui-text/knowledge.md",
+      "detectionGuide": "../patterns/undersized-ui-text/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/undersized-ui-text/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "flat-type-hierarchy",
+      "name": "Flat type hierarchy",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Typography",
+      "catalogDescription": "Headings and body text look too similar, making the page hard to scan. Give them clearer differences in size, weight, or spacing.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "flat-type-hierarchy",
+        "category": "slop",
+        "name": "Flat type hierarchy",
+        "description": "Dominant heading and body roles are separated by less than 1.25× at every step, leaving the size hierarchy flat. Add at least one stronger size step.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "modal-abuse"
+        ]
+      },
+      "knowledge": "../patterns/flat-type-hierarchy/knowledge.md",
+      "detectionGuide": "../patterns/flat-type-hierarchy/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/flat-type-hierarchy/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "icon-tile-stack",
+      "name": "Icon tile stacked above heading",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Typography",
+      "catalogDescription": "An icon in a rounded square above a heading is a familiar AI feature-card pattern. Try placing the icon beside the heading, or remove its container.",
+      "sourceEngineScopes": [
+        "layout"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "icon-tile-stack",
+        "category": "slop",
+        "name": "Icon tile stacked above heading",
+        "description": "A small rounded-square icon container above a heading is the universal AI feature-card template — every generator outputs this exact shape. Try a side-by-side icon and heading, or let the icon sit in flow without its own container.",
+        "scopes": [
+          "layout"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "inter-everywhere",
+          "massive-icons"
+        ]
+      },
+      "knowledge": "../patterns/icon-tile-stack/knowledge.md",
+      "detectionGuide": "../patterns/icon-tile-stack/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/icon-tile-stack/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "italic-serif-display",
+      "name": "Italic serif display headline",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Typography",
+      "catalogDescription": "An oversized italic serif headline is a familiar shortcut to an editorial look. Choose a type style that fits the product’s character, rather than borrowing the same one by default.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "italic-serif-display",
+        "category": "slop",
+        "name": "Italic serif display headline",
+        "description": "Oversized italic serif (Fraunces, Recoleta, Playfair, Newsreader-italic) as the primary hero headline reads as taste in isolation but has become the universal AI-startup landing page hero. Set roman, or move to a non-serif display face. Editorial / magazine register may legitimately want this — judge by context.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/italic-serif-display/knowledge.md",
+      "detectionGuide": "../patterns/italic-serif-display/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/italic-serif-display/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "hero-eyebrow-chip",
+      "name": "Badge above the main headline",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Typography",
+      "catalogDescription": "A small pill above the headline can look clickable and compete with the message. Remove it if it adds little, or put useful information in the headline or supporting text.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "hero-eyebrow-chip",
+        "category": "slop",
+        "name": "Hero eyebrow / pill chip",
+        "description": "A tiny uppercase letter-spaced label sitting immediately above an oversized hero headline — or the same shape rendered as a pill chip — is now the default AI SaaS hero. Drop the eyebrow, integrate the kicker into the headline, or run it as a navigation breadcrumb instead.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "lazy-cool"
+        ]
+      },
+      "knowledge": "../patterns/hero-eyebrow-chip/knowledge.md",
+      "detectionGuide": "../patterns/hero-eyebrow-chip/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/hero-eyebrow-chip/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "oversized-h1",
+      "name": "Oversized hero headline",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Typography",
+      "catalogDescription": "A long headline at display size can fill the first screen by itself. Shorten it or reduce the size so the page has room to explain the offer and show what to do next.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "oversized-h1",
+        "category": "slop",
+        "name": "Oversized hero headline",
+        "description": "A full-sentence headline set at display size ends up dominating the viewport, leaving no room for anything else above the fold. A punchy one- or two-word headline at that size is fine — the problem is a long headline blown up too large. Set long headlines smaller, or tighten the copy.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/oversized-h1/knowledge.md",
+      "detectionGuide": "../patterns/oversized-h1/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/oversized-h1/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "extreme-negative-tracking",
+      "name": "Crushed letter spacing",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Typography",
+      "catalogDescription": "Letters pushed too close together become hard to distinguish. Loosen the spacing until each character is clear, especially at smaller screen sizes.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "extreme-negative-tracking",
+        "category": "slop",
+        "name": "Crushed letter spacing",
+        "description": "Letter-spacing pulled tighter than the point where characters keep their own shapes costs legibility. Tighten display type optically, not destructively.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/extreme-negative-tracking/knowledge.md",
+      "detectionGuide": "../patterns/extreme-negative-tracking/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/extreme-negative-tracking/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "overused-font",
+      "name": "Overused font",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Typography",
+      "catalogDescription": "Familiar defaults such as Inter and Geist can make unrelated products look alike. Choose typography for the product’s character and reading needs, and keep established brand fonts when they fit.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "overused-font",
+        "category": "slop",
+        "name": "Overused font",
+        "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "inter-everywhere"
+        ]
+      },
+      "knowledge": "../patterns/overused-font/knowledge.md",
+      "detectionGuide": "../patterns/overused-font/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/overused-font/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "single-font-for-everything",
+      "name": "Single font for everything",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Typography",
+      "catalogDescription": "One font family can work well across a whole page. If everything feels flat, vary size, weight, and spacing before deciding whether a second family would help.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "visual-contextual-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "design-review",
+        "currentDisposition": "visual-contextual-review",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": null,
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/single-font-for-everything/knowledge.md",
+      "detectionGuide": "../patterns/single-font-for-everything/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/single-font-for-everything/",
+        "disposition": "visual-context-calibration-pending"
+      }
+    },
+    {
+      "id": "all-caps-body",
+      "name": "All-caps body text",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Typography",
+      "catalogDescription": "Long passages in capitals are tiring to read. Use sentence case for body text, and keep uppercase for short labels or headings.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "all-caps-body",
+        "category": "quality",
+        "name": "All-caps body text",
+        "description": "Long passages in uppercase are hard to read. We recognize words by shape (ascenders and descenders), which all-caps removes. Reserve uppercase for short labels and headings. Only a run that reads as a sentence counts: 80 characters or more of an element's own text. Buttons, nav items, kickers and eyebrows set in caps are a convention and stay silent.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/all-caps-body/knowledge.md",
+      "detectionGuide": "../patterns/all-caps-body/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/all-caps-body/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "radial-halo",
+      "name": "Radial-gradient background halo",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Color & Contrast",
+      "catalogDescription": "A bright halo on a dark page is a familiar AI background effect. Remove the glow when it competes with the content or has no role in the design.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "radial-halo",
+        "category": "slop",
+        "name": "Radial-gradient background halo",
+        "description": "A chromatic radial-gradient wash — saturated at the center, fading to transparent — used as a decorative background glow on a dark page. Same tell as glowing shadows, drawn with a gradient instead of a shadow. Ground the surface with a solid or subtly shifted background instead.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/radial-halo/knowledge.md",
+      "detectionGuide": "../patterns/radial-halo/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/radial-halo/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "radial-spotlight-glow",
+      "name": "Soft spotlight behind content",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Color & Contrast",
+      "catalogDescription": "A faint glow behind a section adds emphasis without explaining what matters. Use spacing, contrast, or a clear heading to guide attention.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "radial-spotlight-glow",
+        "category": "slop",
+        "name": "Decorative radial spotlight glow",
+        "description": "An accent-colored radial gradient fading to transparent, dropped behind a hero or section as a \"spotlight\" and bright enough against that surface to read as a cloud floating over the copy. It is a reflex AI decoration — the translucent cousin of the saturated radial halo. Let the surface stand on its own, or light the composition with a deliberate material accent rather than a floating colored haze.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "lazy-impact"
+        ]
+      },
+      "knowledge": "../patterns/radial-spotlight-glow/knowledge.md",
+      "detectionGuide": "../patterns/radial-spotlight-glow/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/radial-spotlight-glow/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "ai-color-palette",
+      "name": "AI color palette",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Color & Contrast",
+      "catalogDescription": "Purple gradients and bright cyan on dark backgrounds are familiar AI defaults. Build the palette around the product’s identity and how people will use it.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "ai-color-palette",
+        "category": "slop",
+        "name": "AI color palette",
+        "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. A gradient in one of those hues is the tell on its own; flat neon ink on a dark ground is charged once a second tell hue joins it. Choose a distinctive, intentional palette.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "purple-gradients-everywhere",
+          "lazy-impact",
+          "copy-paste-layouts",
+          "bad-contrast-choices"
+        ]
+      },
+      "knowledge": "../patterns/ai-color-palette/knowledge.md",
+      "detectionGuide": "../patterns/ai-color-palette/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/ai-color-palette/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "dark-glow",
+      "name": "Dark mode with glowing accents",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Color & Contrast",
+      "catalogDescription": "Glowing borders and accents can turn a dark interface into a wall of neon. Keep the dark theme if it suits the product, and reduce the glow so useful information stands out.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "dark-glow",
+        "category": "slop",
+        "name": "Glowing shadow accents",
+        "description": "Colored glow shadows — a zero-offset chromatic halo (box- or text-shadow) on any background, or any colored blurred shadow on a dark background — are the default \"cool\" look of AI-generated UIs. Use neutral elevation shadows and subtle, purposeful lighting instead.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "purple-gradients-everywhere",
+          "lazy-cool",
+          "lazy-impact"
+        ]
+      },
+      "knowledge": "../patterns/dark-glow/knowledge.md",
+      "detectionGuide": "../patterns/dark-glow/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/dark-glow/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "gradient-text",
+      "name": "Gradient text",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Color & Contrast",
+      "catalogDescription": "A gradient makes color change across a heading or number, often just for decoration. Try one solid color and use size or weight for emphasis.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "gradient-text",
+        "category": "slop",
+        "name": "Gradient text",
+        "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "purple-gradients-everywhere",
+          "lazy-impact"
+        ]
+      },
+      "knowledge": "../patterns/gradient-text/knowledge.md",
+      "detectionGuide": "../patterns/gradient-text/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/gradient-text/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "gray-on-color",
+      "name": "Gray text on colored background",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Color & Contrast",
+      "catalogDescription": "Neutral gray text can look washed out on a colored surface. Try a darker tint or a light text color, then check the contrast against the actual background.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "gray-on-color",
+        "category": "quality",
+        "name": "Gray text on colored background",
+        "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "bad-contrast-choices"
+        ]
+      },
+      "knowledge": "../patterns/gray-on-color/knowledge.md",
+      "detectionGuide": "../patterns/gray-on-color/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/gray-on-color/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "cream-palette",
+      "name": "Cream / beige palette",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Color & Contrast",
+      "catalogDescription": "Cream and beige can become a default substitute for a considered palette. Keep them when they belong to the product, and choose the rest of the colors with equal care.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "cream-palette",
+        "category": "slop",
+        "name": "Cream / beige palette",
+        "description": "A warm cream or beige page background has become the default \"tasteful\" AI surface, reached for by reflex. Choose a background that comes from a deliberate palette, not the safe warm off-white.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/cream-palette/knowledge.md",
+      "detectionGuide": "../patterns/cream-palette/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/cream-palette/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "numbered-section-labels",
+      "name": "Tiny numbered section labels",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "Tiny numbers beside headings add clutter when there is no sequence to follow. Keep numbering for steps or an order that matters.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "numbered-section-labels",
+        "category": "slop",
+        "name": "Tiny numbered section labels",
+        "description": "Small numeric index labels riding next to section headings, repeated section after section, are AI editorial scaffolding — a page numbering its own chapters instead of earning structure. Let hierarchy, content, and rhythm carry the sequence.",
+        "scopes": [
+          "type"
+        ],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/numbered-section-labels/knowledge.md",
+      "detectionGuide": "../patterns/numbered-section-labels/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/numbered-section-labels/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "edge-flush-cards",
+      "name": "Cards flush against the scroller edge",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "Cards meet the scroller’s edge without room around them. Add matching space at both ends so the first and last cards have a clear boundary.",
+      "sourceEngineScopes": [
+        "layout"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "edge-flush-cards",
+        "category": "quality",
+        "name": "Cards flush against the scroller edge",
+        "description": "Cards inside a horizontal scroller or tab panel sit flush against the container edge at rest while keeping a gutter on the other side, so their edges and rounded corners get cut off. Usually the panel is sized wider than its clip box. Keep a consistent inset on both sides.",
+        "scopes": [
+          "layout"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/edge-flush-cards/knowledge.md",
+      "detectionGuide": "../patterns/edge-flush-cards/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/edge-flush-cards/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "text-occlusion",
+      "name": "Text covered by another element",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "An opaque layer covers readable text. Move the layer or give the text clear space.",
+      "sourceEngineScopes": [
+        "layout"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "text-occlusion",
+        "category": "quality",
+        "name": "Text occluded by an overlapping element",
+        "description": "Text is painted under an opaque element or a second text run, so part of it cannot be read. A decorative box, a stacked layer, or an inline element with leaked padding lands on the words instead of beside them. Give overlapping layers room, or move the text out from under the layer above it.",
+        "scopes": [
+          "layout"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "lazy-cool",
+          "cardocalypse",
+          "inter-everywhere",
+          "modal-abuse"
+        ]
+      },
+      "knowledge": "../patterns/text-occlusion/knowledge.md",
+      "detectionGuide": "../patterns/text-occlusion/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/text-occlusion/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "first-viewport-column-overflow",
+      "name": "Unbalanced opening columns",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "One opening column extends far below the other, leaving a large gap. Rebalance the content, or move the longer section below both columns.",
+      "sourceEngineScopes": [
+        "layout"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "first-viewport-column-overflow",
+        "category": "quality",
+        "name": "One column stretches the first viewport",
+        "description": "A multi-column opening section lets one column run far past the fold while its sibling fits in a single viewport, so the short column floats in dead space and the fold falls deep inside one section. Balance the columns, cap the tall one, or let the long content flow below the opening row.",
+        "scopes": [
+          "layout"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/first-viewport-column-overflow/knowledge.md",
+      "detectionGuide": "../patterns/first-viewport-column-overflow/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/first-viewport-column-overflow/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "heading-rhythm",
+      "name": "Heading closer to the previous section",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "A heading sits closer to the previous block than its own content. Give it more space above than below.",
+      "sourceEngineScopes": [
+        "layout",
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "heading-rhythm",
+        "category": "quality",
+        "name": "Heading crowded against the previous block",
+        "description": "A heading binds to the content it introduces, so the rendered space above it should exceed the space below it. When headings across a page sit as close or closer to the block above than to their own content, every section reads as if it captions the previous one. Open up the space above each heading.",
+        "scopes": [
+          "layout",
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/heading-rhythm/knowledge.md",
+      "detectionGuide": "../patterns/heading-rhythm/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/heading-rhythm/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "hero-metric-layout",
+      "name": "Hero metric layout",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "A huge number with a small label and supporting stats is a familiar landing-page template. Lead with a metric when it helps explain the product, and give it enough context to mean something.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "visual-contextual-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "design-review",
+        "currentDisposition": "visual-contextual-review",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": null,
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "copy-paste-layouts"
+        ]
+      },
+      "knowledge": "../patterns/hero-metric-layout/knowledge.md",
+      "detectionGuide": "../patterns/hero-metric-layout/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/hero-metric-layout/",
+        "disposition": "visual-context-calibration-pending"
+      }
+    },
+    {
+      "id": "identical-card-grids",
+      "name": "Identical card grids",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "Repeated icon, heading, and text cards give every point the same weight. Group related ideas and vary the layout when the content needs different treatment.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "visual-contextual-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "design-review",
+        "currentDisposition": "visual-contextual-review",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": null,
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "copy-paste-layouts"
+        ]
+      },
+      "knowledge": "../patterns/identical-card-grids/knowledge.md",
+      "detectionGuide": "../patterns/identical-card-grids/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/identical-card-grids/",
+        "disposition": "visual-context-calibration-pending"
+      }
+    },
+    {
+      "id": "monotonous-spacing",
+      "name": "Monotonous spacing",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "Equal gaps everywhere make it hard to tell what belongs together. Keep related items close and leave more space between separate groups.",
+      "sourceEngineScopes": [
+        "layout"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "monotonous-spacing",
+        "category": "slop",
+        "name": "Monotonous spacing",
+        "description": "The same spacing value used everywhere — no rhythm, no variation. Use tight groupings for related items and generous separations between sections.",
+        "scopes": [
+          "layout"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/monotonous-spacing/knowledge.md",
+      "detectionGuide": "../patterns/monotonous-spacing/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/monotonous-spacing/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "nested-cards",
+      "name": "Nested cards",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy: use spacing, typography, and dividers instead of nesting containers.",
+      "sourceEngineScopes": [
+        "layout"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "nested-cards",
+        "category": "slop",
+        "name": "Nested cards",
+        "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+        "scopes": [
+          "layout"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "side-tab-cards",
+          "cardocalypse"
+        ]
+      },
+      "knowledge": "../patterns/nested-cards/knowledge.md",
+      "detectionGuide": "../patterns/nested-cards/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/nested-cards/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "line-length",
+      "name": "Line length too long",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "Long lines make it harder to find the start of the next line. Try a text width of 65–75 characters, then adjust for the font, content, and screen.",
+      "sourceEngineScopes": [
+        "type",
+        "layout"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "line-length",
+        "category": "quality",
+        "name": "Line length too long",
+        "description": "Text lines wider than ~80 characters are hard to read. The eye loses its place tracking back to the start of the next line, so it is measured on the lines that rendered and charged when more than one of them runs long. Add a max-width (65ch to 75ch) to text containers.",
+        "scopes": [
+          "type",
+          "layout"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/line-length/knowledge.md",
+      "detectionGuide": "../patterns/line-length/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/line-length/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "text-overflow",
+      "name": "Content overflowing its container",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "Content spills outside its container or makes the page scroll sideways. Let text wrap and elements shrink; use a scrolling region when the content needs one.",
+      "sourceEngineScopes": [
+        "layout"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "text-overflow",
+        "category": "quality",
+        "name": "Content overflowing its container",
+        "description": "Content renders wider than its container, spilling out or forcing a horizontal scrollbar. Let text wrap, constrain widths, or give the region a deliberate scroll affordance.",
+        "scopes": [
+          "layout"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/text-overflow/knowledge.md",
+      "detectionGuide": "../patterns/text-overflow/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/text-overflow/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "clipped-overflow-container",
+      "name": "Clipped menus and popovers",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Layout & Space",
+      "catalogDescription": "A container cuts off a menu, tooltip, or popover that needs to extend beyond it. Allow the overflow, or render that layer outside the clipping container.",
+      "sourceEngineScopes": [
+        "layout"
+      ],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "clipped-overflow-container",
+        "category": "quality",
+        "name": "Positioned child clipped by overflow container",
+        "description": "A clipping container (overflow hidden or clip) wrapping an absolutely-positioned child cuts off tooltips, menus, and popovers that need to escape. Let the overflow be visible, or move the positioned layer out of the clip.",
+        "scopes": [
+          "layout"
+        ],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "purple-gradients-everywhere",
+          "modal-abuse"
+        ]
+      },
+      "knowledge": "../patterns/clipped-overflow-container/knowledge.md",
+      "detectionGuide": "../patterns/clipped-overflow-container/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/clipped-overflow-container/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "pulsing-dot",
+      "name": "Pulsing status dot",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Motion",
+      "catalogDescription": "A pulsing status dot draws attention even when nothing changes. Keep static status still, and use motion to signal activity that matters.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "pulsing-dot",
+        "category": "slop",
+        "name": "Pulsing status dot",
+        "description": "Small pulsing status dots simulate liveness decoratively. Reserve pulse animation for indicators tied to genuinely live, changing data; a static indicator with clear labeling is honest and calmer.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/pulsing-dot/knowledge.md",
+      "detectionGuide": "../patterns/pulsing-dot/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/pulsing-dot/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "blinking-cursor",
+      "name": "Decorative blinking cursor",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Motion",
+      "catalogDescription": "A blinking cursor makes ordinary text look editable or like a terminal. Remove it from static copy; keep it where people can type.",
+      "sourceEngineScopes": [],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "blinking-cursor",
+        "category": "slop",
+        "name": "Decorative blinking cursor",
+        "description": "A blinking text cursor animated into a hero or landing section simulates typing where no input exists. It borrows the dev-tool aesthetic as decoration. Real editable fields draw their own caret; anywhere else, let the composition hold attention without a fake prompt.",
+        "scopes": [],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/blinking-cursor/knowledge.md",
+      "detectionGuide": "../patterns/blinking-cursor/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/blinking-cursor/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "marquee",
+      "name": "Auto-scrolling marquee",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Motion",
+      "catalogDescription": "Auto-scrolling text or logos make people read at the page’s pace. Keep them still, or give people controls to pause and browse.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "marquee",
+        "category": "slop",
+        "name": "Auto-scrolling marquee",
+        "description": "Continuously auto-scrolling content demands attention it has not earned and hides half its content at any moment. Reserve motion for content that changes; let readers move at their own pace.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "lazy-impact"
+        ]
+      },
+      "knowledge": "../patterns/marquee/knowledge.md",
+      "detectionGuide": "../patterns/marquee/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/marquee/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "bounce-easing",
+      "name": "Bounce or elastic easing",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Motion",
+      "catalogDescription": "A dialog that bounces or overshoots can make a routine action feel fussy. Let it settle quickly, and save playful motion for moments that suit the product.",
+      "sourceEngineScopes": [],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "bounce-easing",
+        "category": "slop",
+        "name": "Bounce or elastic easing",
+        "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+        "scopes": [],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "lazy-impact"
+        ]
+      },
+      "knowledge": "../patterns/bounce-easing/knowledge.md",
+      "detectionGuide": "../patterns/bounce-easing/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/bounce-easing/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "layout-transition",
+      "name": "Animation that changes layout",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Motion",
+      "catalogDescription": "Animating size or spacing can shift nearby content and make transitions stutter. Use transforms for visual movement where possible, and check performance when the layout needs to change.",
+      "sourceEngineScopes": [],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "layout-transition",
+        "category": "quality",
+        "name": "Layout property animation",
+        "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+        "scopes": [],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/layout-transition/knowledge.md",
+      "detectionGuide": "../patterns/layout-transition/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/layout-transition/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "images-move-on-hover",
+      "name": "Images that move on hover",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Motion",
+      "catalogDescription": "Zooming or rotating every image on hover adds movement without a clear purpose. Keep images still unless the motion helps explain what people can do.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": null,
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/images-move-on-hover/knowledge.md",
+      "detectionGuide": "../patterns/images-move-on-hover/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/images-move-on-hover/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "repeated-container-text",
+      "name": "Same text repeated inside one container",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Copy",
+      "catalogDescription": "The same label appears in several slots of one card. Keep it once, where it matters.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "repeated-container-text",
+        "category": "quality",
+        "name": "Same text repeated inside one container",
+        "description": "The same literal text rendered three or more times in structurally different spots inside a single card or panel is redundant messaging — usually a status or label wired into every slot of a template. Say it once, in the slot where it matters most.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "redundant-ux-writing"
+        ]
+      },
+      "knowledge": "../patterns/repeated-container-text/knowledge.md",
+      "detectionGuide": "../patterns/repeated-container-text/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/repeated-container-text/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "em-dash-overuse",
+      "name": "Em-dash overuse",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Copy",
+      "catalogDescription": "A dash in every sentence is a familiar AI writing habit. Use a full stop between separate thoughts, and choose other punctuation when it makes the sentence easier to follow.",
+      "sourceEngineScopes": [],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "em-dash-overuse",
+        "category": "slop",
+        "name": "Em-dash overuse",
+        "description": "Em-dash saturation in body copy is an AI cadence tell. Advisory only: humans use em-dashes legitimately, so this fires only on saturation — at least 8 em-dashes (— or --) at a density near one per 500 characters of body text — never on a long article that uses a few. Prefer commas, colons, periods, or parentheses.",
+        "scopes": [],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/em-dash-overuse/knowledge.md",
+      "detectionGuide": "../patterns/em-dash-overuse/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/em-dash-overuse/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "marketing-buzzword",
+      "name": "Generic marketing claims",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Copy",
+      "catalogDescription": "Words like “supercharge” and “world-class” promise a lot without explaining the product. Say what people can do and what improves for them.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "marketing-buzzword",
+        "category": "slop",
+        "name": "Marketing buzzword",
+        "description": "Generic SaaS phrases (streamline / empower / supercharge / world-class / enterprise-grade / next-generation / cutting-edge / etc) are instant AI tells. Pick a specific verb and noun that says what the product literally does.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/marketing-buzzword/knowledge.md",
+      "detectionGuide": "../patterns/marketing-buzzword/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/marketing-buzzword/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "aphoristic-cadence",
+      "name": "Forced contrast",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Copy",
+      "catalogDescription": "Repeated lines like “Not a feature. A platform.” make every point sound like a slogan. Explain the distinction when it matters, and state the useful information directly.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "aphoristic-cadence",
+        "category": "slop",
+        "name": "Aphoristic-cadence copy",
+        "description": "Three or more sections landing on a short rebuttal sentence (\"X. No Y.\" / \"X. Just Y.\") or a manufactured-contrast aphorism (\"Not a feature. A platform.\") reads as AI cadence, not voice. Once is fine; the pattern is the tell.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/aphoristic-cadence/knowledge.md",
+      "detectionGuide": "../patterns/aphoristic-cadence/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/aphoristic-cadence/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "theater-slop-phrase",
+      "name": "Calling things “theater”",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Copy",
+      "catalogDescription": "Calling something “theater” can replace an explanation with a dismissal. Name what is ineffective or misleading, and explain why.",
+      "sourceEngineScopes": [],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "theater-slop-phrase",
+        "category": "slop",
+        "name": "Theater framing copy",
+        "description": "Dismissing something as \"theater\" is a recurring generated-copy tic. Say plainly what the thing does or does not do.",
+        "scopes": [],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/theater-slop-phrase/knowledge.md",
+      "detectionGuide": "../patterns/theater-slop-phrase/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/theater-slop-phrase/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "shape-assembled-illustration",
+      "name": "Placeholder-style illustrations",
+      "category": "slop",
+      "catalogBadge": "AI slop",
+      "catalogSection": "Imagery",
+      "catalogDescription": "A scene built from generic circles and blocks can look like placeholder art. Choose imagery that says something specific about the product.",
+      "sourceEngineScopes": [],
+      "severity": "advisory",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "shape-assembled-illustration",
+        "category": "slop",
+        "name": "Shape-assembled illustration",
+        "description": "A large inline SVG that builds a pictorial scene from a pile of primitive shapes reads as placeholder clip art, not illustration. Icons, logos, and data graphics are fine at their scale; a hero-sized visual deserves real artwork, a photograph, or a deliberately drawn graphic.",
+        "scopes": [],
+        "severity": "advisory",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/shape-assembled-illustration/knowledge.md",
+      "detectionGuide": "../patterns/shape-assembled-illustration/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/shape-assembled-illustration/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "organic-clip-path",
+      "name": "Jagged image masks",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Imagery",
+      "catalogDescription": "A jagged image mask tries to imitate a torn or organic edge. Use a prepared cut-out asset for that effect, or choose a clean crop.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "organic-clip-path",
+        "category": "quality",
+        "name": "Organic contour drawn as clip-path",
+        "description": "A clip-path polygon with many arbitrary vertices, or a curved clip-path path(), is CSS approximating a torn edge, blob, or silhouette. It reads as the cheap version of the effect and is usually a produced or photographic material replaced with code. Derive an alpha matte from the real image, or ship the shape as a cut-out raster; keep clip-path for geometry (cut corners, diagonals, hexagons).",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/organic-clip-path/knowledge.md",
+      "detectionGuide": "../patterns/organic-clip-path/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/organic-clip-path/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "buried-raster",
+      "name": "Images hidden under overlays",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Imagery",
+      "catalogDescription": "A nearly opaque overlay hides the image you added. Reduce it until the image contributes, or remove an image that serves no purpose.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "buried-raster",
+        "category": "quality",
+        "name": "Raster buried under a wash or opacity",
+        "description": "A background image under a near-opaque gradient wash, or a raster on an element at near-zero opacity, never reaches the screen: the page shows the wash, and the produced texture or photo ships as a compliance token. Let the material show (a tint under 0.9 alpha, a blend mode, an opacity you can see) or remove the file.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/buried-raster/knowledge.md",
+      "detectionGuide": "../patterns/buried-raster/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/buried-raster/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "broken-image",
+      "name": "Broken or placeholder image",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "Imagery",
+      "catalogDescription": "An image with a missing, empty, or placeholder source leaves the page unfinished. Add the intended asset and check that it loads, or remove the image.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "broken-image",
+        "category": "quality",
+        "name": "Broken or placeholder image",
+        "description": "<img> tags with empty src, missing src, or placeholder values ship as broken-image boxes. Use real images, generated assets, or remove the tag.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/broken-image/knowledge.md",
+      "detectionGuide": "../patterns/broken-image/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/broken-image/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "script-error",
+      "name": "JavaScript errors on load",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "General quality",
+      "catalogDescription": "An uncaught JavaScript error can break controls or hide content. Fix the error, then check that the page works before polishing its appearance.",
+      "sourceEngineScopes": [],
+      "severity": "error",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "script-error",
+        "category": "quality",
+        "name": "Uncaught script error on load",
+        "description": "A script threw an uncaught exception or failed to parse while the page loaded. Broken JavaScript silently kills reveals, interactions, and dynamic content, and can leave most of a page invisible. Fix the error before judging anything else.",
+        "scopes": [],
+        "severity": "error",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/script-error/knowledge.md",
+      "detectionGuide": "../patterns/script-error/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/script-error/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "content-hidden-at-rest",
+      "name": "Content stuck waiting to appear",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "General quality",
+      "catalogDescription": "Content stays hidden when its entrance animation fails to run. Make it visible by default so people can still use the page if the animation fails.",
+      "sourceEngineScopes": [
+        "layout"
+      ],
+      "severity": "error",
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "content-hidden-at-rest",
+        "category": "quality",
+        "name": "Content invisible at rest",
+        "description": "A large share of the page text sits at opacity 0 or visibility hidden even after every reveal handler had a chance to run. This is the failed-reveal signature: the content shipped but never becomes visible. Make content visible by default and let JavaScript enhance its entrance instead of gating its existence.",
+        "scopes": [
+          "layout"
+        ],
+        "severity": "error",
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/content-hidden-at-rest/knowledge.md",
+      "detectionGuide": "../patterns/content-hidden-at-rest/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/content-hidden-at-rest/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "cramped-padding",
+      "name": "Cramped padding",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "General quality",
+      "catalogDescription": "Text pressed against a button or card edge feels cramped. Add enough padding to separate the content from its container, using your spacing scale.",
+      "sourceEngineScopes": [
+        "layout"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "cramped-padding",
+        "category": "quality",
+        "name": "Cramped padding",
+        "description": "Text is too close to the edge of its container. Two shapes: (1) an element with its own text where the space between the rendered text and the border box is too small for the font size, and (2) a wrapper whose children's text lands flush against a visible boundary (border, outline, or non-transparent background) with nothing to inset it. Add at least 8px (ideally 12–16px) of space inside bordered, outlined, or colored containers.",
+        "scopes": [
+          "layout"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/cramped-padding/knowledge.md",
+      "detectionGuide": "../patterns/cramped-padding/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/cramped-padding/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "body-text-viewport-edge",
+      "name": "Body text touching the page edge",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "General quality",
+      "catalogDescription": "Paragraphs need space at the sides of the screen. Add horizontal padding to the content container, and check that it remains at narrow widths.",
+      "sourceEngineScopes": [
+        "layout"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "browser-runtime-review",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "browser",
+        "currentDisposition": "rendered-browser-inspection",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "body-text-viewport-edge",
+        "category": "quality",
+        "name": "Body text touching viewport edge",
+        "description": "Body paragraphs render flush against the left or right viewport edge with no container providing horizontal padding. Wrap content in a container with at least 16px (ideally 24-32px) of horizontal padding, or apply max-width with mx-auto.",
+        "scopes": [
+          "layout"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/body-text-viewport-edge/knowledge.md",
+      "detectionGuide": "../patterns/body-text-viewport-edge/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/body-text-viewport-edge/",
+        "disposition": "browser-runtime-calibration-pending"
+      }
+    },
+    {
+      "id": "justified-text",
+      "name": "Justified text",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "General quality",
+      "catalogDescription": "Justified paragraphs can leave distracting gaps between words. Align body text to the start of the line, or use hyphenation and check the spacing at each screen size.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "justified-text",
+        "category": "quality",
+        "name": "Justified text",
+        "description": "In a column this narrow, justifying without hyphenation stretches the word spaces until vertical rivers of white run down the block. Use text-align: left, widen the measure, or enable hyphens: auto if you must justify. Scripts that justify on a character grid or by elongating glyphs, such as CJK, Thai and Arabic, are not affected and are not reported.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/justified-text/knowledge.md",
+      "detectionGuide": "../patterns/justified-text/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/justified-text/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "low-contrast",
+      "name": "Low-contrast text",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "General quality",
+      "catalogDescription": "Text that blends into its background is hard to read. Increase contrast to meet WCAG AA: at least 4.5:1 for regular text and 3:1 for large text.",
+      "sourceEngineScopes": [],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "low-contrast",
+        "category": "quality",
+        "name": "Low contrast text",
+        "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background.",
+        "scopes": [],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "purple-gradients-everywhere",
+          "lazy-impact",
+          "cardocalypse",
+          "copy-paste-layouts",
+          "inter-everywhere",
+          "bad-contrast-choices",
+          "modal-abuse"
+        ]
+      },
+      "knowledge": "../patterns/low-contrast/knowledge.md",
+      "detectionGuide": "../patterns/low-contrast/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/low-contrast/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "skipped-heading",
+      "name": "Skipped heading level",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "General quality",
+      "catalogDescription": "Heading levels help screen reader users navigate. Match them to the page structure: use h2 for a section under h1, then h3 for a subsection.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "skipped-heading",
+        "category": "quality",
+        "name": "Skipped heading level",
+        "description": "Heading levels should not skip (e.g. h1 then h3 with no h2). Screen readers use heading hierarchy for navigation. Skipping levels breaks the document outline.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "lazy-cool",
+          "lazy-impact",
+          "side-tab-cards",
+          "inter-everywhere",
+          "massive-icons",
+          "bad-contrast-choices"
+        ]
+      },
+      "knowledge": "../patterns/skipped-heading/knowledge.md",
+      "detectionGuide": "../patterns/skipped-heading/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/skipped-heading/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "tight-leading",
+      "name": "Tight line height",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "General quality",
+      "catalogDescription": "Closely packed lines make paragraphs hard to follow. Start around 1.5 times the font size, then adjust for the typeface and line length.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "tight-leading",
+        "category": "quality",
+        "name": "Tight line height",
+        "description": "Line height below 1.3x the font size makes multi-line text hard to read. Use 1.5 to 1.7 for body text so lines have room to breathe.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/tight-leading/knowledge.md",
+      "detectionGuide": "../patterns/tight-leading/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/tight-leading/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "tiny-text",
+      "name": "Tiny body text",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "General quality",
+      "catalogDescription": "Small body text makes reading a chore. Start around 16px, then check the actual typeface on a phone and desktop. Keep secondary text comfortably readable too.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "source-inspection-without-deterministic-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "tiny-text",
+        "category": "quality",
+        "name": "Tiny body text",
+        "description": "Body text below 12px is hard to read, especially on high-DPI screens. Use at least 14px for body content, 16px is ideal.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": [
+          "redundant-ux-writing"
+        ]
+      },
+      "knowledge": "../patterns/tiny-text/knowledge.md",
+      "detectionGuide": "../patterns/tiny-text/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/tiny-text/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    },
+    {
+      "id": "wide-tracking",
+      "name": "Wide letter spacing on body text",
+      "category": "quality",
+      "catalogBadge": "Quality",
+      "catalogSection": "General quality",
+      "catalogDescription": "Spreading letters far apart makes paragraphs harder to read. Keep body text near the font’s default spacing; save wider spacing for short labels.",
+      "sourceEngineScopes": [
+        "type"
+      ],
+      "severity": null,
+      "confidenceGuidance": "All automated/source matches are candidates; use visual/contextual evidence before confirmation.",
+      "detectorApplicability": "structural-candidate-detector",
+      "scope": [
+        "page",
+        "multi-page",
+        "application",
+        "project"
+      ],
+      "detection": {
+        "officialModality": "source",
+        "currentDisposition": "source-text-or-structure-candidate",
+        "status": "knowledge-and-detection-guidance-complete",
+        "regexCanConfirm": false
+      },
+      "localSource": {
+        "id": "wide-tracking",
+        "category": "quality",
+        "name": "Wide letter spacing on body text",
+        "description": "Letter spacing above 0.05em on body text disrupts natural character groupings and slows reading. Reserve wide tracking for short uppercase labels only.",
+        "scopes": [
+          "type"
+        ],
+        "severity": null,
+        "skillSection": null,
+        "skillGuideline": null,
+        "files": [
+          "../../antipatterns.json",
+          "../../registry.rs"
+        ]
+      },
+      "provenance": {
+        "catalogUrl": "https://impeccable.style/slop/",
+        "catalogText": "../assets/source/slop.txt",
+        "catalogDom": "../assets/source/slop.html",
+        "catalogScreenshots": "../assets/screenshots/slop/impeccable.style_slop/*.png",
+        "exampleIds": []
+      },
+      "knowledge": "../patterns/wide-tracking/knowledge.md",
+      "detectionGuide": "../patterns/wide-tracking/detection.md",
+      "tests": {
+        "status": "pending",
+        "fixtureDirectory": "../tests/fixtures/wide-tracking/",
+        "disposition": "source-candidate-accuracy-tests-pending"
+      }
+    }
+  ],
+  "examples": [
+    {
+      "id": "purple-gradients-everywhere",
+      "name": "Purple Gradients Everywhere",
+      "url": "https://impeccable.style/antipattern-examples/purple-gradients",
+      "textCapture": "../assets/source/examples/impeccable.style_antipattern-examples_purple-gradients.txt",
+      "screenshotCaptures": [
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_purple-gradients/1.png",
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_purple-gradients/2.png"
+      ],
+      "relatedPatternIds": [
+        "clipped-overflow-container",
+        "ai-color-palette",
+        "gradient-text",
+        "low-contrast",
+        "dark-glow"
+      ]
+    },
+    {
+      "id": "lazy-cool",
+      "name": "Lazy “Cool”",
+      "url": "https://impeccable.style/antipattern-examples/lazy-cool",
+      "textCapture": "../assets/source/examples/impeccable.style_antipattern-examples_lazy-cool.txt",
+      "screenshotCaptures": [
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_lazy-cool/1.png",
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_lazy-cool/2.png"
+      ],
+      "relatedPatternIds": [
+        "glassmorphism-everywhere",
+        "dark-glow",
+        "hero-eyebrow-chip",
+        "text-occlusion",
+        "skipped-heading"
+      ]
+    },
+    {
+      "id": "lazy-impact",
+      "name": "Lazy “Impact”",
+      "url": "https://impeccable.style/antipattern-examples/lazy-impact",
+      "textCapture": "../assets/source/examples/impeccable.style_antipattern-examples_lazy-impact.txt",
+      "screenshotCaptures": [
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_lazy-impact/1.png",
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_lazy-impact/2.png"
+      ],
+      "relatedPatternIds": [
+        "radial-spotlight-glow",
+        "gradient-text",
+        "low-contrast",
+        "bounce-easing",
+        "skipped-heading",
+        "ai-color-palette",
+        "marquee",
+        "dark-glow"
+      ]
+    },
+    {
+      "id": "side-tab-cards",
+      "name": "Side-Tab Cards",
+      "url": "https://impeccable.style/antipattern-examples/thick-border-cards",
+      "textCapture": "../assets/source/examples/impeccable.style_antipattern-examples_thick-border-cards.txt",
+      "screenshotCaptures": [
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_thick-border-cards/1.png",
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_thick-border-cards/2.png"
+      ],
+      "relatedPatternIds": [
+        "side-tab",
+        "nested-cards",
+        "skipped-heading"
+      ]
+    },
+    {
+      "id": "cardocalypse",
+      "name": "Cardocalypse",
+      "url": "https://impeccable.style/antipattern-examples/cardocalypse",
+      "textCapture": "../assets/source/examples/impeccable.style_antipattern-examples_cardocalypse.txt",
+      "screenshotCaptures": [
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_cardocalypse/1.png",
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_cardocalypse/2.png"
+      ],
+      "relatedPatternIds": [
+        "nested-cards",
+        "text-occlusion",
+        "low-contrast"
+      ]
+    },
+    {
+      "id": "copy-paste-layouts",
+      "name": "Copy-Paste Layouts",
+      "url": "https://impeccable.style/antipattern-examples/layout-templates",
+      "textCapture": "../assets/source/examples/impeccable.style_antipattern-examples_layout-templates.txt",
+      "screenshotCaptures": [
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_layout-templates/1.png",
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_layout-templates/2.png"
+      ],
+      "relatedPatternIds": [
+        "identical-card-grids",
+        "hero-metric-layout",
+        "ai-color-palette",
+        "low-contrast"
+      ]
+    },
+    {
+      "id": "inter-everywhere",
+      "name": "Inter Everywhere",
+      "url": "https://impeccable.style/antipattern-examples/inter-everywhere",
+      "textCapture": "../assets/source/examples/impeccable.style_antipattern-examples_inter-everywhere.txt",
+      "screenshotCaptures": [
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_inter-everywhere/1.png",
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_inter-everywhere/2.png"
+      ],
+      "relatedPatternIds": [
+        "overused-font",
+        "undersized-ui-text",
+        "low-contrast",
+        "icon-tile-stack",
+        "text-occlusion",
+        "skipped-heading"
+      ]
+    },
+    {
+      "id": "massive-icons",
+      "name": "Massive Icons",
+      "url": "https://impeccable.style/antipattern-examples/massive-icons",
+      "textCapture": "../assets/source/examples/impeccable.style_antipattern-examples_massive-icons.txt",
+      "screenshotCaptures": [
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_massive-icons/1.png"
+      ],
+      "relatedPatternIds": [
+        "icon-tile-stack",
+        "skipped-heading"
+      ]
+    },
+    {
+      "id": "bad-contrast-choices",
+      "name": "Bad Contrast Choices",
+      "url": "https://impeccable.style/antipattern-examples/bad-contrast",
+      "textCapture": "../assets/source/examples/impeccable.style_antipattern-examples_bad-contrast.txt",
+      "screenshotCaptures": [
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_bad-contrast/1.png"
+      ],
+      "relatedPatternIds": [
+        "low-contrast",
+        "gray-on-color",
+        "skipped-heading",
+        "ai-color-palette"
+      ]
+    },
+    {
+      "id": "redundant-ux-writing",
+      "name": "Redundant UX Writing",
+      "url": "https://impeccable.style/antipattern-examples/redundant-ux-writing",
+      "textCapture": "../assets/source/examples/impeccable.style_antipattern-examples_redundant-ux-writing.txt",
+      "screenshotCaptures": [
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_redundant-ux-writing/1.png",
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_redundant-ux-writing/2.png"
+      ],
+      "relatedPatternIds": [
+        "repeated-container-text",
+        "tiny-text"
+      ]
+    },
+    {
+      "id": "modal-abuse",
+      "name": "Modal Abuse",
+      "url": "https://impeccable.style/antipattern-examples/modal-abuse",
+      "textCapture": "../assets/source/examples/impeccable.style_antipattern-examples_modal-abuse.txt",
+      "screenshotCaptures": [
+        "../assets/screenshots/examples/impeccable.style_antipattern-examples_modal-abuse/1.png",
+        "../assets/screenshots/examples/modal-abuse-inner-full/01-001.png",
+        "../assets/screenshots/examples/modal-abuse-inner-full/01-002.png"
+      ],
+      "relatedPatternIds": [
+        "clipped-overflow-container",
+        "low-contrast",
+        "text-occlusion",
+        "flat-type-hierarchy"
+      ]
+    }
+  ]
+}

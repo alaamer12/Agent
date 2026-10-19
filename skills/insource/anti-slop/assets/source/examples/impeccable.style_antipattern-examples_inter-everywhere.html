@@ -1,0 +1,368 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Pattern: Inter Font Everywhere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      background: #f5f5f5;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    /* Navigation */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 48px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: #666;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .nav-cta {
+      background: #111;
+      color: #fff !important;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    /* Hero */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 700px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f0f0f0;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      width: fit-content;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: #111;
+      letter-spacing: -2px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 32px;
+      font-weight: 400;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-primary {
+      background: #111;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      color: #333;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    /* Features */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+      padding-top: 40px;
+      border-top: 1px solid #eee;
+    }
+
+    .feature {
+      padding: 20px;
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 18px;
+    }
+
+    .feature h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #111;
+      letter-spacing: -0.3px;
+    }
+
+    .feature p {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
+    /* Testimonial */
+    .testimonial {
+      background: #fafafa;
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+
+    .testimonial-text {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.6;
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .testimonial-avatar {
+      width: 36px;
+      height: 36px;
+      background: #ddd;
+      border-radius: 50%;
+    }
+
+    .testimonial-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #111;
+    }
+
+    .testimonial-role {
+      font-size: 12px;
+      color: #888;
+      font-weight: 400;
+    }
+
+    /* Font specimen overlay */
+    .font-specimen {
+      position: absolute;
+      top: 48px;
+      right: 48px;
+      background: #111;
+      color: #fff;
+      padding: 16px 24px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .font-specimen-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .font-specimen-name {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .font-specimen-weights {
+      font-size: 9px;
+      color: #666;
+      margin-top: 6px;
+    }
+
+
+  </style>
+<style>
+    @keyframes impeccable-reveal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .impeccable-overlay:not(.impeccable-banner) {
+      pointer-events: none;
+      outline: 1px solid oklch(84% 0.19 80.46);
+      box-shadow: 0 0 0 3px oklch(84% 0.19 80.46 / 0.20), 0 0 12px oklch(84% 0.19 80.46 / 0.45);
+      border-radius: 4px;
+      transition: outline-color 0.15s ease, box-shadow 0.15s ease;
+      animation: impeccable-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-play-state: paused;
+      border-top-left-radius: 0;
+    }
+    .impeccable-overlay.impeccable-visible {
+      animation-play-state: running;
+    }
+    .impeccable-overlay.impeccable-hover {
+      outline-color: oklch(74% 0.18 80);
+      box-shadow: 0 0 0 3px oklch(74% 0.18 80 / 0.28), 0 0 16px oklch(74% 0.18 80 / 0.6);
+      z-index: 100001 !important;
+    }
+    .impeccable-overlay.impeccable-hover .impeccable-label {
+      background: oklch(74% 0.18 80);
+    }
+    .impeccable-overlay.impeccable-spotlight {
+      z-index: 100002 !important;
+    }
+    .impeccable-overlay.impeccable-spotlight-dimmed {
+      opacity: 0.15 !important;
+      animation: none !important;
+      filter: blur(3px);
+    }
+    .impeccable-spotlight-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      backdrop-filter: blur(3px) brightness(0.6);
+      -webkit-backdrop-filter: blur(3px) brightness(0.6);
+      pointer-events: none;
+      z-index: 99998;
+      opacity: 0;
+      outline: none !important;
+      animation: none !important;
+    }
+    .impeccable-spotlight-backdrop.impeccable-visible {
+      opacity: 1;
+    }
+    .impeccable-hidden .impeccable-overlay:not(.impeccable-banner) {
+      display: none !important;
+    }
+  </style></head>
+<body>
+  <div class="container">
+    <nav>
+      <div class="logo">genericstartup</div>
+      <div class="nav-links">
+        <a href="#">Product</a>
+        <a href="#">Features</a>
+        <a href="#">Pricing</a>
+        <a href="#" class="nav-cta">Sign Up</a>
+      </div>
+    </nav>
+
+    <div class="font-specimen">
+      <div class="font-specimen-label">Font Used</div>
+      <div class="font-specimen-name">Inter</div>
+      <div class="font-specimen-weights">400 · 500 · 600 · 700 · 800</div>
+    </div>
+
+    <div class="hero">
+      <span class="badge">Now Available</span>
+      <h1>The platform for modern teams</h1>
+      <p class="subtitle">Streamline your workflow with our all-in-one solution. Built for teams who want to move fast and ship faster.</p>
+      <div class="cta-group">
+        <button class="btn-primary">Get Started Free</button>
+        <button class="btn-secondary">Book a Demo</button>
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <h3>Lightning Fast</h3>
+        <p>Built for speed from the ground up. Everything loads instantly.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <h3>Secure by Default</h3>
+        <p>Enterprise-grade security with end-to-end encryption.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔗</div>
+        <h3>Integrations</h3>
+        <p>Connect with 100+ tools your team already uses.</p>
+      </div>
+    </div>
+
+    <div class="testimonial">
+      <p class="testimonial-text">"This product has completely transformed how our team works. We've seen a 40% increase in productivity."</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar"></div>
+        <div>
+          <div class="testimonial-name">Sarah Johnson</div>
+          <div class="testimonial-role">Head of Product, TechCorp</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+<script src="https://impeccable.style/js/detect-antipatterns-browser.js"></script>
+<!-- Cloudflare Pages Analytics --><script defer="" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;2375b0fdc85c43a68f4b0e89cc6ae43c&quot;}"></script><!-- Cloudflare Pages Analytics --><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;2e1b258764844c2fb270c26ac9417755&quot;,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+
+
+<div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 102px; left: 974.344px; width: 118.656px; height: 16px; animation-delay: 0ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">undersized functional text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 158px; left: 974.344px; width: 118.656px; height: 15px; animation-delay: 60ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 666.781px; left: 269px; width: 236px; height: 23px; animation-delay: 120ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">✦ icon tile stacked above heading</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 693.781px; left: 269px; width: 236px; height: 43px; animation-delay: 180ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 666.781px; left: 565px; width: 236px; height: 23px; animation-delay: 240ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">✦ icon tile stacked above heading</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 693.781px; left: 565px; width: 236px; height: 43px; animation-delay: 300ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 666.781px; left: 861px; width: 236px; height: 23px; animation-delay: 360ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">✦ icon tile stacked above heading</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 693.781px; left: 861px; width: 236px; height: 43px; animation-delay: 420ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 857.672px; left: 321px; width: 159.516px; height: 19px; animation-delay: 480ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 96px; left: 941.828px; width: 50.75px; height: 21px; animation-delay: 540ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">text occluded by an overlapping element</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 86px; left: 1020.58px; width: 96.4219px; height: 41px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">text occluded by an overlapping element</span></div></div><div class="impeccable-overlay impeccable-banner" style="position: fixed; top: 0px; left: 0px; right: 0px; z-index: 100000; background: oklch(0.978 0 0); color: oklch(0.13 0 0); border-bottom: 1px solid oklch(0.77 0.13 82); box-shadow: oklch(0.13 0 0 / 0.1) 0px 1px 0px, oklch(0 0 0 / 0.35) 0px 6px 18px; font-family: system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 12px; display: flex; align-items: center; pointer-events: auto; height: 36px; overflow: hidden; max-width: 100vw; transform: translateY(0px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);"><span style="flex-shrink: 0; width: 7px; height: 7px; margin: 0px 0px 0px 12px; border-radius: 50%; background: oklch(0.84 0.19 80.46); box-shadow: oklch(0.13 0 0 / 0.12) 0px 0px 0px 1px, oklch(0.84 0.19 80 / 0.6) 0px 0px 4px;"></span><div style="flex: 1 1 0%; min-width: 0px; overflow: auto hidden; display: flex; gap: 12px; align-items: center; padding: 0px 12px; scroll-snap-type: x mandatory; scrollbar-width: none;"><span style="display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; scroll-snap-align: start;"><span style="display: inline-flex; align-items: center; min-height: 16px; padding: 0px 6px; border-radius: 3px; background: oklch(0.92 0 0); color: oklch(0.46 0 0); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; line-height: 1; text-transform: uppercase;">skipped heading level</span><span style="color: oklch(0.13 0 0); font-family: system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 12px;">&lt;h1&gt; "The platform for modern teams" followed by &lt;h3&gt; "Lightning Fast" (missing h2)</span></span></div><div style="display: flex; align-items: center; gap: 2px; padding: 0px 8px; flex-shrink: 0;"><button title="Toggle overlay visibility" style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.46 0 0); font-size: 16px; cursor: pointer; padding: 0px 4px; opacity: 0.85; transition: opacity 0.15s;">◉</button><button title="Dismiss banner" style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.46 0 0); font-size: 18px; cursor: pointer; padding: 0px 4px;">×</button></div></div></body></html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout — Northstar</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #20242a; background: #fff; font: 16px/1.5 Arial, sans-serif; }
+    main { max-width: 1080px; margin: auto; padding: 40px 32px 120px; }
+    .hero { padding: 24px 0; }
+    h1 { font-size: 42px; background: linear-gradient(90deg, #fff 0%, #f8faff 100%); color: transparent; background-clip: text; }
+    .columns { display: grid; grid-template-columns: 1.2fr .8fr; gap: 32px; }
+    .card { border: 1px solid #d8dde3; border-left: 6px solid #7656d8; border-radius: 12px; padding: 24px; box-shadow: 0 12px 28px #0002; }
+    .panel { border: 1px solid #d8dde3; border-radius: 10px; padding: 16px; box-shadow: 0 8px 22px #0002; margin-top: 18px; }
+    .muted { color: #e3e3e3; }
+    .method { max-width: 190px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .cover { position: fixed; bottom: 0; left: 0; width: 100%; height: 92px; z-index: 5; padding: 18px; color: white; background: #8b1e1e; text-align: center; }
+    .pay { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 1; padding: 14px 32px; color: white; background: #1259b5; border: 0; border-radius: 8px; font: inherit; }
+    @media (max-width: 700px) { .columns { grid-template-columns: 1fr; } main { padding: 24px 18px 120px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <h1>Complete your Northstar order</h1>
+      <p>Review payment and delivery details before placing your order.</p>
+      <img src="assets/missing-checkout-illustration.png" alt="Order securely with Northstar">
+    </header>
+    <h3>Review the order details</h3>
+    <section class="columns" aria-label="Order details">
+      <article class="card">
+        <h2>Payment method</h2>
+        <p class="method">Visa ending in 4242 — cardholder name and billing details</p>
+        <p class="muted">Your billing address is required to complete payment.</p>
+        <div class="panel"><strong>Card security</strong><p>Protected payment details for your order.</p></div>
+      </article>
+      <article class="card">
+        <h2>Order total</h2>
+        <p>$248.00 including delivery</p>
+        <p class="muted">A receipt will be sent after checkout.</p>
+        <div class="panel"><strong>Delivery</strong><p>Arrives Thursday, 14 May.</p></div>
+      </article>
+    </section>
+    <h3>Final confirmation</h3>
+    <p>Confirm the total and payment method, then place your order.</p>
+    <div class="cover">Payment verification temporarily unavailable</div>
+    <button class="pay" type="button">Place order — $248.00</button>
+  </main>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Pattern: Purple Gradients Everywhere</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #1a0a2e 100%);
+      color: white;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      background: linear-gradient(145deg, #2a1a4a 0%, #1a0a2e 100%);
+      border-radius: 32px;
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Purple gradient orbs everywhere */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.6;
+    }
+    .orb-1 { width: 400px; height: 400px; background: linear-gradient(135deg, #8b5cf6, #a855f7); top: -100px; right: -100px; }
+    .orb-2 { width: 300px; height: 300px; background: linear-gradient(135deg, #7c3aed, #c084fc); bottom: -50px; left: -50px; }
+    .orb-3 { width: 200px; height: 200px; background: linear-gradient(135deg, #a855f7, #d946ef); top: 40%; left: 30%; }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navigation */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 60px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .nav-cta {
+      background: linear-gradient(135deg, #8b5cf6, #a855f7) !important;
+      color: white !important;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    /* Hero */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      padding: 0 60px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(168, 85, 247, 0.2));
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      margin: 0 auto 24px;
+      color: #c4b5fd;
+    }
+
+    .badge::before {
+      content: '✨';
+    }
+
+    h1 {
+      font-size: 64px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 50%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 20px;
+      color: rgba(255,255,255,0.6);
+      max-width: 500px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c026d3 100%);
+      color: white;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(168, 85, 247, 0.1));
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      color: #c4b5fd;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 4px;
+    }
+
+
+  </style>
+<style>
+    @keyframes impeccable-reveal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .impeccable-overlay:not(.impeccable-banner) {
+      pointer-events: none;
+      outline: 1px solid oklch(84% 0.19 80.46);
+      box-shadow: 0 0 0 3px oklch(84% 0.19 80.46 / 0.20), 0 0 12px oklch(84% 0.19 80.46 / 0.45);
+      border-radius: 4px;
+      transition: outline-color 0.15s ease, box-shadow 0.15s ease;
+      animation: impeccable-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-play-state: paused;
+      border-top-left-radius: 0;
+    }
+    .impeccable-overlay.impeccable-visible {
+      animation-play-state: running;
+    }
+    .impeccable-overlay.impeccable-hover {
+      outline-color: oklch(74% 0.18 80);
+      box-shadow: 0 0 0 3px oklch(74% 0.18 80 / 0.28), 0 0 16px oklch(74% 0.18 80 / 0.6);
+      z-index: 100001 !important;
+    }
+    .impeccable-overlay.impeccable-hover .impeccable-label {
+      background: oklch(74% 0.18 80);
+    }
+    .impeccable-overlay.impeccable-spotlight {
+      z-index: 100002 !important;
+    }
+    .impeccable-overlay.impeccable-spotlight-dimmed {
+      opacity: 0.15 !important;
+      animation: none !important;
+      filter: blur(3px);
+    }
+    .impeccable-spotlight-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      backdrop-filter: blur(3px) brightness(0.6);
+      -webkit-backdrop-filter: blur(3px) brightness(0.6);
+      pointer-events: none;
+      z-index: 99998;
+      opacity: 0;
+      outline: none !important;
+      animation: none !important;
+    }
+    .impeccable-spotlight-backdrop.impeccable-visible {
+      opacity: 1;
+    }
+    .impeccable-hidden .impeccable-overlay:not(.impeccable-banner) {
+      display: none !important;
+    }
+  </style></head>
+<body>
+  <div class="container">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="content">
+      <nav>
+        <div class="logo">Synthwave.ai</div>
+        <div class="nav-links">
+          <a href="#">Features</a>
+          <a href="#">Pricing</a>
+          <a href="#">About</a>
+          <a href="#" class="nav-cta">Get Started</a>
+        </div>
+      </nav>
+
+      <div class="hero">
+        <span class="badge">New: AI-Powered Everything</span>
+        <h1>Build the Future<br>With AI Magic</h1>
+        <p class="subtitle">Transform your workflow with our revolutionary AI platform. Purple gradients included.</p>
+        <div class="cta-group">
+          <button class="btn-primary">Start Free Trial</button>
+          <button class="btn-secondary">Watch Demo</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value">10K+</div>
+            <div class="stat-label">Active Users</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">99.9%</div>
+            <div class="stat-label">Uptime</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">50M+</div>
+            <div class="stat-label">API Calls</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+<script src="https://impeccable.style/js/detect-antipatterns-browser.js"></script>
+<!-- Cloudflare Pages Analytics --><script defer="" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;2375b0fdc85c43a68f4b0e89cc6ae43c&quot;}"></script><!-- Cloudflare Pages Analytics --><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;2e1b258764844c2fb270c26ac9417755&quot;,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+
+
+<div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 38px; left: 201px; width: 964px; height: 742.781px; animation-delay: 0ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">positioned child clipped by overflow container</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: -62px; left: 861px; width: 404px; height: 404px; animation-delay: 60ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">✦ ai color palette</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 526.781px; left: 151px; width: 304px; height: 304px; animation-delay: 120ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">✦ ai color palette</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 333.5px; left: 489px; width: 204px; height: 204px; animation-delay: 180ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">✦ ai color palette</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 90px; left: 249px; width: 166.875px; height: 33px; animation-delay: 240ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">✦ gradient text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 86px; left: 995.969px; width: 121.031px; height: 41px; animation-delay: 300ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 183px; left: 562.531px; width: 240.922px; height: 39px; animation-delay: 360ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">✦ ai color palette</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 242px; left: 309px; width: 748px; height: 144.781px; animation-delay: 420ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">✦ gradient text, ✦ ai color palette</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 510.781px; left: 503.812px; width: 180.047px; height: 56px; animation-delay: 480ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 510.781px; left: 695.859px; width: 166.312px; height: 56px; animation-delay: 540ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">✦ ai color palette</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 663.781px; left: 463.156px; width: 93.75px; height: 48px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">✦ gradient text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 663.781px; left: 612.906px; width: 123.562px; height: 48px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">✦ gradient text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 663.781px; left: 792.469px; width: 110.375px; height: 48px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">✦ gradient text</span></div></div><div class="impeccable-overlay impeccable-banner" style="position: fixed; top: 0px; left: 0px; right: 0px; z-index: 100000; background: oklch(0.978 0 0); color: oklch(0.13 0 0); border-bottom: 1px solid oklch(0.77 0.13 82); box-shadow: oklch(0.13 0 0 / 0.1) 0px 1px 0px, oklch(0 0 0 / 0.35) 0px 6px 18px; font-family: system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 12px; display: flex; align-items: center; pointer-events: auto; height: 36px; overflow: hidden; max-width: 100vw; transform: translateY(0px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);"><span style="flex-shrink: 0; width: 7px; height: 7px; margin: 0px 0px 0px 12px; border-radius: 50%; background: oklch(0.84 0.19 80.46); box-shadow: oklch(0.13 0 0 / 0.12) 0px 0px 0px 1px, oklch(0.84 0.19 80 / 0.6) 0px 0px 4px;"></span><div style="flex: 1 1 0%; min-width: 0px; overflow: auto hidden; display: flex; gap: 12px; align-items: center; padding: 0px 12px; scroll-snap-type: x mandatory; scrollbar-width: none;"><span style="display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; scroll-snap-align: start;"><span style="display: inline-flex; align-items: center; min-height: 16px; padding: 0px 6px; border-radius: 3px; background: oklch(0.84 0.19 80.46); color: oklch(0.14 0.018 95); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; line-height: 1; text-transform: uppercase;">ai color palette</span><span style="color: oklch(0.13 0 0); font-family: system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 12px;">Purple/violet accent colors detected</span></span><span style="display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; scroll-snap-align: start;"><span style="display: inline-flex; align-items: center; min-height: 16px; padding: 0px 6px; border-radius: 3px; background: oklch(0.84 0.19 80.46); color: oklch(0.14 0.018 95); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; line-height: 1; text-transform: uppercase;">gradient text</span><span style="color: oklch(0.13 0 0); font-family: system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 12px;">background-clip: text + gradient</span></span><span style="display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; scroll-snap-align: start;"><span style="display: inline-flex; align-items: center; min-height: 16px; padding: 0px 6px; border-radius: 3px; background: oklch(0.84 0.19 80.46); color: oklch(0.14 0.018 95); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; line-height: 1; text-transform: uppercase;">glowing shadow accents</span><span style="color: oklch(0.13 0 0); font-family: system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 12px;">Zero-offset box-shadow glow (#8b5cf6)</span></span></div><div style="display: flex; align-items: center; gap: 2px; padding: 0px 8px; flex-shrink: 0;"><button title="Toggle overlay visibility" style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.46 0 0); font-size: 16px; cursor: pointer; padding: 0px 4px; opacity: 0.85; transition: opacity 0.15s;">◉</button><button title="Dismiss banner" style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.46 0 0); font-size: 18px; cursor: pointer; padding: 0px 4px;">×</button></div></div></body></html>

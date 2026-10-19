@@ -1,0 +1,67 @@
+{
+  "title": "Pay button - micro animation options",
+  "target": "CheckoutButton.tsx",
+  "command": "micro",
+  "tier": "rare",
+  "options": [
+    {
+      "id": "A",
+      "name": "Label rolls into a check",
+      "concept": "The label slides up out of a clipped window while a check draws itself in, confirming on the button that was pressed.",
+      "feel": "Precise and satisfying",
+      "techniques": ["mask", "line drawing"],
+      "sync": "domino",
+      "interactive": false,
+      "timing": { "duration_ms": 360, "easing": "cubic-bezier(0.22, 1, 0.36, 1)" },
+      "properties": ["transform", "opacity", "stroke-dashoffset"],
+      "reduced_motion": "Crossfade the label to the check; no movement.",
+      "risk": "Needs a fixed button width so the swap causes no layout shift.",
+      "needs_html": false,
+      "sequences": [
+        { "label": "forward", "frames": [
+          { "t": 0,   "art": "┌──────────┐\n│ Pay now  │\n└──────────┘", "note": "rest" },
+          { "t": 120, "art": "┌──────────┐\n│ ▲▲▲▲▲▲▲▲ │\n└──────────┘", "note": "label exits upward" },
+          { "t": 240, "art": "┌──────────┐\n│    ·/    │\n└──────────┘", "note": "check starts drawing" },
+          { "t": 360, "art": "┌──────────┐\n│    ✓     │\n└──────────┘", "note": "check complete" }
+        ] },
+        { "label": "reverse", "frames": [
+          { "t": 0,   "art": "┌──────────┐\n│    ✓     │\n└──────────┘" },
+          { "t": 100, "art": "┌──────────┐\n│ ░░░░░░░░ │\n└──────────┘", "note": "crossfade" },
+          { "t": 180, "art": "┌──────────┐\n│ Pay now  │\n└──────────┘", "note": "rest" }
+        ] }
+      ],
+      "lanes": [
+        { "element": "Label", "start": 0, "end": 160, "technique": "slide out" },
+        { "element": "Check", "start": 120, "end": 360, "technique": "line drawing" }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "Sheen sweep on press",
+      "concept": "A soft band of light crosses the button as it is pressed, like light catching glass, while the button settles to 0.97.",
+      "feel": "Premium and tactile",
+      "techniques": ["reflection", "scale"],
+      "sync": "instant",
+      "interactive": true,
+      "timing": { "duration_ms": 520, "easing": "cubic-bezier(0.22, 1, 0.36, 1)" },
+      "properties": ["transform", "opacity"],
+      "reduced_motion": "No sheen; keep the press scale-down only.",
+      "risk": "Sheen is a gradient on its own layer; keep it small on low-end devices.",
+      "needs_html": true,
+      "html_reason": "Light and reflection cannot be shown honestly in ASCII.",
+      "sequences": [
+        { "label": "forward", "frames": [
+          { "t": 0,   "art": "┌──────────┐\n│ Pay now  │\n└──────────┘", "note": "rest" },
+          { "t": 140, "art": "┌──────────┐\n│ Pay ░now │\n└──────────┘", "note": "sheen enters left" },
+          { "t": 520, "art": "┌──────────┐\n│ Pay now  │\n└──────────┘", "note": "sheen exits right" }
+        ] }
+      ],
+      "lanes": [
+        { "element": "Press scale", "start": 0, "end": 140, "technique": "scale 0.97" },
+        { "element": "Sheen", "start": 0, "end": 520, "technique": "translate" }
+      ],
+      "demo_html": "<style>#stage{display:grid;place-items:center;min-height:220px;background:#f6f4f1}.btn{position:relative;overflow:hidden;padding:14px 28px;border:0;border-radius:12px;background:#1f1d1b;color:#fff;font:600 16px system-ui;cursor:pointer;transition:transform 140ms cubic-bezier(0.25,0.46,0.45,0.94)}.btn:active{transform:scale(.97)}.btn::after{content:'';position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%)}.btn.go::after{transition:transform 520ms cubic-bezier(0.22,1,0.36,1);transform:translateX(120%)}.btn:focus-visible{outline:2px solid #f59e0b;outline-offset:3px}@media (prefers-reduced-motion:reduce){.btn.go::after{transition:none;transform:none;opacity:0}}</style><div id='stage'><button class='btn' id='b'>Pay now</button></div><script>var b=document.getElementById('b');window.play=function(){b.classList.remove('go');void b.offsetWidth;b.classList.add('go')};b.addEventListener('pointerdown',window.play);b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')window.play()});</script>"
+    }
+  ],
+  "recommendation": { "option": "A", "reason": "Confirms in place within the rare-tier budget; B suits a premium brand if the sheen is kept subtle." }
+}

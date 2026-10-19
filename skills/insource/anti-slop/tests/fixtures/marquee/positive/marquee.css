@@ -1,0 +1,7 @@
+.ticker {
+  animation: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+  to { transform: translateX(-100%); }
+}

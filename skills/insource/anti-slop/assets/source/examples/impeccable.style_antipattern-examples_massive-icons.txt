@@ -1,0 +1,38 @@
+Why Choose Us
+
+Everything you need to build amazing products
+
+Lightning Fast
+
+Built for speed and performance from the ground up.
+
+Secure
+
+Enterprise-grade security for your peace of mind.
+
+Automated
+
+Automate repetitive tasks and save time.
+
+Scalable
+
+Grows with your business needs seamlessly.
+
+User Friendly
+
+Intuitive interface that anyone can use.
+
+Analytics
+
+Powerful insights to drive decisions.
+
+✦ ICON TILE STACKED ABOVE HEADING
+✦ ICON TILE STACKED ABOVE HEADING
+✦ ICON TILE STACKED ABOVE HEADING
+✦ ICON TILE STACKED ABOVE HEADING
+✦ ICON TILE STACKED ABOVE HEADING
+✦ ICON TILE STACKED ABOVE HEADING
+SKIPPED HEADING LEVEL
+<h1> "Why Choose Us" followed by <h3> "Lightning Fast" (missing h2)
+◉
+×

@@ -1,0 +1,696 @@
+{
+ "title": "Nightly backup job for the invoice database",
+ "date": "6 October 2026",
+ "context": [
+  {
+   "k": "h",
+   "t": "What you asked for"
+  },
+  "You asked for an automatic backup of the **invoice database** that runs every night without anyone starting it. The database holds your invoices, so losing it would mean losing billing records. This page asks four decisions that change how the job is built. Figures such as sizes and prices are illustrative in this sample.",
+  {
+   "k": "h",
+   "t": "The environment, exactly"
+  },
+  {
+   "k": "table",
+   "h": [
+    "Component",
+    "Detail",
+    "Why it matters here"
+   ],
+   "r": [
+    [
+     "Operating system",
+     "Ubuntu 24.04 LTS",
+     "It runs `systemd`, so systemd timers are available. On Windows Server the scheduler options would be different."
+    ],
+    [
+     "Database",
+     "PostgreSQL 16 on the **same machine** as the app",
+     "`pg_dump` is installed with it and connects through the local socket, so no network setup is needed to dump."
+    ],
+    [
+     "Size",
+     "About 18 GB",
+     "A compressed dump is smaller than the live data. The sample assumes about 4 GB per night."
+    ],
+    [
+     "Disk",
+     "One disk, 120 GB free",
+     "Anything stored only on this disk is lost if the disk fails."
+    ],
+    [
+     "Network",
+     "Outbound connections allowed",
+     "Uploading copies to another place is possible."
+    ],
+    [
+     "Existing backups",
+     "None",
+     "There is no current copy to protect while we build this."
+    ]
+   ]
+  },
+  {
+   "k": "h",
+   "t": "How a nightly backup works, step by step"
+  },
+  {
+   "k": "ascii",
+   "cap": "Every backup job has these six steps. Your decisions attach to specific steps.",
+   "t": [
+    "  1  Start     ◀── Decision 1: what triggers the job at night",
+    "  │",
+    "  2  Dump      pg_dump reads a consistent snapshot of the database.",
+    "  │            Writers are not blocked while it reads.",
+    "  3  Verify    The file must exist and must not be empty.",
+    "  │",
+    "  4  Copy      ◀── Decision 2: where the copies are stored",
+    "  │",
+    "  5  Prune     ◀── Decision 3: how long old copies are kept",
+    "  │",
+    "  6  Report    Success can be silent. A failure at ANY step must reach you."
+   ]
+  },
+  {
+   "k": "h",
+   "t": "Terms used on this page"
+  },
+  {
+   "k": "table",
+   "h": [
+    "Term",
+    "Meaning"
+   ],
+   "r": [
+    [
+     "Dump",
+     "A file that contains the whole database in a form that can rebuild it."
+    ],
+    [
+     "Snapshot",
+     "The database as it was at one instant. It stays consistent even while the app keeps writing."
+    ],
+    [
+     "Retention",
+     "How long a backup is kept before it is deleted."
+    ],
+    [
+     "Off-site",
+     "Stored in a different building or provider, so one incident cannot destroy both copies."
+    ]
+   ]
+  },
+  {
+   "k": "h",
+   "t": "Assumptions I am making"
+  },
+  {
+   "k": "list",
+   "i": [
+    "The dump format is **custom format** (`pg_dump -Fc`), which is compressed and restorable table by table. I did not ask because it is the safe default at this size.",
+    "The job runs as a dedicated `backup` user with read-only database access.",
+    "Restores will be tested by you at least once. A backup that was never restored is unproven."
+   ]
+  }
+ ],
+ "tldr": [
+  "Ubuntu 24.04 server, PostgreSQL 16, 18 GB, one disk, no backups.",
+  "A backup has six steps. You decide the trigger, the copy targets and how long copies live.",
+  "Some answers open follow-up questions. Option 1 of each question is my recommendation."
+ ],
+ "qs": [
+  {
+   "id": "sched",
+   "q": "What should start the backup each night?",
+   "type": "single",
+   "hi": true,
+   "about": "Step 1 of the job needs something that wakes the script at a fixed time. Ubuntu has two standard tools for that. They behave the same when the server is running at 02:00. They differ when the server is off or restarting at 02:00, and in how you see failures.",
+   "why": "If the trigger skips a night silently, you could run for days without a backup and not know it. Your answer decides whether a missed night is repaired automatically.",
+   "terms": [
+    [
+     "Persistent timer",
+     "A systemd setting (`Persistent=true`) that records the last run time on disk. At boot, if a scheduled time was missed, the job runs immediately."
+    ],
+    [
+     "Unit",
+     "systemd's name for anything it manages: a service, a timer, a mount. A timer unit starts a service unit."
+    ],
+    [
+     "Crontab",
+     "The file that lists cron's schedules. Each line has five time fields followed by a command."
+    ]
+   ],
+   "vis": {
+    "k": "table",
+    "cap": "Side-by-side behaviour.",
+    "h": [
+     "Behaviour",
+     "systemd timer",
+     "cron"
+    ],
+    "r": [
+     [
+      "Files to write",
+      "Two (`.service`, `.timer`)",
+      "One line"
+     ],
+     [
+      "Server off at 02:00",
+      "Runs at next boot",
+      "Night is skipped"
+     ],
+     [
+      "Where output goes",
+      "`journalctl -u backup.service`",
+      "Email to the crontab owner, or lost"
+     ],
+     [
+      "Failure visibility",
+      "Unit shows `failed`; can trigger another unit with `OnFailure=`",
+      "Only through email"
+     ],
+     [
+      "See next run",
+      "`systemctl list-timers`",
+      "No built-in command"
+     ]
+    ]
+   },
+   "opts": [
+    {
+     "t": "systemd timer",
+     "d": "systemd is the service manager already running on Ubuntu 24.04. A timer is a small unit that starts a matching service unit on a schedule. You write `backup.service`, which says what to run, and `backup.timer`, which says when. The timer starts the service, the service runs your script, and the service ends when the script ends.",
+     "pros": [
+      "A missed night runs at next boot with `Persistent=true`",
+      "Output and exit codes are stored in `journalctl` automatically",
+      "A failed run is visible with `systemctl status`",
+      "`OnFailure=` can start an alert unit"
+     ],
+     "cons": [
+      "Two files to maintain",
+      "Slightly more to learn than one line of cron",
+      "Time syntax (`OnCalendar`) differs from cron's"
+     ],
+     "vis": [
+      {
+       "k": "ascii",
+       "cap": "What happens when the server is off during the scheduled time.",
+       "t": [
+        "night 1         night 2 (server off)           boot",
+        "02:00 ✔ ran     02:00 ✘ missed ╌╌╌╌╌╌╌╌╌╌╌╌▶  ↻ runs now"
+       ]
+      },
+      {
+       "k": "code",
+       "l": "ini",
+       "f": "the two files",
+       "t": [
+        "# /etc/systemd/system/backup.service",
+        "[Unit]",
+        "Description=Nightly invoice database backup",
+        "[Service]",
+        "Type=oneshot",
+        "ExecStart=/usr/local/bin/backup.sh",
+        "",
+        "# /etc/systemd/system/backup.timer",
+        "[Timer]",
+        "OnCalendar=*-*-* 02:00:00",
+        "Persistent=true",
+        "[Install]",
+        "WantedBy=timers.target"
+       ]
+      },
+      {
+       "k": "steps",
+       "i": [
+        [
+         "Write the script",
+         "Create `/usr/local/bin/backup.sh` and run `chmod +x` on it. It must exit with a non-zero code on any failure, because systemd uses the exit code to mark the run as failed."
+        ],
+        [
+         "Create both unit files",
+         "Save them in `/etc/systemd/system/` with the contents above."
+        ],
+        [
+         "Reload systemd",
+         "Run `systemctl daemon-reload` so systemd reads the new files."
+        ],
+        [
+         "Enable the timer",
+         "Run `systemctl enable --now backup.timer`. `enable` starts it at every boot. `--now` starts it immediately."
+        ],
+        [
+         "Check the schedule",
+         "`systemctl list-timers backup.timer` shows the next run time."
+        ],
+        [
+         "Test once",
+         "Run `systemctl start backup.service`, then `journalctl -u backup.service` to read the output and confirm the dump file exists."
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "t": "cron",
+     "d": "cron is the classic scheduler. You add one line to a crontab. The line has five time fields (minute, hour, day of month, month, day of week) and then the command. cron starts the command when the clock matches. It keeps no record of runs it did not make.",
+     "pros": [
+      "One line to write",
+      "Almost every administrator already knows it",
+      "Works the same on most Linux and Unix systems"
+     ],
+     "cons": [
+      "A night missed because the server was off is **lost**",
+      "Errors reach you only through email, which needs a working mail setup",
+      "No built-in way to list the next run"
+     ],
+     "vis": [
+      {
+       "k": "ascii",
+       "cap": "The same missed night with cron.",
+       "t": [
+        "night 1         night 2 (server off)           boot",
+        "02:00 ✔ ran     02:00 ✘ missed ╌╌╌╌╌╌╌╌╌╌╌╌▶  ∅ never runs"
+       ]
+      },
+      {
+       "k": "code",
+       "l": "sh",
+       "f": "crontab",
+       "t": [
+        "# edit with: crontab -e   (as the backup user)",
+        "MAILTO=you@example.com",
+        "# minute hour day month weekday  command",
+        "0 2 * * * /usr/local/bin/backup.sh"
+       ]
+      },
+      {
+       "k": "steps",
+       "i": [
+        [
+         "Write the script",
+         "Create `/usr/local/bin/backup.sh` and make it executable. cron mails any output the script prints, so print only what you want to read."
+        ],
+        [
+         "Pick the user",
+         "Run the job as the dedicated `backup` user so it never needs root."
+        ],
+        [
+         "Open the crontab",
+         "Run `crontab -e` as that user."
+        ],
+        [
+         "Add the line",
+         "`0 2 * * *` means minute 0, hour 2, every day, every month, every weekday: 02:00 daily."
+        ],
+        [
+         "Set `MAILTO`",
+         "This is the address that receives output. Without a working mail setup the message is dropped."
+        ],
+        [
+         "Test",
+         "Temporarily set the line to run in two minutes, confirm the dump appears, then restore `0 2 * * *`."
+        ]
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mailer",
+   "when": {
+    "q": "sched",
+    "is": [
+     1
+    ]
+   },
+   "q": "Does this server have a working mail relay?",
+   "type": "single",
+   "about": "cron reports a job's output and errors by sending an email to the crontab owner. That only works if the server has a mail program that can deliver the message to a real address.",
+   "why": "You chose cron, so email is your only built-in failure signal. If mail does not work, a failing backup produces no alert at all.",
+   "terms": [
+    [
+     "Mail relay (MTA)",
+     "A program such as Postfix that accepts mail from the server and forwards it to the destination."
+    ]
+   ],
+   "vis": [
+    {
+     "k": "code",
+     "l": "sh",
+     "f": "how to check",
+     "t": [
+      "# Is a mail program installed?",
+      "command -v sendmail",
+      "# Is a mail server running?",
+      "systemctl status postfix",
+      "# Send a test message (needs the mailutils package)",
+      "echo \"test\" | mail -s \"backup test\" you@example.com"
+     ]
+    },
+    "If the test message arrives in your inbox, choose **Yes**. If a command is missing, an error appears, or nothing arrives, choose **No**."
+   ],
+   "opts": [
+    {
+     "t": "Yes, mail works",
+     "d": "cron's failure email will reach you. I will set `MAILTO` in the crontab and add no other alert.",
+     "pros": [
+      "No extra setup",
+      "Uses cron's built-in behaviour"
+     ],
+     "cons": [
+      "Relies on mail staying healthy",
+      "A silent mail failure hides every backup failure"
+     ]
+    },
+    {
+     "t": "No, or I am not sure",
+     "d": "I will add a second reporting path that does not depend on mail, and I will ask which one in the next question.",
+     "pros": [
+      "Failures reach you another way",
+      "Does not depend on the mail server"
+     ],
+     "cons": [
+      "One more piece to set up and test"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "target",
+   "q": "Where should the copies be stored?",
+   "type": "multi",
+   "about": "Step 4 copies the finished dump somewhere. The place decides which failures a backup survives. You can choose more than one target, and most setups should.",
+   "why": "Your server has a single disk. A copy that lives only on that disk protects you from a mistaken delete but not from the disk breaking.",
+   "vis": [
+    {
+     "k": "list",
+     "cap": "What each kind of failure requires.",
+     "i": [
+      "A **mistaken delete** needs any copy that still exists.",
+      "A **disk failure** needs a copy that is not on this disk.",
+      "A **lost site** (fire, theft, provider outage) needs an off-site copy."
+     ]
+    },
+    {
+     "k": "table",
+     "cap": "Prices are placeholders for this sample.",
+     "h": [
+      "Target",
+      "Survives disk loss",
+      "Survives site loss",
+      "Restore speed",
+      "Cost"
+     ],
+     "r": [
+      [
+       "Local folder",
+       "No",
+       "No",
+       "Fastest",
+       "None"
+      ],
+      [
+       "Object storage",
+       "Yes",
+       "Yes",
+       "Medium (download first)",
+       "Per GB, plus a possible egress fee"
+      ]
+     ]
+    }
+   ],
+   "opts": [
+    {
+     "t": "Object storage bucket",
+     "d": "A bucket is a remote storage space reached over HTTPS. Each night the script uploads that night's dump file into it. The provider keeps the data on its own hardware, away from your server.",
+     "pros": [
+      "Survives disk and site loss",
+      "Priced per GB, so cost follows size",
+      "Supports retention rules that delete old files for you"
+     ],
+     "cons": [
+      "Downloading can carry an **egress fee**",
+      "Needs an account and access keys that must be kept secret",
+      "A restore needs the download to finish first"
+     ],
+     "vis": {
+      "k": "steps",
+      "i": [
+       [
+        "Create the bucket",
+        "Choose a region far from your server's site if possible."
+       ],
+       [
+        "Create a key that can only upload",
+        "Give it write permission to this bucket only, not delete or list. A stolen key then cannot erase your history."
+       ],
+       [
+        "Install an upload tool",
+        "`rclone` or the provider's CLI."
+       ],
+       [
+        "Add the upload to the script",
+        "One command at step 4 of the job, after the verify step."
+       ],
+       [
+        "Test a restore",
+        "Download a file back and run `pg_restore --list` on it."
+       ]
+      ]
+     }
+    },
+    {
+     "t": "Local folder `/var/backups/pg`",
+     "d": "The script keeps the dump on the server's own disk in a folder only the `backup` user can read. Restores are the fastest because no download is needed.",
+     "pros": [
+      "Fastest restore",
+      "No cost",
+      "Nothing to configure or secure"
+     ],
+     "cons": [
+      "Lost together with the disk",
+      "Does not protect against site loss",
+      "Alone, it is **not** a real backup"
+     ]
+    },
+    {
+     "t": "Lock uploads for 30 days",
+     "when": {
+      "q": "target",
+      "is": [
+       0
+      ]
+     },
+     "d": "The bucket refuses to change or delete an uploaded file for 30 days. This feature is called object lock. In **compliance mode** no one can shorten the lock, including the account owner. In **governance mode** an account with special permission can bypass it.",
+     "pros": [
+      "Protects against deletion by a bug, a mistake or an attacker using your keys",
+      "Gives a guaranteed 30-day recovery window"
+     ],
+     "cons": [
+      "You cannot free the space early",
+      "Storage costs rise because deleted files linger",
+      "Support differs between providers, so check yours"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tool",
+   "when": {
+    "q": "target",
+    "is": [
+     0
+    ]
+   },
+   "q": "Which tool should upload to the bucket?",
+   "type": "single",
+   "about": "Step 4 of the job needs a program that sends each dump file to the bucket. Two common choices exist. They do not have pros and cons in isolation. What matters is what you gain and what you give up by choosing one **instead of the other**, so each option lists its trade-off against the alternative.",
+   "why": "The tool is called from your script every night, so changing it later means editing the script and re-testing the upload and the restore.",
+   "terms": [
+    [
+     "Checksum",
+     "A short fingerprint of a file. If the fingerprint of the uploaded copy matches the original, the file arrived intact."
+    ],
+    [
+     "Backend",
+     "The kind of storage rclone talks to, such as one provider's bucket."
+    ]
+   ],
+   "opts": [
+    {
+     "t": "rclone",
+     "d": "A third-party command-line program that talks to many storage providers with one set of commands. You describe each provider once in a config file, called a remote, and then every command refers to that remote by name.",
+     "facets": [
+      {
+       "h": "Advantages over the provider CLI",
+       "tone": "good",
+       "i": [
+        "The same commands work for dozens of providers, so switching provider changes only the config",
+        "`--checksum` compares fingerprints after upload",
+        "`rclone copy` skips files that are already present, so a retry after a failure does not re-upload everything"
+       ]
+      },
+      {
+       "h": "Disadvantages versus the provider CLI",
+       "tone": "bad",
+       "i": [
+        "You install it and keep it updated yourself",
+        "A feature that is new on one provider may not be supported yet",
+        "One more program in the chain that can fail"
+       ]
+      },
+      {
+       "h": "Choose it when",
+       "tone": "info",
+       "i": [
+        "You might change provider later",
+        "You also want to copy to a second provider"
+       ]
+      }
+     ],
+     "vis": {
+      "k": "code",
+      "l": "sh",
+      "f": "upload step",
+      "t": [
+       "rclone copy /var/backups/pg/latest.dump remote:invoices --checksum"
+      ]
+     }
+    },
+    {
+     "t": "The provider's own CLI",
+     "d": "The official command-line tool of the storage provider, for example `aws s3` for Amazon S3. It is written and maintained by the same company that runs the storage, so it exposes every setting the provider supports.",
+     "facets": [
+      {
+       "h": "Advantages over rclone",
+       "tone": "good",
+       "i": [
+        "Supports every provider feature first, including object lock settings",
+        "Maintained by the provider, with its own security fixes",
+        "No third-party program to trust"
+       ]
+      },
+      {
+       "h": "Disadvantages versus rclone",
+       "tone": "bad",
+       "i": [
+        "Works with that provider family only",
+        "Moving provider means rewriting every command",
+        "Cannot copy to two different providers with one syntax"
+       ]
+      },
+      {
+       "h": "Choose it when",
+       "tone": "info",
+       "i": [
+        "You are certain of the provider",
+        "You need a provider-only feature such as the 30-day lock"
+       ]
+      }
+     ],
+     "vis": {
+      "k": "code",
+      "l": "sh",
+      "f": "upload step",
+      "t": [
+       "aws s3 cp /var/backups/pg/latest.dump s3://invoices-backup/ --only-show-errors"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "keep",
+   "q": "How long should old backups be kept?",
+   "type": "single",
+   "about": "Step 5 deletes backups older than a limit. Each night adds about 4 GB compressed in this sample, so a limit is needed or the target fills up. A longer limit lets you go back further in time but costs more space.",
+   "why": "The limit is the oldest state of the data you can return to. A bug that corrupts invoices slowly is only fixable if a copy from before it started still exists.",
+   "terms": [
+    [
+     "Daily, weekly, monthly",
+     "Rotation scheme. Keep every night for a short period, then only one per week, then only one per month, so old history stays cheap."
+    ]
+   ],
+   "vis": [
+    {
+     "k": "chart",
+     "title": "Storage needed (GB). Free disk: 120.",
+     "max": 120,
+     "b": [
+      [
+       "14 daily",
+       56
+      ],
+      [
+       "14+8+6",
+       112
+      ]
+     ]
+    },
+    {
+     "k": "table",
+     "cap": "The arithmetic behind the chart, at 4 GB per dump.",
+     "h": [
+      "Policy",
+      "Copies kept",
+      "Space",
+      "Oldest state reachable"
+     ],
+     "r": [
+      [
+       "14 daily",
+       "14",
+       "14 × 4 = 56 GB",
+       "14 days back"
+      ],
+      [
+       "14 daily + 8 weekly + 6 monthly",
+       "28",
+       "28 × 4 = 112 GB",
+       "About 6 months back"
+      ]
+     ]
+    },
+    {
+     "k": "code",
+     "l": "sh",
+     "f": "prune step (14 daily)",
+     "t": [
+      "# delete dumps older than 14 days",
+      "find /var/backups/pg -name \"*.dump\" -mtime +14 -delete"
+     ]
+    }
+   ],
+   "opts": [
+    {
+     "t": "14 daily, 8 weekly, 6 monthly",
+     "d": "The newest 14 nights are all kept. Beyond that, one copy per week is kept for 8 weeks, and beyond that one copy per month for 6 months. Recent history is dense and old history is sparse.",
+     "pros": [
+      "Can go back about 6 months",
+      "Recent days stay available night by night"
+     ],
+     "cons": [
+      "About **112 GB**, nearly all the free disk if stored locally",
+      "Needs a rotation script, which is more to write and test"
+     ]
+    },
+    {
+     "t": "14 daily only",
+     "d": "The newest 14 nights are kept and everything older is deleted by the single `find` command shown above.",
+     "pros": [
+      "Simplest to write and check",
+      "About 56 GB, which fits locally"
+     ],
+     "cons": [
+      "A problem first noticed after **15 days** cannot be undone",
+      "No long-term history"
+     ]
+    }
+   ]
+  }
+ ],
+ "mode": "verbose"
+}

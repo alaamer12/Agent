@@ -1,0 +1,258 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Pattern: Redundant UX Writing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: #f0f4f8;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    /* Page Header */
+    .page-header {
+      text-align: center;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    /* Section with DUPLICATE heading */
+    .section {
+      background: #f9fafb;
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .section-header {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .section-header h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+
+    .section-header p {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    .form-sublabel {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .form-hint {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    /* Button section */
+    .button-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+
+    .btn-helper {
+      font-size: 12px;
+      color: #6b7280;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* Form row */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+
+  </style>
+<style>
+    @keyframes impeccable-reveal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .impeccable-overlay:not(.impeccable-banner) {
+      pointer-events: none;
+      outline: 1px solid oklch(84% 0.19 80.46);
+      box-shadow: 0 0 0 3px oklch(84% 0.19 80.46 / 0.20), 0 0 12px oklch(84% 0.19 80.46 / 0.45);
+      border-radius: 4px;
+      transition: outline-color 0.15s ease, box-shadow 0.15s ease;
+      animation: impeccable-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-play-state: paused;
+      border-top-left-radius: 0;
+    }
+    .impeccable-overlay.impeccable-visible {
+      animation-play-state: running;
+    }
+    .impeccable-overlay.impeccable-hover {
+      outline-color: oklch(74% 0.18 80);
+      box-shadow: 0 0 0 3px oklch(74% 0.18 80 / 0.28), 0 0 16px oklch(74% 0.18 80 / 0.6);
+      z-index: 100001 !important;
+    }
+    .impeccable-overlay.impeccable-hover .impeccable-label {
+      background: oklch(74% 0.18 80);
+    }
+    .impeccable-overlay.impeccable-spotlight {
+      z-index: 100002 !important;
+    }
+    .impeccable-overlay.impeccable-spotlight-dimmed {
+      opacity: 0.15 !important;
+      animation: none !important;
+      filter: blur(3px);
+    }
+    .impeccable-spotlight-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      backdrop-filter: blur(3px) brightness(0.6);
+      -webkit-backdrop-filter: blur(3px) brightness(0.6);
+      pointer-events: none;
+      z-index: 99998;
+      opacity: 0;
+      outline: none !important;
+      animation: none !important;
+    }
+    .impeccable-spotlight-backdrop.impeccable-visible {
+      opacity: 1;
+    }
+    .impeccable-hidden .impeccable-overlay:not(.impeccable-banner) {
+      display: none !important;
+    }
+  </style></head>
+<body>
+  <div class="container">
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <h1>Create Your Account</h1>
+      <p>Sign up to get started with our platform</p>
+    </div>
+
+    <!-- SECTION WITH DUPLICATE HEADING -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Create Your Account</h2>
+        <p>Fill out the form below to create your new account</p>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <span class="form-sublabel">Enter your first name</span>
+          <input type="text" class="form-input" placeholder="Enter first name">
+          <span class="form-hint">Your first name as it appears on documents</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <span class="form-sublabel">Enter your last name</span>
+          <input type="text" class="form-input" placeholder="Enter last name">
+          <span class="form-hint">Your last name as it appears on documents</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <span class="form-sublabel">Provide a valid email address</span>
+        <input type="email" class="form-input" placeholder="example@email.com">
+        <span class="form-hint">Your email will be used to send you important notifications via email</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Create Password</label>
+        <span class="form-sublabel">Choose a secure password</span>
+        <input type="password" class="form-input" placeholder="Enter password">
+        <span class="form-hint">Password must be at least 8 characters for security</span>
+      </div>
+
+      <div class="button-section">
+        <button class="btn-submit">Create Account</button>
+        <p class="btn-helper">Click the button above to create your account and complete registration</p>
+      </div>
+    </div>
+
+  </div>
+<script src="https://impeccable.style/js/detect-antipatterns-browser.js"></script>
+<!-- Cloudflare Pages Analytics --><script defer="" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;2375b0fdc85c43a68f4b0e89cc6ae43c&quot;}"></script><!-- Cloudflare Pages Analytics --><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;2e1b258764844c2fb270c26ac9417755&quot;,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+
+
+<div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 405px; left: 277px; width: 230.125px; height: 18px; animation-delay: 0ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">tiny body text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 405px; left: 689px; width: 228.094px; height: 18px; animation-delay: 60ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">tiny body text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 534.391px; left: 277px; width: 355.938px; height: 18px; animation-delay: 120ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">tiny body text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 663.781px; left: 277px; width: 271.531px; height: 18px; animation-delay: 180ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">tiny body text</span></div></div></body></html>

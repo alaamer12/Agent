@@ -1,0 +1,1429 @@
+{
+ "_comment": "Technology fingerprints. Add or override entries with `design --signatures FILE` (same format). Pools: meta_generator, meta_name, header ('name: value'), cookie_name, script_src, stylesheet_href, any_url, comment, attr_name, attr_prefix, class_name, class_prefix, tag, inline_script, json_script_id, script_type, global, css_banner, css_text, root_marker, input_name, package. weight: strong = unambiguous, medium = suggestive, weak = common word. Confidence: high = any strong; medium = 2+ medium (or medium+weak); low = otherwise. This list is a starter set, NOT a closed world: unknown technology still surfaces as raw evidence in the report.",
+ "cdn_patterns": [
+  {
+   "name": "jsDelivr (npm)",
+   "re": "cdn\\.jsdelivr\\.net/npm/(?P<pkg>(?:@[\\w.-]+/)?[\\w.-]+)(?:@(?P<ver>[\\w.-]+))?"
+  },
+  {
+   "name": "jsDelivr (GitHub)",
+   "re": "cdn\\.jsdelivr\\.net/gh/(?P<pkg>[\\w.-]+/[\\w.-]+)(?:@(?P<ver>[\\w.-]+))?"
+  },
+  {
+   "name": "unpkg",
+   "re": "unpkg\\.com/(?P<pkg>(?:@[\\w.-]+/)?[\\w.-]+)(?:@(?P<ver>[\\w.-]+))?"
+  },
+  {
+   "name": "cdnjs",
+   "re": "cdnjs\\.cloudflare\\.com/ajax/libs/(?P<pkg>[\\w.-]+)/(?P<ver>[\\w.-]+)/"
+  },
+  {
+   "name": "Google Hosted Libraries",
+   "re": "ajax\\.googleapis\\.com/ajax/libs/(?P<pkg>[\\w.-]+)/(?P<ver>[\\w.-]+)/"
+  },
+  {
+   "name": "ESM CDN",
+   "re": "(?:esm\\.sh|cdn\\.skypack\\.dev|ga\\.jspm\\.io)/(?:npm:)?(?P<pkg>(?:@[\\w.-]+/)?[\\w.-]+)(?:@(?P<ver>[\\w.-]+))?"
+  },
+  {
+   "name": "node_modules path",
+   "re": "/node_modules/(?P<pkg>(?:@[\\w.-]+/)?[\\w.-]+)/"
+  },
+  {
+   "name": "versioned filename",
+   "re": "/(?P<pkg>[A-Za-z][\\w.]*?)[-.@](?P<ver>\\d+\\.\\d+(?:\\.\\d+)?(?:-[\\w.]+)?)(?:\\.min)?\\.(?:js|mjs|css)(?:\\?|$)"
+  }
+ ],
+ "signatures": [
+  {
+   "name": "Astro",
+   "category": "meta-framework",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^astro",
+     "weight": "strong"
+    },
+    {
+     "in": "attr_prefix",
+     "re": "^data-astro",
+     "weight": "strong"
+    },
+    {
+     "in": "tag",
+     "re": "^astro-(island|slot)$",
+     "weight": "strong"
+    },
+    {
+     "in": "any_url",
+     "re": "/_astro/",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Hugo",
+   "category": "static-site generator",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^hugo",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Jekyll",
+   "category": "static-site generator",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^jekyll",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Hexo",
+   "category": "static-site generator",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^hexo",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Eleventy",
+   "category": "static-site generator",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^eleventy",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Gatsby",
+   "category": "meta-framework",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^gatsby",
+     "weight": "strong"
+    },
+    {
+     "in": "root_marker",
+     "re": "^___gatsby$",
+     "weight": "medium"
+    },
+    {
+     "in": "any_url",
+     "re": "/page-data/",
+     "weight": "weak"
+    }
+   ]
+  },
+  {
+   "name": "Docusaurus",
+   "category": "docs generator",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^docusaurus",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "VitePress",
+   "category": "docs generator",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^vitepress",
+     "weight": "strong"
+    },
+    {
+     "in": "class_name",
+     "re": "^VP(Doc|Nav|Sidebar|Content)",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "MkDocs",
+   "category": "docs generator",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^mkdocs",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Docsify",
+   "category": "docs generator",
+   "signals": [
+    {
+     "in": "global",
+     "re": "^\\$docsify$",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Next.js",
+   "category": "meta-framework",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-powered-by:\\s*next\\.js",
+     "weight": "strong"
+    },
+    {
+     "in": "json_script_id",
+     "re": "^__NEXT_DATA__$",
+     "weight": "strong"
+    },
+    {
+     "in": "global",
+     "re": "^__next_f$|^__NEXT_DATA__$",
+     "weight": "strong"
+    },
+    {
+     "in": "any_url",
+     "re": "/_next/static/",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Nuxt",
+   "category": "meta-framework",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-powered-by:\\s*nuxt",
+     "weight": "strong"
+    },
+    {
+     "in": "global",
+     "re": "^__NUXT__$|^__NUXT_DATA__$",
+     "weight": "strong"
+    },
+    {
+     "in": "json_script_id",
+     "re": "^__NUXT_DATA__$",
+     "weight": "strong"
+    },
+    {
+     "in": "any_url",
+     "re": "/_nuxt/",
+     "weight": "strong"
+    },
+    {
+     "in": "root_marker",
+     "re": "^__nuxt$",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "SvelteKit",
+   "category": "meta-framework",
+   "signals": [
+    {
+     "in": "attr_prefix",
+     "re": "^data-sveltekit",
+     "weight": "strong"
+    },
+    {
+     "in": "any_url",
+     "re": "/_app/immutable/",
+     "weight": "strong"
+    },
+    {
+     "in": "global",
+     "re": "^__sveltekit",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Svelte",
+   "category": "ui framework",
+   "signals": [
+    {
+     "in": "class_prefix",
+     "re": "^svelte$",
+     "weight": "medium"
+    },
+    {
+     "in": "package",
+     "re": "^svelte$",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Remix / React Router",
+   "category": "meta-framework",
+   "signals": [
+    {
+     "in": "global",
+     "re": "^__remixContext$|^__reactRouterContext$",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Qwik",
+   "category": "meta-framework",
+   "signals": [
+    {
+     "in": "script_type",
+     "re": "^qwik/json$",
+     "weight": "strong"
+    },
+    {
+     "in": "attr_prefix",
+     "re": "^q:",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Fresh (Deno)",
+   "category": "meta-framework",
+   "signals": [
+    {
+     "in": "any_url",
+     "re": "/_frsh/",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Angular",
+   "category": "ui framework",
+   "signals": [
+    {
+     "in": "attr_name",
+     "re": "^ng-version$",
+     "weight": "strong"
+    },
+    {
+     "in": "attr_prefix",
+     "re": "^_ng(content|host)",
+     "weight": "strong"
+    },
+    {
+     "in": "attr_prefix",
+     "re": "^ng-",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "React",
+   "category": "ui framework",
+   "signals": [
+    {
+     "in": "attr_name",
+     "re": "^data-reactroot$",
+     "weight": "strong"
+    },
+    {
+     "in": "package",
+     "re": "^react(-dom)?$",
+     "weight": "strong"
+    },
+    {
+     "in": "global",
+     "re": "^__REACT_DEVTOOLS_GLOBAL_HOOK__$|^_reactRootContainer$",
+     "weight": "medium"
+    },
+    {
+     "in": "comment",
+     "re": "^\\$[?!]?$|^/\\$$",
+     "weight": "medium"
+    },
+    {
+     "in": "script_src",
+     "re": "react(-dom)?([.-](production|development))*(\\.min)?\\.js",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Preact",
+   "category": "ui framework",
+   "signals": [
+    {
+     "in": "package",
+     "re": "^preact$",
+     "weight": "strong"
+    },
+    {
+     "in": "script_src",
+     "re": "preact",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Vue",
+   "category": "ui framework",
+   "signals": [
+    {
+     "in": "attr_name",
+     "re": "^data-v-[0-9a-f]{8}$",
+     "weight": "strong"
+    },
+    {
+     "in": "attr_name",
+     "re": "^data-server-rendered$",
+     "weight": "strong"
+    },
+    {
+     "in": "package",
+     "re": "^vue$",
+     "weight": "strong"
+    },
+    {
+     "in": "global",
+     "re": "^__VUE__$|^__vue_app__$",
+     "weight": "medium"
+    },
+    {
+     "in": "attr_name",
+     "re": "^v-cloak$",
+     "weight": "medium"
+    },
+    {
+     "in": "script_src",
+     "re": "(^|/)vue([.-]\\w+)*\\.js",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Solid",
+   "category": "ui framework",
+   "signals": [
+    {
+     "in": "attr_name",
+     "re": "^data-hk$",
+     "weight": "strong"
+    },
+    {
+     "in": "package",
+     "re": "^solid-js$",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Lit",
+   "category": "ui library",
+   "signals": [
+    {
+     "in": "comment",
+     "re": "^\\?lit\\$",
+     "weight": "strong"
+    },
+    {
+     "in": "package",
+     "re": "^lit(-html|-element)?$",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Alpine.js",
+   "category": "ui library",
+   "signals": [
+    {
+     "in": "attr_name",
+     "re": "^x-(data|init|show|bind|model|for|if|ref|cloak)",
+     "weight": "strong"
+    },
+    {
+     "in": "package",
+     "re": "^alpinejs$",
+     "weight": "strong"
+    },
+    {
+     "in": "script_src",
+     "re": "alpine",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "htmx",
+   "category": "ui library",
+   "signals": [
+    {
+     "in": "attr_name",
+     "re": "^hx-(get|post|put|delete|patch|trigger|target|swap|boost)$",
+     "weight": "strong"
+    },
+    {
+     "in": "package",
+     "re": "^htmx",
+     "weight": "strong"
+    },
+    {
+     "in": "script_src",
+     "re": "htmx",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Stimulus",
+   "category": "ui library",
+   "signals": [
+    {
+     "in": "package",
+     "re": "^@hotwired/stimulus$",
+     "weight": "strong"
+    },
+    {
+     "in": "attr_name",
+     "re": "^data-controller$",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Turbo (Hotwire)",
+   "category": "ui library",
+   "signals": [
+    {
+     "in": "tag",
+     "re": "^turbo-(frame|stream)$",
+     "weight": "strong"
+    },
+    {
+     "in": "attr_prefix",
+     "re": "^data-turbo",
+     "weight": "strong"
+    },
+    {
+     "in": "package",
+     "re": "^@hotwired/turbo",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Livewire",
+   "category": "ui framework",
+   "signals": [
+    {
+     "in": "attr_prefix",
+     "re": "^wire:",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Knockout",
+   "category": "ui library",
+   "signals": [
+    {
+     "in": "attr_name",
+     "re": "^data-bind$",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Ember",
+   "category": "ui framework",
+   "signals": [
+    {
+     "in": "root_marker",
+     "re": "ember-application",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "jQuery",
+   "category": "library",
+   "signals": [
+    {
+     "in": "package",
+     "re": "^jquery$",
+     "weight": "strong"
+    },
+    {
+     "in": "script_src",
+     "re": "jquery([.-]\\d[\\w.]*)?(\\.min)?\\.js",
+     "weight": "medium"
+    },
+    {
+     "in": "inline_script",
+     "re": "\\bjQuery\\(|\\$\\(document\\)\\.ready",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "WordPress",
+   "category": "cms",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^wordpress",
+     "weight": "strong"
+    },
+    {
+     "in": "any_url",
+     "re": "/wp-(content|includes|json)/",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Drupal",
+   "category": "cms",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^drupal",
+     "weight": "strong"
+    },
+    {
+     "in": "header",
+     "re": "^x-generator:\\s*drupal",
+     "weight": "strong"
+    },
+    {
+     "in": "global",
+     "re": "^drupalSettings$",
+     "weight": "strong"
+    },
+    {
+     "in": "any_url",
+     "re": "/sites/(default|all)/(files|modules|themes)/",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Joomla",
+   "category": "cms",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^joomla",
+     "weight": "strong"
+    },
+    {
+     "in": "any_url",
+     "re": "/media/(jui|system)/",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Shopify",
+   "category": "commerce",
+   "signals": [
+    {
+     "in": "any_url",
+     "re": "cdn\\.shopify\\.com",
+     "weight": "strong"
+    },
+    {
+     "in": "header",
+     "re": "^x-shop(ify|id)",
+     "weight": "strong"
+    },
+    {
+     "in": "global",
+     "re": "^Shopify$",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Webflow",
+   "category": "site builder",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^webflow",
+     "weight": "strong"
+    },
+    {
+     "in": "attr_name",
+     "re": "^data-wf-(page|site)$",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Wix",
+   "category": "site builder",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^wix\\.com",
+     "weight": "strong"
+    },
+    {
+     "in": "any_url",
+     "re": "(parastorage|wixstatic)\\.com",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Squarespace",
+   "category": "site builder",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^squarespace",
+     "weight": "strong"
+    },
+    {
+     "in": "any_url",
+     "re": "squarespace(-cdn)?\\.com",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Ghost",
+   "category": "cms",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^ghost",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Framer",
+   "category": "site builder",
+   "signals": [
+    {
+     "in": "meta_generator",
+     "re": "^framer",
+     "weight": "strong"
+    },
+    {
+     "in": "any_url",
+     "re": "framerusercontent\\.com",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Tailwind CSS",
+   "category": "css framework",
+   "signals": [
+    {
+     "in": "css_banner",
+     "re": "tailwind",
+     "weight": "strong"
+    },
+    {
+     "in": "css_text",
+     "re": "--tw-[a-z0-9-]+\\s*:",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Bootstrap",
+   "category": "css framework",
+   "signals": [
+    {
+     "in": "css_banner",
+     "re": "bootstrap",
+     "weight": "strong"
+    },
+    {
+     "in": "css_text",
+     "re": "--bs-[a-z0-9-]+\\s*:",
+     "weight": "strong"
+    },
+    {
+     "in": "package",
+     "re": "^bootstrap$",
+     "weight": "strong"
+    },
+    {
+     "in": "class_name",
+     "re": "^(navbar-expand(-\\w+)?|col-(sm|md|lg|xl)-\\d+)$",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Bulma",
+   "category": "css framework",
+   "signals": [
+    {
+     "in": "css_banner",
+     "re": "bulma",
+     "weight": "strong"
+    },
+    {
+     "in": "class_name",
+     "re": "^(navbar-burger|hero-body)$",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "UIkit",
+   "category": "css framework",
+   "signals": [
+    {
+     "in": "css_banner",
+     "re": "uikit",
+     "weight": "strong"
+    },
+    {
+     "in": "class_name",
+     "re": "^uk-(grid|container|navbar|button)",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Material UI",
+   "category": "design system",
+   "signals": [
+    {
+     "in": "class_name",
+     "re": "^Mui[A-Z]\\w+-",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Chakra UI",
+   "category": "design system",
+   "signals": [
+    {
+     "in": "class_name",
+     "re": "^chakra-",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Ant Design",
+   "category": "design system",
+   "signals": [
+    {
+     "in": "class_name",
+     "re": "^ant-",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Font Awesome",
+   "category": "icon font",
+   "signals": [
+    {
+     "in": "package",
+     "re": "^@fortawesome",
+     "weight": "strong"
+    },
+    {
+     "in": "any_url",
+     "re": "fontawesome",
+     "weight": "medium"
+    },
+    {
+     "in": "class_name",
+     "re": "^fa-",
+     "weight": "weak"
+    }
+   ]
+  },
+  {
+   "name": "GSAP",
+   "category": "animation",
+   "signals": [
+    {
+     "in": "package",
+     "re": "^gsap$",
+     "weight": "strong"
+    },
+    {
+     "in": "script_src",
+     "re": "(^|/)(gsap|TweenMax|ScrollTrigger)(\\.min)?\\.js",
+     "weight": "medium"
+    },
+    {
+     "in": "inline_script",
+     "re": "\\bgsap\\.(to|from|fromTo|timeline|registerPlugin)\\(",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "anime.js",
+   "category": "animation",
+   "signals": [
+    {
+     "in": "package",
+     "re": "^anime(js)?$",
+     "weight": "strong"
+    },
+    {
+     "in": "script_src",
+     "re": "(^|/)anime(\\.min)?\\.js|animejs",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Lottie",
+   "category": "animation",
+   "signals": [
+    {
+     "in": "tag",
+     "re": "^(lottie-player|dotlottie-player)$",
+     "weight": "strong"
+    },
+    {
+     "in": "package",
+     "re": "lottie",
+     "weight": "strong"
+    },
+    {
+     "in": "script_src",
+     "re": "lottie",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Three.js",
+   "category": "3d",
+   "signals": [
+    {
+     "in": "package",
+     "re": "^three$",
+     "weight": "strong"
+    },
+    {
+     "in": "script_src",
+     "re": "(^|/)three(\\.module)?(\\.min)?\\.js",
+     "weight": "medium"
+    },
+    {
+     "in": "inline_script",
+     "re": "\\bTHREE\\.",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "glTF / Draco assets",
+   "category": "3d",
+   "signals": [
+    {
+     "in": "any_url",
+     "re": "\\.(glb|gltf)(\\?|$)|draco",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Swiper",
+   "category": "ui library",
+   "signals": [
+    {
+     "in": "class_name",
+     "re": "^swiper(-wrapper|-slide|-container)?$",
+     "weight": "strong"
+    },
+    {
+     "in": "package",
+     "re": "^swiper$",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Splide",
+   "category": "ui library",
+   "signals": [
+    {
+     "in": "class_name",
+     "re": "^splide(__track|__slide)?$",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "D3",
+   "category": "charts",
+   "signals": [
+    {
+     "in": "package",
+     "re": "^d3(-\\w+)?$",
+     "weight": "medium"
+    },
+    {
+     "in": "script_src",
+     "re": "(^|/)d3(\\.v\\d+)?(\\.min)?\\.js",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Chart.js",
+   "category": "charts",
+   "signals": [
+    {
+     "in": "package",
+     "re": "^chart\\.js$",
+     "weight": "strong"
+    },
+    {
+     "in": "script_src",
+     "re": "(^|/)chart(\\.umd)?(\\.min)?\\.js",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "highlight.js",
+   "category": "code highlighting",
+   "signals": [
+    {
+     "in": "class_name",
+     "re": "^hljs",
+     "weight": "strong"
+    },
+    {
+     "in": "package",
+     "re": "^highlight\\.js$",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Prism",
+   "category": "code highlighting",
+   "signals": [
+    {
+     "in": "package",
+     "re": "^prismjs$",
+     "weight": "strong"
+    },
+    {
+     "in": "script_src",
+     "re": "(^|/)prism(\\.min)?\\.js",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Web Components (custom elements)",
+   "category": "platform",
+   "signals": [
+    {
+     "in": "inline_script",
+     "re": "customElements\\.define",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Cloudflare",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^cf-ray:",
+     "weight": "strong"
+    },
+    {
+     "in": "header",
+     "re": "^server:\\s*cloudflare",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Vercel",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-vercel-id:",
+     "weight": "strong"
+    },
+    {
+     "in": "header",
+     "re": "^server:\\s*vercel",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Netlify",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-nf-request-id:",
+     "weight": "strong"
+    },
+    {
+     "in": "header",
+     "re": "^server:\\s*netlify",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "GitHub Pages",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^server:\\s*github\\.com",
+     "weight": "medium"
+    },
+    {
+     "in": "header",
+     "re": "^x-github-request-id:",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Amazon CloudFront",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-amz-cf-id:",
+     "weight": "strong"
+    },
+    {
+     "in": "header",
+     "re": "^via:.*cloudfront",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Amazon S3",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^server:\\s*amazons3",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Fastly",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-fastly-",
+     "weight": "strong"
+    },
+    {
+     "in": "header",
+     "re": "^x-served-by:.*cache-",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Akamai",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-akamai-",
+     "weight": "strong"
+    },
+    {
+     "in": "header",
+     "re": "^server:\\s*akamaighost",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Fly.io",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^fly-request-id:",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Render",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-render-origin-server:",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Google Cloud frontend",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^server:\\s*(google frontend|gws|esf)",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Azure",
+   "category": "hosting/CDN",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-azure-ref:",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "nginx",
+   "category": "web server",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^server:\\s*nginx",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Apache",
+   "category": "web server",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^server:\\s*apache",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Caddy",
+   "category": "web server",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^server:\\s*caddy",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "LiteSpeed",
+   "category": "web server",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^server:\\s*litespeed",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Microsoft IIS",
+   "category": "web server",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^server:\\s*microsoft-iis",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Express",
+   "category": "server framework",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-powered-by:\\s*express",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Hono",
+   "category": "server framework",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-powered-by:\\s*hono",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "PHP",
+   "category": "server runtime",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-powered-by:\\s*php",
+     "weight": "strong"
+    },
+    {
+     "in": "cookie_name",
+     "re": "^PHPSESSID$",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "ASP.NET",
+   "category": "server framework",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-powered-by:\\s*asp\\.net",
+     "weight": "strong"
+    },
+    {
+     "in": "header",
+     "re": "^x-aspnet-version:",
+     "weight": "strong"
+    },
+    {
+     "in": "cookie_name",
+     "re": "^(ASP\\.NET_SessionId|\\.AspNetCore\\.)",
+     "weight": "strong"
+    },
+    {
+     "in": "input_name",
+     "re": "^__VIEWSTATE$|^__RequestVerificationToken$",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Django",
+   "category": "server framework",
+   "signals": [
+    {
+     "in": "input_name",
+     "re": "^csrfmiddlewaretoken$",
+     "weight": "strong"
+    },
+    {
+     "in": "cookie_name",
+     "re": "^csrftoken$",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Ruby on Rails",
+   "category": "server framework",
+   "signals": [
+    {
+     "in": "input_name",
+     "re": "^authenticity_token$",
+     "weight": "strong"
+    },
+    {
+     "in": "meta_name",
+     "re": "^csrf-param$",
+     "weight": "medium"
+    }
+   ]
+  },
+  {
+   "name": "Laravel",
+   "category": "server framework",
+   "signals": [
+    {
+     "in": "cookie_name",
+     "re": "^laravel_session$",
+     "weight": "strong"
+    }
+   ]
+  },
+  {
+   "name": "Phusion Passenger",
+   "category": "app server",
+   "signals": [
+    {
+     "in": "header",
+     "re": "^x-powered-by:\\s*phusion passenger",
+     "weight": "strong"
+    }
+   ]
+  }
+ ],
+ "header_policy": {
+  "informative": [
+   "server",
+   "x-powered-by",
+   "via",
+   "x-generator",
+   "powered-by",
+   "x-aspnet-version",
+   "x-served-by"
+  ],
+  "informative_prefixes": [
+   "x-",
+   "cf-",
+   "fly-",
+   "cdn-"
+  ],
+  "noise_prefixes": [
+   "x-content-type",
+   "x-frame",
+   "x-xss",
+   "x-request",
+   "x-cache",
+   "x-ratelimit",
+   "x-robots",
+   "x-dns",
+   "x-download",
+   "x-permitted",
+   "x-ua-",
+   "x-envoy-upstream",
+   "x-timer",
+   "x-runtime",
+   "x-correlation",
+   "x-trace"
+  ]
+ }
+}

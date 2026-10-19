@@ -1,0 +1,71 @@
+{
+  "title": "Checkout wizard - transition options",
+  "target": "Wizard.tsx",
+  "command": "transition",
+  "tier": "rare",
+  "options": [
+    {
+      "id": "A",
+      "name": "Hand-off glide",
+      "concept": "Current step content glides out in the direction of travel while the next step's parts arrive in domino order, header first.",
+      "feel": "Guided and calm",
+      "techniques": ["slide", "stagger", "blur bridge"],
+      "sync": "domino",
+      "interactive": false,
+      "timing": { "duration_ms": 320, "easing": "cubic-bezier(0.25, 1, 0.5, 1)" },
+      "properties": ["transform", "opacity", "filter"],
+      "reduced_motion": "Opacity crossfade only.",
+      "risk": "Keep stagger total under 120ms so rapid next/back stays crisp.",
+      "needs_html": false,
+      "sequences": [
+        { "label": "forward: step 1 to step 2", "frames": [
+          { "t": 0,   "art": "[ Step 1 ]            \n  fields here         ", "note": "rest" },
+          { "t": 120, "art": " [ Step 1 ]░         \n   fields ░░░         ", "note": "step 1 exits left" },
+          { "t": 220, "art": "         [ Step 2 ]\n          fields   ", "note": "header of step 2 arrives" },
+          { "t": 320, "art": "         [ Step 2 ]\n        fields here", "note": "settled" }
+        ] },
+        { "label": "reverse: step 2 to step 1", "frames": [
+          { "t": 0,   "art": "         [ Step 2 ]\n        fields here" },
+          { "t": 100, "art": "      [ Step 2 ]░  \n       fields ░░░  ", "note": "step 2 exits right, shorter" },
+          { "t": 240, "art": "[ Step 1 ]            \n  fields here         ", "note": "step 1 returns" }
+        ] }
+      ],
+      "lanes": [
+        { "element": "Outgoing", "start": 0, "end": 160, "technique": "slide out" },
+        { "element": "Header", "start": 80, "end": 240, "technique": "slide in" },
+        { "element": "Fields", "start": 120, "end": 320, "technique": "slide in" }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "Progress thread",
+      "concept": "A line travels from the old step marker to the new one, carrying the eye while content crossfades beneath it.",
+      "feel": "Quietly clever",
+      "techniques": ["trace", "crossfade"],
+      "sync": "linked",
+      "interactive": false,
+      "timing": { "duration_ms": 280, "easing": "cubic-bezier(0.25, 1, 0.5, 1)" },
+      "properties": ["transform", "opacity"],
+      "reduced_motion": "Marker jumps; content crossfades.",
+      "risk": "Marker and content must share one clock to stay linked.",
+      "needs_html": false,
+      "sequences": [
+        { "label": "forward", "frames": [
+          { "t": 0,   "art": "(1)───( 2 )\n  content 1" },
+          { "t": 140, "art": "(1)━━━>( 2 )\n  content ░" },
+          { "t": 280, "art": "( 1 )───(2)\n  content 2" }
+        ] },
+        { "label": "reverse", "frames": [
+          { "t": 0,   "art": "( 1 )───(2)\n  content 2" },
+          { "t": 110, "art": "(1)<━━━( 2 )\n  content ░" },
+          { "t": 220, "art": "(1)───( 2 )\n  content 1" }
+        ] }
+      ],
+      "lanes": [
+        { "element": "Marker thread", "start": 0, "end": 280, "technique": "trace" },
+        { "element": "Content", "start": 60, "end": 280, "technique": "crossfade" }
+      ]
+    }
+  ],
+  "recommendation": { "option": "A", "reason": "Direction is explicit and the reverse is its own shorter motion." }
+}

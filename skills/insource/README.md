@@ -2,7 +2,7 @@
 
 This repository contains a comprehensive collection of modular Agent Skills. Each skill provides specialized domain instructions, operational workflows, patterns, and best practices for agents.
 
-Total skills available: **44**
+Total skills available: **45**
 
 ## Quick Index
 
@@ -23,6 +23,7 @@ Total skills available: **44**
 - [how-to-do](./how-to-do/SKILL.md) — Maintains a persistent .htd/ folder of generalized "how to do X in this codebase" procedures, so multi-step tasks are do...
 - [idk](./idk/SKILL.md) — Use this skill whenever the user directly signals they don't know what they want or need — phrases like "idk", "I don't ...
 - [investigate](./investigate/SKILL.md) — Investigate local files, codebases, datasets, and external Agent Skills. Use for high-precision searches across heterogeneous formats, diagnosing unfamiliar architectures, inspecting...
+- [anti-patterns](./anti-patterns/SKILL.md) — Find and document evidence-backed anti-patterns across any software project, then turn user-selected findings into project documentation.
 - [like-a-pro](./like-a-pro/SKILL.md) — Root meta-skill orchestrator that reproduces production-grade engineering standards and conventions across applications....
 - [mine](./mine/SKILL.md) — Runs a deep, budgeted, multi-source research dig to understand not just what a class of thing looks like, but WHY — the ...
 - [no-framework](./no-framework/SKILL.md) — > Build Single Page Applications using NoF (No Frameworks) — a lightweight architecture defaulting to VanJS (~1KB, fine-...
@@ -109,7 +110,18 @@ Custom static analysis for this monorepo. Rules live in `.chekr/checks/`; config
 
 ---
 
-### 6. [code](./code/SKILL.md)
+### 6. [anti-patterns](./anti-patterns/SKILL.md)
+
+- **Directory:** `anti-patterns`
+- **Title:** Anti-Patterns — Evidence-First, Language-Agnostic
+- **Description:** Find and document evidence-backed anti-patterns in any software project. Inspect the actual codebase, research relevant patterns using reliable web sources and the bundled seed database, produce an editable checklist grouped by detected language, and turn user-selected items into project documentation with explanations and before/after diffs.
+
+**Overview & Usage:**
+Audits project code and architecture for substantiated anti-patterns, separates project evidence from general references, collects user selections in an editable checklist, and documents selected patterns in the project's conventional docs location.
+
+---
+
+### 7. [code](./code/SKILL.md)
 
 - **Directory:** `code`
 - **Title:** Code — brief, toolchain, docs-grounded, then write
@@ -120,7 +132,7 @@ Never let a code edit start from memory. Every ecosystem drifts - Rust editions 
 
 ---
 
-### 7. [contribute-agents](./contribute-agents/SKILL.md)
+### 8. [contribute-agents](./contribute-agents/SKILL.md)
 
 - **Directory:** `contribute-agents`
 - **Title:** Contribute Agents
@@ -131,7 +143,7 @@ Orchestrate a supervised, multi-agent collaboration: several subagents work on t
 
 ---
 
-### 8. [cross-platform-refactor](./cross-platform-refactor/SKILL.md)
+### 9. [cross-platform-refactor](./cross-platform-refactor/SKILL.md)
 
 - **Directory:** `cross-platform-refactor`
 - **Title:** Cross-Platform Refactor
@@ -142,7 +154,7 @@ A framework for taking any multi-platform codebase from "leaky and duplicated" t
 
 ---
 
-### 9. [design-mockup](./design-mockup/SKILL.md)
+### 10. [design-mockup](./design-mockup/SKILL.md)
 
 - **Directory:** `design-mockup`
 - **Title:** Design Mockup
@@ -153,7 +165,7 @@ A static HTML mockup of a UI — a screen, a short flow, or one component in con
 
 ---
 
-### 10. [display-to-user](./display-to-user/SKILL.md)
+### 11. [display-to-user](./display-to-user/SKILL.md)
 
 - **Directory:** `display-to-user`
 - **Description:** Use this skill whenever you (Claude) are running as a remote coding agent and the user asks you to "show", "display", "let me see", or "give me a link to see" what you've done to their project — the current state of files, or just the changes so far. Also trigger this if the user asks for a way to visually browse the project tree, preview a README or HTML file you produced, or share a live view of the repo with someone else. This spins up a local web viewer (file tree + git status + file preview) and tunnels it with ngrok so the user gets a real clickable URL back, rather than you pasting file contents into chat.
@@ -163,7 +175,7 @@ Give the user (or someone they forward the link to) a live, browsable view of th
 
 ---
 
-### 11. [docs-refactor](./docs-refactor/SKILL.md)
+### 12. [docs-refactor](./docs-refactor/SKILL.md)
 
 - **Directory:** `docs-refactor`
 - **Title:** Docs Refactor
@@ -174,7 +186,7 @@ A skill for taking documentation that has grown organically — usually AI-gener
 
 ---
 
-### 12. [document-db-attach-chain](./document-db-attach-chain/SKILL.md)
+### 13. [document-db-attach-chain](./document-db-attach-chain/SKILL.md)
 
 - **Directory:** `document-db-attach-chain`
 - **Title:** Document DB Attach Chain
@@ -185,7 +197,7 @@ No document database engine has a universal answer to cross-collection reads: so
 
 ---
 
-### 13. [explain](./explain/SKILL.md)
+### 14. [explain](./explain/SKILL.md)
 
 - **Directory:** `explain`
 - **Title:** Explain
@@ -196,7 +208,7 @@ The gap between an expert explanation and a clear one is almost never about the 
 
 ---
 
-### 14. [gitter](./gitter/SKILL.md)
+### 15. [gitter](./gitter/SKILL.md)
 
 - **Directory:** `gitter`
 - **Title:** Gitter
@@ -207,7 +219,7 @@ Git is the safety net. Treat commits as save points, branches as sandboxes, and 
 
 ---
 
-### 15. [how-to-do](./how-to-do/SKILL.md)
+### 16. [how-to-do](./how-to-do/SKILL.md)
 
 - **Directory:** `how-to-do`
 - **Description:** Maintains a persistent .htd/ folder of generalized "how to do X in this codebase" procedures, so multi-step tasks are done the same correct way every time across sessions, agents, and models — instead of silently missing a step. ALWAYS check for a .htd/ folder at the repo root before starting ANY coding task, even if not mentioned, and consult it if present. Trigger this — don't wait to be asked — whenever the user says "add", "create", "change", "update", "refactor", "migrate", "wire up", or "integrate" something in a real codebase, including simple-sounding tasks like "add a table" (exactly what this exists for — never skip as too simple). Also trigger on any mention of "how-to-do", ".htd", or standardizing a workflow. After any nontrivial multi-file change in a repo with (or needing) .htd/, use this proactively to record a new procedure, patch an existing one, or confirm no update is needed — skipping this defeats the skill's purpose.
@@ -217,7 +229,7 @@ A persistent record, local to each repo, of *how* to correctly perform recurring
 
 ---
 
-### 16. [idk](./idk/SKILL.md)
+### 17. [idk](./idk/SKILL.md)
 
 - **Directory:** `idk`
 - **Description:** Use this skill whenever the user directly signals they don't know what they want or need — phrases like "idk", "I don't know", "not sure what I need", "I don't know how to explain it", "I can't put it into words", or similar explicit expressions of uncertainty about their own intent. This is NOT a general clarifying-questions skill — it only triggers on that explicit signal, not on every vague or underspecified request. Once triggered, it guides the user from a fuzzy feeling toward a clear, named intent through a calm, jargon-free conversation, optionally looking around the project's code and docs for clues, and ends with a plain-language review that maps what the user said onto the standard technical term for it.
@@ -227,7 +239,7 @@ The user knows *something* is off, or wants *something* to change, or has a feel
 
 ---
 
-### 17. [investigate](./investigate/SKILL.md)
+### 18. [investigate](./investigate/SKILL.md)
 
 - **Directory:** `investigate`
 - **Title:** Investigation & Search

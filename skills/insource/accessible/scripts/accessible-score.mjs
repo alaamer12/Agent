@@ -32,7 +32,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 const argv = process.argv.slice(2);
-const OPTS = new Set(['--chrome', '--exclude', '--out', '--baseline', '--width', '--height']);
+const OPTS = new Set(['--chrome', '--exclude', '--out', '--baseline', '--width', '--height', '--wait']);
 const positional = argv.filter((a) => !a.startsWith('--') && !OPTS.has(argv[argv.indexOf(a) - 1]));
 const flag = (n, f) => { const i = argv.indexOf(`--${n}`); return i === -1 ? f : argv[i + 1]; };
 const asJson = argv.includes('--json');
@@ -47,12 +47,18 @@ const r1 = (n) => Math.round(n * 10) / 10;
 const reports = positional.map((src) => {
   if (src.endsWith('.json')) return { name: path.basename(src).replace(/\.json$/, ''), report: JSON.parse(readFileSync(src, 'utf8')) };
   const out = path.join(tmpdir(), `score-${Date.now()}-${Math.random().toString(36).slice(2)}.json`);
-  const args = [AUDIT, path.resolve(src), '--out', out];
+  // path.resolve() on a URL produces '/cwd/http:/host/...' and the audit then measures
+  // a blank page, reporting a deceptively clean 1.8% ink and 1 screen.
+  const loc = /^https?:\/\//.test(src) ? src : path.resolve(src);
+  const args = [AUDIT, loc, '--out', out];
   const chrome = flag('chrome', null); if (chrome) args.push('--chrome', chrome);
   // Chrome (the browser) and chrome (the UI) are unrelated words that collided in this
   // file. Scope the audit's --exclude through, or a bold brand-hue rail is counted as a
   // working-surface contrast failure and the score means nothing.
   const excl = flag('exclude', null); if (excl) args.push('--exclude', excl);
+  // Forwarded: lazily-mounted routes need a longer settle than the audit default, and
+  // auditing a half-rendered page yields a deceptively low ink ratio and a false score.
+  const wait = flag('wait', null); if (wait) args.push('--wait', wait);
   try { execFileSync('node', args, { stdio: 'pipe' }); }
   catch (e) { if (e.status === 2) { console.error(e.stderr?.toString() || e.message); process.exit(2); } }
   if (!existsSync(out)) { console.error(`could not audit ${src}`); process.exit(2); }

@@ -1,0 +1,373 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Pattern: Layout Templates</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: #f5f5f5;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    /* Template indicator */
+    .template-badge {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid #fcd34d;
+    }
+
+    /* THE TEMPLATE: Hero Metric Layout */
+    .hero-metric {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 24px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-metric::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+
+    .hero-metric-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hero-metric-main {
+      text-align: left;
+    }
+
+    .hero-metric-label {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+
+    .hero-metric-value {
+      font-size: 72px;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .hero-metric-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .hero-metric-supporting {
+      display: flex;
+      gap: 32px;
+    }
+
+    .supporting-stat {
+      text-align: right;
+    }
+
+    .supporting-stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .supporting-stat-label {
+      font-size: 12px;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Repeat the same template 3 more times */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      flex: 1;
+    }
+
+    .metric-template {
+      border-radius: 16px;
+      padding: 28px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-template::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -30%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+
+    .metric-template.blue { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+    .metric-template.green { background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); }
+    .metric-template.orange { background: linear-gradient(135deg, #f97316 0%, #c2410c 100%); }
+    .metric-template.pink { background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); }
+
+    .metric-template-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .metric-template-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+
+    .metric-template-value {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .metric-template-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.2);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .metric-template-row {
+      display: flex;
+      gap: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .metric-template-sub {
+      flex: 1;
+    }
+
+    .metric-template-sub-value {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .metric-template-sub-label {
+      font-size: 10px;
+      opacity: 0.7;
+      text-transform: uppercase;
+    }
+
+
+  </style>
+<style>
+    @keyframes impeccable-reveal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .impeccable-overlay:not(.impeccable-banner) {
+      pointer-events: none;
+      outline: 1px solid oklch(84% 0.19 80.46);
+      box-shadow: 0 0 0 3px oklch(84% 0.19 80.46 / 0.20), 0 0 12px oklch(84% 0.19 80.46 / 0.45);
+      border-radius: 4px;
+      transition: outline-color 0.15s ease, box-shadow 0.15s ease;
+      animation: impeccable-reveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-play-state: paused;
+      border-top-left-radius: 0;
+    }
+    .impeccable-overlay.impeccable-visible {
+      animation-play-state: running;
+    }
+    .impeccable-overlay.impeccable-hover {
+      outline-color: oklch(74% 0.18 80);
+      box-shadow: 0 0 0 3px oklch(74% 0.18 80 / 0.28), 0 0 16px oklch(74% 0.18 80 / 0.6);
+      z-index: 100001 !important;
+    }
+    .impeccable-overlay.impeccable-hover .impeccable-label {
+      background: oklch(74% 0.18 80);
+    }
+    .impeccable-overlay.impeccable-spotlight {
+      z-index: 100002 !important;
+    }
+    .impeccable-overlay.impeccable-spotlight-dimmed {
+      opacity: 0.15 !important;
+      animation: none !important;
+      filter: blur(3px);
+    }
+    .impeccable-spotlight-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      backdrop-filter: blur(3px) brightness(0.6);
+      -webkit-backdrop-filter: blur(3px) brightness(0.6);
+      pointer-events: none;
+      z-index: 99998;
+      opacity: 0;
+      outline: none !important;
+      animation: none !important;
+    }
+    .impeccable-spotlight-backdrop.impeccable-visible {
+      opacity: 1;
+    }
+    .impeccable-hidden .impeccable-overlay:not(.impeccable-banner) {
+      display: none !important;
+    }
+  </style></head>
+<body>
+  <div class="container">
+    <div class="template-badge">Same layout × 5</div>
+
+    <!-- THE TEMPLATE: Hero Metric Layout -->
+    <div class="hero-metric">
+      <div class="hero-metric-content">
+        <div class="hero-metric-main">
+          <div class="hero-metric-label">Total Revenue</div>
+          <div class="hero-metric-value">$2.4M</div>
+          <div class="hero-metric-change">↑ +24.5% from last month</div>
+        </div>
+        <div class="hero-metric-supporting">
+          <div class="supporting-stat">
+            <div class="supporting-stat-value">12.8K</div>
+            <div class="supporting-stat-label">Customers</div>
+          </div>
+          <div class="supporting-stat">
+            <div class="supporting-stat-value">$187</div>
+            <div class="supporting-stat-label">Avg. Order</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Same template repeated 4 more times -->
+    <div class="metrics-grid">
+      <div class="metric-template blue">
+        <div class="metric-template-content">
+          <div class="metric-template-label">Active Users</div>
+          <div class="metric-template-value">48.2K</div>
+          <div class="metric-template-change">↑ +12.3%</div>
+          <div class="metric-template-row">
+            <div class="metric-template-sub">
+              <div class="metric-template-sub-value">32.1K</div>
+              <div class="metric-template-sub-label">Mobile</div>
+            </div>
+            <div class="metric-template-sub">
+              <div class="metric-template-sub-value">16.1K</div>
+              <div class="metric-template-sub-label">Desktop</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-template green">
+        <div class="metric-template-content">
+          <div class="metric-template-label">Conversion Rate</div>
+          <div class="metric-template-value">8.7%</div>
+          <div class="metric-template-change">↑ +2.1%</div>
+          <div class="metric-template-row">
+            <div class="metric-template-sub">
+              <div class="metric-template-sub-value">12.4%</div>
+              <div class="metric-template-sub-label">Returning</div>
+            </div>
+            <div class="metric-template-sub">
+              <div class="metric-template-sub-value">5.2%</div>
+              <div class="metric-template-sub-label">New</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-template orange">
+        <div class="metric-template-content">
+          <div class="metric-template-label">Avg. Session</div>
+          <div class="metric-template-value">4:32</div>
+          <div class="metric-template-change">↓ -0.8%</div>
+          <div class="metric-template-row">
+            <div class="metric-template-sub">
+              <div class="metric-template-sub-value">5.2</div>
+              <div class="metric-template-sub-label">Pages/Visit</div>
+            </div>
+            <div class="metric-template-sub">
+              <div class="metric-template-sub-value">32%</div>
+              <div class="metric-template-sub-label">Bounce</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-template pink">
+        <div class="metric-template-content">
+          <div class="metric-template-label">NPS Score</div>
+          <div class="metric-template-value">72</div>
+          <div class="metric-template-change">↑ +5 pts</div>
+          <div class="metric-template-row">
+            <div class="metric-template-sub">
+              <div class="metric-template-sub-value">84%</div>
+              <div class="metric-template-sub-label">Promoters</div>
+            </div>
+            <div class="metric-template-sub">
+              <div class="metric-template-sub-value">4%</div>
+              <div class="metric-template-sub-label">Detractors</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+<script src="https://impeccable.style/js/detect-antipatterns-browser.js"></script>
+<!-- Cloudflare Pages Analytics --><script defer="" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;2375b0fdc85c43a68f4b0e89cc6ae43c&quot;}"></script><!-- Cloudflare Pages Analytics --><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;2e1b258764844c2fb270c26ac9417755&quot;,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+
+
+<div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 70px; left: 233px; width: 900px; height: 218px; animation-delay: 0ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">✦ ai color palette</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 110px; left: 273px; width: 244.75px; height: 21px; animation-delay: 60ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 215px; left: 273px; width: 207.234px; height: 33px; animation-delay: 120ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 188.5px; left: 900.5px; width: 83.875px; height: 19px; animation-delay: 180ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 188.5px; left: 1012.38px; width: 80.625px; height: 19px; animation-delay: 240ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 336px; left: 261px; width: 386px; height: 19px; animation-delay: 300ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 409px; left: 261px; width: 81.4531px; height: 27px; animation-delay: 360ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 465px; left: 261px; width: 185px; height: 25px; animation-delay: 420ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 488px; left: 261px; width: 185px; height: 16px; animation-delay: 480ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 465px; left: 462px; width: 185px; height: 25px; animation-delay: 540ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 488px; left: 462px; width: 185px; height: 16px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 336px; left: 719px; width: 386px; height: 19px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 359px; left: 719px; width: 386px; height: 46px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 409px; left: 719px; width: 72.7344px; height: 27px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 465px; left: 719px; width: 185px; height: 25px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 488px; left: 719px; width: 185px; height: 16px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 465px; left: 920px; width: 185px; height: 25px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 488px; left: 920px; width: 185px; height: 16px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 576px; left: 261px; width: 386px; height: 19px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 599px; left: 261px; width: 386px; height: 46px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 649px; left: 261px; width: 74.0156px; height: 27px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 705px; left: 261px; width: 185px; height: 25px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 728px; left: 261px; width: 185px; height: 16px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 705px; left: 462px; width: 185px; height: 25px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 728px; left: 462px; width: 185px; height: 16px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 576px; left: 719px; width: 386px; height: 19px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 649px; left: 719px; width: 74.2656px; height: 27px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 705px; left: 719px; width: 185px; height: 25px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 728px; left: 719px; width: 185px; height: 16px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 705px; left: 920px; width: 185px; height: 25px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="padding: 3px 8px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-visible" style="z-index: 99999; box-sizing: border-box; position: absolute; top: 728px; left: 920px; width: 185px; height: 16px; animation-delay: 600ms;"><div class="impeccable-label" style="position: absolute; bottom: 100%; left: -2px; display: flex; align-items: center; white-space: nowrap; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.14 0.018 95); line-height: 14px; background: oklch(0.84 0.19 80.46); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-radius: 3px 3px 0px 0px;"><span style="display: inline-flex; align-items: center; flex-shrink: 0;"><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 4px 3px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">‹</button><button style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.14 0.018 95 / 0.7); font-size: 11px; cursor: pointer; padding: 3px 2px 3px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 14px; pointer-events: auto;">›</button></span><span style="padding: 3px 8px 3px 4px;">low contrast text</span></div></div><div class="impeccable-overlay impeccable-banner" style="position: fixed; top: 0px; left: 0px; right: 0px; z-index: 100000; background: oklch(0.978 0 0); color: oklch(0.13 0 0); border-bottom: 1px solid oklch(0.77 0.13 82); box-shadow: oklch(0.13 0 0 / 0.1) 0px 1px 0px, oklch(0 0 0 / 0.35) 0px 6px 18px; font-family: system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 12px; display: flex; align-items: center; pointer-events: auto; height: 36px; overflow: hidden; max-width: 100vw; transform: translateY(0px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);"><span style="flex-shrink: 0; width: 7px; height: 7px; margin: 0px 0px 0px 12px; border-radius: 50%; background: oklch(0.84 0.19 80.46); box-shadow: oklch(0.13 0 0 / 0.12) 0px 0px 0px 1px, oklch(0.84 0.19 80 / 0.6) 0px 0px 4px;"></span><div style="flex: 1 1 0%; min-width: 0px; overflow: auto hidden; display: flex; gap: 12px; align-items: center; padding: 0px 12px; scroll-snap-type: x mandatory; scrollbar-width: none;"><span style="display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; scroll-snap-align: start;"><span style="display: inline-flex; align-items: center; min-height: 16px; padding: 0px 6px; border-radius: 3px; background: oklch(0.84 0.19 80.46); color: oklch(0.14 0.018 95); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; line-height: 1; text-transform: uppercase;">ai color palette</span><span style="color: oklch(0.13 0 0); font-family: system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif; font-size: 12px;">Purple/violet accent colors detected</span></span></div><div style="display: flex; align-items: center; gap: 2px; padding: 0px 8px; flex-shrink: 0;"><button title="Toggle overlay visibility" style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.46 0 0); font-size: 16px; cursor: pointer; padding: 0px 4px; opacity: 0.85; transition: opacity 0.15s;">◉</button><button title="Dismiss banner" style="background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; color: oklch(0.46 0 0); font-size: 18px; cursor: pointer; padding: 0px 4px;">×</button></div></div></body></html>

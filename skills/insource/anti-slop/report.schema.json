@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["scope", "target", "coverage", "assessedPatternIds", "findings"],
+  "properties": {
+    "scope": {"enum": ["page", "multi-page", "application", "project"]},
+    "target": {"type": "string", "minLength": 1},
+    "coverage": {
+      "type": "object",
+      "required": ["routesOrFiles", "states", "limitations"],
+      "properties": {
+        "routesOrFiles": {"type": "array", "items": {"type": "string"}},
+        "states": {"type": "array", "items": {"type": "string"}},
+        "limitations": {"type": "array", "items": {"type": "string"}},
+        "structuralScout": {"enum": ["completed", "not-run", "partial"]},
+        "visualScout": {"enum": ["completed", "not-run", "partial"]}
+      },
+      "additionalProperties": false
+    },
+    "assessedPatternIds": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["patternId", "name", "status", "confidence", "structuralEvidence", "visualEvidence", "contextualAssessment", "exceptionsChecked", "counterevidence", "recommendations", "verification"],
+        "properties": {
+          "patternId": {"type": "string"},
+          "name": {"type": "string"},
+          "status": {"enum": ["confirmed", "candidate", "false-positive", "not-observed"]},
+          "confidence": {"enum": ["high", "medium", "low"]},
+          "structuralEvidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "line", "snippet", "status"],
+              "properties": {
+                "path": {"type": "string"},
+                "line": {"type": "integer", "minimum": 1},
+                "snippet": {"type": "string"},
+                "status": {"const": "candidate"}
+              },
+              "additionalProperties": false
+            }
+          },
+          "visualEvidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["reference", "region", "observation"],
+              "properties": {
+                "reference": {"type": "string"},
+                "region": {"type": "string"},
+                "viewport": {"type": "string"},
+                "state": {"type": "string"},
+                "observation": {"type": "string"}
+              },
+              "additionalProperties": false
+            }
+          },
+          "contextualAssessment": {"type": "string"},
+          "exceptionsChecked": {"type": "array", "items": {"type": "string"}},
+          "counterevidence": {"type": "array", "items": {"type": "string"}},
+          "recommendations": {"type": "array", "items": {"type": "string"}},
+          "verification": {"type": "array", "items": {"type": "string"}},
+          "unresolvedDisagreement": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,62 @@
+{
+  "cases": [
+    {
+      "id": "obvious-slop",
+      "scope": "page",
+      "html": "fixtures/obvious-slop.html",
+      "screenshots": ["screenshots/obvious-slop/1.png"],
+      "expected": [
+        {"patternId": "ai-color-palette", "status": "candidate"},
+        {"patternId": "gradient-text", "status": "candidate"},
+        {"patternId": "side-tab", "status": "candidate"},
+        {"patternId": "nested-cards", "status": "candidate"},
+        {"patternId": "marketing-buzzword", "status": "candidate"},
+        {"patternId": "radial-halo", "status": "candidate"},
+        {"patternId": "identical-card-grids", "status": "candidate"},
+        {"patternId": "icon-tile-stack", "status": "not-observed"}
+      ],
+      "expectedNotConfirmed": ["ai-color-palette", "gradient-text", "side-tab", "nested-cards", "marketing-buzzword", "radial-halo", "identical-card-grids"],
+      "calibration": "Exaggerated generic gradient hero, broad claims, identical feature cards, left accent stripes, nested surfaces, and radial glow. Emoji-like standalone icons are not rounded-square icon tiles. Scout must cite visible evidence and avoid inferring AI authorship."
+    },
+    {
+      "id": "subtle-slop",
+      "scope": "multi-page",
+      "html": ["fixtures/subtle-home.html", "fixtures/subtle-features.html"],
+      "screenshots": ["screenshots/subtle-home/1.png", "screenshots/subtle-features/1.png"],
+      "expected": [
+        {"patternId": "radial-halo", "status": "candidate"},
+        {"patternId": "numbered-section-labels", "status": "candidate"},
+        {"patternId": "identical-card-grids", "status": "candidate"},
+        {"patternId": "hero-metric-layout", "status": "false-positive"},
+        {"patternId": "monotonous-spacing", "status": "not-observed"}
+      ],
+      "expectedNotConfirmed": ["radial-halo", "numbered-section-labels", "identical-card-grids"],
+      "calibration": "Subtle generic repeated hero/section recipe across two routes. Meaningful KPI context is present; do not falsely confirm the hero metric. Page-wide consistency may be intentional and needs product context."
+    },
+    {
+      "id": "legitimate-lookalike",
+      "scope": "page",
+      "html": "fixtures/legitimate-lookalike.html",
+      "screenshots": ["screenshots/legitimate-lookalike/1.png"],
+      "expected": [
+        {"patternId": "ai-color-palette", "status": "false-positive"},
+        {"patternId": "side-tab", "status": "false-positive"},
+        {"patternId": "nested-cards", "status": "false-positive"},
+        {"patternId": "identical-card-grids", "status": "false-positive"},
+        {"patternId": "icon-tile-stack", "status": "not-observed"}
+      ],
+      "calibration": "Dark brand palette, status stripe, icon tile, nested regional unit, and equal metric cards all carry explicit functional/contextual meaning; record the lookalike and its rationale, not a violation."
+    },
+    {
+      "id": "visual-only-occlusion",
+      "scope": "page",
+      "html": "fixtures/visual-only-occlusion.html",
+      "screenshots": ["screenshots/visual-only-occlusion/1.png"],
+      "expected": [
+        {"patternId": "text-occlusion", "status": "confirmed"}
+      ],
+      "expectedNotConfirmed": [],
+      "calibration": "A dark floating banner visibly covers part of a service instruction; this should be discoverable visually even without a static detector."
+    }
+  ]
+}

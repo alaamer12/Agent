@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><title>Sample - Home</title>
+<script>
+  // Pattern the capture skill relies on: read the theme BEFORE first paint.
+  try { var t = localStorage.getItem('sample-theme'); if (t === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
+</script>
+<style>
+  body { margin:0; font:16px system-ui; background:#f1f5f9; color:#0f172a; }
+  .dark body { background:#0f172a; color:#f1f5f9; }
+  header { padding:16px 24px; background:#fff; border-bottom:1px solid #e2e8f0; }
+  .dark header { background:#1e293b; border-color:#334155; }
+  main { padding:24px; } .card { background:#fff; padding:16px; border-radius:8px; max-width:420px; }
+  .dark .card { background:#1e293b; }
+</style>
+</head>
+<body><header><strong>Sample app</strong> &middot; <a href="settings.html">Settings</a></header>
+<main><div class="card"><h2>Projects</h2><p>Two themes, one page.</p></div></main></body>
+</html>

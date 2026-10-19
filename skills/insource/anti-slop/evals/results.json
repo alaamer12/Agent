@@ -1,0 +1,379 @@
+{
+  "skill_name": "anti-slop",
+  "generated_at": "2026-10-06T08:30:47.438084+00:00",
+  "evaluation_scope": "three annotated local HTML impact cases; not a host LLM benchmark",
+  "cases": [
+    {
+      "id": "html-high-impact",
+      "tier": "high",
+      "fixture": "evals/fixtures/high-impact.html",
+      "impact_note": "High is a fixture-specific severity label: the visible defects obstruct a core checkout task or make essential payment information unavailable.",
+      "structural_score": {
+        "expected": [
+          "broken-image",
+          "gpt-thin-border-wide-shadow",
+          "gradient-text",
+          "nested-cards",
+          "side-tab",
+          "skipped-heading"
+        ],
+        "observed": [
+          "broken-image",
+          "gpt-thin-border-wide-shadow",
+          "gradient-text",
+          "nested-cards",
+          "side-tab",
+          "skipped-heading"
+        ],
+        "true_positives": [
+          "broken-image",
+          "gpt-thin-border-wide-shadow",
+          "gradient-text",
+          "nested-cards",
+          "side-tab",
+          "skipped-heading"
+        ],
+        "false_positives": [],
+        "false_negatives": [],
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "structural_findings": [
+        {
+          "patternId": "gradient-text",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/high-impact.html",
+          "line": 12,
+          "column": 106,
+          "snippet": "h1 { font-size: 42px; background: linear-gradient(90deg, #fff 0%, #f8faff 100%); color: transparent; background-clip: text; }",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A source signature was found; consult the pattern guide and confirm context before reporting."
+        },
+        {
+          "patternId": "side-tab",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/high-impact.html",
+          "line": 14,
+          "column": 12,
+          "snippet": ".card { border: 1px solid #d8dde3; border-left: 6px solid #7656d8; border-radius: 12px; padding: 24px; box-shadow: 0 12px 28px #0002; }",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A CSS rule combines a left-side border with rounded corners; verify its role and rendered use."
+        },
+        {
+          "patternId": "gpt-thin-border-wide-shadow",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/high-impact.html",
+          "line": 14,
+          "column": 12,
+          "snippet": ".card { border: 1px solid #d8dde3; border-left: 6px solid #7656d8; border-radius: 12px; padding: 24px; box-shadow: 0 12px 28px #0002; }",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A CSS rule combines border and shadow; visual review must determine whether they redundantly define the surface."
+        },
+        {
+          "patternId": "gpt-thin-border-wide-shadow",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/high-impact.html",
+          "line": 15,
+          "column": 13,
+          "snippet": ".panel { border: 1px solid #d8dde3; border-radius: 10px; padding: 16px; box-shadow: 0 8px 22px #0002; margin-top: 18px; }",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A CSS rule combines border and shadow; visual review must determine whether they redundantly define the surface."
+        },
+        {
+          "patternId": "broken-image",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/high-impact.html",
+          "line": 28,
+          "column": 1,
+          "snippet": "<img src=\"assets/missing-checkout-illustration.png\" alt=\"Order securely with Northstar\">",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "The image source is empty, absent, or placeholder-like; confirm its runtime loading state."
+        },
+        {
+          "patternId": "skipped-heading",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/high-impact.html",
+          "line": 30,
+          "column": 1,
+          "snippet": "<h3>Review the order details</h3>",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "Heading rank jumps from h1 to h3; inspect the full content outline."
+        },
+        {
+          "patternId": "nested-cards",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/high-impact.html",
+          "line": 32,
+          "column": 1,
+          "snippet": "<article class=\"card\">",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A card/panel contains another card-like element; verify whether each boundary has a distinct role."
+        },
+        {
+          "patternId": "nested-cards",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/high-impact.html",
+          "line": 38,
+          "column": 1,
+          "snippet": "<article class=\"card\">",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A card/panel contains another card-like element; verify whether each boundary has a distinct role."
+        }
+      ],
+      "scanned_files": [
+        "high-impact.html"
+      ],
+      "browser_capture": {
+        "screenshot": "evals/screenshots/html-high-impact.png",
+        "viewport": {
+          "width": 1280,
+          "height": 900
+        },
+        "browser_errors": [],
+        "runtime_observations": {
+          "images": [
+            {
+              "src": "assets/missing-checkout-illustration.png",
+              "complete": true,
+              "naturalWidth": 0,
+              "failed": true
+            }
+          ],
+          "methodState": {
+            "text": "Visa ending in 4242 — cardholder name and billing details",
+            "clientWidth": 190,
+            "scrollWidth": 412,
+            "clipped": true
+          },
+          "primaryActionOverlap": {
+            "buttonVisible": true,
+            "centerHitIsButton": false,
+            "hitElement": "div.cover"
+          }
+        }
+      }
+    },
+    {
+      "id": "html-medium-impact",
+      "tier": "medium",
+      "fixture": "evals/fixtures/medium-impact.html",
+      "impact_note": "Medium is fixture-specific: redundant or hard-to-read copy impedes scanning but does not block the primary task; alert and metric surfaces are intentional controls for false-positive calibration.",
+      "structural_score": {
+        "expected": [
+          "all-caps-body",
+          "nested-cards",
+          "repeated-container-text",
+          "side-tab"
+        ],
+        "observed": [
+          "all-caps-body",
+          "nested-cards",
+          "repeated-container-text",
+          "side-tab"
+        ],
+        "true_positives": [
+          "all-caps-body",
+          "nested-cards",
+          "repeated-container-text",
+          "side-tab"
+        ],
+        "false_positives": [],
+        "false_negatives": [],
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "structural_findings": [
+        {
+          "patternId": "side-tab",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/medium-impact.html",
+          "line": 14,
+          "column": 15,
+          "snippet": ".warning { margin-top: 24px; padding: 18px; border-left: 5px solid #c47a00; border-radius: 8px; background: #fff8e8; }",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A CSS rule combines a left-side border with rounded corners; verify its role and rendered use."
+        },
+        {
+          "patternId": "all-caps-body",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/medium-impact.html",
+          "line": 22,
+          "column": 1,
+          "snippet": "<p class=\"caps\">SERVICE HEALTH IS WITHIN THE EXPECTED RANGE. REVIEW THE REGIONAL DETAILS BELOW TO UNDERSTAND RECENT CHANGES AND FOLLOW UP ON ANY OPEN ITEMS THAT NEED ATTENTION.</p>",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A long paragraph is authored in uppercase; review its role, language, and reading context."
+        },
+        {
+          "patternId": "nested-cards",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/medium-impact.html",
+          "line": 24,
+          "column": 1,
+          "snippet": "<article class=\"card\"><h2>Availability</h2><strong>99.98%</strong><div class=\"panel\">Availability is measured over the last 24 hours.</div></article>",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A card/panel contains another card-like element; verify whether each boundary has a distinct role."
+        },
+        {
+          "patternId": "nested-cards",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/medium-impact.html",
+          "line": 25,
+          "column": 1,
+          "snippet": "<article class=\"card\"><h2>Response time</h2><strong>42 ms</strong><div class=\"panel\">Response time is measured over the last 24 hours.</div></article>",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A card/panel contains another card-like element; verify whether each boundary has a distinct role."
+        },
+        {
+          "patternId": "nested-cards",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/medium-impact.html",
+          "line": 26,
+          "column": 1,
+          "snippet": "<article class=\"card\"><h2>Incidents</h2><strong>0</strong><div class=\"panel\">Incidents is measured over the last 24 hours.</div></article>",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A card/panel contains another card-like element; verify whether each boundary has a distinct role."
+        },
+        {
+          "patternId": "repeated-container-text",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/medium-impact.html",
+          "line": 32,
+          "column": 1,
+          "snippet": "<section class=\"card\" aria-label=\"Repeated action copy\">",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "The container repeats a literal text segment at least three times: 'save changes'."
+        }
+      ],
+      "scanned_files": [
+        "medium-impact.html"
+      ],
+      "browser_capture": {
+        "screenshot": "evals/screenshots/html-medium-impact.png",
+        "viewport": {
+          "width": 1280,
+          "height": 900
+        },
+        "browser_errors": [],
+        "runtime_observations": {
+          "images": [],
+          "methodState": null,
+          "primaryActionOverlap": null
+        }
+      }
+    },
+    {
+      "id": "html-low-impact",
+      "tier": "low",
+      "fixture": "evals/fixtures/low-impact.html",
+      "impact_note": "Low is fixture-specific: justified alignment is isolated to a supporting editorial note, has no task-blocking consequence, and remains a contextual candidate rather than an accessibility verdict.",
+      "structural_score": {
+        "expected": [
+          "justified-text"
+        ],
+        "observed": [
+          "justified-text"
+        ],
+        "true_positives": [
+          "justified-text"
+        ],
+        "false_positives": [],
+        "false_negatives": [],
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "structural_findings": [
+        {
+          "patternId": "justified-text",
+          "path": "C:/Users/amrmu/Downloads/test/anti-slop/evals/fixtures/low-impact.html",
+          "line": 11,
+          "column": 46,
+          "snippet": ".note { width: 360px; margin: 36px auto; text-align: justify; color: #59636d; }",
+          "evidenceModality": "structural",
+          "status": "candidate",
+          "confidence": "candidate",
+          "explanation": "A source signature was found; consult the pattern guide and confirm context before reporting."
+        }
+      ],
+      "scanned_files": [
+        "low-impact.html"
+      ],
+      "browser_capture": {
+        "screenshot": "evals/screenshots/html-low-impact.png",
+        "viewport": {
+          "width": 1280,
+          "height": 900
+        },
+        "browser_errors": [],
+        "runtime_observations": {
+          "images": [],
+          "methodState": null,
+          "primaryActionOverlap": null
+        }
+      }
+    }
+  ],
+  "aggregate": {
+    "structural_candidate_score": {
+      "expected": [
+        "all-caps-body",
+        "broken-image",
+        "gpt-thin-border-wide-shadow",
+        "gradient-text",
+        "justified-text",
+        "nested-cards",
+        "repeated-container-text",
+        "side-tab",
+        "skipped-heading"
+      ],
+      "observed": [
+        "all-caps-body",
+        "broken-image",
+        "gpt-thin-border-wide-shadow",
+        "gradient-text",
+        "justified-text",
+        "nested-cards",
+        "repeated-container-text",
+        "side-tab",
+        "skipped-heading"
+      ],
+      "true_positives": [
+        "all-caps-body",
+        "broken-image",
+        "gpt-thin-border-wide-shadow",
+        "gradient-text",
+        "justified-text",
+        "nested-cards",
+        "repeated-container-text",
+        "side-tab",
+        "skipped-heading"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "interpretation": "Candidate-signature coverage only; structural hits do not confirm user-facing anti-patterns."
+    }
+  },
+  "visual_agent_review": {
+    "status": "not-run-by-local-script",
+    "note": "Requires independent visual/contextual review of captured screenshots; no visual classification is inferred from HTML or browser measurements."
+  }
+}

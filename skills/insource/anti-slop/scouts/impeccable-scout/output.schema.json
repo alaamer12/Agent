@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["scope", "target", "assessedPatternIds", "findings"],
+  "properties": {
+    "scope": {"enum": ["page", "multi-page", "application", "project"]},
+    "target": {"type": "string", "minLength": 1},
+    "assessedPatternIds": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["patternId", "status", "confidence", "evidenceModality", "summary", "evidence", "exceptionsChecked"],
+        "properties": {
+          "patternId": {"type": "string", "minLength": 1},
+          "status": {"enum": ["confirmed", "candidate", "false-positive", "not-observed"]},
+          "confidence": {"enum": ["high", "medium", "low"]},
+          "evidenceModality": {"enum": ["visual", "contextual", "visual-and-contextual"]},
+          "summary": {"type": "string", "minLength": 1},
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["observation", "reference"],
+              "properties": {
+                "observation": {"type": "string", "minLength": 1},
+                "reference": {"type": "string", "minLength": 1},
+                "viewport": {"type": "string"},
+                "state": {"type": "string"}
+              },
+              "additionalProperties": false
+            }
+          },
+          "context": {"type": "string"},
+          "counterevidence": {"type": "array", "items": {"type": "string"}},
+          "exceptionsChecked": {"type": "array", "items": {"type": "string"}},
+          "limitations": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

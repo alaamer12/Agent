@@ -1,0 +1,55 @@
+{
+  "reviewMethod": "Independent visual/context-only assessment of the captured screenshots using the impeccable-scout contract; source HTML and structural-scout findings were not used.",
+  "reviewedArtifacts": [
+    "screenshots/obvious-slop/1.png",
+    "screenshots/subtle-home/1.png",
+    "screenshots/subtle-features/1.png",
+    "screenshots/legitimate-lookalike/1.png",
+    "screenshots/visual-only-occlusion/1.png"
+  ],
+  "cases": [
+    {
+      "id": "obvious-slop",
+      "observed": [
+        {"patternId": "ai-color-palette", "status": "candidate", "evidence": "Dark violet backdrop, violet-to-cyan heading, and gradient CTA; product identity is unknown."},
+        {"patternId": "gradient-text", "status": "candidate", "evidence": "Two-line hero heading visibly uses violet-to-cyan glyph fill; it appears legible at the captured size."},
+        {"patternId": "side-tab", "status": "candidate", "evidence": "Three ordinary feature cards use a conspicuous violet left stripe with no visible status meaning."},
+        {"patternId": "nested-cards", "status": "candidate", "evidence": "Each feature card contains a second rounded metric panel; the child data role may justify it."},
+        {"patternId": "marketing-buzzword", "status": "candidate", "evidence": "Supercharge, AI magic, world-class insights, next-generation platform, and transform appear without a specific offer or evidence in the visible copy."},
+        {"patternId": "radial-halo", "status": "candidate", "evidence": "Broad purple glow sits behind the hero; only one page is shown, so repetition is unknown."},
+        {"patternId": "identical-card-grids", "status": "candidate", "evidence": "Three equal cards repeat icon/title/description/inset metric structure; peer comparability is unknown."},
+        {"patternId": "icon-tile-stack", "status": "not-observed", "evidence": "Standalone emoji-like graphics appear above headings, without rounded-square tile containers."}
+      ],
+      "assessment": "No pattern was visually confirmed because brand, task, and operational context are unavailable; candidates are justified by visible cues."
+    },
+    {
+      "id": "subtle-slop",
+      "observed": [
+        {"patternId": "radial-halo", "status": "candidate", "evidence": "Both routes show a similarly placed, faint lavender hero glow; it may be intentional brand styling."},
+        {"patternId": "numbered-section-labels", "status": "candidate", "evidence": "Sections use 01 and 02 labels; they could indicate purposeful progression, but no task sequence is shown."},
+        {"patternId": "identical-card-grids", "status": "candidate", "evidence": "Related capabilities repeat equal card slots on both routes; that may support scanning."},
+        {"patternId": "hero-metric-layout", "status": "false-positive", "evidence": "148 is labeled as open items across 12 projects and updated today, supplying useful context."},
+        {"patternId": "monotonous-spacing", "status": "not-observed", "evidence": "Related title/body pairs are grouped closely and larger gaps distinguish hero, section, and card groups."}
+      ],
+      "assessment": "The repeated recipe is a low-confidence candidate pending brand/task context; the metric is contextualized and spacing is not visibly monotonous."
+    },
+    {
+      "id": "legitimate-lookalike",
+      "observed": [
+        {"patternId": "ai-color-palette", "status": "false-positive", "evidence": "Restrained blue-violet brand mark and dark operations palette have stated brand/state roles; amber labels a warning."},
+        {"patternId": "side-tab", "status": "false-positive", "evidence": "Amber stripe is attached to a labeled Warning banner describing elevated latency."},
+        {"patternId": "nested-cards", "status": "false-positive", "evidence": "An outlined regional group contains a differentiated latency measurement with target comparison."},
+        {"patternId": "identical-card-grids", "status": "false-positive", "evidence": "Equal cards show comparable availability, response-time, and incident measures."},
+        {"patternId": "icon-tile-stack", "status": "not-observed", "evidence": "The small mark is adjacent to the brand name, not stacked above a feature heading."}
+      ],
+      "assessment": "These surface similarities have explicit operational/brand roles in the captured context; none is a confirmed violation."
+    },
+    {
+      "id": "visual-only-occlusion",
+      "observed": [
+        {"patternId": "text-occlusion", "status": "confirmed", "evidence": "The opaque release banner visibly covers the end of a service-critical recovery instruction."}
+      ],
+      "assessment": "Confirmed from rendered overlap; no source signature is needed to establish the visible obstruction."
+    }
+  ]
+}

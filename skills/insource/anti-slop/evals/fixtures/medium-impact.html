@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operations overview — Relay</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #20252b; background: #f5f7fa; font: 16px/1.5 system-ui, sans-serif; }
+    main { max-width: 1080px; margin: auto; padding: 36px 28px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card, .panel { background: white; border: 1px solid #d7dce2; border-radius: 10px; padding: 20px; }
+    .panel { margin-top: 14px; background: #f0f4f8; }
+    .warning { margin-top: 24px; padding: 18px; border-left: 5px solid #c47a00; border-radius: 8px; background: #fff8e8; }
+    .caps { max-width: 850px; }
+    @media (max-width: 700px) { .metrics { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Operations overview</h1>
+    <p class="caps">SERVICE HEALTH IS WITHIN THE EXPECTED RANGE. REVIEW THE REGIONAL DETAILS BELOW TO UNDERSTAND RECENT CHANGES AND FOLLOW UP ON ANY OPEN ITEMS THAT NEED ATTENTION.</p>
+    <section class="metrics" aria-label="Comparable service metrics">
+      <article class="card"><h2>Availability</h2><strong>99.98%</strong><div class="panel">Availability is measured over the last 24 hours.</div></article>
+      <article class="card"><h2>Response time</h2><strong>42 ms</strong><div class="panel">Response time is measured over the last 24 hours.</div></article>
+      <article class="card"><h2>Incidents</h2><strong>0</strong><div class="panel">Incidents is measured over the last 24 hours.</div></article>
+    </section>
+    <section class="warning" role="status">
+      <strong>Warning</strong>
+      <p>One region is reporting elevated latency. Open the region view for details.</p>
+    </section>
+    <section class="card" aria-label="Repeated action copy">
+      <button type="button">Save changes</button>
+      <p>Choose a region to update monitoring preferences.</p>
+      <button type="button">Save changes</button>
+      <button type="button">Save changes</button>
+    </section>
+  </main>
+</body>
+</html>

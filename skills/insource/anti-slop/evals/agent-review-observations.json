@@ -1,0 +1,46 @@
+{
+  "reviewers": {
+    "visual": {
+      "role": "independent visual/contextual review",
+      "cases": {
+        "html-high-impact": [
+          {"patternId": "broken-image", "status": "candidate", "evidence": "Broken-image marker and visible alt text beside checkout content; persistence/load state unknown."},
+          {"patternId": "low-contrast", "status": "candidate", "evidence": "Hero heading and two payment-related lines appear extremely pale on white; exact contrast was not measured."},
+          {"patternId": "text-overflow", "status": "false-positive", "evidence": "Payment preview ends with an ellipsis, but card type and last four remain visible; a full-value path is unverified."}
+        ],
+        "html-medium-impact": [
+          {"patternId": "repeated-container-text", "status": "candidate", "evidence": "Three visible Save changes buttons occur within the preferences panel; button scope is unknown."}
+        ],
+        "html-low-impact": [
+          {"patternId": "justified-text", "status": "candidate", "evidence": "The narrow supplemental note shows full justification and conspicuously variable word gaps; context remains limited."}
+        ]
+      }
+    },
+    "structural": {
+      "role": "independent code/structure review",
+      "cases": {
+        "html-high-impact": [
+          {"patternId": "broken-image", "status": "candidate"},
+          {"patternId": "gpt-thin-border-wide-shadow", "status": "candidate"},
+          {"patternId": "gradient-text", "status": "candidate"},
+          {"patternId": "nested-cards", "status": "candidate"},
+          {"patternId": "side-tab", "status": "candidate"},
+          {"patternId": "skipped-heading", "status": "candidate"}
+        ],
+        "html-medium-impact": [
+          {"patternId": "all-caps-body", "status": "candidate"},
+          {"patternId": "nested-cards", "status": "candidate"},
+          {"patternId": "repeated-container-text", "status": "candidate"},
+          {"patternId": "side-tab", "status": "candidate"}
+        ],
+        "html-low-impact": [
+          {"patternId": "justified-text", "status": "candidate"}
+        ]
+      }
+    }
+  },
+  "notes": [
+    "Observed IDs/statuses are transcribed from the independent subagent outputs; omitted IDs count as not reported, not as explicit not-observed classifications.",
+    "Structural findings are candidate-only and can be legitimate lookalikes; they are not confirmed design violations."
+  ]
+}

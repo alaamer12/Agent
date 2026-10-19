@@ -1,0 +1,410 @@
+{
+ "title": "Nightly backup job for the invoice database",
+ "date": "6 October 2026",
+ "context": [
+  {
+   "k": "h",
+   "t": "Background"
+  },
+  "You asked for a nightly backup of the **invoice database**. It is **PostgreSQL 16**, about **18 GB**, on one **Ubuntu 24.04** server that runs `systemd`. Nothing is backed up today.",
+  {
+   "k": "ascii",
+   "cap": "Current state. The database and its only copy share one disk.",
+   "t": [
+    " ┌───────────┐  writes   ┌─────────────────┐",
+    " │  Web app  │──────────▶│  PostgreSQL 16  │",
+    " └───────────┘           │  18 GB          │",
+    "                         └────────┬────────┘",
+    "                                  │ stored on",
+    "                         ┌────────▼────────┐",
+    "                         │  Disk (single)  │ ◀── the only copy",
+    "                         │  120 GB free    │",
+    "                         └─────────────────┘",
+    " Today: no backups. If this disk fails, the invoices are gone."
+   ]
+  },
+  {
+   "k": "h",
+   "t": "What is settled and what is open"
+  },
+  {
+   "k": "table",
+   "h": [
+    "Item",
+    "Status",
+    "Where it came from"
+   ],
+   "r": [
+    [
+     "PostgreSQL 16 on Ubuntu 24.04",
+     "Settled",
+     "Your first message"
+    ],
+    [
+     "Dump with `pg_dump`",
+     "Settled",
+     "Safe default at 18 GB, so I did not ask"
+    ],
+    [
+     "Storage budget",
+     "**Unknown**",
+     "Not mentioned"
+    ],
+    [
+     "Scheduler, targets, retention",
+     "**Open**",
+     "Asked below"
+    ]
+   ]
+  },
+  "On Windows Server the scheduler choices would differ, so these answers hold only for this Linux setup."
+ ],
+ "tldr": [
+  "Linux server, PostgreSQL 16, 18 GB, one disk, no backups yet.",
+  "Open decisions: scheduler, copy targets, retention. Some answers add follow-up questions.",
+  "The first option of each question is my recommendation."
+ ],
+ "qs": [
+  {
+   "id": "sched",
+   "q": "What should start the backup each night?",
+   "type": "single",
+   "hi": true,
+   "about": "Something must wake the job at a fixed time. Two tools on this server can do it. They differ when the server is off at 02:00.",
+   "why": "The missed-run behaviour decides whether a rebooted server catches up or silently skips a night.",
+   "terms": [
+    [
+     "Persistent timer",
+     "A systemd setting that runs a missed job as soon as the machine is back on."
+    ]
+   ],
+   "opts": [
+    {
+     "t": "systemd timer",
+     "pros": [
+      "Runs a missed job at next boot",
+      "Logs and failures land in `journalctl`"
+     ],
+     "cons": [
+      "Two files to maintain"
+     ],
+     "d": "A `.timer` and a `.service` file. Logs go to `journalctl`.",
+     "vis": {
+      "k": "ascii",
+      "t": [
+       "night 1         night 2 (server off)           boot",
+       "02:00 ✔ ran     02:00 ✘ missed ╌╌╌╌╌╌╌╌╌╌╌╌▶  ↻ runs now"
+      ]
+     }
+    },
+    {
+     "t": "cron",
+     "pros": [
+      "One line to write",
+      "Familiar to most admins"
+     ],
+     "cons": [
+      "A missed run is **lost**",
+      "Errors reach you only by email"
+     ],
+     "d": "One line in `crontab`. Familiar and short.",
+     "vis": {
+      "k": "ascii",
+      "t": [
+       "night 1         night 2 (server off)           boot",
+       "02:00 ✔ ran     02:00 ✘ missed ╌╌╌╌╌╌╌╌╌╌╌╌▶  ∅ never runs"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "mailer",
+   "when": {
+    "q": "sched",
+    "is": [
+     1
+    ]
+   },
+   "q": "Does this server have a working mail relay?",
+   "type": "single",
+   "about": "cron reports a failed job only by email. Without a relay the message is dropped.",
+   "why": "You chose cron, so this decides whether failures can reach you at all.",
+   "opts": [
+    {
+     "t": "Yes, mail works",
+     "pros": [
+      "No extra setup"
+     ],
+     "cons": [
+      "Relies on mail staying healthy"
+     ],
+     "d": "I will rely on cron's own failure mail."
+    },
+    {
+     "t": "No, or I am not sure",
+     "pros": [
+      "Failures reach you another way"
+     ],
+     "cons": [
+      "One more thing to set up"
+     ],
+     "d": "I will add another way to report failures."
+    }
+   ]
+  },
+  {
+   "id": "fallback",
+   "when": {
+    "q": "mailer",
+    "is": [
+     1
+    ]
+   },
+   "q": "How should a failed backup be reported without mail?",
+   "type": "single",
+   "about": "A backup that fails quietly is the usual way people find out they have none.",
+   "opts": [
+    {
+     "t": "Chat webhook",
+     "pros": [
+      "Fast to notice",
+      "One `curl` call"
+     ],
+     "cons": [
+      "The webhook URL must be kept secret"
+     ],
+     "d": "Slack, Teams or similar. One `curl` call on failure."
+    },
+    {
+     "t": "Log only",
+     "pros": [
+      "Nothing to set up"
+     ],
+     "cons": [
+      "Failures can go **unnoticed for weeks**"
+     ],
+     "d": "Check `journalctl` or a log file yourself."
+    }
+   ],
+   "why": "You chose cron without a mail relay, so failures need another way to reach you."
+  },
+  {
+   "id": "target",
+   "q": "Where should the copies be stored?",
+   "type": "multi",
+   "about": "A copy on the same disk does not survive a disk failure. You can choose more than one target.",
+   "why": "Your server has one disk, so a local-only copy would protect against mistakes but not against hardware loss.",
+   "vis": {
+    "k": "list",
+    "i": [
+     "A mistaken delete needs **any** copy.",
+     "A disk failure needs a copy **off this disk**.",
+     "A lost site needs a copy **off-site**."
+    ],
+    "cap": "What each kind of failure requires."
+   },
+   "opts": [
+    {
+     "t": "Object storage bucket",
+     "pros": [
+      "Survives disk and site loss",
+      "Cheap per GB"
+     ],
+     "cons": [
+      "Downloads can carry an egress fee",
+      "Needs an account and keys"
+     ],
+     "d": "Upload each dump to an S3-compatible bucket."
+    },
+    {
+     "t": "Local folder `/var/backups/pg`",
+     "pros": [
+      "Fastest restore",
+      "No cost"
+     ],
+     "cons": [
+      "Lost with the disk",
+      "Not a real backup alone"
+     ],
+     "d": "Fast restores from the newest dumps."
+    },
+    {
+     "t": "Lock uploads for 30 days",
+     "pros": [
+      "Safe from deletion by a bug or an attacker"
+     ],
+     "cons": [
+      "Space cannot be freed for 30 days"
+     ],
+     "when": {
+      "q": "target",
+      "is": [
+       0
+      ]
+     },
+     "d": "Objects cannot be changed or deleted for 30 days, even by an attacker with your keys."
+    }
+   ]
+  },
+  {
+   "id": "tool",
+   "when": {
+    "q": "target",
+    "is": [
+     0
+    ]
+   },
+   "q": "Which tool should upload to the bucket?",
+   "type": "single",
+   "about": "The script needs a program to send each file. The two common choices trade breadth for provider-specific features.",
+   "opts": [
+    {
+     "t": "rclone",
+     "d": "A third-party tool that speaks to many storage providers with the same commands.",
+     "facets": [
+      {
+       "h": "Advantages over the provider CLI",
+       "tone": "good",
+       "i": [
+        "Same commands for dozens of providers",
+        "Verifies uploads with `--checksum`"
+       ]
+      },
+      {
+       "h": "Disadvantages versus the provider CLI",
+       "tone": "bad",
+       "i": [
+        "You install and update it yourself",
+        "New provider-only features arrive later"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "The provider's own CLI",
+     "d": "For example `aws s3`. Made by the storage provider.",
+     "facets": [
+      {
+       "h": "Advantages over rclone",
+       "tone": "good",
+       "i": [
+        "Supports every provider feature first, such as object lock flags",
+        "Maintained by the provider"
+       ]
+      },
+      {
+       "h": "Disadvantages versus rclone",
+       "tone": "bad",
+       "i": [
+        "Works with that provider only",
+        "Moving provider means rewriting commands"
+       ]
+      }
+     ]
+    }
+   ],
+   "why": "The tool is called from your script every night, so changing it later means re-testing."
+  },
+  {
+   "id": "keep",
+   "q": "How long should old backups be kept?",
+   "type": "single",
+   "about": "Each night adds about 4 GB compressed. Without a limit the disk fills within a month.",
+   "why": "This sets the oldest state you can return to, for example after a bug that corrupts data slowly.",
+   "vis": [
+    {
+     "k": "chart",
+     "title": "Storage needed (GB). Free disk: 120.",
+     "max": 120,
+     "b": [
+      [
+       "14 daily",
+       56
+      ],
+      [
+       "14+8+6",
+       112
+      ]
+     ]
+    },
+    {
+     "k": "code",
+     "l": "sh",
+     "f": "prune.sh",
+     "t": [
+      "# 14 daily dumps",
+      "find /var/backups/pg -name \"*.dump\" -mtime +14 -delete"
+     ]
+    }
+   ],
+   "opts": [
+    {
+     "t": "14 daily, 8 weekly, 6 monthly",
+     "pros": [
+      "Dense recent history",
+      "Can go back 6 months"
+     ],
+     "cons": [
+      "About **112 GB**, nearly all free space"
+     ],
+     "d": "Dense recent history, sparse older history."
+    },
+    {
+     "t": "14 daily only",
+     "pros": [
+      "Simplest",
+      "About 56 GB"
+     ],
+     "cons": [
+      "A problem noticed after **15 days** cannot be undone"
+     ],
+     "d": "Simplest. Nothing older than two weeks."
+    }
+   ]
+  },
+  {
+   "id": "legal",
+   "when": {
+    "q": "keep",
+    "custom": true
+   },
+   "q": "Is your retention period a legal or contract requirement?",
+   "type": "single",
+   "about": "You wrote your own retention period. Some rules fix both the period and where the data may be stored.",
+   "why": "A legal requirement can rule out some storage targets chosen above.",
+   "opts": [
+    {
+     "t": "Yes, it is required",
+     "pros": [
+      "Choices can be checked against the rule"
+     ],
+     "cons": [
+      "May rule out some targets"
+     ],
+     "d": "Tell me the rule in a follow-up message."
+    },
+    {
+     "t": "No, it is my own choice",
+     "pros": [
+      "Full freedom in choosing targets"
+     ],
+     "cons": [
+      "No outside rule to lean on"
+     ],
+     "d": "I will use your period as written."
+    }
+   ],
+   "vis": {
+    "k": "src",
+    "i": [
+     [
+      "systemd.timer manual (sample source)",
+      "https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html"
+     ]
+    ]
+   }
+  }
+ ],
+ "mode": "concise"
+}

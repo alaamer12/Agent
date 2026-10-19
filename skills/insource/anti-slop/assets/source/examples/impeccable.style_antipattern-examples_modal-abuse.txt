@@ -1,0 +1,59 @@
+Dashboard
+Home
+Projects
+Team
+Overview
+Analytics
+Reports
+Settings
+Recent Activity
+
+Your recent actions will appear here...
+
+Quick Stats
+
+Overview of your account metrics...
+
+Advanced Settings
+×
+Notifications
+Email notifications
+Receive updates via email
+Push notifications
+Browser push alerts
+Notification frequency
+Instant
+Daily digest
+Weekly
+Privacy & Security
+Two-factor authentication
+Add extra security
+Session timeout
+30 minutes
+1 hour
+4 hours
+Activity logging
+Track account activity
+Data & Export
+Auto-backup
+Automatic data backups
+Export format
+CSV
+JSON
+Excel
+API Settings
+API Key
+Rate limit
+100/min
+500/min
+1000/min
+Cancel
+Save Changes
+POSITIONED CHILD CLIPPED BY OVERFLOW CONTAINER
+LOW CONTRAST TEXT
+LOW CONTRAST TEXT
+TEXT OCCLUDED BY AN OVERLAPPING ELEMENT
+FLAT TYPE HIERARCHY
+Role sizes: body 14px, h4 14px, h3 16px (largest adjacent step 1.14:1; target 1.25:1)
+◉
+×

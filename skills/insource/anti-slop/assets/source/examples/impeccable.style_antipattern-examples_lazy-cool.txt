@@ -1,0 +1,48 @@
+~/hacker-vibes
+npm run look-cool
+<CYBER/>
+FEATURES
+DOCS
+PRICING
+LAUNCH
+// NOW IN BETA
+Build the Future
+with Cyber Tech
+
+const future = await buildWithAI(); // Neon glow makes everything 10x more futuristic
+
+INITIALIZE_
+VIEW_CODE
+⚡
+LIGHTNING
+
+Blazing fast with quantum acceleration
+
+🔮
+AI POWERED
+
+Neural networks do the heavy lifting
+
+🌐
+WEB3 READY
+
+Decentralized by default
+
+✦ GLOWING SHADOW ACCENTS
+‹
+›
+✦ GLOWING SHADOW ACCENTS
+✦ GLOWING SHADOW ACCENTS
+✦ HERO EYEBROW / PILL CHIP
+✦ GLOWING SHADOW ACCENTS
+‹
+›
+✦ GLOWING SHADOW ACCENTS
+TEXT OCCLUDED BY AN OVERLAPPING ELEMENT
+TEXT OCCLUDED BY AN OVERLAPPING ELEMENT
+SKIPPED HEADING LEVEL
+<h1> "Build the Futurewith Cyber Tech" followed by <h3> "Lightning" (missing h2)
+GLOWING SHADOW ACCENTS
+Zero-offset text-shadow glow (#00ffff)
+◉
+×

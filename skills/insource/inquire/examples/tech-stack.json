@@ -1,0 +1,190 @@
+{
+ "title": "Frontend stack for the customer portal",
+ "date": "6 October 2026",
+ "mode": "concise",
+ "context": [
+  "You are building a **customer portal**: logged-in users view invoices and open support tickets. The team has **two developers**, both strong in **Vue**, and a **6-week** deadline. Search engines must index the public help pages, but the logged-in area does not need indexing.",
+  {
+   "k": "table",
+   "h": [
+    "Item",
+    "Status",
+    "Source"
+   ],
+   "r": [
+    [
+     "Team skill",
+     "Vue",
+     "Your message"
+    ],
+    [
+     "Deadline",
+     "6 weeks",
+     "Your message"
+    ],
+    [
+     "SEO",
+     "Public help pages only",
+     "Your message"
+    ],
+    [
+     "Hosting",
+     "**Unknown**",
+     "Not mentioned"
+    ]
+   ]
+  }
+ ],
+ "tldr": [
+  "Two Vue developers, 6 weeks, public help pages need SEO.",
+  "Decisions: framework, rendering style, hosting."
+ ],
+ "qs": [
+  {
+   "id": "framework",
+   "type": "single",
+   "hi": true,
+   "q": "Which full-stack web framework should the portal use?",
+   "about": "Both frameworks add server rendering, routing and an API layer on top of a UI library.",
+   "why": "The framework fixes the language of your components for the whole project, so it sets how fast the team can move.",
+   "opts": [
+    {
+     "t": "Nuxt",
+     "d": "The Vue framework. Your team already writes Vue components.",
+     "facets": [
+      {
+       "h": "Advantages over Next.js",
+       "tone": "good",
+       "i": [
+        "No new library to learn for the team",
+        "Auto-imports and file conventions reduce boilerplate"
+       ]
+      },
+      {
+       "h": "Disadvantages versus Next.js",
+       "tone": "bad",
+       "i": [
+        "Smaller ecosystem of ready-made portal components",
+        "Fewer developers to hire later"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "Next.js",
+     "d": "The React framework. Requires writing components in React.",
+     "facets": [
+      {
+       "h": "Advantages over Nuxt",
+       "tone": "good",
+       "i": [
+        "Larger ecosystem and more hiring options",
+        "More third-party examples for dashboards"
+       ]
+      },
+      {
+       "h": "Disadvantages versus Nuxt",
+       "tone": "bad",
+       "i": [
+        "The team must learn React: **plan 2 to 3 weeks** of slower work",
+        "A 6-week deadline leaves little room for that"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "render",
+   "type": "single",
+   "q": "How should pages be rendered?",
+   "about": "Public help pages need HTML ready for search engines. The logged-in area does not.",
+   "why": "The rendering style decides your hosting cost and how fast pages feel.",
+   "vis": {
+    "k": "ascii",
+    "cap": "Where the HTML is produced in each style.",
+    "t": [
+     " HYBRID",
+     "   /help/*  ──built once──▶  static files on a CDN     (indexed by search engines)",
+     "   /app/*   ──in browser──▶  single-page app           (not indexed, not needed)",
+     "",
+     " EVERYTHING ON THE SERVER",
+     "   any page ──every visit─▶  server builds the HTML    (needs an always-on server)"
+    ]
+   },
+   "opts": [
+    {
+     "t": "Hybrid: static help pages, client-side app",
+     "d": "Help pages are built once. The logged-in area runs in the browser.",
+     "pros": [
+      "Cheapest hosting",
+      "SEO where it is needed"
+     ],
+     "cons": [
+      "Two rendering modes to configure"
+     ]
+    },
+    {
+     "t": "Server-render every page",
+     "d": "The server builds each page on each visit.",
+     "pros": [
+      "One mental model",
+      "Fast first paint everywhere"
+     ],
+     "cons": [
+      "Needs an always-on server",
+      "Higher hosting cost"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "host",
+   "type": "multi",
+   "q": "Where should it be hosted?",
+   "about": "You can pick more than one if you want a fallback or a staging environment.",
+   "opts": [
+    {
+     "t": "A static host plus a small API",
+     "d": "Static files on a CDN; the API on a managed service.",
+     "facets": [
+      {
+       "h": "Choose it when",
+       "tone": "info",
+       "i": [
+        "You chose the hybrid style"
+       ]
+      },
+      {
+       "h": "Avoid it when",
+       "tone": "bad",
+       "i": [
+        "You need server-rendered private pages"
+       ]
+      }
+     ]
+    },
+    {
+     "t": "A container platform",
+     "d": "One container runs the whole app.",
+     "facets": [
+      {
+       "h": "Choose it when",
+       "tone": "info",
+       "i": [
+        "You server-render everything"
+       ]
+      },
+      {
+       "h": "Avoid it when",
+       "tone": "bad",
+       "i": [
+        "Nobody on the team can operate containers"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

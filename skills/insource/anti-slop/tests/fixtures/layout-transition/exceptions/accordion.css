@@ -1,0 +1,3 @@
+.accordion-panel {
+  transition: height 180ms ease;
+}

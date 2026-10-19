@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["evidenceModality", "findingStatus", "scannedFileCount", "findings"],
+  "properties": {
+    "evidenceModality": {"const": "structural"},
+    "findingStatus": {"const": "candidate-only"},
+    "scannedFileCount": {"type": "integer", "minimum": 0},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["patternId", "path", "line", "column", "snippet", "evidenceModality", "status", "confidence", "explanation"],
+        "properties": {
+          "patternId": {"type": "string", "minLength": 1},
+          "path": {"type": "string", "minLength": 1},
+          "line": {"type": "integer", "minimum": 1},
+          "column": {"type": "integer", "minimum": 1},
+          "snippet": {"type": "string"},
+          "evidenceModality": {"const": "structural"},
+          "status": {"const": "candidate"},
+          "confidence": {"const": "candidate"},
+          "explanation": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,240 @@
+{
+  "generated_at": "2026-10-06T08:31:01.828441+00:00",
+  "score_scope": "three curated HTML cases; case-pattern annotations, not a 67-pattern or production benchmark",
+  "scoring_rules": {
+    "positive_prediction": "candidate or confirmed",
+    "visual_false_positive": "counts as a negative classification and is separately checked against expected false-positive lookalikes",
+    "combined_status": "visual confirmed wins; an explicit visual false-positive resolves only when no structural candidate conflicts; otherwise either modality yields candidate; no finding yields not-observed",
+    "limitation": "A detector can score perfectly on intentionally planted signatures without demonstrating general-world precision or recall."
+  },
+  "aggregate": {
+    "visual_detection": {
+      "expected_count": 9,
+      "observed_count": 4,
+      "true_positives": [
+        "html-high-impact:broken-image",
+        "html-high-impact:low-contrast",
+        "html-low-impact:justified-text",
+        "html-medium-impact:repeated-container-text"
+      ],
+      "false_positives": [],
+      "false_negatives": [
+        "html-high-impact:gpt-thin-border-wide-shadow",
+        "html-high-impact:nested-cards",
+        "html-high-impact:side-tab",
+        "html-high-impact:text-occlusion",
+        "html-medium-impact:all-caps-body"
+      ],
+      "precision": 1.0,
+      "recall": 0.4444,
+      "f1": 0.6154
+    },
+    "structural_candidate_detection": {
+      "expected_count": 11,
+      "observed_count": 11,
+      "true_positives": [
+        "html-high-impact:broken-image",
+        "html-high-impact:gpt-thin-border-wide-shadow",
+        "html-high-impact:gradient-text",
+        "html-high-impact:nested-cards",
+        "html-high-impact:side-tab",
+        "html-high-impact:skipped-heading",
+        "html-low-impact:justified-text",
+        "html-medium-impact:all-caps-body",
+        "html-medium-impact:nested-cards",
+        "html-medium-impact:repeated-container-text",
+        "html-medium-impact:side-tab"
+      ],
+      "false_positives": [],
+      "false_negatives": [],
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "combined_positive_findings": {
+      "expected_count": 11,
+      "observed_count": 12,
+      "true_positives": [
+        "html-high-impact:broken-image",
+        "html-high-impact:gpt-thin-border-wide-shadow",
+        "html-high-impact:gradient-text",
+        "html-high-impact:low-contrast",
+        "html-high-impact:nested-cards",
+        "html-high-impact:side-tab",
+        "html-high-impact:skipped-heading",
+        "html-low-impact:justified-text",
+        "html-medium-impact:all-caps-body",
+        "html-medium-impact:repeated-container-text"
+      ],
+      "false_positives": [
+        "html-medium-impact:nested-cards",
+        "html-medium-impact:side-tab"
+      ],
+      "false_negatives": [
+        "html-high-impact:text-occlusion"
+      ],
+      "precision": 0.8333,
+      "recall": 0.9091,
+      "f1": 0.8696
+    },
+    "visual_lookalike_classification": {
+      "correct": 1,
+      "expected": 3,
+      "accuracy": 0.3333
+    },
+    "combined_status_calibration": {
+      "correct": 11,
+      "expected": 14,
+      "accuracy": 0.7857
+    }
+  },
+  "cases": [
+    {
+      "case_id": "html-high-impact",
+      "tier": "high",
+      "visual": {
+        "expected_count": 6,
+        "observed_count": 2,
+        "true_positives": [
+          "broken-image",
+          "low-contrast"
+        ],
+        "false_positives": [],
+        "false_negatives": [
+          "gpt-thin-border-wide-shadow",
+          "nested-cards",
+          "side-tab",
+          "text-occlusion"
+        ],
+        "precision": 1.0,
+        "recall": 0.3333,
+        "f1": 0.5
+      },
+      "structural": {
+        "expected_count": 6,
+        "observed_count": 6,
+        "true_positives": [
+          "broken-image",
+          "gpt-thin-border-wide-shadow",
+          "gradient-text",
+          "nested-cards",
+          "side-tab",
+          "skipped-heading"
+        ],
+        "false_positives": [],
+        "false_negatives": [],
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "expected_overall_status": {
+        "broken-image": "candidate",
+        "low-contrast": "candidate",
+        "text-occlusion": "confirmed",
+        "text-overflow": "false-positive",
+        "gradient-text": "candidate",
+        "side-tab": "candidate",
+        "nested-cards": "candidate",
+        "gpt-thin-border-wide-shadow": "candidate",
+        "skipped-heading": "candidate"
+      },
+      "observed_overall_status": {
+        "broken-image": "candidate",
+        "low-contrast": "candidate",
+        "text-occlusion": "not-observed",
+        "text-overflow": "false-positive",
+        "gradient-text": "candidate",
+        "side-tab": "candidate",
+        "nested-cards": "candidate",
+        "gpt-thin-border-wide-shadow": "candidate",
+        "skipped-heading": "candidate"
+      },
+      "overall_status_exact_matches": 8,
+      "overall_status_count": 9
+    },
+    {
+      "case_id": "html-medium-impact",
+      "tier": "medium",
+      "visual": {
+        "expected_count": 2,
+        "observed_count": 1,
+        "true_positives": [
+          "repeated-container-text"
+        ],
+        "false_positives": [],
+        "false_negatives": [
+          "all-caps-body"
+        ],
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6667
+      },
+      "structural": {
+        "expected_count": 4,
+        "observed_count": 4,
+        "true_positives": [
+          "all-caps-body",
+          "nested-cards",
+          "repeated-container-text",
+          "side-tab"
+        ],
+        "false_positives": [],
+        "false_negatives": [],
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "expected_overall_status": {
+        "all-caps-body": "candidate",
+        "repeated-container-text": "candidate",
+        "side-tab": "false-positive",
+        "nested-cards": "false-positive"
+      },
+      "observed_overall_status": {
+        "all-caps-body": "candidate",
+        "repeated-container-text": "candidate",
+        "side-tab": "candidate",
+        "nested-cards": "candidate"
+      },
+      "overall_status_exact_matches": 2,
+      "overall_status_count": 4
+    },
+    {
+      "case_id": "html-low-impact",
+      "tier": "low",
+      "visual": {
+        "expected_count": 1,
+        "observed_count": 1,
+        "true_positives": [
+          "justified-text"
+        ],
+        "false_positives": [],
+        "false_negatives": [],
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "structural": {
+        "expected_count": 1,
+        "observed_count": 1,
+        "true_positives": [
+          "justified-text"
+        ],
+        "false_positives": [],
+        "false_negatives": [],
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "expected_overall_status": {
+        "justified-text": "candidate"
+      },
+      "observed_overall_status": {
+        "justified-text": "candidate"
+      },
+      "overall_status_exact_matches": 1,
+      "overall_status_count": 1
+    }
+  ],
+  "observations_file": "agent-review-observations.json"
+}

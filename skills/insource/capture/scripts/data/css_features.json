@@ -1,0 +1,41 @@
+{
+ "_comment": "Reporting lists for the tokens report. 'modern_properties' = notable newer CSS properties to call out when used; 'selector_features' = selector constructs to count. Edit freely: they only affect informational summary lines.",
+ "modern_properties": [
+  "backdrop-filter",
+  "mix-blend-mode",
+  "mask",
+  "clip-path",
+  "aspect-ratio",
+  "scroll-snap-type",
+  "text-wrap",
+  "color-scheme",
+  "accent-color",
+  "scrollbar-gutter",
+  "container-type",
+  "font-variation-settings",
+  "font-variant-numeric",
+  "inset",
+  "translate",
+  "will-change",
+  "view-transition-name",
+  "animation-timeline",
+  "anchor-name",
+  "field-sizing"
+ ],
+ "selector_features": [
+  ":has(",
+  ":is(",
+  ":where(",
+  ":not(",
+  "::before",
+  "::after",
+  ":before",
+  ":after",
+  "::selection",
+  "::placeholder",
+  ":focus-visible",
+  ":hover",
+  ":nth-child(",
+  ":focus-within"
+ ]
+}

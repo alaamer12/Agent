@@ -1,0 +1,3 @@
+.drawing-canvas {
+  background-image: repeating-linear-gradient(0deg, #ddd 0 1px, transparent 1px 16px);
+}

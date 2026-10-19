@@ -1,0 +1,51 @@
+genericstartup
+Product
+Features
+Pricing
+Sign Up
+FONT USED
+Inter
+400 · 500 · 600 · 700 · 800
+NOW AVAILABLE
+The platform for modern teams
+
+Streamline your workflow with our all-in-one solution. Built for teams who want to move fast and ship faster.
+
+Get Started Free
+Book a Demo
+⚡
+Lightning Fast
+
+Built for speed from the ground up. Everything loads instantly.
+
+🔒
+Secure by Default
+
+Enterprise-grade security with end-to-end encryption.
+
+🔗
+Integrations
+
+Connect with 100+ tools your team already uses.
+
+"This product has completely transformed how our team works. We've seen a 40% increase in productivity."
+
+Sarah Johnson
+Head of Product, TechCorp
+UNDERSIZED FUNCTIONAL TEXT
+‹
+›
+LOW CONTRAST TEXT
+✦ ICON TILE STACKED ABOVE HEADING
+LOW CONTRAST TEXT
+✦ ICON TILE STACKED ABOVE HEADING
+LOW CONTRAST TEXT
+✦ ICON TILE STACKED ABOVE HEADING
+LOW CONTRAST TEXT
+LOW CONTRAST TEXT
+TEXT OCCLUDED BY AN OVERLAPPING ELEMENT
+TEXT OCCLUDED BY AN OVERLAPPING ELEMENT
+SKIPPED HEADING LEVEL
+<h1> "The platform for modern teams" followed by <h3> "Lightning Fast" (missing h2)
+◉
+×

@@ -1,0 +1,117 @@
+{
+ "_comment": "Button/summary texts that mean 'reveal more content'. Matched case-insensitively as the whole text or a short prefix (e.g. 'show more (24)'). Add languages or phrases here, or per run with --more-phrase.",
+ "en": [
+  "load more",
+  "show more",
+  "view more",
+  "see more",
+  "read more",
+  "show all",
+  "view all",
+  "see all",
+  "more results",
+  "more posts",
+  "more items",
+  "expand",
+  "expand all",
+  "older posts"
+ ],
+ "ar": [
+  "عرض المزيد",
+  "تحميل المزيد",
+  "المزيد",
+  "اقرأ المزيد",
+  "قراءة المزيد",
+  "عرض الكل",
+  "إظهار المزيد",
+  "مشاهدة المزيد",
+  "شاهد المزيد",
+  "تحميل المزيد من"
+ ],
+ "es": [
+  "ver más",
+  "mostrar más",
+  "cargar más",
+  "leer más",
+  "ver todo",
+  "mostrar todo",
+  "más resultados"
+ ],
+ "fr": [
+  "voir plus",
+  "afficher plus",
+  "charger plus",
+  "lire la suite",
+  "tout afficher",
+  "voir tout",
+  "plus de résultats"
+ ],
+ "de": [
+  "mehr anzeigen",
+  "mehr laden",
+  "weitere laden",
+  "mehr lesen",
+  "alle anzeigen",
+  "mehr ansehen"
+ ],
+ "pt": [
+  "ver mais",
+  "carregar mais",
+  "mostrar mais",
+  "ler mais",
+  "mostrar tudo",
+  "ver tudo"
+ ],
+ "it": [
+  "mostra altro",
+  "carica altro",
+  "mostra di più",
+  "leggi di più",
+  "mostra tutto",
+  "vedi altro"
+ ],
+ "nl": [
+  "meer weergeven",
+  "meer laden",
+  "toon meer",
+  "lees meer",
+  "alles tonen"
+ ],
+ "tr": [
+  "daha fazla göster",
+  "daha fazla yükle",
+  "devamını oku",
+  "tümünü göster",
+  "daha fazla"
+ ],
+ "ru": [
+  "показать ещё",
+  "показать еще",
+  "загрузить ещё",
+  "загрузить еще",
+  "читать далее",
+  "показать все"
+ ],
+ "zh": [
+  "加载更多",
+  "查看更多",
+  "显示更多",
+  "更多",
+  "展开",
+  "阅读更多",
+  "展开全部"
+ ],
+ "ja": [
+  "もっと見る",
+  "さらに表示",
+  "続きを読む",
+  "もっと読み込む",
+  "すべて表示"
+ ],
+ "ko": [
+  "더 보기",
+  "더보기",
+  "더 불러오기",
+  "전체 보기"
+ ]
+}

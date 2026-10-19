@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Decide: UI framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f5fb;--fg:#1a1f36;--mut:#55607a;--card:#fff;--line:#dde1ef;--acc:#4f46e5;--accbg:#e8e7fd;
+--winbg:#dcfce7;--winfg:#146c35;--whybg:#e0f2fe;--whyfg:#07557e;--whyln:#38a6e0;--warnbg:#fef3c7;--warnfg:#8a4a07;--mbg:#ede9fe;--mfg:#5b21b6;
+--react:#0b78b8;--vue:#168a4a;--solid:#2f5fd6;--svelte:#d9530c;--qwik:#8a2fd0}
+:root[data-theme=dark]{--bg:#0d1017;--fg:#e8ebf5;--mut:#a3acc2;--card:#151a25;--line:#2a3246;--acc:#8e89ff;--accbg:#232454;
+--winbg:#12301f;--winfg:#86efac;--whybg:#0c2a3d;--whyfg:#8ad6fb;--whyln:#2b8fc7;--warnbg:#3a2a0a;--warnfg:#fcd34d;--mbg:#2a1f4d;--mfg:#c9b8ff;
+--react:#4cc2ff;--vue:#4ade80;--solid:#7da2ff;--svelte:#ff8a4c;--qwik:#c78bff}
+html{height:100%;font-size:clamp(17px,.55vw + 15px,22px);scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Lexend","Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.75;letter-spacing:.01em}
+main{width:100%;padding:clamp(18px,4vw,64px) clamp(16px,4vw,72px) 80px}
+h1{font-size:clamp(1.9rem,2.6vw + 1rem,3.2rem);line-height:1.2;margin:0 0 16px;letter-spacing:-.01em}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:99px;background:var(--card);border:1.5px solid var(--c);font-weight:500;font-size:.95rem}
+.chip:before{content:"";width:.7em;height:.7em;border-radius:50%;background:var(--c)}
+.cap{margin:0 0 28px;color:var(--mut);font-size:1.1rem;max-width:70ch}
+.steps{display:flex;gap:6px;margin-bottom:32px;border-bottom:2px solid var(--line);overflow-x:auto}
+.steps button{all:unset;cursor:pointer;padding:12px 18px;min-height:44px;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-2px;display:flex;gap:10px;align-items:center;white-space:nowrap;font-weight:500}
+.steps button[aria-selected=true]{color:var(--acc);border-color:var(--acc);font-weight:600}
+.n{display:inline-grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:var(--accbg);color:var(--acc);font-size:.9rem;font-weight:700;flex:none}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.pane[hidden]{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,34rem),1fr));gap:clamp(28px,3.5vw,56px)}
+.dim{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(18px,2.4vw,32px)}
+.dim h2{font-size:1.35rem;margin:0 0 14px;display:flex;gap:12px;align-items:center;line-height:1.3}
+.win{margin:0 0 16px;padding:10px 14px;border-radius:12px;background:var(--winbg);color:var(--winfg);font-size:1.05rem}
+.win b{color:var(--k,var(--winfg))}
+.win .tag{font-weight:700;margin-right:8px}
+.win .mg{opacity:.85;font-size:.95rem}
+.dim ul{margin:0 0 18px;padding:0;list-style:none}
+.dim li{margin:6px 0;padding:8px 12px;border-radius:10px}
+.who{font-weight:600;color:var(--c,var(--acc))}
+.m{background:var(--mbg);color:var(--mfg);padding:1px 7px;border-radius:7px;font:500 .9em "JetBrains Mono",ui-monospace,monospace;white-space:nowrap}
+.why{margin:0;padding:12px 16px;border-radius:12px;background:var(--whybg);color:var(--whyfg);border-left:5px solid var(--whyln);font-size:1rem}
+.why b{display:block;font-size:.9rem;margin-bottom:2px}
+.verdict{margin-top:clamp(28px,3.5vw,56px);padding:clamp(18px,2.4vw,32px);border:2px solid var(--acc);border-radius:20px;background:var(--card)}
+.verdict h2{margin:0 0 14px;font-size:1.5rem}
+.row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.row span.l{flex:1 1 18rem}
+.pick{padding:3px 14px;border-radius:99px;color:#fff;font-weight:600;background:var(--c);font-size:.95rem}
+:root[data-theme=dark] .pick{color:#0d1017}
+.note{margin-top:20px;padding:12px 16px;border-radius:12px;background:var(--warnbg);color:var(--warnfg);font-size:.95rem}
+.ex{display:flex;gap:16px;margin-bottom:clamp(28px,4vw,48px);max-width:60rem}
+.ex>div{min-width:0;flex:1}
+.ex h2{font-size:1.4rem;margin:2px 0 4px;line-height:1.3}
+.ex p{margin:0 0 14px;color:var(--mut)}
+.box{border:1px solid #2a3042;border-radius:16px;background:#12151c;overflow:hidden;color:#d6dbe8}
+.bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #2a3042;background:#171b24}
+.tabs{display:flex;gap:6px;overflow-x:auto;flex:1}
+.tabs button{all:unset;cursor:pointer;padding:6px 14px;min-height:36px;display:inline-flex;align-items:center;border-radius:10px;border:1.5px solid transparent;color:#9aa3b8;font:500 .95rem "JetBrains Mono",ui-monospace,monospace;white-space:nowrap}
+.tabs button[aria-selected=true]{border-color:var(--c);color:var(--c);background:#1d2230}
+.cp{all:unset;cursor:pointer;padding:6px 12px;min-height:36px;color:#9aa3b8;font:500 .85rem "Lexend",sans-serif;border-radius:8px;border:1px solid #2a3042}
+.cp:hover{color:#fff;border-color:#5a6380}
+pre{margin:0;padding:18px 20px;overflow-x:auto;font:400 .95rem/1.75 "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;tab-size:2}
+.cm{color:#6b7794;font-style:italic}.st{color:#a5e075}.kw{color:#ff7ab2}.tg{color:#6cb6ff}.at{color:#ffc66d}.fn{color:#c4a2ff}.nu{color:#ff9e64}
+.nav{display:flex;justify-content:space-between;margin-top:32px}
+.nav button{all:unset;cursor:pointer;padding:12px 24px;min-height:44px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);font-weight:500}
+.nav .go{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:600}
+:root[data-theme=dark] .nav .go{color:#0d1017}
+@media(max-width:560px){.ex{gap:10px}.ex>.n{display:none}.dim li{padding-left:10px}}
+
+:root{--h5b:#bbf7d0;--h5f:#14532d;--h4b:#dcfce7;--h4f:#166534;--h3b:#fef3c7;--h3f:#78350f;--h2b:#fee2e2;--h2f:#7f1d1d}
+:root[data-theme=dark]{--h5b:#14532d;--h5f:#bbf7d0;--h4b:#1b3b2a;--h4f:#9be7b5;--h3b:#4a3a10;--h3f:#fde68a;--h2b:#4a1d1d;--h2f:#fecaca}
+.chip{font:500 .95rem "Lexend",sans-serif;color:var(--fg);cursor:pointer;min-height:44px;padding:6px 8px 6px 16px}
+.chip[aria-pressed=true]{background:var(--c);color:#fff}
+:root[data-theme=dark] .chip[aria-pressed=true]{color:#0d1017}
+.chip:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.sc{font:600 .85rem "JetBrains Mono",ui-monospace,monospace;padding:2px 10px;border-radius:99px;background:var(--accbg);color:var(--acc)}
+.chip[aria-pressed=true] .sc{background:rgba(255,255,255,.28);color:inherit}
+.hint{flex-basis:100%;margin:2px 0 0;color:var(--mut);font-size:.9rem}
+.intro{padding:14px 18px;border-radius:14px;background:var(--whybg);color:var(--whyfg);margin:0 0 clamp(24px,3vw,40px);max-width:80ch}
+.dm{opacity:.3;filter:grayscale(.7);transition:opacity .2s}
+.hl{background:color-mix(in srgb,var(--fc) 15%,transparent);outline:2px solid color-mix(in srgb,var(--fc) 50%,transparent)}
+li.hl,.row.hl,.br.hl{border-radius:10px}
+.who:before{content:"";display:inline-block;width:.6em;height:.6em;border-radius:50%;background:var(--c);margin-right:.4em}
+.chart{margin:0 0 18px;padding:14px 16px;border-radius:14px;background:var(--bg);border:1px solid var(--line)}
+.chart h3{margin:0 0 10px;font-size:.95rem;font-weight:600}
+.br{display:grid;grid-template-columns:4.5rem 1fr auto;gap:10px;align-items:center;padding:4px 8px;font-size:.95rem}
+.bt{height:.9rem;background:var(--line);border-radius:99px;overflow:hidden}
+.bt i{display:block;height:100%;border-radius:99px;background:var(--c)}
+.bv{font:500 .85rem "JetBrains Mono",ui-monospace,monospace;text-align:right;white-space:nowrap}
+.cn{margin:8px 0 0;font-size:.85rem;color:var(--mut)}
+.src{margin:0 0 16px;font-size:.85rem;color:var(--mut)}
+.src a{color:var(--acc)}
+.tw{overflow-x:auto;margin-top:clamp(28px,3.5vw,56px);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(14px,2vw,28px)}
+.tw h2{margin:0 0 12px;font-size:1.35rem}
+table{border-collapse:separate;border-spacing:4px;width:100%;min-width:46rem;font-size:.95rem}
+th{font-weight:600;text-align:left;padding:8px 10px}
+td{padding:8px 10px;border-radius:8px}
+td.t{text-align:center;font-weight:600}
+.h5{background:var(--h5b)!important;color:var(--h5f)}.h4{background:var(--h4b)!important;color:var(--h4f)}.h3{background:var(--h3b)!important;color:var(--h3f)}.h2{background:var(--h2b)!important;color:var(--h2f)}
+td.sum{font:600 1rem "JetBrains Mono",monospace;text-align:center}
+
+.tl{display:flex;gap:6px}
+.steps .pdfb{margin:0 0 0 auto;align-self:center;padding:8px 18px;border:1.5px solid var(--acc);border-radius:12px;color:var(--acc);font-weight:600}
+.steps .pdfb:hover{background:var(--accbg)}
+.sub{display:block;margin-top:2px;font-size:.88rem;line-height:1.6;color:var(--mut)}
+.pall,.ph{display:none}
+.pmeta{display:none}
+@page{size:A4;margin:17mm 14mm 18mm}
+@media print{
+html{font-size:10pt;height:auto}
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-shadow:none!important;transition:none!important}
+body{background:#fff;line-height:1.55;letter-spacing:0}
+main{padding:0;width:auto}
+.steps,.nav,.hint{display:none!important}
+h1{font-size:20pt;margin:0 0 8pt}
+.chips{gap:6pt;margin-bottom:8pt}
+.chip{min-height:0;padding:3pt 4pt 3pt 9pt;font-size:8.5pt;gap:5pt}
+.sc{font-size:7.5pt;padding:1pt 6pt}
+.cap{font-size:10pt;margin-bottom:6pt;max-width:none}
+.pmeta{display:block;color:var(--mut);font-size:8pt;margin:0 0 12pt}
+.intro{max-width:none;font-size:9.5pt;margin-bottom:14pt;padding:8pt 12pt}
+.ph{display:block;font-size:15pt;margin:0 0 10pt;padding-bottom:4pt;border-bottom:1.5pt solid var(--acc);break-after:avoid}
+#p2 .ph{break-before:page}
+.grid{display:block}
+.dim{margin:0;padding:11pt 0;border:0;border-bottom:1pt solid var(--line);border-radius:0;background:transparent}
+.win{break-after:avoid}
+.dim h2{font-size:12pt;margin-bottom:8pt;break-after:avoid}
+.n{width:18pt;height:18pt;font-size:8pt}
+.win{padding:5pt 9pt;font-size:9.5pt;margin-bottom:8pt}
+.chart{padding:8pt 10pt;margin-bottom:9pt;break-inside:avoid}
+.chart h3{font-size:8.5pt;margin-bottom:6pt}
+.br{font-size:8.5pt;padding:2pt 4pt;grid-template-columns:3.4rem 1fr auto}
+.bv{font-size:7.5pt}
+.cn{font-size:7.5pt}
+.dim li{margin:3pt 0;padding:5pt 8pt;font-size:9.5pt;break-inside:avoid}
+.sub{font-size:8pt}
+.src{font-size:7.5pt;margin-bottom:8pt}
+.why{font-size:9pt;padding:6pt 10pt;break-inside:avoid}
+.why b{font-size:8pt}
+.tw{margin-top:14pt;padding:12pt 14pt;overflow:visible}
+.tw h2{font-size:12pt;margin-bottom:8pt;break-after:avoid}
+table{min-width:0;font-size:8pt;border-spacing:2pt}
+thead{display:table-header-group}
+tr{break-inside:avoid}
+th,td{padding:4pt 6pt}
+.verdict{margin-top:14pt;padding:12pt 14pt;break-inside:avoid;border-width:1.5pt}
+.verdict h2{font-size:12pt;margin-bottom:6pt}
+.row{padding:6pt 0;font-size:9.5pt}
+.pick{font-size:8.5pt;padding:2pt 9pt}
+.note{font-size:8pt;padding:7pt 10pt;break-inside:avoid}
+.ex{display:block;margin-bottom:12pt;max-width:none}
+.ex>.n{display:none}
+.ex h2{font-size:12pt;break-after:avoid}
+.ex p{font-size:9pt;margin-bottom:6pt;break-after:avoid}
+.box{background:none;border:0;border-radius:0;overflow:visible}
+.box .bar,.box>pre{display:none}
+.pall{display:block}
+.pall h4{display:flex;align-items:center;gap:6pt;margin:12pt 0 5pt;color:var(--c);font:600 10pt "Lexend",sans-serif;break-after:avoid}
+.pall h4:before{content:"";width:6pt;height:6pt;border-radius:50%;background:var(--c)}
+.pall pre{margin:0;padding:9pt 12pt;background:#f6f7fb;color:#1a1f36;border:1pt solid #dde1ef;border-radius:8pt;font-size:7.5pt;line-height:1.5;white-space:pre-wrap;word-break:break-word;overflow:visible;break-inside:avoid}
+.cm{color:#6b7794}.st{color:#2e7d32}.kw{color:#c2185b}.tg{color:#1565c0}.at{color:#b45309}.fn{color:#6a32c9}.nu{color:#c2410c}
+}
+
+.fresh{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:14px 28px;margin:0 0 clamp(20px,3vw,36px);padding:16px 22px;border:1.5px solid var(--warnfg);border-radius:14px;background:var(--warnbg);color:var(--warnfg)}
+.fresh .fl{display:block;font-size:.8rem;font-weight:500;opacity:.85}
+.fresh strong{font-size:1.1rem;font-weight:600;line-height:1.4}
+.fresh p{grid-column:1/-1;margin:0;font-size:.9rem}
+@media print{.fresh{break-inside:avoid;padding:8pt 12pt;margin-bottom:12pt;gap:6pt 18pt}.fresh strong{font-size:10pt}.fresh .fl,.fresh p{font-size:8pt}}
+</style>
+</head>
+<body>
+<main>
+<h1>Svelte 5 vs Qwik v2 vs SolidJS vs Vue 3.5 vs React 19</h1>
+<div class="chips" id="chips"></div>
+<p class="cap">Which UI framework fits a content-heavy or a highly interactive web app? Seven dimensions compared, then working code for each candidate.</p>
+<section class="fresh" data-section="freshness" aria-label="Comparison date">
+<div><span class="fl">Compared on</span><strong>5 October 2026</strong></div>
+<div><span class="fl">Data covers</span><strong>Late 2025 to early 2026</strong></div>
+<div><span class="fl">Re-check by</span><strong>April 2027, or after a major release</strong></div>
+<p>Versions, benchmarks and maintenance status change. After the re-check date, treat this page as out of date.</p>
+</section>
+<p class="pmeta" id="pmeta"></p>
+
+<div class="steps"><div class="tl" role="tablist">
+<button role="tab" id="t1" aria-selected="true"><span class="n">1</span>Compare</button>
+<button role="tab" id="t2" aria-selected="false"><span class="n">2</span>Showcase</button>
+</div><button id="pdf" class="pdfb" type="button">Export PDF</button></div>
+
+<section class="pane" id="p1"></section>
+<section class="pane" id="p2" hidden></section>
+</main>
+
+<script>
+(function(){
+var th=new URLSearchParams(location.search).get("theme");
+document.documentElement.dataset.theme=th==="dark"?"dark":"light";
+
+var C=[["React","react"],["Vue","vue"],["Solid","solid"],["Svelte","svelte"],["Qwik","qwik"]];
+var CHIPS=[["React 19 + compiler","react"],["Vue 3.5+ (Vapor)","vue"],["SolidJS 1.9+","solid"],["Svelte 5","svelte"],["Qwik v2","qwik"]];
+var N=["react","vue","solid","svelte","qwik"];
+var col=function(k){return "var(--"+k+")"};
+var kk=function(t){t=t.toLowerCase();if(t.indexOf("nuxt")==0)return "vue";if(t.indexOf("next")==0)return "react";for(var i=0;i<5;i++)if(t.indexOf(N[i])==0)return N[i];return null};
+var M=function(t){return t.replace(/(\d+(?:\.\d+)?(?:\s?(?:to|–)\s?\d+(?:\.\d+)?)?\s?(?:×|%|KB|ms|s\b))/g,'<span class="m">$1</span>')};
+var S=[[2,3,4,4,5],[2,3,5,4,3],[2,3,5,4,5],[3,3,4,4,5],[2,3,4,5,5],[5,4,3,4,2],[2,3,5,4,5]];
+var NT=["Qwik scales best with size","Gaps small outside micro-benchmarks","Qwik best idle","All capable with meta-frameworks","Svelte smallest compiled","React wins hiring; others win satisfaction","Context-dependent"];
+var avg=N.map(function(k,j){return S.reduce(function(a,r){return a+r[j]},0)/S.length});
+var TL={5:"1st",4:"2nd",3:"3rd",2:"4th+"};
+var JFB=[["js-framework-benchmark","https://github.com/krausest/js-framework-benchmark"]];
+
+document.getElementById("chips").innerHTML=CHIPS.map(function(c,j){return '<button class="chip" data-k="'+c[1]+'" aria-pressed="false" style="--c:'+col(c[1])+'">'+c[0]+' <span class="sc">'+avg[j].toFixed(1)+'/5</span></button>'}).join("")+'<p class="hint">Score = average rank tier across 7 dimensions, equal weights, 5 is best. Derived from the source ranking table. Select a candidate to focus on it.</p>';
+
+var SRC={
+rl:["ResumeLens 2026 comparison","https://www.resumelens.org/blog/react/react-vs-vue-vs-svelte-2026"],
+j18:["johal.in Svelte 5 vs Solid 1.8","https://johal.in/benchmark-svelte-vs-solidjs-18-2026-reactive-uis"],
+pk:["PkgPulse reactivity 2026","https://www.pkgpulse.com/blog/solidjs-vs-svelte-5-vs-react-reactivity-2026"],
+st:["Sitka Theme 2026","https://sitkatheme.com/react-vs-vue-vs-svelte-2026.html"],
+fr:["findarepo","https://findarepo.com/categories/web-frameworks/"],
+sd:["SoloDevStack Solid vs Qwik","https://solodevstack.com/blog/solidjs-vs-qwik-solo-developers"],
+ti:["Tech Insider","https://tech-insider.org/solidjs-vs-react-vs-svelte-2026/"],
+dv:["DEV Community","https://dev.to/kouta222/the-next-big-things-in-frontend-svelte-astro-qwik-solid-2025-edition-2fnf"],
+md:["Medium performance comparison","https://medium.com/@drew.robi/frontend-framework-performance-comparison-382dbf20b9de"],
+gc:["Gabriel Caiana reactivity","https://gabrielcaiana.com/blog/reactivity-solidjs-vs-react-vs-vue/"],
+yt:["YouTube stress test","https://www.youtube.com/watch?v=FuMXjJBmHvc"],
+j3:["johal.in Svelte 5 vs Solid 2 vs Qwik 2","https://johal.in/comparison-svelte-50-vs-solidjs-20-vs-qwik"],
+lq:["Learn Qwik: Qwik vs React","https://www.learn-qwik.com/blog/qwik-vs-react-2026/"],
+lc:["LeadCognition Svelte vs Solid","https://leadcognition.io/tools/compare/svelte-vs-solid"],
+tn:["TechNewsDaily Svelte 5 runes","https://technewsdaily.com/software/svelte-5-runes-change-the-reactivity-math-for-engineering-teams/"],
+jfb:["js-framework-benchmark","https://github.com/krausest/js-framework-benchmark"]};
+var D=[
+{t:"Initial loading (TTI)",w:"Qwik v2",wk:["qwik"],n:"clear margin on large or content-heavy pages",y:"On mobile or e-commerce pages, users leave before the first click. Qwik's model scales with app size better than hydration-based frameworks.",src:["st","lq","md","rl"],
+ch:{t:"Time to interactive, seconds (lower is better)",r:[["qwik",.4,"≤ 0.4 s"],["solid",1.15,"1.1–1.2 s"],["svelte",1.15,"1.1–1.2 s"]],n:"Throttled CPU / Slow 3G. No figure was given for Vue or React."},
+i:[
+[["Qwik"],"No hydration pass. About 1 KB core, TTI often 0.4 s or lower.","Resumability serializes closures and state into HTML. The browser resumes without hydrating and downloads handler code only on interaction. Measured on Slow 3G / throttled CPU, even for substantial apps."],
+[["Svelte","Solid"],"About 1.1 to 1.2 s. Tiny runtimes, but they still hydrate.","Close behind Qwik in comparable tests because of tiny runtimes and direct DOM output; they still pay a hydration cost."],
+[["Vue"],"Competitive, especially with Vapor."],
+[["React"],"Largest initial payload and highest hydration cost.","Even with React 19 + compiler."]]},
+{t:"Reactivity (update speed)",w:"SolidJS",wk:["solid"],n:"narrow edge over Svelte 5",y:"High-frequency UIs (dashboards, real-time lists, editors) use less CPU when updates are surgical. For most apps the difference is academic outside the micro-benchmark.",src:["jfb","pk","j18","gc","j3","lc","tn"],
+ch:{t:"Geometric mean vs vanilla JS (lower is better). Bar shows overhead above 1.00×",base:1,r:[["solid",1.06,"1.04–1.08×"],["svelte",1.075,"1.05–1.10×"],["qwik",1.23,"≈ 1.23×"],["react",1.65,"1.5–1.8×"]],n:"Midpoints of the reported ranges. No figure was given for Vue."},
+i:[
+[["Solid"],"Fine-grained signals. No virtual DOM, no component re-renders. About 1.04 to 1.08× vanilla JS.","Components are factories that run once; only the exact dependent DOM nodes update. Figure is the geometric mean on js-framework-benchmark."],
+[["Svelte"],"Runes give nearly the same granularity, about 1.05 to 1.10×. Gap under 10%.","Compile-time analysis plus runtime signals. The difference is rarely user-visible."],
+[["Qwik"],"About 1.23×, more than 2× faster than v1. Still trails Solid and Svelte.","Improved with signal-based updates and a yielding scheduler, but behind on pure update throughput."],
+[["Vue"],"Vapor closes much of the gap. Classic Vue remains slower."],
+[["React"],"About 1.5 to 1.8×.","React 19 + compiler stays slower because of residual reconciliation."]]},
+{t:"Memory and resources",w:"Qwik (idle), Solid and Svelte (active)",wk:["qwik","solid","svelte"],n:"",y:"Mobile browsers and low-RAM devices (or many open tabs) kill or throttle heavy pages. Lower memory also improves battery life.",src:["j3","md","yt"],
+i:[
+[["Qwik"],"Idle CPU near zero. Lowest per-component memory after resume.","Most code stays unloaded."],
+[["Solid","Svelte"],"Low active memory. No virtual DOM trees.","Precise dependency graphs. Svelte often ships the smallest compiled footprint."],
+[["Vue"],"Mid-pack."],
+[["React"],"Heaviest long-lived structures.","Fiber tree plus potential over-retention."]]},
+{t:"SSR and streaming",w:"Qwik",wk:["qwik"],n:"all five are solid with their meta-frameworks",y:"SEO, perceived performance and edge rendering all improve when the server streams HTML and the client does minimal work.",src:["rl","lq"],
+i:[
+[["Qwik"],"Designed around server-first resumability and streaming.","Now supports experimental out-of-order streaming. No client re-execution of the component tree."],
+[["SvelteKit","SolidStart","Nuxt 4","Next.js 15"],"All offer streaming SSR and selective hydration or islands."],
+[["React"],"Server Components reduce client work.","They still require careful boundary design."],
+[["Practical"],"Differences are smaller than the marketing.","All five can deliver excellent Core Web Vitals with their official meta-frameworks."]]},
+{t:"Network and payload",w:"Svelte (compiled size), Qwik (first load)",wk:["svelte","qwik"],n:"",y:"First-load bytes dominate on 3G/4G and affect Lighthouse scores and conversion. Later navigations matter less with good caching.",src:["st","ti","j18"],
+ch:{t:"Framework size, KB (lower is better)",r:[["qwik",1,"≈ 1 KB core"],["svelte",4,"3–5 KB min app"],["solid",7,"6–8 KB runtime"],["vue",34,"≈ 34 KB (Vapor)"],["react",42,"≈ 42 KB + app"]],n:"Figures measure different things (core, minimal app, runtime). Compare loosely."},
+i:[
+[["Svelte"],"Minimal apps often under 3 to 5 KB gzipped.","Compiles away almost all framework code; real apps stay dramatically smaller than React."],
+[["Qwik"],"Smallest initial payload.","Aggressive lazy loading. Total bytes over a full session can still be higher if many interactions occur."],
+[["Solid"],"Runtime about 6 to 8 KB."],
+[["Vue"],"Vapor about 34 KB."],
+[["React"],"About 42 KB plus application code."]]},
+{t:"Developer experience",w:"Depends on team",wk:[],n:"React, then Vue and Svelte, then Solid, then Qwik",y:"Hiring, onboarding and long-term maintainability often outweigh a 20% runtime win.",src:["rl","ti","sd","fr","tn","dv"],
+i:[
+[["Ecosystem"],"Decisive for frameworks. React is largest; Qwik is smallest.","React: most jobs and richest tooling. Qwik: fewer ready-made solutions."],
+[["React"],"Richest tooling. Compiler reduces memoization boilerplate.","Steepest long-term complexity tax."],
+[["Vue"],"Gentle curve. Clear templates plus Composition API.","Excellent progressive adoption and a mature Nuxt story."],
+[["Svelte"],"Runes feel natural after a short curve.","Single-file components, excellent SvelteKit DX, high satisfaction scores."],
+[["Solid"],"JSX familiar to React developers. The run-once mental model needs adjustment.","SolidStart is now stable. Tech Insider reports the top State of JS 2025 satisfaction score for the fifth year running."],
+[["Qwik"],"Steepest curve.","Serialization rules, $ conventions and a resumability mindset. Smaller ecosystem."],
+[["Build"],"Fast on Vite-based setups for all.","SvelteKit, SolidStart, Nuxt, Qwik City, Vite + React. React's larger dependency graphs can be slower in very large monorepos."]]},
+{t:"Mobile and low-end devices",w:"Qwik (startup), Solid and Svelte (sustained)",wk:["qwik","solid","svelte"],n:"",y:"A large share of real users are on mid-range Android. Core Web Vitals field data increasingly reflects this.",src:["md","yt","lq"],
+i:[
+[["Qwik"],"Near-zero initial JS wins TTI and First Input Delay.","Holds on throttled CPU plus slow networks."],
+[["Solid","Svelte"],"Lowest main-thread work and memory once interactive.","Better Interaction to Next Paint (INP) and battery life."],
+[["React","Vue"],"Suffer more under throttling and memory pressure.","Thermal throttling hits React and classic Vue."]]}
+];
+var V=[
+["Content, marketing or e-commerce with strict TTI",["qwik","Qwik"]],
+["Long-lived interactive UIs (dashboards, editors)",["solid","SolidJS"],["svelte","Svelte 5"]],
+["Team velocity and hiring",["react","React"],["vue","Vue"]],
+["Best overall balance for green-field apps",["svelte","Svelte 5 + SvelteKit"]]];
+
+function chart(c){var b=c.base||0,mx=Math.max.apply(null,c.r.map(function(r){return r[1]-b}));
+return '<div class="chart"><h3>'+c.t+'</h3>'+c.r.map(function(r){return '<div class="br" data-ks="'+r[0]+'"><span>'+r[0].charAt(0).toUpperCase()+r[0].slice(1)+'</span><span class="bt"><i style="width:'+Math.max(3,(r[1]-b)/mx*100)+'%;--c:'+col(r[0])+'"></i></span><span class="bv">'+r[2]+'</span></div>'}).join("")+'<p class="cn">'+c.n+'</p></div>';}
+
+var h='<h2 class="ph">Compare</h2><p class="intro">No framework is universally best. Gaps are largest on cold starts, low-end devices and large interactive trees, and shrink for typical CRUD apps once running. Ecosystem and hiring decide for most teams.</p><div class="grid">';
+D.forEach(function(d,i){
+h+='<article class="dim"><h2><span class="n">'+(i+1)+'</span>'+d.t+'</h2><p class="win"'+(d.wk.length?' data-ks="'+d.wk.join(" ")+'"':'')+'><span class="tag">Winner</span><b style="--k:'+(d.wk[0]?col(d.wk[0]):"var(--winfg)")+'">'+d.w+'</b> <span class="mg">'+d.n+'</span></p>';
+if(d.ch)h+=chart(d.ch);
+h+='<ul>';
+d.i.forEach(function(it){var ks=it[0].map(kk).filter(Boolean);
+h+='<li'+(ks.length?' data-ks="'+ks.join(" ")+'"':'')+'>'+it[0].map(function(n){var k=kk(n);return '<span class="who" style="--c:'+(k?col(k):"var(--acc)")+'">'+n+'</span>'}).join(", ")+' '+M(it[1])+(it[2]?'<span class="sub">'+M(it[2])+'</span>':'')+'</li>';});
+h+='</ul><p class="src">'+'Related sources: '+d.src.map(function(id){var x=SRC[id];return '<a href="'+x[1]+'" target="_blank" rel="noopener">'+x[0]+'</a>'}).join(", ")+'</p><p class="why"><b>Why it matters</b>'+d.y+'</p></article>';
+});
+h+='</div><div class="tw"><h2>Summary rankings</h2><table><thead><tr><th>Dimension</th>'+CHIPS.map(function(c,j){return '<th data-ks="'+N[j]+'">'+C[j][0]+'</th>'}).join("")+'<th>Notes</th></tr></thead><tbody>';
+D.forEach(function(d,i){h+='<tr><th>'+d.t+'</th>'+S[i].map(function(v,j){return '<td class="t h'+v+'" data-ks="'+N[j]+'">'+TL[v]+'</td>'}).join("")+'<td>'+NT[i]+'</td></tr>';});
+h+='<tr><th>Score (/5)</th>'+avg.map(function(v,j){return '<td class="sum" data-ks="'+N[j]+'">'+v.toFixed(1)+'</td>'}).join("")+'<td>Equal weights. Ties share a tier; unlisted candidates count as 4th+.</td></tr></tbody></table></div>';
+h+='<div class="verdict"><h2>Final decision</h2>';
+V.forEach(function(v){h+='<div class="row" data-ks="'+v.slice(1).map(function(p){return p[0]}).join(" ")+'"><span class="l">'+v[0]+'</span>';v.slice(1).forEach(function(p){h+='<span class="pick" style="--c:'+col(p[0])+'">'+p[1]+'</span>';});h+='</div>';});
+h+='<p class="cn">Choose by the dominant constraint of your product (first load, sustained interactivity or team size), not a single benchmark. All five are production-ready in 2026; architecture and ecosystem usually decide.</p></div>';
+h+='<p class="note"><b>Read with care.</b> Sources are linked per dimension as related reading; individual figures are not matched to one source. Versions disagree across sources (SolidJS 1.8 and 2.0; SoloDevStack lists @builder.io/qwik 1.20.0 as current in May 2026), so confirm Qwik v2 status. The score is derived from the ranking table, not measured.</p><div class="nav"><span></span><button class="go" data-go="2">Next: showcase</button></div>';
+document.getElementById("p1").innerHTML=h;
+
+var F=null;
+function setFocus(k){F=F===k?null:k;
+document.documentElement.style.setProperty("--fc",F?col(F):"transparent");
+document.querySelectorAll("#p1 [data-ks]").forEach(function(el){var on=!F||el.dataset.ks.split(" ").indexOf(F)>-1;el.classList.toggle("dm",!on);el.classList.toggle("hl",!!F&&on);});
+document.querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed",c.dataset.k===F);});}
+document.getElementById("chips").addEventListener("click",function(e){var c=e.target.closest(".chip");if(c)setFocus(c.dataset.k);});
+
+var X=[
+{t:"Basic usage",d:"A button that counts clicks.",c:{
+React:`import { useState } from "react";
+
+export default function Counter() {
+  const [n, setN] = useState(0);
+  return <button onClick={() => setN(n + 1)}>{n}</button>;
+}`,
+Vue:`<script setup>
+import { ref } from "vue";
+const n = ref(0);
+<\/script>
+
+<template>
+  <button @click="n++">{{ n }}</button>
+</template>`,
+Solid:`import { createSignal } from "solid-js";
+
+export default function Counter() {
+  const [n, setN] = createSignal(0);
+  return <button onClick={() => setN(n() + 1)}>{n()}</button>;
+}`,
+Svelte:`<script>
+  let n = $state(0);
+<\/script>
+
+<button onclick={() => n++}>{n}</button>`,
+Qwik:`import { component$, useSignal } from "@builder.io/qwik";
+
+export default component$(() => {
+  const n = useSignal(0);
+  return <button onClick$={() => n.value++}>{n.value}</button>;
+});`}},
+{t:"With state",d:"A value derived from state.",c:{
+React:`const [n, setN] = useState(0);
+const double = n * 2; // compiler memoizes if needed`,
+Vue:`const n = ref(0);
+const double = computed(() => n.value * 2);`,
+Solid:`const [n, setN] = createSignal(0);
+const double = () => n() * 2;`,
+Svelte:`let n = $state(0);
+let double = $derived(n * 2);`,
+Qwik:`const n = useSignal(0);
+const double = useComputed$(() => n.value * 2);`}},
+{t:"Nested components",d:"Pass a prop to a child.",c:{
+React:`function Badge({ label }) {
+  return <b>{label}</b>;
+}
+
+export default () => <Badge label="Hi" />;`,
+Vue:`<\!-- Badge.vue -->
+<script setup>
+defineProps({ label: String });
+<\/script>
+<template><b>{{ label }}</b></template>
+
+<\!-- Parent.vue -->
+<Badge label="Hi" />`,
+Solid:`function Badge(props) {
+  // keep props.label: destructuring loses reactivity
+  return <b>{props.label}</b>;
+}
+
+export default () => <Badge label="Hi" />;`,
+Svelte:`<\!-- Badge.svelte -->
+<script>
+  let { label } = $props();
+<\/script>
+<b>{label}</b>
+
+<\!-- Parent.svelte -->
+<Badge label="Hi" />`,
+Qwik:`const Badge = component$<{ label: string }>(({ label }) => {
+  return <b>{label}</b>;
+});
+
+export default component$(() => <Badge label="Hi" />);`}}
+];
+
+var RX=/(<\!--[\s\S]*?-->|\/\/[^\n]*)|("[^"\n]*"|'[^'\n]*')|(\b(?:import|from|export|default|function|const|let|return)\b)|(<\/?[A-Za-z][\w.-]*)|([@:]?[\w-]+\$?(?==))|([\w$]+(?=\())|(\b\d+\b)/g;
+var K=["","cm","st","kw","tg","at","fn","nu"];
+var E=function(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")};
+function hl(s){var o="",l=0,m;RX.lastIndex=0;
+while((m=RX.exec(s))){var g=1;while(!m[g])g++;o+=E(s.slice(l,m.index))+'<span class="'+K[g]+'">'+E(m[0])+'</span>';l=RX.lastIndex;}
+return o+E(s.slice(l));}
+
+var p2=document.getElementById("p2"),s='<h2 class="ph">Showcase</h2>';
+X.forEach(function(x,i){
+s+='<div class="ex"><span class="n">'+(i+1)+'</span><div><h2>'+x.t+'</h2><p>'+x.d+'</p><div class="box" data-i="'+i+'"><div class="bar"><div class="tabs" role="tablist">';
+C.forEach(function(c){s+='<button role="tab" aria-selected="false" data-c="'+c[0]+'" style="--c:'+col(c[1])+'">'+c[0]+'</button>';});
+s+='</div><button class="cp" aria-label="Copy code">Copy</button></div><pre><code></code></pre><div class="pall"></div></div></div></div>';
+});
+s+='<div class="nav"><button data-go="1">Back</button><span></span></div>';
+p2.innerHTML=s;
+
+function show(box,c){
+box.querySelector("code").innerHTML=hl(X[box.dataset.i].c[c]);
+box.dataset.raw=c;
+box.querySelectorAll(".tabs button").forEach(function(b){b.setAttribute("aria-selected",b.dataset.c===c);});
+}
+p2.querySelectorAll(".box").forEach(function(b){show(b,"React");b.querySelector(".pall").innerHTML=C.map(function(c){return '<h4 style="--c:'+col(c[1])+'">'+c[0]+'</h4><pre>'+hl(X[b.dataset.i].c[c[0]])+'</pre>'}).join("")});
+p2.addEventListener("click",function(e){
+var t=e.target.closest(".tabs button");
+if(t){show(t.closest(".box"),t.dataset.c);return;}
+var cp=e.target.closest(".cp");
+if(cp){var b=cp.closest(".box"),txt=X[b.dataset.i].c[b.dataset.raw];
+try{navigator.clipboard.writeText(txt).then(function(){cp.textContent="Copied";setTimeout(function(){cp.textContent="Copy"},1300)});}catch(_){cp.textContent="Select text"}}
+});
+
+function go(n){
+document.getElementById("p1").hidden=n!==1;p2.hidden=n!==2;
+document.getElementById("t1").setAttribute("aria-selected",n===1);
+document.getElementById("t2").setAttribute("aria-selected",n===2);
+window.scrollTo(0,0);
+}
+document.getElementById("t1").onclick=function(){go(1)};
+document.getElementById("t2").onclick=function(){go(2)};
+document.body.addEventListener("click",function(e){var g=e.target.closest("[data-go]");if(g)go(+g.dataset.go)});
+var prevTheme;
+var ps=document.createElement("style");document.head.appendChild(ps);
+window.addEventListener("beforeprint",function(){var cd=document.querySelector("[data-section=freshness] strong").textContent;ps.textContent='@page{@top-left{content:"'+document.title.replace(/["\\]/g,"")+'";font:500 8pt Lexend,sans-serif;color:#6b7280}@bottom-left{content:"Compared on '+cd+'";font:500 8pt Lexend,sans-serif;color:#6b7280}@bottom-right{content:"Page " counter(page) " of " counter(pages);font:500 8pt Lexend,sans-serif;color:#6b7280}}';document.getElementById("pmeta").textContent="Exported "+new Date().toLocaleDateString("en-GB",{year:"numeric",month:"long",day:"numeric"});prevTheme=document.documentElement.dataset.theme;document.documentElement.dataset.theme="light";document.getElementById("p1").hidden=false;p2.hidden=false;});
+window.addEventListener("afterprint",function(){document.documentElement.dataset.theme=prevTheme;var on=document.getElementById("t1").getAttribute("aria-selected")==="true";document.getElementById("p1").hidden=!on;p2.hidden=on;});
+document.getElementById("pdf").onclick=function(){window.print()};
+})();
+</script>
+</body>
+</html>

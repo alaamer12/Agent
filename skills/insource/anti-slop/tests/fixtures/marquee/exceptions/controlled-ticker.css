@@ -1,0 +1,4 @@
+.live-ticker {
+  animation: marquee 30s linear infinite;
+}
+@keyframes marquee { to { transform: translateX(-100%); } }

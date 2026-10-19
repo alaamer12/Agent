@@ -1,0 +1,46 @@
+{
+  "cases": [
+    {
+      "id": "agreement-gradient-text",
+      "structural": {"patternId": "gradient-text", "status": "candidate", "evidenceModality": "structural"},
+      "visual": {"patternId": "gradient-text", "status": "confirmed", "evidenceModality": "visual-and-contextual", "note": "Rendered headline has low-contrast portions and no brand/logo exception."},
+      "expected": {"status": "confirmed", "preserveBothEvidence": true}
+    },
+    {
+      "id": "disagreement-status-stripe",
+      "structural": {"patternId": "side-tab", "status": "candidate", "evidenceModality": "structural"},
+      "visual": {"patternId": "side-tab", "status": "false-positive", "evidenceModality": "visual-and-contextual", "note": "Stripe marks a documented warning state and is paired with text."},
+      "expected": {"status": "false-positive", "preserveBothEvidence": true, "doNotConfirmFromStructure": true}
+    },
+    {
+      "id": "structural-only-repeating-grid",
+      "structural": {"patternId": "repeating-stripes-gradient", "status": "candidate", "evidenceModality": "structural"},
+      "visual": {"patternId": "repeating-stripes-gradient", "status": "false-positive", "evidenceModality": "visual-and-contextual", "note": "Rendered grid is a functional drawing canvas."},
+      "expected": {"status": "false-positive", "preserveBothEvidence": true}
+    },
+    {
+      "id": "visual-only-identical-layout",
+      "structural": {"patternId": "identical-card-grids", "status": "not-applicable", "evidenceModality": "structural"},
+      "visual": {"patternId": "identical-card-grids", "status": "candidate", "evidenceModality": "visual-and-contextual", "note": "Unrelated content appears templated, but task impact needs owner/context confirmation."},
+      "expected": {"status": "candidate", "preserveVisualEvidence": true}
+    },
+    {
+      "id": "visual-only-occlusion",
+      "structural": {"patternId": "text-occlusion", "status": "not-applicable", "evidenceModality": "structural"},
+      "visual": {"patternId": "text-occlusion", "status": "confirmed", "evidenceModality": "visual-and-contextual", "note": "An opaque banner visibly covers a service instruction."},
+      "expected": {"status": "confirmed", "preserveVisualEvidence": true}
+    },
+    {
+      "id": "structural-only-unresolved",
+      "structural": {"patternId": "text-overflow", "status": "candidate", "evidenceModality": "structural"},
+      "visual": {"patternId": "text-overflow", "status": "not-observed", "evidenceModality": "visual", "note": "The supplied screenshot does not include the narrow viewport or long-text state."},
+      "expected": {"status": "candidate", "preserveBothEvidence": true, "contextualReviewRequired": true}
+    },
+    {
+      "id": "no-findings-limited-page",
+      "structural": {"status": "not-observed", "evidenceModality": "structural"},
+      "visual": {"status": "not-observed", "evidenceModality": "visual"},
+      "expected": {"status": "not-observed", "scopeLimited": true}
+    }
+  ]
+}

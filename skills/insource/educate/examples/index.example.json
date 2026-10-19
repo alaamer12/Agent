@@ -1,0 +1,104 @@
+{
+  "library": "awesomelib",
+  "version": "4.1.0",
+  "generated_at": "2026-09-27T19:08:53.178621",
+  "source_dir": "docs",
+  "sections": [
+    {
+      "file": "Configuration.md",
+      "heading": "Configuration",
+      "level": 1,
+      "topic": "configuration",
+      "line_start": 1,
+      "line_end": 2
+    },
+    {
+      "file": "Configuration.md",
+      "heading": "Environment variables",
+      "level": 2,
+      "topic": "configuration",
+      "line_start": 3,
+      "line_end": 6
+    },
+    {
+      "file": "Configuration.md",
+      "heading": "API Reference",
+      "level": 2,
+      "topic": "api",
+      "line_start": 7,
+      "line_end": 8
+    },
+    {
+      "file": "Configuration.md",
+      "heading": "connect()",
+      "level": 3,
+      "topic": "other",
+      "line_start": 9,
+      "line_end": 12
+    },
+    {
+      "file": "Configuration.md",
+      "heading": "Important: breaking change in 4.0",
+      "level": 2,
+      "topic": "notes",
+      "line_start": 13,
+      "line_end": 15
+    },
+    {
+      "file": "Installation.md",
+      "heading": "Installation",
+      "level": 1,
+      "topic": "installation",
+      "line_start": 1,
+      "line_end": 11
+    }
+  ],
+  "topics": {
+    "configuration": [
+      {
+        "file": "Configuration.md",
+        "heading": "Configuration",
+        "line_start": 1,
+        "line_end": 2
+      },
+      {
+        "file": "Configuration.md",
+        "heading": "Environment variables",
+        "line_start": 3,
+        "line_end": 6
+      }
+    ],
+    "api": [
+      {
+        "file": "Configuration.md",
+        "heading": "API Reference",
+        "line_start": 7,
+        "line_end": 8
+      }
+    ],
+    "other": [
+      {
+        "file": "Configuration.md",
+        "heading": "connect()",
+        "line_start": 9,
+        "line_end": 12
+      }
+    ],
+    "notes": [
+      {
+        "file": "Configuration.md",
+        "heading": "Important: breaking change in 4.0",
+        "line_start": 13,
+        "line_end": 15
+      }
+    ],
+    "installation": [
+      {
+        "file": "Installation.md",
+        "heading": "Installation",
+        "line_start": 1,
+        "line_end": 11
+      }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$comment": [
+    "React 18/19 + Tailwind + a component library. The load-bearing difference from Vue is the",
+    "logic block: a React module has no delimited script section, so hashing 'the script' means",
+    "hashing the whole file and every JSX edit fails the check. Get this wrong and the identity",
+    "diff reports a broken refactor on a clean one."
+  ],
+  "name": "react-tailwind",
+  "exts": [".tsx", ".jsx", ".ts", ".js", ".css", ".scss", ".html"],
+  "colour": {
+    "utilityClasses": "\\b(?:text|bg|border|from|to|via|ring|divide|fill|stroke|shadow|outline|placeholder|caret)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)(?:-(?:50|[1-9]00|950))?(?:\\/\\d{1,3})?\\b"
+  },
+  "components": {
+    "localPrefixes": ["Ui", "App", "Shad", "Data"]
+  },
+  "logicBlock": { "style": "whole" },
+  "routes": {
+    "declarationPattern": "(?:^|[^\\w])(?:path|to|href|url)\\s*[:=]\\s*[\"'`](\\/[^\"'`?#]*)[\"'`]",
+    "redirectStubPattern": "<Navigate\\s+[^>]*redirect[^>]*/>|\\{\\s*path\\s*:\\s*[\"'`][^\"'`]+[\"'`]\\s*,\\s*(?:redirect|element\\s*:\\s*<Navigate)[^}]*\\}",
+    "configFilePattern": "(?:routes|router|App\\.[tj]sx|navigation|sidebar|menu|access-control|casl|ability)"
+  },
+  "typography": { "patterns": ["font-size", "line-height", "letter-spacing", "text-\\w+", "leading-\\w+", "tracking-\\w+"] }
+}

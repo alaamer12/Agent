@@ -25,11 +25,35 @@
       "skillPath": "skills/animation-vocabulary/SKILL.md",
       "computedHash": "9aaad861dd54dab7c9bb3fb5bd4c539078d8d06c14530d92d49cdb1509bfa937"
     },
+    "anti-ai-writing": {
+      "source": "iustinvaliza-del/anti-ai-writing-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "b223f57ca576795d8abb6da7f124926c358a03b0839ef81b6f604064620c05f1"
+    },
     "ascii-animation": {
       "source": "iart-ai/web-animation-skills",
       "sourceType": "github",
       "skillPath": "skills/ascii-animation/SKILL.md",
       "computedHash": "0e4fa3f778c41e372cdcc1895fb206d0886c4fd5de221f69bfd12788920e8e3a"
+    },
+    "authoring-github-workflows": {
+      "source": "dotnet/skills",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/authoring-github-workflows/SKILL.md",
+      "computedHash": "8a1ab212d59191e828ad00d02060c93cb642ff35dcb1761212a7cd2dcef212cb"
+    },
+    "brainstorming": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "skillPath": "skills/brainstorming/SKILL.md",
+      "computedHash": "9c462616182917fb389d7d630c59000cff31ed18081baaa644ff148d4c967390"
+    },
+    "breakdown-test": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/breakdown-test/SKILL.md",
+      "computedHash": "aec76bd6b3246889ada4fecba3f78a6c5d0717d66a70af5791279556a3891759"
     },
     "caption-animation": {
       "source": "iart-ai/tiktok-video-skills",
@@ -37,11 +61,23 @@
       "skillPath": "skills/caption-animation/SKILL.md",
       "computedHash": "1bcfe2026d1b2a81ff7257d7149f4a555d6d28e238be909050c308bec85ea513"
     },
+    "cast": {
+      "source": "athevon/genjutsu",
+      "sourceType": "github",
+      "skillPath": "skills/cast/SKILL.md",
+      "computedHash": "1d15cbec63bef79d0f2f190ea1d4b20d81260cb051a6edaeb16a2113321fe3f5"
+    },
     "code-review": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/code-review/SKILL.md",
       "computedHash": "b4f17857c85ca60af1df7d0b623dd03c2a48419f6123e714f3d9748ca744a1bf"
+    },
+    "creative-thinking-for-research": {
+      "source": "orchestra-research/ai-research-skills",
+      "sourceType": "github",
+      "skillPath": "21-research-ideation/creative-thinking-for-research/SKILL.md",
+      "computedHash": "2292a3a6b14e934e2077fe8d5c2fe5f2b636f068d44ec2bfb0d615d19c4fd740"
     },
     "entrance-animations": {
       "source": "dylantarre/animation-principles",
@@ -54,6 +90,18 @@
       "sourceType": "github",
       "skillPath": "skills/find-animation-opportunities/SKILL.md",
       "computedHash": "c6673fadf179233cc0a52c978ea9acc9b82a210665c749307a571a86ed4c092e"
+    },
+    "gh-fix-ci": {
+      "source": "openai/skills",
+      "sourceType": "github",
+      "skillPath": "skills/.curated/gh-fix-ci/SKILL.md",
+      "computedHash": "62b4c9b9aeb0e52925882185019e65c7785da8e7fa16ddb95dd3aaa00883961a"
+    },
+    "godot-gdscript-mastery": {
+      "source": "thedivergentai/game-dev-agentic-skills",
+      "sourceType": "github",
+      "skillPath": "skills/godot-gdscript-mastery/SKILL.md",
+      "computedHash": "d3ef93285ce1c0435d8887166a7a2dd83dff1e97654fafaaf4e73a5631918d9e"
     },
     "grill-me": {
       "source": "mattpocock/skills",
@@ -73,6 +121,18 @@
       "skillPath": "skills/page-transition-animation/SKILL.md",
       "computedHash": "2ca70040f86cc93643877b9cc1fe16653908b9729e87f5711fd6e74e62a789f4"
     },
+    "refactor": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/refactor/SKILL.md",
+      "computedHash": "87789a786b96f99ba0680e89345a975106e10e7db1071c7cdc2e76d507c449d6"
+    },
+    "refactoring-patterns": {
+      "source": "wondelai/skills",
+      "sourceType": "github",
+      "skillPath": "refactoring-patterns/SKILL.md",
+      "computedHash": "5372f40d0b83f20713f7cb8436466280e234cc1b2a5e3c956ece457724c7b3a4"
+    },
     "review-animations": {
       "source": "emilkowalski/skills",
       "sourceType": "github",
@@ -85,11 +145,23 @@
       "skillPath": "skills/safe-debug/SKILL.md",
       "computedHash": "f09bc8d4d750dd7cab6a61c05af7720d5543ff74bec8e557ae5e3461212c374c"
     },
+    "surprise-me": {
+      "source": "bytedance/deer-flow",
+      "sourceType": "github",
+      "skillPath": "skills/public/surprise-me/SKILL.md",
+      "computedHash": "5f1e90e27bbf451bb0c1878ff4621b39a8f2c47f56e9a9b98426e736fbd1d37a"
+    },
     "systematic-debugging": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/systematic-debugging/SKILL.md",
       "computedHash": "3589907ee34dc8b1b7223a33fac98ab841a9e42f9960ab4433a832f0c6f00be0"
+    },
+    "testing-changes": {
+      "source": "riekelt/principal-engineer",
+      "sourceType": "github",
+      "skillPath": "plugins/principal-engineer/skills/testing-changes/SKILL.md",
+      "computedHash": "e597c89d92066afeae1782507a5bb87eb6ca5cdc14d2fa275646995506287de7"
     },
     "ui-animation": {
       "source": "mblode/agent-skills",
@@ -115,11 +187,23 @@
       "skillPath": "skills/watching-videos/SKILL.md",
       "computedHash": "3b6934b761bfb9e9e0f0d29796117c6ece7d2314bbd76d4ac1350e7ed0c137c8"
     },
+    "web-design-expert": {
+      "source": "curiositech/some_claude_skills",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/web-design-expert/SKILL.md",
+      "computedHash": "a5b561296a8fc3b057162c3b5b712b901d4aa840637308b5ceccf8450bb98316"
+    },
     "whiteboard-animation": {
       "source": "yangagent/whiteboard-animation-skill",
       "sourceType": "github",
       "skillPath": "skills/whiteboard-animation/SKILL.md",
       "computedHash": "189aae005a449e532e92674f27d9bf2a7129831c92ce4ba3ec4750af4301767d"
+    },
+    "writing-unit-tests": {
+      "source": "riekelt/principal-engineer",
+      "sourceType": "github",
+      "skillPath": "plugins/principal-engineer/skills/writing-unit-tests/SKILL.md",
+      "computedHash": "3b87b422eaea2e84fb15de7e2b7d9bf5abebd4a60a2049ae285d22f69da254ce"
     }
   }
 }

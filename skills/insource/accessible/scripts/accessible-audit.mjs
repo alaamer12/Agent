@@ -56,6 +56,9 @@ const url = /^https?:\/\//.test(target) ? target : 'file://' + path.resolve(targ
 const width = Number(flag('width', 1440));
 const height = Number(flag('height', 1000));
 const shotPath = flag('shot', null);
+// Dynamic-import pages (and any lazily-mounted route) need longer than a fixed settle; without
+// this the audit evaluates a half-rendered page and reports a false 'clean'.
+const settle = Number(flag('wait', 2500));
 const outPath = flag('out', null);
 const baselinePath = flag('baseline', null);
 const exclude = (flag('exclude', '') || '').split(',').map((s) => s.trim()).filter(Boolean);
@@ -637,7 +640,7 @@ try {
   await cdp.send('Runtime.enable');
   await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
   await cdp.send('Page.navigate', { url });
-  await sleep(2500);
+  await sleep(settle);
 
   const evalRes = await cdp.send('Runtime.evaluate', {
     expression: `window.__EXCLUDE = ${JSON.stringify(exclude)};\n(${PAGE_SCRIPT.toString()})()`,
