@@ -1,0 +1,24 @@
+/* theme.css — design tokens ONLY (custom properties; no component selectors) */
+:root {
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --ink: #1d2330;
+  --muted: #68718a;
+  --line: #e3e7f0;
+  --accent: #3b5bdb;
+  --up: #177245;
+  --down: #b3402e;
+  --warn-bg: #fdf3e7;
+  --err-bg: #fbeceb;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgb(20 30 60 / .08), 0 8px 24px rgb(20 30 60 / .06);
+  --space-1: 8px; --space-2: 12px; --space-3: 16px; --space-4: 24px; --space-5: 32px;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-xs: 12px; --fs-sm: 13px; --fs-md: 15px; --fs-lg: 19px; --fs-xl: 26px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12151d; --surface: #1a1f2b; --ink: #e7ebf5; --muted: #93a0bd;
+    --line: #2a3244; --shadow: 0 1px 3px rgb(0 0 0 / .4);
+  }
+}

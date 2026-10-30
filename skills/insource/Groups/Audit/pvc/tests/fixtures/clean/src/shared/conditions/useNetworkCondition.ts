@@ -1,0 +1,1 @@
+export function useNetworkCondition() { const [isOnline, setIsOnline] = useState(true); useEffect(() => { const on = () => setIsOnline(true); window.addEventListener("online", on); return () => window.removeEventListener("online", on); }, []); return { isOnline }; }

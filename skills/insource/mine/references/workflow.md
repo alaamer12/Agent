@@ -51,7 +51,9 @@ means for that kind of source.
 Start at `references/source-ecosystems.md` — one block per ecosystem this
 skill knows how to reach (codebases, visual/design, documentation sets,
 research literature, specs and standards, package registries, discussion
-corpora, postmortems and org writing, datasets), each answering the same six
+corpora, postmortems and org writing, datasets, document files — PDFs,
+ebooks, scans, single long artifacts — and time-based media), each answering
+the same six
 questions: candidate, discovery, reach, census, why, dedup/traps. Those
 blocks are the accumulated result of actually doing runs, and they're
 additive — the list is not a whitelist. `references/search-and-mining-technique.md`
@@ -85,6 +87,42 @@ source type.
 Before any mining happens, produce a source plan using
 `assets/source-plan-template.md` and get explicit user approval on it.
 Do not start mining on an unapproved plan.
+
+### The plan is a file from the moment it exists — not at mining time
+
+Create the run directory (`./mine/<task-slug>/plan/`) *while building the
+plan*, before presenting it, and write the plan into `plan/plan.md` there.
+A plan that lives only in the conversation is lost when the session is —
+and a lost plan means re-planning: re-discovery, re-verification, a
+different candidate list, and a user asked to approve twice what they
+already approved. Alongside it write `plan/checklist.md` — the run's
+resume spine — one line per unit of work, **in mining order**:
+
+```markdown
+# Mining checklist — <task>   (budget: ~2h, started 2026-10-20 14:00)
+Directives: "each subagent reads 100 pages" → slices of the body range
+Tools: tools/extract-pdf.sh ✅ tested ×2 · scrape skill ✅ · DeepWiki ✗ declined
+- [x] 01 <source A>          — done 14:20 · experience/01-a.md
+- [~] 02 <source B>          — IN PROGRESS (slices 1–3 done, 4–5 open)
+- [ ] 03 <source C>          — pending
+- [s] 04 <source D>          — swapped → <replacement>, dedup with 03 (see plan.md log)
+```
+
+Statuses: `pending` / `in progress` / `done` (timestamp + checkpoint path) /
+`failed-in-budget` / `swapped` (with reason). For within-source fan-out, one
+line per slice under its source. When the user approves the plan, record the
+approval *in* `plan/plan.md` (approved as-is / with these edits, date) — so a
+resumed session knows approval was already given and exactly to what, and
+never re-asks a settled question. Mid-run changes (substitutions, dedup
+removals, directive amendments) append to a change-log section rather than
+rewriting the approved plan — the plan file is history, the checklist is
+state.
+
+### Before planning — check for an interrupted run
+
+`/mine` on a topic that already has a run directory with unchecked items is
+a **resume**, not a new dig, unless the user explicitly asks to re-plan.
+See "Resuming an interrupted run" below.
 
 ### Identify the source type and check for the best tool first
 
@@ -147,6 +185,26 @@ remain the best (or only) option going forward:
   any number of web searches against the human-facing site, which typically
   hides both. `source-ecosystems.md` names the specific endpoints per
   ecosystem, with what's been verified here and what hasn't.
+- *For document files and media* (PDFs, ebooks, scans, recordings), the
+  fitting tool is a **converter** — the source isn't readable until it
+  becomes text: text extraction for born-digital files, an OCR chain for
+  scans, ASR or published transcripts for audio/video, a docs scraper for
+  HTML. Which tools are actually best is a moving target — a new open-source
+  release can outrank the established hosted product next month — so the
+  agent **searches for the current landscape (this year's queries, recent
+  releases, leaderboards) instead of trusting its memory of tool names and
+  standings**, and remembers that open-vs-paid wins neither category by
+  default: the pick is made by measuring accuracy on one real sample of the
+  actual content (the bootstrap's accuracy gate), with the free-vs-paid
+  choice surfaced to the user *with that evidence* when spend or verbatim
+  claims make it consequential. Availability differs per machine, so check
+  what this environment actually has, and when nothing exists or passes, the
+  agent adapts rather than declaring the source unreachable. The full
+  sequence — search current tools, gate for accuracy, adapt, prove the
+  pipeline once by hand, then codify it into reusable scripts under the
+  run's `tools/` that every subagent calls — is
+  `search-and-mining-technique.md` → "The extraction bootstrap"; run it
+  before spawning anyone, whenever the sources need converting at all.
 
 Don't treat any of these as *the* answer for their category, and don't
 stop looking once one of them is found to not apply — if a task's source
@@ -169,7 +227,13 @@ apply:
    "screens"; for anything else, the same pattern applied to that
    domain). Don't stop at one query if the first doesn't surface
    anything plausible — try a couple of angles before concluding nothing
-   fits.
+   fits. And when the question is *which tool is currently best* rather
+   than *does one exist*, search with the present year rather than
+   answering from memory: tool landscapes (converters, OCR/ASR models,
+   scrapers, parsers) turn over faster than skill versions, and a
+   remembered leaderboard is stale by construction — today's newest
+   open-source release may be the honest answer and "the famous one" may
+   not be.
 3. **Build the candidate plan as normal first** (see "Finding candidates"
    below) — a tool's presence doesn't change which candidates go on the
    plan, only how they get mined once approved.
@@ -226,6 +290,43 @@ registry, a model hub, or authored implementations) and still settles
 true-independents vs industry/products for its contenders. The four phases then run
 identically; only the interrogation step inside Phase 2 swaps from reading to
 testing, and the Phase 4 deliverable from a distillation to a verdict.
+
+### Honor mining directives — the user may specify the *how*, not just the *what*
+
+Requests sometimes carry explicit instructions about how the mining itself
+should be done, not merely what to mine: "/mine this 800-page PDF, each
+subagent reads 100 pages" names the artifact, the split granularity, and the
+worker fan-out; "for each repo read every ADR before touching code" prescribes
+a per-source procedure; "OCR the scans then skim, don't deep-read" prescribes
+the reach technique and reading depth; "use the scrape skill for the doc sites"
+prescribes the tool. Treat these as **directives** — first-class input, honored
+literally wherever the environment can honor them:
+
+- **Record them in the plan** under "Mining directives", one line each, so the
+  user sees their instruction was received as written and can amend it at
+  approval. A directive can always be overridden by the user at approval; it
+  can never be quietly dropped.
+- **A directive settles the choice it covers, replacing the skill's default
+  for that choice** — split size, subagent count, read-vs-skim depth, which
+  reach method, which regions to prioritize. "Each subagent reads 100 pages"
+  is an exact fan-out spec (see "Who performs the deep mining" → within-source
+  fan-out below); don't re-derive your own preferred split and call it
+  compliant.
+- **Directives change *how much and how sliced*, never whether the discipline
+  runs.** Plan approval, census + noise map before reading, the checkpoint
+  floor, the ledger, and run-mining's fairness rules stay in force under every
+  directive. "Read 100 pages per subagent" still requires each slice's
+  checkpoint to carry the census and the ledger; it just fixes the slice size.
+- **Resolve conflicts at plan time, never silently.** A directive that's
+  impossible as stated (100-page slices on a 40-page PDF; "each of 8
+  subagents reads a tenth of this 300-page book" when the noise map shows only
+  90 pages of body content) gets flagged in the plan with the nearest faithful
+  reading proposed — e.g. keep 8 subagents, split the *signal* range by the
+  structure map — rather than the agent quietly reinterpreting or the user
+  discovering after approval that their instruction produced index-reading.
+- A directive phrased as a *method* the skill doesn't know ("mine it the way
+  you'd mine RFCs") is read as source-type/method input and settled like any
+  ambiguous case — name the interpretation in the plan.
 
 ### True-independents or industry/products — settle this before discovery
 
@@ -360,7 +461,10 @@ expensive thing on the list. Note too that for API-reachable ecosystems
 (registries, literature, specs, discussion corpora) *discovery* is nearly
 free while *full-text reach* is the bottleneck — listing 200 papers takes
 seconds, reading 20 of them does not — so size the plan against reading, not
-against finding.
+against finding. For document sources, price the *signal*, not the page
+count: a 600-page book is a ~400-page read once the noise map is known, and
+the map costs seconds — run extraction and profiling on one representative
+artifact before fixing N or any page-range split (see Phase 2 → step 1).
 
 This estimate is a **planning tool, not a runtime cap.** Once mining
 starts, per-source time is not fixed or equally divided — some sources
@@ -381,6 +485,22 @@ the user can choose:
   own checkpoint notes. The cost is context: the parent only ever sees
   what a subagent returns, never its raw digging, so the brief must
   demand the full evidence rather than a thin recap.
+- **Within-source fan-out** — when the work is *one* large artifact (an
+  800-page book, a 40-module monorepo, a year of a forum), subagents split
+  **inside** the source by slice — a page range, a directory, a date window —
+  instead of one agent per candidate. This is what a directive like "each
+  subagent reads 100 pages" asks for. Three rules make it work: slice by the
+  **structure map, not raw page counts** (run extraction and the noise pass
+  first — see `references/noise-and-density.md` — or one agent gets fifty
+  pages of index while another gets the core argument); have each slice write
+  a part-checkpoint (`experience/07a-<source>-p301-400.md` style), which the
+  parent or a final agent stitches into that source's single checkpoint, with
+  the census and ledger merged across slices; and every slice brief carries
+  the artifact's census so far, because a subagent reading pages 301–400
+  cannot know it holds 12% of a book unless the brief says so. Cross-slice
+  "why" questions (one argument developed across four chapters) are the
+  parent's job after stitching — tell the slices to note open threads rather
+  than chase them outside their range.
 
 If the user picks subagents and a `/subagent` skill exists in this
 environment, read its `SKILL.md` and build every mining brief with its
@@ -414,7 +534,7 @@ teaches still applies to a mining brief:
   file instead of being the file.
 
 With many subagents, don't repeat the common context in every spawn —
-write one shared brief file once (e.g. `research/SHARED-MINING-BRIEF.md`,
+write one shared brief file once (e.g. `<run-dir>/tools/SHARED-MINING-BRIEF.md`,
 like the worked example in this repo), containing the full `/subagent`
 structure — Root, Role, Domain, the per-source process steps, hard
 boundaries, Autonomy Bounds, Output Contract, and any output format spec
@@ -422,7 +542,15 @@ boundaries, Autonomy Bounds, Output Contract, and any output format spec
 and the checkpoint floor into that brief near-verbatim rather than
 paraphrasing them short: with a dozen agents running blind and in parallel,
 the brief is the only thing standing between them and twelve private
-definitions of "be thorough". Each spawn then
+definitions of "be thorough". When the sources need converting at all (PDFs,
+scans, HTML, media), the brief also points at the run's `tools/` extraction
+script by path — "run `tools/<script> --help` and use it on your artifact;
+read its `cache/` output; do not re-derive extraction" — and states the
+noise rule for the slice ranges it hands out (body ranges from the structure
+map, skips recorded as `skipped:<region> <range> (<evidence>)` in the
+checkpoint). One pipeline definition per run, tested once by its author, is
+the difference between twelve agents mining twelve versions of a book and
+twelve agents mining the same one. Each spawn then
 carries only what differs: the assigned source(s) and exact output
 paths, plus "read `<shared-brief-path>` first and follow it exactly."
 One canonical brief also keeps every agent consistent, makes mid-run
@@ -463,21 +591,89 @@ fails it as *did-not-run-in-budget*, never as a silent drop.
 ### The run directory
 
 Every run gets one conventional directory named after the task:
-`./mine/<kebab-cased-task>` (e.g. `./mine/50-dashboard-designs`) — this is
+`./mine/<kebab-cased-task>` (e.g. `./mine/50-dashboard-designs`,
+`./mine/mining-the-800-page-handbook`) — this is
 the default location; if the user names a different output location, use
 that instead, keeping the same naming and subdirectory conventions below.
-The directory has a fixed three-subdirectory shape:
+Two absolute rules: **every scratch, cache, tool, and evidence file a run
+produces lives inside its run directory** — nothing loose in `/tmp`, no
+orphaned artifacts elsewhere — because everything a checkpoint or ledger
+cites must still be findable by someone reopening that folder a month later;
+and the directory has a **fixed set of static folders** that exist in every
+run, plus **dynamic folders** created only when the task needs them.
+
+**Static folders** (same names and roles in every run; `plan/` is created in
+Phase 1 when the plan is written, the rest at the start of Phase 2):
 
 | Dir | What goes in it |
 |---|---|
-| `sources/` | The approved plan, and everything collected to reach the sources — cloned checkouts, fetched images, raw fetch/API responses (each cached artifact carrying the URL it came from, so the ledger is reconstructable from disk and not just from memory). In run-mining, also the frozen fixture set, each candidate's thin adapter, the one runner, and cached installs/builds/artifacts, so a result is re-runnable without re-paying the setup |
-| `experience/` | One checkpoint file per mined source — its ground census (what the source physically is, and what of it was actually reached), then what was learned from it and why, closing with the source ledger of URLs it touched (see "Write a checkpoint file" below) |
-| `distillation/` | The final document plus the true full journey of the run — how discovery actually went, the cross-source ground table if you built one, the union of the per-source ledgers as the run's bibliography, category quotas met or missed, substitutions/dedup removals, budget reality vs estimate, tools used. In run-mining, the score table and ranked verdict live here too, and the reproducible probe is kept so the user can re-run or extend it |
+| `plan/` | `plan.md` — the plan as presented and approved (with the approval and any amendments recorded in it), and `checklist.md` — every unit of work in mining order with its live status. Written in Phase 1, updated through Phase 2; this pair is what makes an interrupted run resumable in the same sequence (see "Resuming an interrupted run" below) |
+| `sources/` | The **raw bytes** collected to reach the sources — cloned checkouts, fetched images, downloaded PDFs, raw fetch/API responses (each cached artifact carrying the URL it came from, so the ledger is reconstructable from disk and not just from memory). In run-mining, also each candidate's thin adapter and the one runner. |
+| `cache/` | **Derived** artifacts rebuildable from `sources/` — PDF→text extractions, OCR output, HTML→Markdown, transcripts, per-page density profiles, trimmed API fields. One extraction per artifact however many agents read it; this is what subagents consume instead of re-converting raw sources. Expensive once, trivial after, safe to delete and rebuild |
+| `experience/` | One checkpoint file per mined source (for within-source fan-out: one part-file per slice plus the stitched parent checkpoint) — its ground census (what the source physically is, its structure split if it's a long artifact, and what of it was actually reached), then what was learned from it and why, closing with the source ledger of URLs it touched (see "Write a checkpoint file" below) |
+| `witness/` | The run's **proof of process**: command transcripts, the noise-map outputs backing every `skipped:` decision, the parent's spot-check results and verification notes; in run-mining, harness run logs, timing and score outputs, failure screenshots. If a checkpoint claim were doubted later, the file that would settle it lives here |
+| `tools/` | Scripts written during this run for reuse — the codified extraction pipeline from the bootstrap (`search-and-mining-technique.md` → "The extraction bootstrap"), census helpers, run-mining harness glue. Each ships with `--help`, is tested on at least two artifacts by its author before distribution, and is what the shared brief points every subagent at |
+| `distillation/` | The final document plus the true full journey of the run — how discovery actually went, the cross-source ground table if you built one, the union of the per-source ledgers as the run's bibliography, category quotas met or missed, substitutions/dedup removals, the noise-skip summary (what was skipped across all sources and on what evidence), budget reality vs estimate, tools used. In run-mining, the score table and ranked verdict live here too, and the reproducible probe is kept so the user can re-run or extend it |
 
-Create the directory at the start of Phase 2; every path this workflow
-mentions ("a working directory for this run", "the run's checkpoints
-directory") means these subdirectories. Solo and subagent runs write to
-the same place — a subagent's output contract is its `experience/` file.
+**Dynamic folders** (created by the task, not by convention — the static list
+is closed, the dynamic list never is): `scratch/` for throwaway working
+files; `slices/` for per-subagent page-range extracts in within-source
+fan-out; `extracts/`, `frames/`, `transcripts/` when one cache type deserves
+its own tree; `fixtures/` and `probes/` for run-mining inputs and harnesses;
+whatever else a specific task genuinely generates. Rules: kebab-case names;
+one folder per purpose, first referenced in the checkpoint or journey
+document that uses it; every file in it traceable to at least one checkpoint
+or ledger; and a dynamic folder never duplicates a static role — raw bytes
+belong in `sources/`, derivations in `cache/`, proof in `witness/`, reusable
+machinery in `tools/`. If something in `scratch/` outlives the run and the
+distillation cites it, it was filed in the wrong place.
+
+`plan/` is created in Phase 1 — the plan needs its file before mining starts,
+and the rest of the folders get created at the start of Phase 2; every path
+this workflow mentions ("a working directory for this run", "the run's
+checkpoints directory") means these subdirectories. Solo and subagent runs
+write to the same place — a subagent's output contract is its `experience/`
+file, a within-source slice's is its `experience/` part-file plus its range
+under `slices/`.
+
+### Resuming an interrupted run
+
+Any session picking up `/mine` — after an interruption, a context loss, a
+deleted conversation, or a deliberate "continue tomorrow" — runs this
+protocol instead of re-planning:
+
+1. **Find the run, don't rebuild it.** Match the topic against existing run
+   directories; open `plan/plan.md` + `plan/checklist.md`. If the checklist
+   still has unchecked units, this is a resume: announce it ("Resuming
+   `<task>`: 4 of 15 sources mined, continuing at #5 — 1 slice of #2 still
+   open"), and carry on **in the recorded mining order** under the recorded
+   directives and the already-given approval. Re-planning an approved,
+   half-mined run silently changes the candidate set mid-run and invalidates
+   the cross-source spine the checkpoints were built to support.
+2. **Trust disk over memory — the files already are the state.** Every
+   `experience/` checkpoint is self-sufficient by design, so re-reading the
+   completed ones restores what was learned without re-mining. `cache/`
+   holds extractions that must not be redone; `tools/` scripts get one smoke
+   test before reuse, not a rewrite; `witness/` skip-decisions stay valid;
+   in run-mining, cached builds in `cache/` and the kept harness in
+   `sources/`/`fixtures/` mean a resume doesn't re-pay setup.
+3. **Detect half-done work honestly.** A checklist unit marked `in progress`
+   with partial slice files or a missing checkpoint means the interruption
+   landed mid-source: keep the finished slices (read them back), mine only
+   the open range, then stitch. Never re-mine a slice whose part-file exists
+   and passes the checkpoint floor — and never mark a unit done on the
+   strength of its slices alone until the stitched parent checkpoint exists.
+4. **Evidence beats the ledger when they disagree.** If the checklist and
+   the actual files disagree (checkbox ticked but no checkpoint, or a
+   checkpoint nobody recorded), the files win: fix the checklist with a dated
+   note in the plan's change-log, and treat the disagreement itself as a
+   finding worth one line ("unit 7 recorded done; checkpoint absent —
+   re-mined").
+5. **Budget resumes too.** The checklist timestamps give elapsed mining time
+   across sessions; a time-budgeted resume weighs *remaining* budget against
+   *remaining* units exactly like Phase 3 does mid-run — including saying so
+   plainly when the list no longer fits, rather than letting the restart
+   quietly pretend the clock hadn't run.
 
 For each approved candidate, in order:
 
@@ -507,13 +703,19 @@ For each approved candidate, in order:
    - Any other ecosystem: follow the **Reach** line of its block in
      `references/source-ecosystems.md` (a docs scraper for documentation
      sets, an API plus full-text fetch for literature and specs, and so
-     on). Two rules hold everywhere the source is remote: cache what you
-     reached under `sources/` — the raw JSON, the downloaded PDF, the
-     scraped Markdown — so a claim can be re-checked without re-fetching
-     and the run survives an endpoint going down mid-run; and check size
-     before downloading, since documentation sets and datasets are the
-     largest disk hazards this skill meets. A partial reach that's
-     honestly labelled beats a bulk download that eats the sandbox.
+     on). Two rules hold everywhere the source is remote: cache the raw
+     bytes you reached under `sources/` — the raw JSON, the downloaded PDF
+     — so a claim can be re-checked without re-fetching and the run
+     survives an endpoint going down mid-run; and check size before
+     downloading, since documentation sets and datasets are the largest
+     disk hazards this skill meets. A partial reach that's honestly
+     labelled beats a bulk download that eats the sandbox.
+     **When the raw bytes aren't readable text** (PDF, scan, HTML, audio,
+     video), converting them is part of reaching: run the extraction
+     bootstrap (`search-and-mining-technique.md` → "The extraction
+     bootstrap") — proven pipeline first by hand, then codified under
+     `tools/`, derived text landing in `cache/` — and for a run with
+     fan-out, do this before the first subagent spawns, not inside one.
 1. **Take the ground census before interpreting anything.** Get the countable
    facts about what this source physically *is* — its identity (exact
    instance, branch/version, license), magnitude (how many files, bytes, LOC,
@@ -528,7 +730,8 @@ For each approved candidate, in order:
    never left blank, because a blank and an unavailable look identical to
    whoever reads this after the context is gone.
    The same step starts your **source ledger**: from the first fetch onward,
-   write down each URL as you touch it (`tee -a` into a scratch file, or put
+   write down each URL as you touch it (`tee -a` into `scratch/<slug>-urls.txt`
+   inside the run directory, or put
    the URL in the header of each artifact you cache under `sources/`). The
    ledger is a by-product of digging and is trivially accurate while you're
    digging; reconstructed from memory at write-up time it becomes a list of
@@ -536,6 +739,18 @@ For each approved candidate, in order:
    than having no list, because the parent verifies against it. See
    `search-and-mining-technique.md` → "The source ledger" for the role tags,
    commit/DOI pinning, and the credential-scrub rule.
+   **For any artifact too big to read in one pass — a book, a scan, a long
+   report, a transcript, a scraped corpus — the census is not complete without
+   the noise map** (`references/noise-and-density.md`): profile the structure
+   from the extracted text in `cache/` (front matter / body / back matter page
+   ranges, near-blank and repeated-boilerplate pages), sample-verify every
+   region you mean to skip, and write the resulting **structure split** —
+   pages read / skimmed / skipped, each skip with its evidence — into the
+   census. Do this *before* assigning page ranges to subagents; a split made
+   against raw page counts hands one agent fifty pages of index while another
+   gets the core argument. The preface/foreword exception applies always: the
+   noise pass downgrades them to skim, never to skip — that's where the
+   author's own "why" lives.
 2. Dig into the source using the technique appropriate to its type — see
    `search-and-mining-technique.md` for concrete method per source type
    (GitHub: README/docs/ADRs/PRs/commit history; visual: layout, color,
@@ -589,7 +804,11 @@ For each approved candidate, in order:
    - **What you actually reached, as a count next to the total.** "Read 15
      files of 32,818" or "viewed 1 screen of the 9-step flow" is what makes
      every absence claim honest, and it is the difference between a
-     well-hedged conclusion and an unfalsifiable one.
+     well-hedged conclusion and an unfalsifiable one. For a long artifact
+     this is the structure split: pages read / skimmed / skipped with the
+     noise-map evidence behind each skip — a checkpoint summarizing "the
+     book" while having read only its front matter is the document-scale
+     version of the invented ledger.
    - **The *why* and *cost*** behind what's structurally notable, not a "what
      was found" list.
    - **`stated` vs `inferred` labels** on conclusions, each with its evidence
@@ -626,6 +845,12 @@ For each approved candidate, in order:
    user-facing feedback, distinct from the checkpoint file (which is the
    agent's own working notes, not shown to the user unless asked) — both
    happen after every source, they're not alternatives to each other.
+   And with the progress line, **tick the unit in `plan/checklist.md`** —
+   `done`, timestamp, checkpoint path (or `swapped`/`failed-in-budget` with
+   its one-line reason, mirrored into the plan's change-log). The tick is
+   what turns the next interruption into a resume instead of a re-dig; an
+   un-ticked checklist is a run that forgets it happened. Mark a unit
+   `in progress` when *starting* it, for the mid-source-resume case.
 
 ### Dedup after collection — wherever content can be copied
 
@@ -664,6 +889,11 @@ one that plateaus quickly, as long as the running total stays roughly on
 track to cover the full candidate list. If it's clear the full list won't
 fit the remaining budget, say so plainly rather than silently truncating
 the list or silently rushing through remaining sources shallowly.
+
+Either way, `plan/checklist.md` is the budget's durable record — start
+time and per-unit timestamps make a resumed session's "what's left"
+arithmetic read off files rather than memory (see "Resuming an interrupted
+run" in Phase 2).
 
 ## Phase 4 — the final document
 

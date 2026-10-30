@@ -133,8 +133,11 @@ the bulk cost, and it can dwarf everything else — a single heavy build can eat
 whole budget. Before committing, sanity-check what "run all N candidates" actually
 costs, and note in the plan that run-mining estimates are the shakiest kind.
 Time-box any one build (a candidate you cannot get running inside its slot is a
-result: *failed to run in budget*, recorded, not silently dropped). Cache
-everything you fetched/built under `sources/` so a re-run doesn't re-pay it. This
+result: *failed to run in budget*, recorded, not silently dropped). Cache raw
+fetches under `sources/`, builds/installs/derived artifacts under `cache/` —
+so a re-run doesn't re-pay the setup — and put the run logs, timing and score
+outputs that prove what happened in `witness/`. The frozen fixtures and probe
+code live in the run's dynamic `fixtures/` and `probes/` folders. This
 all sits under the same Phase 3 rule: the estimate plans the list, it does not cap
 a candidate that's genuinely worth the time.
 

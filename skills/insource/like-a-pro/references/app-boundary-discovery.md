@@ -76,13 +76,13 @@ Based on my scan of the repository structure, I have identified the following ca
    - Path: apps/web/
    - Tech Stack: TypeScript, Next.js, React
    - Nature: Web Frontend (Has UI)
-   - Proposed Standards: language-conventional (TS), errors-handling, ui-rules
+   - Proposed Standards: language-handling (TS), error-handling, ui-handling
 
 2. Application: 'feed-worker'
    - Path: services/worker/
    - Tech Stack: Go
    - Nature: Background Daemon / Pipeline (Headless - No UI)
-   - Proposed Standards: language-conventional (Go), sql-conventional, errors-handling
+   - Proposed Standards: language-handling (Go), sql-handling, error-handling
 
 Do these application boundaries accurately reflect your project architecture, or would you like to adjust or merge any of them?
 ```

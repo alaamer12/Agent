@@ -1,5 +1,11 @@
 # State Management
 
+> Written in VanJS terms (`--ui vanjs`, NoF's original UI library). The
+> same three-way split and the same reassign-don't-mutate rule apply
+> verbatim under `--ui preact` (`@preact/signals` or Nano Stores) and
+> `--ui nanojsx` (always Nano Stores) — see `references/ui_libraries.md`
+> for those libraries' equivalent syntax.
+
 ## Three kinds of state
 
 - **Local state** — inside a component, via `van.state()`, when nothing

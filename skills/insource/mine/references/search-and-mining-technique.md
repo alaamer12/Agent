@@ -20,11 +20,14 @@ still follows that same discipline; write a new section here — or a block in
 `source-ecosystems.md` — afterward if the technique that worked is worth
 keeping for next time (see
 `workflow.md` for when this skill accumulates a new domain's technique).
-"The ground census", "The source ledger", "Mining technique — going from
-'what' to 'why'" and "Writing the final document" are fully general and apply
+"The ground census", "The source ledger", "The extraction bootstrap",
+"Mining technique — going from 'what' to 'why'" and "Writing the final
+document" are fully general and apply
 regardless of source type — read the census section even for a source you
 think you already know the shape of, and write the ledger even when the run
-felt entirely local.
+felt entirely local. For any artifact too big to read in one pass (book,
+scan, transcript, scraped corpus), also read
+`references/noise-and-density.md` before spending reading budget on it.
 
 ## The ground census — establish what a source IS before arguing why
 
@@ -118,7 +121,8 @@ gh api repos/<owner>/<repo>/languages        # per-language byte split
 gh api "repos/<owner>/<repo>/contributors?per_page=1" -i 2>/dev/null | grep -io 'page=[0-9]*>; rel="last"'
 ```
 
-Cache the tree JSON once (`> /tmp/<repo>_tree.json`) and re-cut it with `jq`
+Cache the tree JSON once (`> cache/<repo>_tree.json` in the run directory) and
+re-cut it with `jq`
 locally instead of re-hitting the API per question — it's also the cheapest way
 to answer "does path X exist anywhere" at whole-repo scale.
 
@@ -225,7 +229,7 @@ that entry — it means the line numbers may not survive the day.
 **Log while you fetch; never reconstruct afterwards.** Rebuilding a URL list
 from memory at write-up time reliably produces confident, invented links, which
 is the fastest way to poison a run — the parent spot-checks exactly these.
-Appending as you go is nearly free: `curl … | tee -a /tmp/<slug>-urls.txt`, or
+Appending as you go is nearly free: `curl … | tee -a scratch/<slug>-urls.txt`, or
 paste the source URL into the header of every raw response you cache under
 `sources/`, and the ledger is then a one-line `grep` away.
 
@@ -259,6 +263,119 @@ Shape of the closing block, with the tags doing the work:
 - failed   https://objects.<cdn>.githubcontent.com/<signed-path> → 403 after pin expiry;
            query string redacted
 ```
+
+## The extraction bootstrap — prove the reach pipeline once, then hand it to every subagent
+
+Most source types beyond repos-and-screens are not directly readable: a PDF
+must become text, a scan must be OCR'd, an HTML tree must become Markdown, an
+episode must become a transcript, a dataset must become sampled rows. That
+conversion step — *reach* in the six-question sense — is where runs quietly
+die, in two distinct ways: each agent redoes it differently (or one agent
+redoes it N times), **or the whole run is built on a converter that produces
+confident garbage.** The second failure is the expensive one, because of the
+chain it starts: a weak converter produces weak experiences (every agent reads
+the same garbled page), weak experiences produce a weak essence (the
+distillation is only as true as what actually reached it), and a tidy ledger
+makes the garbage look *sourced* — receipts certify that a URL was fetched,
+not that the tool parsing it was right, so nothing downstream can smell the
+error. The bootstrap exists to break that chain at its root, before fan-out.
+
+The sequence, in order of cheapness:
+
+1. **Search for the current tool landscape — never pick a converter from
+   memory.** This is a fast-moving field: a new open-source model released
+   last month may already beat the established names on OCR, ASR, or PDF
+   parsing, and whichever list is in your weights is stale by construction.
+   So before choosing any conversion tool, run the discovery like any other
+   discovery question — search "best open source [PDF extraction / OCR /
+   speech-to-text] <this year>", check what's recently changed (a tool's repo
+   activity, a benchmark leaderboard, a release announcement), and treat the
+   agent's own memory of tool names and standings as a *hypothesis to verify*,
+   never a source. The same rule applies in both directions: don't assume the
+   famous tool is still best, and don't assume the new thing on the leaderboard
+   is — verify both against the next two steps.
+2. **Enumerate the candidates — open source *and* paid — and refuse to assume
+   which category wins.** For every conversion job there is usually a
+   professional/hosted option and a free/library option (hosted ASR vs open
+   ASR models, commercial document-OCR vs `tesseract` vs a parsing library).
+   Neither category holds the quality crown by default: open implementations
+   currently lead some benchmarks for some languages, accents, and document
+   types, and hosted products lead others — and standings move. Pick by the
+   actual axes: accuracy *on this kind of content* (see step 3), cost and
+   rate limits, what this environment can actually run, credentials the user
+   has, and whether the output shape is greppable.
+3. **Run the accuracy gate before the run commits to a tool.** Take ONE real
+   sample of the actual content — one page of this scan, a two-minute stretch
+   of this audio, one two-column page — convert it with the leading candidate,
+   and *personally verify the output against ground truth*: read the rendered
+   page next to the extracted text; listen to the segment next to the
+   transcript. Count errors where it matters: a small character-error rate is
+   harmless for skimming structure and quietly lethal for verbatim quotes.
+   The gate decides "accurate enough for what this run will *do* with the
+   output" — skim vs cite vs measure are different quality bars. When free and
+   paid are both viable and the choice has real consequences (spend, or the
+   accuracy claims depend on), present both to the user *with what you just
+   measured on their content*, not with brand reputation — in the plan-approval
+   message, same fold-in as the connector choice. "The open model beat the
+   hosted one on this clip and costs nothing" and "the hosted one is worth $N
+   because the open one mangles this domain's jargon" are both legitimate
+   findings; an unmeasured assumption in either direction is not.
+4. **Look for what's already installed and shipped.** Sibling skills first
+   (in this repo, `scrape` for docs sites), then installed binaries
+   (`pdftotext`, `pandoc`, `tesseract`, `gs`, `ffmpeg`, an ASR model), then
+   language libraries (`pypdf`, `pdfplumber`, `pdfminer`), then platform APIs
+   that return the converted form directly (provider-hosted transcripts,
+   arXiv source, RFC `.txt`). Check what *this* environment actually has — do
+   not assume a tool exists because it is famous, and do not assume it's
+   missing because one check failed. A tool behind a paid API the user hasn't
+   opted into is not "available."
+5. **If nothing exists or nothing passes the gate, adapt rather than
+   downgrade the source.** Hand-roll the minimum that makes the content
+   greppable or readable: a loop over page-range reads via a PDF-capable
+   reader; `curl` + a HTML→text filter; rendering pages to images and reading
+   them visually. Label the method honestly in the census Reach field —
+   "OCR'd, 2018 scan, expect character errors in quotes" is a usable census
+   fact; an undetectable pipeline is a lie waiting to be quoted.
+6. **The main agent mines the pipeline once, by hand, on ONE sample
+   artifact** — before any subagent spawns. Not "verify the tool runs" but
+   actually run the full chain end-to-end: fetch → convert → noise-profile →
+   read a slice, so every failure mode shows itself while it still only
+   costs one artifact's budget (wrong tool for scanned PDFs, encoding junk,
+   missing fonts, rate limits, the 400-page file that isn't what its name
+   claimed).
+7. **Codify the proven sequence into a script under the run's `tools/`
+   directory — every mining task generates its scripts.** Not only fan-out
+   runs: per-task jobs are what the run's toolset is made of — split a PDF
+   by page range, cut an audio segment, sample frames at a stride, profile
+   page density, dedup images by perceptual hash, harvest table pages. A
+   sequence worth running twice is a script. Each takes the artifact (path
+   or URL) and emits the standard products: extracted text and/or per-page
+   word profile into `cache/`, the noise map into `witness/`, and URL/version
+   lines ready for the ledger. Required properties: a `--help` that states
+   inputs and outputs; a fixed output-location convention so every consumer
+   knows where results land; a one-line header recording the tool + version
+   it wrapped — *including which ASR/OCR tool produced which transcript, so
+   the accuracy provenance travels with the citation* — and an explicit
+   "this artifact is scanned/empty/failed" outcome, because a pipeline that
+   silently produces empty text is worse than one that errors: an agent will
+   summarize nothing as content.
+8. **Test the script once on a second, different artifact** (a second book,
+   a differently-generated PDF) before distribution — the one-sample proof
+   overfits to the first file, and a bug found after twelve subagents shipped
+   is twelve runs poisoned.
+9. **Every mining brief then points at the script, not at prose.** "Read
+   `<run>/tools/extract.sh --help` and call it on your assigned artifact;
+   consume `cache/` output; do not re-derive extraction" beats explaining the
+   pipeline in words in six different briefs. This is the same argument the
+   shared brief already makes — a dozen agents with one definition of the
+   work — applied to the *tool* instead of the *checklist*.
+
+This is strictly beneficial whenever fanout is involved — N agents re-deriving
+an extraction pipeline by hand is N× the cost and N× the variance — but the
+script is worth writing even for a solo run mining ten PDFs, for the same
+reason the checkpoint files are: the third one reuses what the first one
+proved, and a re-run of the whole job months later is `tools/` + `sources/`
+already on disk.
 
 ## Searching professionally — codebase/GitHub sources
 

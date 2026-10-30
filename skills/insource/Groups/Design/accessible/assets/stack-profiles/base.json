@@ -1,0 +1,77 @@
+{
+  "$comment": [
+    "Stack profile — the knobs that differ between projects, so no script hardcodes one stack's",
+    "assumptions. Copy this file, fill it in from what your project actually uses, and pass it",
+    "with --profile. Deriving it is quick; the steps are in references/stack-profiles.md.",
+    "",
+    "Every regex is a string source (no slashes) and runs without flags unless noted. A null",
+    "disables that measure, and a script must report a disabled measure as 'not measured'",
+    "rather than as zero — a zero from a rule that cannot match anything is how a check",
+    "passes while blind.",
+    "",
+    "The values below are deliberately neutral: they find CSS custom properties and hex",
+    "literals, which exist everywhere, and nothing that belongs to one framework."
+  ],
+
+  "name": "base",
+
+  "exts": [".html", ".css", ".scss", ".ts", ".js", ".tsx", ".jsx", ".vue", ".svelte"],
+
+  "skipDirs": ["node_modules", ".git", "dist", "build", ".next", ".nuxt", "coverage", ".turbo", "vendor"],
+
+  "snapshotDirPattern": "(?:^|[/\\\\])(?:[\\w.-]+[-_])?(?:origin|before|baseline|snapshot|golden)(?:[-_][\\w.-]+)?$",
+
+  "colour": {
+    "utilityClasses": null,
+    "utilityClassesNote": "Tailwind-style text-blue-500 / bg-slate-900. null where the project has no utility-class colour layer — see vue-tailwind.json for the shape.",
+    "inlineLiterals": "(?:#[0-9a-fA-F]{6}\\b|#[0-9a-fA-F]{3}\\b|rgba?\\(|hsla?\\(|oklch\\()",
+    "tokenDefinitions": "(--[a-z][a-z0-9-]*\\s*:|@theme\\b|theme\\s*\\(\\s*\\{|\\$[a-z][a-z0-9-]*\\s*:)",
+    "rampMinTokens": 12,
+    "rampGrowthFactor": 1.5
+  },
+
+  "elevation": {
+    "tokenPattern": "(--[\\w-]*(?:elev|shadow|depth|radius)[\\w-]*)\\s*:",
+    "usagePattern": "var\\(\\s*--[\\w-]*(?:elev|shadow|depth)[\\w-]*\\s*\\)",
+    "minSteps": 3
+  },
+
+  "routes": {
+    "declarationPattern": "(?:^|[^\\w])(?:path|route|href|to|url)\\s*[:=]\\s*[\"'`](\\/[^\"'`?#]*)[\"'`]",
+    "redirectStubPattern": "\\{\\s*(?:path|route)\\s*:\\s*[\"'`][^\"'`]+[\"'`]\\s*,\\s*(?:redirect|redirectTo|replace)\\s*:[^}]+\\}",
+    "configFilePattern": "(?:router|routes|navigation|nav-?config|menu|sidebar|urls|permissions|ability|policy)"
+  },
+
+  "interaction": {
+    "$note": [
+      "The writing surfaces: forms, dialogs, wizards, pickers — the places a user does a task",
+      "rather than reads a screen. A pass can restyle every one of them and change none of them,",
+      "which is why this is measured as a signature of the CONTROLS rather than of the styling.",
+      "Extend these patterns with whatever the project's own dialog/field components are called;",
+      "null disables the measure and mode-audit reports it as NOT MEASURED, never as zero."
+    ],
+    "surfacePattern": "(?:<(?:input|textarea|select|form)\\b|<(?:[A-Za-z][\\w.]*)?(?:Dialog|Modal|Drawer|Sheet|Wizard|Form|Picker|Upload)\\b)",
+    "controlPattern": "<((?:[A-Za-z][\\w.]*)?(?:input|textarea|select|form|button|Dialog|Modal|Drawer|Sheet|Wizard|Form|Field|Input|Select|Textarea|Picker|Checkbox|Radio|Switch|Upload|Submit|Step|Stepper))(\\s[^<>]*)?>",
+    "identityAttrPattern": "(?:^|\\s)(name|type|id|for|htmlFor|label|aria-label|placeholder|title|value|defaultValue|checked|required|disabled|step|field|options|items)(?=[\\s=/>])",
+    "listTop": 8
+  },
+
+  "components": {
+    "localPrefixes": [],
+    "localPrefixesNote": "Prefixes that mark a project's own shared components, e.g. [\"Sd\",\"Ui\"]. Empty disables the used-but-not-imported check rather than guessing.",
+    "importPattern": "import\\s+(?:\\{([^}]*)\\}|(\\w+))\\s+from"
+  },
+
+  "typography": {
+    "patterns": ["font-size", "line-height", "letter-spacing", "text-\\w+"]
+  },
+
+  "spacing": {
+    "patterns": ["padding", "margin", "gap", "--[\\w-]*(?:space|gap|pad)"]
+  },
+
+  "logicBlock": {
+    "style": "auto",
+    "styleNote": "auto detects per file; or force 'vue' (the <script> blocks) or 'whole' (the file is the module, React/plain JS)."
+  }
+}

@@ -1,0 +1,80 @@
+/* _app.css — shared shell + cross-page components. No page-specific rules here. */
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: var(--fs-md)/1.5 var(--font); }
+body { overscroll-behavior-y: none; }
+
+.app { max-width: 1200px; margin: 0 auto; padding: var(--space-4); }
+.icon { width: 18px; height: 18px; vertical-align: -4px; }
+
+.topbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; }
+.brand { font-weight: 600; font-size: var(--fs-lg); display: flex; gap: var(--space-1); align-items: center; }
+.tools { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); color: var(--muted); }
+.tools .q { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 6px 10px; font: inherit; color: var(--ink); width: 220px; }
+.navlink { color: var(--accent); text-decoration: none; font-size: var(--fs-sm); }
+.navlink:hover { text-decoration: underline; }
+
+.tabs { display: flex; gap: var(--space-1); margin: var(--space-3) 0; border-bottom: 1px solid var(--line); }
+.tab { border: 0; background: none; font: inherit; color: var(--muted); padding: var(--space-2) var(--space-3);
+  cursor: pointer; border-bottom: 2px solid transparent; text-transform: capitalize; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: var(--space-4); box-shadow: var(--shadow); }
+
+.btn, .btn-ghost { border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  border-radius: var(--radius); padding: 6px 12px; font: inherit; cursor: pointer; }
+.btn:hover, .btn-ghost:hover { border-color: var(--accent); }
+.btn-ghost { border: 0; color: var(--accent); background: none; }
+
+.pill { font-size: var(--fs-xs); padding: 2px 8px; border-radius: 99px; text-transform: capitalize; }
+.pill.settled { background: color-mix(in srgb, var(--up) 12%, var(--surface)); color: var(--up); }
+.pill.pending { background: var(--warn-bg); color: #9a6b1f; }
+.pill.failed  { background: var(--err-bg); color: var(--down); }
+
+.up { color: var(--up); } .down { color: var(--down); }
+.muted { color: var(--muted); }
+
+.backdrop { position: fixed; inset: 0; background: rgb(10 15 30 / .45); display: grid; place-items: center; z-index: 20; }
+.modal { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); width: min(480px, 90vw); }
+.modal header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-3);
+  border-bottom: 1px solid var(--line); font-weight: 600; }
+.modal p { padding: 0 var(--space-3); }
+.modal .x { border: 0; background: none; cursor: pointer; color: var(--muted); }
+
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink);
+  color: var(--bg); padding: var(--space-2) var(--space-3); border-radius: var(--radius); box-shadow: var(--shadow); z-index: 30; }
+
+/* shimmer occupies only the sub-region actually arriving (per ?loading=header|input-fields|all) */
+.shimmer-row { height: 40px; margin: var(--space-1) 0; border-radius: 6px;
+  background: linear-gradient(90deg, var(--line), var(--surface), var(--line)) 0/200% 100%;
+  animation: shim 1.2s linear infinite; }
+.shimmer-row.w40 { height: 16px; width: 40%; }
+.shimmer-row.w60 { width: 60%; }
+.shimmer-row.h40 { height: 44px; }
+@keyframes shim { to { background-position: -200% 0; } }
+
+/* bottom sheet — a queryable component with states + sub-states */
+.sheet { position: fixed; left: 50%; bottom: 0; transform: translateX(-50%);
+  width: min(480px, 100%); background: var(--surface); border-radius: 16px 16px 0 0;
+  box-shadow: var(--shadow); padding: var(--space-4); z-index: 20; }
+.sheet-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto var(--space-2); }
+.sheet .x { position: absolute; top: var(--space-2); right: var(--space-2); border: 0; background: none; cursor: pointer; color: var(--muted); }
+.sheet h3 { margin: 0 0 var(--space-1); }
+.sheet .field { display: block; margin: var(--space-2) 0; font-size: var(--fs-sm); color: var(--muted); }
+.sheet .field input { display: block; width: 100%; margin-top: 4px; padding: 10px; border: 1px solid var(--line);
+  border-radius: var(--radius); font: inherit; color: var(--ink); background: var(--surface); }
+.sheet .option { display: block; padding: var(--space-1) 0; }
+.sheet .options { margin: var(--space-2) 0; }
+.sheet .wide { width: 100%; margin-top: var(--space-2); }
+.sheet-actions { display: flex; gap: var(--space-2); align-items: center; margin-top: var(--space-2); }
+
+/* dropdown menu — another queryable component (?refresh=open|loading|done) */
+.refresh-wrap { position: relative; }
+.menu { position: absolute; right: 0; top: 130%; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow); padding: var(--space-1); min-width: 180px; z-index: 15; }
+.menu-item { display: block; width: 100%; text-align: left; border: 0; background: none; padding: var(--space-1) var(--space-2);
+  font: inherit; cursor: pointer; border-radius: 6px; color: var(--ink); }
+.menu-item:hover { background: var(--bg); }
+.menu .ok-line { margin: 0; padding: var(--space-1) var(--space-2); }
+.menu .ok-line { color: var(--up); }

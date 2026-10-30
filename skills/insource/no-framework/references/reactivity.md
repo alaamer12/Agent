@@ -1,5 +1,10 @@
 # Reactivity & Memoization with `van.derive()`
 
+> Written in VanJS terms (`--ui vanjs`). `@preact/signals`' `computed()`
+> and Nano Stores' `computed()` are the direct equivalents under `--ui
+> preact`/`--ui nanojsx` — same memoization behavior, no dependency
+> array either way — see `references/ui_libraries.md`.
+
 ## What it does
 
 `van.derive()` creates a computed value that automatically re-runs only

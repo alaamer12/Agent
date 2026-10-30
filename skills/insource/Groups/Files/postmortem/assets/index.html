@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Markdown Reader</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..700&display=swap" rel="stylesheet">
+
+<style>
+  /* ---------- Design tokens ---------- */
+  :root {
+    --bar: 56px;
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --ink: #19212b;
+    --muted: #5b6674;
+    --rule: #dde2e8;
+    --accent: #2457c5;
+    --accent-soft: #e6edfb;
+    --code-bg: #eef1f5;
+    --code-ink: #243041;
+    --shadow: 0 1px 2px rgba(25, 33, 43, .05), 0 8px 24px rgba(25, 33, 43, .06);
+
+    --note: #2457c5;
+    --tip: #1b7f5c;
+    --important: #7a3fc4;
+    --warning: #a86500;
+    --caution: #b3261e;
+
+    --font-body: "Literata", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --font-ui: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    --hl-keyword: #a626a4;
+    --hl-string: #1b7f5c;
+    --hl-number: #b45309;
+    --hl-comment: #7a8594;
+    --hl-title: #2457c5;
+    --hl-attr: #b3261e;
+    --hl-built: #0e7490;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12161c;
+      --surface: #171c23;
+      --ink: #e3e7ec;
+      --muted: #94a0ae;
+      --rule: #29313b;
+      --accent: #86abff;
+      --accent-soft: #1d2a45;
+      --code-bg: #1c232c;
+      --code-ink: #d5dce5;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+      --note: #86abff; --tip: #5fd0a2; --important: #bf95f0; --warning: #f0b45a; --caution: #ff8f87;
+      --hl-keyword: #d68cf0; --hl-string: #7fd8b0; --hl-number: #f0b45a;
+      --hl-comment: #7b8795; --hl-title: #86abff; --hl-attr: #ff8f87; --hl-built: #6fd0e6;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12161c;
+    --surface: #171c23;
+    --ink: #e3e7ec;
+    --muted: #94a0ae;
+    --rule: #29313b;
+    --accent: #86abff;
+    --accent-soft: #1d2a45;
+    --code-bg: #1c232c;
+    --code-ink: #d5dce5;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+    --note: #86abff; --tip: #5fd0a2; --important: #bf95f0; --warning: #f0b45a; --caution: #ff8f87;
+    --hl-keyword: #d68cf0; --hl-string: #7fd8b0; --hl-number: #f0b45a;
+    --hl-comment: #7b8795; --hl-title: #86abff; --hl-attr: #ff8f87; --hl-built: #6fd0e6;
+  }
+
+  /* ---------- Base ---------- */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 18px;
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  ::selection { background: var(--accent-soft); }
+
+  /* ---------- Top bar ---------- */
+  .bar {
+    position: fixed; inset: 0 0 auto 0; height: var(--bar); z-index: 20;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 0 20px;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    backdrop-filter: saturate(1.4) blur(14px);
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-ui);
+  }
+  .bar .file {
+    display: flex; align-items: center; gap: 10px; min-width: 0;
+    font-size: 14px; font-weight: 600; color: var(--muted);
+  }
+  .bar .file svg { flex: none; }
+  .bar .file span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar .actions { display: flex; gap: 6px; }
+  .btn {
+    font: inherit; font-size: 13.5px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 7px 12px; border-radius: 8px;
+    color: var(--ink); background: transparent;
+    border: 1px solid var(--rule); cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .btn:hover { background: var(--surface); border-color: var(--muted); }
+  .progress {
+    position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%;
+    background: var(--accent); transform: scaleX(0); transform-origin: 0 50%;
+  }
+
+  /* ---------- Layout ---------- */
+  .layout {
+    max-width: 1160px; margin: 0 auto;
+    padding: calc(var(--bar) + 40px) 24px 120px;
+    display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px 56px;
+  }
+  @media (min-width: 1040px) {
+    .layout { grid-template-columns: 232px minmax(0, 1fr); }
+  }
+
+  /* ---------- Table of contents ---------- */
+  .toc { font-family: var(--font-ui); font-size: 14px; line-height: 1.4; }
+  .toc details { border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); }
+  .toc summary { cursor: pointer; padding: 12px 16px; font-weight: 700; list-style: none; }
+  .toc summary::-webkit-details-marker { display: none; }
+  .toc nav { padding: 0 16px 14px; }
+  .toc ul { list-style: none; margin: 0; padding: 0; }
+  .toc li { margin: 0; }
+  .toc a {
+    display: block; padding: 6px 0 6px 12px; margin-left: -1px;
+    color: var(--muted); text-decoration: none;
+    border-left: 2px solid transparent;
+  }
+  .toc a:hover { color: var(--ink); }
+  .toc a.active { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+  .toc li.l3 a { padding-left: 26px; font-size: 13.5px; }
+  .toc.empty { display: none; }
+  @media (min-width: 1040px) {
+    .toc { position: sticky; top: calc(var(--bar) + 32px); align-self: start;
+           max-height: calc(100vh - var(--bar) - 64px); overflow: auto; }
+    .toc details { border: 0; background: transparent; }
+    .toc summary { padding: 0 0 10px 12px; pointer-events: none; font-size: 13.5px; color: var(--muted); }
+    .toc nav { padding: 0; border-left: 1px solid var(--rule); }
+  }
+
+  /* ---------- Document ---------- */
+  .doc { min-width: 0; max-width: 44rem; }
+  .doc > :first-child { margin-top: 0; }
+
+  .doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6 {
+    font-family: var(--font-ui);
+    color: var(--ink);
+    line-height: 1.2;
+    letter-spacing: -.015em;
+    position: relative;
+    scroll-margin-top: calc(var(--bar) + 20px);
+  }
+  .doc h1 { font-size: clamp(2.1rem, 5vw, 3rem); font-weight: 800; letter-spacing: -.03em; margin: 0 0 .5rem; line-height: 1.08; }
+  .doc h2 { font-size: 1.7rem; font-weight: 700; margin: 3.2rem 0 1rem; }
+  .doc h3 { font-size: 1.3rem; font-weight: 700; margin: 2.4rem 0 .7rem; }
+  .doc h4 { font-size: 1.08rem; font-weight: 700; margin: 2rem 0 .5rem; }
+  .doc h5, .doc h6 { font-size: .98rem; font-weight: 700; margin: 1.6rem 0 .4rem; color: var(--muted); }
+
+  .doc .anchor {
+    position: absolute; left: -1.1em; top: 0; width: 1em;
+    font-weight: 500; color: var(--muted); text-decoration: none; opacity: 0;
+    transition: opacity .15s;
+  }
+  .doc h1 .anchor { display: none; }
+  .doc :is(h2, h3, h4):hover .anchor, .doc .anchor:focus-visible { opacity: 1; }
+  @media (max-width: 1100px) { .doc .anchor { display: none; } }
+
+  .doc .meta {
+    display: flex; flex-wrap: wrap; gap: 4px 18px;
+    margin: 0 0 2.4rem; padding-bottom: 1.4rem;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-ui); font-size: 14px; font-weight: 500; color: var(--muted);
+  }
+
+  .doc p { margin: 0 0 1.3em; }
+  .doc strong { font-weight: 650; }
+  .doc a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  .doc a:hover { text-decoration-thickness: 2px; }
+
+  .doc ul, .doc ol { margin: 0 0 1.3em; padding-left: 1.5em; }
+  .doc li { margin: .3em 0; padding-left: .2em; }
+  .doc li > :is(ul, ol) { margin: .3em 0 0; }
+  .doc li::marker { color: var(--muted); }
+  .doc li:has(> input[type="checkbox"]) { list-style: none; margin-left: -1.4em; }
+  .doc input[type="checkbox"] { accent-color: var(--accent); margin: 0 .6em 0 0; transform: translateY(1px); }
+
+  .doc hr { border: 0; border-top: 1px solid var(--rule); margin: 3rem 0; }
+
+  /* Inline & block code */
+  .doc code {
+    font-family: var(--font-mono); font-size: .84em;
+    background: var(--code-bg); color: var(--code-ink);
+    padding: .16em .4em; border-radius: 5px;
+  }
+  .code {
+    margin: 0 0 1.6em; border: 1px solid var(--rule); border-radius: 10px;
+    background: var(--code-bg); overflow: hidden;
+  }
+  .code-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 8px 6px 16px; border-bottom: 1px solid var(--rule);
+    font-family: var(--font-ui); font-size: 12.5px; font-weight: 600; color: var(--muted);
+  }
+  .code-head button {
+    font: inherit; color: inherit; background: transparent; border: 0; cursor: pointer;
+    padding: 4px 10px; border-radius: 6px;
+  }
+  .code-head button:hover { background: var(--surface); color: var(--ink); }
+  .code pre { margin: 0; padding: 16px; overflow-x: auto; font-size: 14px; line-height: 1.65; tab-size: 2; }
+  .code pre code { background: none; padding: 0; font-size: inherit; color: var(--code-ink); }
+
+  .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-doctag, .hljs-meta .hljs-keyword { color: var(--hl-keyword); }
+  .hljs-string, .hljs-regexp, .hljs-addition, .hljs-template-variable { color: var(--hl-string); }
+  .hljs-number, .hljs-symbol, .hljs-bullet { color: var(--hl-number); }
+  .hljs-comment, .hljs-quote { color: var(--hl-comment); font-style: italic; }
+  .hljs-title, .hljs-title.function_, .hljs-section, .hljs-selector-id, .hljs-selector-class { color: var(--hl-title); }
+  .hljs-attr, .hljs-attribute, .hljs-name, .hljs-tag, .hljs-deletion, .hljs-variable { color: var(--hl-attr); }
+  .hljs-built_in, .hljs-type, .hljs-params, .hljs-meta { color: var(--hl-built); }
+  .hljs-emphasis { font-style: italic; }
+  .hljs-strong { font-weight: 700; }
+
+  .doc kbd {
+    font-family: var(--font-mono); font-size: .8em;
+    padding: .15em .5em; border-radius: 5px;
+    background: var(--surface); border: 1px solid var(--rule); border-bottom-width: 2px;
+  }
+
+  /* Quotes and callouts */
+  .doc blockquote {
+    margin: 0 0 1.5em; padding: .2em 0 .2em 1.3em;
+    border-left: 3px solid var(--rule); color: var(--muted); font-style: italic;
+  }
+  .doc blockquote > :last-child { margin-bottom: 0; }
+  .doc blockquote.callout {
+    font-style: normal; color: var(--ink);
+    background: color-mix(in srgb, var(--c) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--c) 28%, transparent);
+    border-left: 4px solid var(--c);
+    border-radius: 10px; padding: 14px 18px;
+  }
+  .doc blockquote.callout { --c: var(--note); }
+  .doc blockquote.callout-note { --c: var(--note); } .doc blockquote.callout-tip { --c: var(--tip); }
+  .doc blockquote.callout-important { --c: var(--important); } .doc blockquote.callout-warning { --c: var(--warning); }
+  .doc blockquote.callout-caution { --c: var(--caution); }
+  .callout-title { font-family: var(--font-ui); font-weight: 700; font-size: .95rem; color: var(--c); margin-bottom: .3em; }
+
+  /* Tables */
+  .table-wrap { margin: 0 0 1.6em; overflow-x: auto; border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); }
+  .doc table { border-collapse: collapse; width: 100%; font-family: var(--font-ui); font-size: .92rem; line-height: 1.5; }
+  .doc th, .doc td { padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--rule); }
+  .doc th { font-weight: 700; background: var(--code-bg); white-space: nowrap; }
+  .doc tbody tr:last-child td { border-bottom: 0; }
+  .doc :is(th, td)[align="center"] { text-align: center; }
+  .doc :is(th, td)[align="right"] { text-align: right; }
+
+  /* Media */
+  .doc img { max-width: 100%; height: auto; border-radius: 10px; display: block; }
+  .doc figure { margin: 0 0 1.6em; }
+  .doc figcaption { margin-top: .6em; font-family: var(--font-ui); font-size: .85rem; color: var(--muted); }
+  .doc details { margin: 0 0 1.4em; border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); padding: 0 16px; }
+  .doc summary { cursor: pointer; font-family: var(--font-ui); font-weight: 600; padding: 12px 0; }
+  .doc details[open] summary { border-bottom: 1px solid var(--rule); margin-bottom: 12px; }
+
+  /* ---------- States ---------- */
+  .notice {
+    font-family: var(--font-ui); font-size: 16px; line-height: 1.6;
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 14px;
+    padding: 28px; box-shadow: var(--shadow);
+  }
+  .notice h2 { margin: 0 0 .5rem; font-size: 1.35rem; }
+  .notice p { margin: 0 0 1em; }
+  .notice pre { margin: 0 0 1em; padding: 12px 16px; background: var(--code-bg); border-radius: 8px; overflow-x: auto; font-family: var(--font-mono); font-size: 14px; }
+  .notice .btn { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .notice .btn:hover { background: var(--accent); filter: brightness(1.1); }
+  .loading { font-family: var(--font-ui); color: var(--muted); }
+  .dropping::after {
+    content: "Drop a Markdown file to read it";
+    position: fixed; inset: 12px; z-index: 50;
+    display: grid; place-items: center;
+    font: 700 1.4rem var(--font-ui); color: var(--accent);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    border: 2px dashed var(--accent); border-radius: 18px;
+  }
+
+  @media (max-width: 600px) {
+    body { font-size: 17px; }
+    .bar { padding: 0 12px; }
+    .btn .label { display: none; }
+  }
+  /* ---------- Floating font picker ---------- */
+  .fp {
+    position: fixed; right: 20px; bottom: 20px; z-index: 30;
+    font-family: "Hanken Grotesk", system-ui, sans-serif; font-size: 14px; line-height: 1.4; color: var(--ink);
+  }
+  .fp-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 16px; border-radius: 999px;
+    border: 1px solid var(--rule); background: var(--surface); color: var(--ink);
+    font: inherit; font-weight: 600; cursor: pointer; box-shadow: var(--shadow);
+  }
+  .fp-btn:hover { border-color: var(--muted); }
+  .fp-aa { font-size: 17px; font-weight: 700; letter-spacing: -.02em; }
+  .fp-cur { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-weight: 500; }
+  .fp-panel {
+    position: absolute; right: 0; bottom: calc(100% + 10px);
+    width: min(330px, calc(100vw - 40px)); max-height: min(70vh, 520px);
+    display: flex; flex-direction: column; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; box-shadow: var(--shadow);
+  }
+  .fp-panel[hidden] { display: none; }
+  .fp-search { padding: 12px; border-bottom: 1px solid var(--rule); }
+  .fp-search input {
+    width: 100%; font: inherit; padding: 9px 12px; border-radius: 8px;
+    border: 1px solid var(--rule); background: var(--bg); color: var(--ink);
+  }
+  .fp-list { overflow-y: auto; padding: 6px; overscroll-behavior: contain; }
+  .fp-group { padding: 10px 10px 4px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+  .fp-item {
+    display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 9px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--ink);
+    font-size: 17px; line-height: 1.3; text-align: left; cursor: pointer;
+  }
+  .fp-item:hover { background: var(--accent-soft); }
+  .fp-item[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+  .fp-item.custom { font: 600 14px "Hanken Grotesk", system-ui, sans-serif; color: var(--accent); }
+  .fp-item .tick { font: 14px system-ui, sans-serif; }
+  .fp-status { margin: 0; padding: 10px 14px; min-height: 2.6em; border-top: 1px solid var(--rule); font-size: 13px; color: var(--muted); }
+  .fp-status.err { color: var(--caution); }
+  @media (max-width: 600px) {
+    .fp { right: 14px; bottom: 14px; }
+    .fp-cur { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+  @media print {
+    .bar, .toc, .code-head button, .anchor, .fp { display: none !important; }
+    .layout { display: block; padding: 0; }
+    body { background: #fff; font-size: 12pt; }
+    .doc { max-width: none; }
+  }
+</style>
+</head>
+
+<body>
+  <header class="bar">
+    <div class="file" title="Document source">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 1.75h6l3 3v9.5h-9z"/><path d="M9.5 1.75v3h3"/></svg>
+      <span id="file-name">Loading…</span>
+    </div>
+    <div class="actions">
+      <button class="btn" id="open-btn" type="button" title="Open a Markdown file from your computer">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4.5V12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V6.5a1 1 0 0 0-1-1H8L6.5 3.5H3a1 1 0 0 0-1 1z"/></svg>
+        <span class="label">Open file</span>
+      </button>
+      <button class="btn" id="reload-btn" type="button" title="Reload the document">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg>
+        <span class="label">Reload</span>
+      </button>
+      <button class="btn" id="theme-btn" type="button" aria-label="Toggle light and dark theme" title="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7z"/></svg>
+      </button>
+    </div>
+    <div class="progress" id="progress"></div>
+  </header>
+
+  <div class="fp" id="fp">
+    <div class="fp-panel" id="fp-panel" role="dialog" aria-label="Choose a font" hidden>
+      <div class="fp-search">
+        <input id="fp-input" type="search" placeholder="Search, or type any Google Font" autocomplete="off" spellcheck="false" aria-label="Search fonts">
+      </div>
+      <div class="fp-list" id="fp-list"></div>
+      <p class="fp-status" id="fp-status" role="status"></p>
+    </div>
+    <button class="fp-btn" id="fp-btn" type="button" aria-haspopup="dialog" aria-expanded="false" title="Change font">
+      <span class="fp-aa">Aa</span><span class="fp-cur" id="fp-cur">Default</span>
+    </button>
+  </div>
+
+  <input type="file" id="file-input" accept=".md,.markdown,.mdown,.txt,text/markdown,text/plain" hidden>
+
+  <div class="layout">
+    <aside class="toc empty" id="toc">
+      <details open>
+        <summary>On this page</summary>
+        <nav id="toc-nav" aria-label="Table of contents"></nav>
+      </details>
+    </aside>
+    <main>
+      <article class="doc" id="doc"><p class="loading">Loading document…</p></article>
+    </main>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+(() => {
+  'use strict';
+
+  /* ---------- Config ----------
+     Default document is example.md next to this file.
+     Override with ?file=other.md in the address bar. */
+  const params = new URLSearchParams(location.search);
+  const SOURCE = params.get('file') || 'example.md';
+
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const docEl = $('#doc');
+  const tocEl = $('#toc');
+  const tocNav = $('#toc-nav');
+  const tocDetails = $('#toc details');
+  const fileName = $('#file-name');
+  const progress = $('#progress');
+  const fileInput = $('#file-input');
+  let observer = null;
+  let currentName = SOURCE;
+
+  /* ---------- Theme ---------- */
+  const root = document.documentElement;
+  try {
+    const saved = localStorage.getItem('md-reader-theme');
+    if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
+  } catch (e) { /* storage unavailable */ }
+
+  $('#theme-btn').addEventListener('click', () => {
+    const current = root.dataset.theme ||
+      (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try { localStorage.setItem('md-reader-theme', next); } catch (e) { /* ignore */ }
+  });
+
+  /* ---------- Helpers ---------- */
+  const slugCounts = new Map();
+  function slugify(text) {
+    let base = text.trim().toLowerCase()
+      .replace(/[^\p{L}\p{N}\s-]/gu, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-') || 'section';
+    const n = slugCounts.get(base) || 0;
+    slugCounts.set(base, n + 1);
+    return n ? `${base}-${n}` : base;
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise((resolve, reject) => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy') ? resolve() : reject(); }
+      catch (e) { reject(e); }
+      finally { ta.remove(); }
+    });
+  }
+
+  /* ---------- Rendering ---------- */
+  function render(markdown, name) {
+    if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
+      showNotice('Libraries failed to load',
+        'The Markdown libraries come from cdnjs.cloudflare.com. Check your internet connection and reload the page.');
+      return;
+    }
+
+    currentName = name;
+    fileName.textContent = name;
+
+    const text = markdown
+      .replace(/^\uFEFF/, '')
+      .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, ''); // strip YAML front matter
+
+    const html = marked.parse(text, { gfm: true, breaks: false });
+    docEl.innerHTML = DOMPurify.sanitize(html);
+
+    slugCounts.clear();
+    enhance(text);
+
+    if (location.hash) {
+      const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (target) target.scrollIntoView();
+    }
+    updateProgress();
+  }
+
+  function enhance(sourceText) {
+    // Headings: ids and anchor links
+    docEl.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(h => {
+      h.id = slugify(h.textContent);
+      const a = document.createElement('a');
+      a.className = 'anchor';
+      a.href = '#' + h.id;
+      a.setAttribute('aria-label', 'Link to this section');
+      a.textContent = '#';
+      h.appendChild(a);
+    });
+
+    // Document title and reading time
+    const h1 = docEl.querySelector('h1');
+    const words = (sourceText.match(/[\p{L}\p{N}'’-]+/gu) || []).length;
+    const minutes = Math.max(1, Math.round(words / 230));
+    document.title = (h1 ? h1.textContent.replace(/#$/, '') + ' – ' : '') + currentName;
+    if (h1) {
+      const meta = document.createElement('p');
+      meta.className = 'meta';
+      meta.innerHTML = `<span>${minutes} min read</span><span>${words.toLocaleString()} words</span>`;
+      h1.after(meta);
+    }
+
+    // Links
+    docEl.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (/^https?:\/\//i.test(href) && new URL(href).origin !== location.origin) {
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+      }
+    });
+
+    // Images: lazy load, optional caption from title
+    docEl.querySelectorAll('img').forEach(img => {
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      const title = img.getAttribute('title');
+      const parent = img.parentElement;
+      if (title && parent && parent.tagName === 'P' && parent.children.length === 1 && !parent.textContent.trim()) {
+        const fig = document.createElement('figure');
+        const cap = document.createElement('figcaption');
+        cap.textContent = title;
+        img.removeAttribute('title');
+        fig.append(img, cap);
+        parent.replaceWith(fig);
+      }
+    });
+
+    // Tables: horizontal scroll wrapper
+    docEl.querySelectorAll('table').forEach(t => {
+      const wrap = document.createElement('div');
+      wrap.className = 'table-wrap';
+      t.replaceWith(wrap);
+      wrap.appendChild(t);
+    });
+
+    // Callouts: > [!NOTE], > [!TIP], > [!IMPORTANT], > [!WARNING], > [!CAUTION]
+    docEl.querySelectorAll('blockquote').forEach(bq => {
+      const p = bq.firstElementChild;
+      if (!p || p.tagName !== 'P') return;
+      const m = p.innerHTML.match(/^\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(<br\s*\/?>)?\s*/i);
+      if (!m) return;
+      const kind = m[1].toLowerCase();
+      p.innerHTML = p.innerHTML.slice(m[0].length);
+      if (!p.textContent.trim() && !p.children.length) p.remove();
+      bq.classList.add('callout', 'callout-' + kind);
+      const title = document.createElement('div');
+      title.className = 'callout-title';
+      title.textContent = kind.charAt(0).toUpperCase() + kind.slice(1);
+      bq.prepend(title);
+    });
+
+    // Code blocks: syntax highlighting, language label, copy button
+    docEl.querySelectorAll('pre > code').forEach(code => {
+      const pre = code.parentElement;
+      const langClass = [...code.classList].find(c => c.startsWith('language-'));
+      const lang = langClass ? langClass.slice(9) : '';
+
+      if (lang && window.hljs && hljs.getLanguage(lang)) {
+        try { hljs.highlightElement(code); } catch (e) { /* leave plain */ }
+      }
+
+      const wrap = document.createElement('div');
+      wrap.className = 'code';
+      const head = document.createElement('div');
+      head.className = 'code-head';
+      const label = document.createElement('span');
+      label.textContent = lang || 'text';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', () => {
+        copyText(code.textContent).then(
+          () => { btn.textContent = 'Copied'; },
+          () => { btn.textContent = 'Press Ctrl+C'; }
+        ).finally(() => setTimeout(() => { btn.textContent = 'Copy'; }, 1600));
+      });
+      head.append(label, btn);
+      pre.replaceWith(wrap);
+      wrap.append(head, pre);
+    });
+
+    buildToc();
+  }
+
+  /* ---------- Table of contents + scroll spy ---------- */
+  function buildToc() {
+    if (observer) observer.disconnect();
+    tocNav.innerHTML = '';
+
+    const heads = [...docEl.querySelectorAll('h2, h3')];
+    if (heads.length < 2) { tocEl.classList.add('empty'); return; }
+
+    const ul = document.createElement('ul');
+    heads.forEach(h => {
+      const li = document.createElement('li');
+      li.className = h.tagName === 'H3' ? 'l3' : 'l2';
+      const a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent.replace(/#$/, '');
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+    tocNav.appendChild(ul);
+    tocEl.classList.remove('empty');
+
+    const links = new Map(heads.map(h => [h.id, tocNav.querySelector(`a[href="#${CSS.escape(h.id)}"]`)]));
+    observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        links.forEach(l => l && l.classList.remove('active'));
+        const link = links.get(e.target.id);
+        if (link) link.classList.add('active');
+      });
+    }, { rootMargin: '-80px 0px -70% 0px' });
+    heads.forEach(h => observer.observe(h));
+  }
+
+  // The contents list is always open on wide screens, collapsible on narrow ones
+  const wide = matchMedia('(min-width: 1040px)');
+  const syncToc = () => { tocDetails.open = wide.matches; };
+  wide.addEventListener('change', syncToc);
+  syncToc();
+
+  /* ---------- Reading progress ---------- */
+  function updateProgress() {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    progress.style.transform = `scaleX(${max > 0 ? Math.min(1, h.scrollTop / max) : 0})`;
+  }
+  addEventListener('scroll', updateProgress, { passive: true });
+  addEventListener('resize', updateProgress);
+
+  /* ---------- Messages ---------- */
+  function showNotice(title, message, extra) {
+    docEl.innerHTML = '';
+    tocEl.classList.add('empty');
+    const box = document.createElement('div');
+    box.className = 'notice';
+    const h = document.createElement('h2');
+    h.textContent = title;
+    const p = document.createElement('p');
+    p.textContent = message;
+    box.append(h, p);
+    if (extra) box.append(extra);
+    docEl.appendChild(box);
+  }
+
+  function showLoadError(reason) {
+    const extra = document.createElement('div');
+    const isFile = location.protocol === 'file:';
+    if (isFile) {
+      const p = document.createElement('p');
+      p.textContent = 'Browsers block pages opened from disk from reading other files. Start a small local server in this folder, then open the address it prints:';
+      const pre = document.createElement('pre');
+      pre.textContent = 'python3 -m http.server 8000\n# then visit http://localhost:8000/';
+      extra.append(p, pre);
+    }
+    const p2 = document.createElement('p');
+    p2.textContent = 'You can also pick the file by hand, or drag it onto this page.';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn';
+    btn.textContent = 'Choose a Markdown file';
+    btn.addEventListener('click', () => fileInput.click());
+    extra.append(p2, btn);
+    fileName.textContent = SOURCE;
+    showNotice(`Couldn’t load ${SOURCE}`, reason, extra);
+  }
+
+  /* ---------- Loading ---------- */
+  async function load() {
+    try {
+      const res = await fetch(SOURCE, { cache: 'no-cache' });
+      if (!res.ok) throw new Error(`The server answered ${res.status} ${res.statusText}.`);
+      render(await res.text(), SOURCE);
+    } catch (err) {
+      showLoadError(location.protocol === 'file:'
+        ? 'This page is running from a local file.'
+        : (err && err.message) || 'The file could not be fetched.');
+    }
+  }
+
+  function loadFromFile(file) {
+    if (!file) return;
+    file.text().then(text => render(text, file.name));
+  }
+
+  /* ---------- Events ---------- */
+  $('#open-btn').addEventListener('click', () => fileInput.click());
+  $('#reload-btn').addEventListener('click', load);
+  fileInput.addEventListener('change', () => { loadFromFile(fileInput.files[0]); fileInput.value = ''; });
+
+  let dragDepth = 0;
+  addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; document.body.classList.add('dropping'); });
+  addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dropping'); } });
+  addEventListener('dragover', e => e.preventDefault());
+  addEventListener('drop', e => {
+    e.preventDefault();
+    dragDepth = 0;
+    document.body.classList.remove('dropping');
+    loadFromFile(e.dataTransfer.files[0]);
+  });
+
+  load();
+})();
+</script>
+<script>
+/* ---------- Font picker ----------
+   Applies one font to the whole page. Google Fonts are loaded on demand,
+   and any family name typed into the search box is tried as a Google Font. */
+(() => {
+  'use strict';
+
+  const SERIF = 'Georgia, "Times New Roman", serif';
+  const SANS  = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+  const MONO  = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+
+  const GROUPS = [
+    { label: 'Serif', fallback: SERIF, fonts: ['Literata', 'Source Serif 4', 'Merriweather', 'Lora', 'Crimson Pro',
+      'EB Garamond', 'Newsreader', 'Libre Baskerville', 'Playfair Display', 'Noto Serif'] },
+    { label: 'Sans serif', fallback: SANS, fonts: ['Hanken Grotesk', 'Inter', 'Roboto', 'Open Sans', 'Lato', 'Work Sans',
+      'IBM Plex Sans', 'DM Sans', 'Nunito', 'Source Sans 3', 'Poppins', 'Manrope', 'Outfit'] },
+    { label: 'Monospace', fallback: MONO, mono: true, fonts: ['JetBrains Mono', 'Fira Code', 'IBM Plex Mono',
+      'Source Code Pro', 'Space Mono'] },
+    { label: 'Easy to read', fallback: SANS, fonts: ['Atkinson Hyperlegible', 'Lexend'] },
+    { label: 'System (no download)', fallback: SANS, fonts: [['System sans', SANS], ['System serif', SERIF], ['System mono', MONO]] }
+  ];
+
+  const $ = id => document.getElementById(id);
+  const root = $('fp'), btn = $('fp-btn'), panel = $('fp-panel'), input = $('fp-input'),
+        list = $('fp-list'), statusEl = $('fp-status'), curEl = $('fp-cur');
+  const style = document.documentElement.style;
+  const KEY = 'md-reader-font';
+  const enc = n => encodeURIComponent(n).replace(/%20/g, '+');
+  const isValidName = n => /^[\p{L}\p{N} .&+\-]{2,60}$/u.test(n);
+
+  const entries = [];
+  GROUPS.forEach(g => g.fonts.forEach(f => {
+    const system = Array.isArray(f);
+    const name = system ? f[0] : f;
+    entries.push({
+      name, group: g.label, system,
+      mono: !!g.mono || (system && f[1] === MONO),
+      stack: system ? f[1] : `"${name}", ${g.fallback}`
+    });
+  }));
+  const customEntry = name => ({ name, group: 'Custom', system: false, custom: true, mono: false, stack: `"${name}", ${SANS}` });
+
+  let current = null; // null means the built-in default pairing
+
+  /* Load a Google Font. Not every family has every weight, and the API
+     rejects the whole request if one is missing, so fall back step by step. */
+  const loading = new Map();
+  function loadGoogleFont(name) {
+    if (loading.has(name)) return loading.get(name);
+    const axes = ['wght@400;500;600;700', 'wght@400;700', ''];
+    const p = new Promise((resolve, reject) => {
+      let i = 0;
+      const attempt = () => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = `https://fonts.googleapis.com/css2?family=${enc(name)}${axes[i] ? ':' + axes[i] : ''}&display=swap`;
+        link.onload = () => resolve();
+        link.onerror = () => { link.remove(); (++i < axes.length) ? attempt() : reject(new Error('failed')); };
+        document.head.appendChild(link);
+      };
+      attempt();
+    });
+    p.catch(() => loading.delete(name));
+    loading.set(name, p);
+    return p;
+  }
+
+  /* Tiny preview stylesheets (only the glyphs of each font's own name) so the list shows real typefaces. */
+  let previewsRequested = false;
+  function loadPreviews() {
+    if (previewsRequested) return;
+    previewsRequested = true;
+    entries.filter(e => !e.system).forEach(e => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `https://fonts.googleapis.com/css2?family=${enc(e.name)}&text=${encodeURIComponent(e.name)}&display=swap`;
+      link.onerror = () => link.remove();
+      document.head.appendChild(link);
+    });
+  }
+
+  function setStatus(msg, isError) {
+    statusEl.textContent = msg || '';
+    statusEl.classList.toggle('err', !!isError);
+  }
+
+  function apply(entry) {
+    current = entry;
+    if (!entry) {
+      ['--font-body', '--font-ui', '--font-mono'].forEach(v => style.removeProperty(v));
+    } else {
+      style.setProperty('--font-body', entry.stack);
+      style.setProperty('--font-ui', entry.stack);
+      // Code keeps its own monospace face unless the chosen font is monospace
+      entry.mono ? style.setProperty('--font-mono', entry.stack) : style.removeProperty('--font-mono');
+    }
+    curEl.textContent = entry ? entry.name : 'Default';
+    try {
+      entry ? localStorage.setItem(KEY, JSON.stringify({ name: entry.name, custom: !!entry.custom }))
+            : localStorage.removeItem(KEY);
+    } catch (e) { /* storage unavailable */ }
+    window.dispatchEvent(new Event('resize')); // keep the progress bar accurate after reflow
+  }
+
+  async function choose(entry) {
+    if (entry && !entry.system) {
+      setStatus(`Loading ${entry.name}…`);
+      try { await loadGoogleFont(entry.name); }
+      catch (e) {
+        setStatus(`Couldn’t load “${entry.name}”. Check the spelling and your connection.`, true);
+        return false;
+      }
+    }
+    setStatus('');
+    apply(entry);
+    const top = list.scrollTop;
+    render();
+    list.scrollTop = top;
+    return true;
+  }
+
+  /* ---------- List ---------- */
+  function makeItem(label, entry, family, extraClass) {
+    const pressed = entry ? !!current && current.name === entry.name : !current;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'fp-item' + (extraClass ? ' ' + extraClass : '');
+    if (!extraClass) b.setAttribute('aria-pressed', String(pressed));
+    const n = document.createElement('span');
+    n.textContent = label;
+    if (family) n.style.fontFamily = family;
+    const t = document.createElement('span');
+    t.className = 'tick';
+    t.textContent = !extraClass && pressed ? '✓' : '';
+    b.append(n, t);
+    b.addEventListener('click', () => choose(entry));
+    return b;
+  }
+
+  function heading(text) {
+    const h = document.createElement('div');
+    h.className = 'fp-group';
+    h.textContent = text;
+    return h;
+  }
+
+  function render() {
+    const q = input.value.trim();
+    const ql = q.toLowerCase();
+    list.innerHTML = '';
+
+    if (!ql || 'default'.includes(ql)) {
+      list.appendChild(makeItem('Default (Literata + Hanken Grotesk)', null, '"Literata", Georgia, serif'));
+    }
+    if (current && current.custom && current.name.toLowerCase().includes(ql)) {
+      list.append(heading('Custom'), makeItem(current.name, current, current.stack));
+    }
+    GROUPS.forEach(g => {
+      const matches = entries.filter(e => e.group === g.label && e.name.toLowerCase().includes(ql));
+      if (!matches.length) return;
+      list.appendChild(heading(g.label));
+      matches.forEach(e => list.appendChild(makeItem(e.name, e, e.stack)));
+    });
+    const known = entries.some(e => e.name.toLowerCase() === ql) || (current && current.name.toLowerCase() === ql);
+    if (q && isValidName(q) && !known) {
+      const row = makeItem(`Load “${q}” from Google Fonts`, customEntry(q), null, 'custom');
+      list.appendChild(row);
+    }
+  }
+
+  /* ---------- Open, close, keyboard ---------- */
+  function setOpen(open) {
+    panel.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
+    if (open) {
+      loadPreviews();
+      render();
+      if (matchMedia('(pointer: fine)').matches) input.focus();
+    }
+  }
+  btn.addEventListener('click', () => setOpen(panel.hidden));
+  document.addEventListener('click', e => { if (!panel.hidden && !e.composedPath().includes(root)) setOpen(false); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !panel.hidden) { setOpen(false); btn.focus(); }
+  });
+  input.addEventListener('input', () => { setStatus(''); render(); });
+  input.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const q = input.value.trim();
+    if (!q) return;
+    const exact = entries.find(x => x.name.toLowerCase() === q.toLowerCase());
+    if (exact) choose(exact);
+    else if (isValidName(q)) choose(customEntry(q));
+    else setStatus('Font names can only use letters, numbers, spaces, and . & + -', true);
+  });
+
+  /* ---------- Restore saved choice ---------- */
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved && saved.name) {
+      const entry = entries.find(e => e.name === saved.name) ||
+        (saved.custom && isValidName(saved.name) ? customEntry(saved.name) : null);
+      if (entry) {
+        apply(entry); // apply straight away, then fetch the font; text swaps in when it arrives
+        if (!entry.system) loadGoogleFont(entry.name).catch(() => {});
+      }
+    }
+  } catch (e) { /* ignore */ }
+})();
+</script>
+</body>
+</html>

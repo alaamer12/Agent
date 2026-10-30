@@ -47,22 +47,22 @@ Agent: "Understood. Re-scoped to 1 confirmed application: 'MostaqlK' (Desktop cl
 ### Step 3.2: Applying Like-a-Pro Child Skills
 For the confirmed application, the agent runs the specialized skills:
 
-1. **`language-conventional`:**
+1. **`language-handling`:**
    - Detects C# 14 / .NET 10.
    - Enforces `<Nullable>enable</Nullable>`, `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`.
    - Generates `.repertoire/.steering/base/tech/csharp-conventions.md`.
 
-2. **`sql-conventional`:**
+2. **`sql-handling`:**
    - Agrees on SQLite embedded dumb-store architecture.
    - Generates Stage 1 `.repertoire/.steering/base/tech/sql-conventions.md`.
    - Generates Stage 2 `docs/table-reference.md` mapping entities and functional dependencies.
 
-3. **`errors-handling`:**
+3. **`error-handling`:**
    - Discusses failure contract (adopts Three-tier Throw/Result/Neither).
    - Establishes machine-readable error codes (`{DOMAIN}-{NNN}`) and per-module `Errors.cs` factories.
    - Generates `.repertoire/.steering/base/tech/errors-handling.md`.
 
-4. **`ui-rules` (Activated because app has UI):**
+4. **`ui-handling` (Activated because app has UI):**
    - Agrees on responsiveness (no fixed heights on text containers), skeleton shimmer pairing, 3-tier icons, and RTL support.
    - Generates `.repertoire/.steering/base/tech/ui-rules.md`.
 

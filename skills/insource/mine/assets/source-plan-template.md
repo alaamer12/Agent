@@ -3,7 +3,8 @@
 **Source type:** <name the ecosystem from `references/source-ecosystems.md`
 — "Codebase/GitHub" | "Visual/design references" | "Documentation sets" |
 "Research literature" | "Specs/standards" | "Package registries" |
-"Discussion corpora" | "Postmortems/org writing" | "Datasets" | other,
+"Discussion corpora" | "Postmortems/org writing" | "Datasets" | "Document
+files (PDF/scan/book)" | "Time-based media" | other,
 described in a clause. If none fits, say so and that you're mining it by that
 file's generic shape — the list is an index, not a whitelist>
 
@@ -21,6 +22,16 @@ in order to compare them (5 styles, 3 architectures)" — matters most for
 run-mining: authored contenders must be built to the *same* fixture set and metric
 before they're comparable, and near-identical approaches are collapsed to one
 candidate before any of them is built>
+
+**Mining directives:** <the user's explicit instructions about *how* to mine,
+quoted one per line and mapped to how this plan executes them — e.g.
+'"each subagent reads 100 pages" → within-source fan-out, 7 subagents over
+the body range 24–451 from the noise map, index skipped' |
+'"read the ADRs first" → per-source procedure step before any code read' |
+"none given — the skill's defaults govern". Directives are honored literally;
+one that is impossible or self-contradictory as stated gets flagged here with
+the nearest faithful reading proposed, never silently reinterpreted
+(workflow.md → "Honor mining directives")>
 
 **Unit of a source:** <what one candidate actually is in this ecosystem, since
 it isn't always obvious and it sets the count: one repo vs one product's three
@@ -56,11 +67,19 @@ dashboard screens across SaaS analytics products" for a visual task —
 state this plainly so the user can judge whether the selection method
 matches what they actually wanted>
 
-**Mining tool:** <state which tool this run will use, and its status —
-e.g. "DeepWiki (connected) — used where it covers a candidate, manual
-search as fallback" | "Mobbin (available, requires your paid plan) —
-asking below whether to connect it" | "`scrape` skill (installed here) —
-each doc set pulled to local Markdown once, then grepped" | "the domain's
+**Mining tool:** <state which tool this run will use, how it was chosen, and
+its status — converters/parsers are chosen by **searching the current
+landscape, not memory** (open-source vs paid wins neither category by
+default; standings move monthly) and then by the **accuracy gate** — one real
+sample of the actual content verified against ground truth. e.g. "DeepWiki
+(connected) — used where it covers a candidate, manual search as fallback" |
+"Mobbin (available, requires your paid plan) — asking below whether to
+connect it" | "`scrape` skill (installed here) — each doc set pulled to
+local Markdown once, then grepped" | "ASR: searched 2026 landscape, gated
+open model X vs paid Y on a 2-minute stretch of *this* audio — X fewer
+errors and free; using X" | "OCR: paid Z beat the open options on this scan's
+two-column pages by enough that verbatim quotes justify the spend — asking
+below whether to use it or accept X's measured error rate" | "the domain's
 official search API (arXiv / Crossref / RFC editor / registry) — no
 connector needed, no bulk download" | "Manual search/fetch only — no
 specialized tool found or available for this source type">
@@ -68,7 +87,20 @@ specialized tool found or available for this source type">
 **Who performs the deep mining:** <"Solo — main agent mines every source
 sequentially" | "Subagents — one per source/category in parallel; briefs
 built with the /subagent skill if present (see workflow.md → 'Who
-performs the deep mining')">
+performs the deep mining')" | "Within-source fan-out — subagents split
+*inside* one large artifact by page range / directory / date window (what
+'each subagent reads 100 pages' means); ranges come from the noise map and
+TOC, never raw page counts; per-slice part checkpoints stitched into one
+source checkpoint">
+
+**Extraction plan:** <for sources that aren't directly readable (PDFs, scans,
+HTML, audio/video): the conversion chain you'll use — installed skill,
+existing binary, or adapted fallback — and whether the pipeline has been
+proven once by hand and codified into the run's `tools/` script that every
+subagent will call (search-and-mining-technique.md → "The extraction
+bootstrap"). State it here so the user sees fan-out rests on a tested
+pipeline, not on twelve agents improvising the same OCR command. Omit for
+sources that are already text.>
 
 **Distinctness check:** <for a codebase task: "each candidate below is
 judged distinct from the others at a glance (different language,
@@ -147,3 +179,20 @@ anything else.
   the tool requires payment (e.g. Mobbin), say so plainly here too.
 -->
 I'll only start mining once this list is approved.
+
+**Status:** draft, presented <date> — approval recorded in this file when
+given (approved as-is / with these edits), along with any mid-run amendments
+in a change-log below. This file is the run's resume anchor: a later session
+reads it plus `checklist.md` and continues in this recorded sequence — same
+directives, same approval — instead of re-planning
+(workflow.md → "The plan is a file from the moment it exists" and "Resuming
+an interrupted run").
+<!--
+  Persistence is part of planning: write this plan into
+  `<run-dir>/plan/plan.md` while building it (before the approval round-trip),
+  and generate `plan/checklist.md` from the candidate table above — one line
+  per unit in mining order (per slice for within-source fan-out), statuses
+  pending / in progress / done (timestamp + checkpoint path) /
+  failed-in-budget / swapped (reason). Tick it as Phase 2 runs; on resume the
+  checklist is state and this file is history.
+-->

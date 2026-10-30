@@ -3,24 +3,48 @@
 ## Verify versions and API compatibility before relying on this skill's code
 
 Every version referenced in this skill's `examples/` and
-`scripts/init-nof.sh` (VanJS, Navigo) is a snapshot, not a live source of
-truth — library versions move forward, and this skill's own patterns can
-lag behind a library's current API. Before scaffolding or writing code
-against VanJS, Navigo, or anything else pulled in:
+`scripts/init-nof.sh` (Navigo, and whichever of VanJS/Preact/Nano JSX
+`--ui` selects, plus `@preact/signals` or Nano Stores if used) is a
+snapshot, not a live source of truth — library versions move forward,
+and this skill's own patterns can lag behind a library's current API.
+Before scaffolding or writing code against any of these:
 
 1. Search for the current latest stable version on npm (or the relevant
    registry) for each library being used.
 2. If the current version is a major-version jump ahead of what this
    skill's examples reference, check that library's changelog/release
    notes for breaking API changes before assuming the patterns in
-   `references/state_management.md`, `references/routing.md`, etc. still
-   apply as written. A minor/patch bump is generally safe to assume
-   compatible without a deep check; a major bump is not.
+   `references/state_management.md`, `references/routing.md`,
+   `references/ui_libraries.md`, etc. still apply as written. A
+   minor/patch bump is generally safe to assume compatible without a
+   deep check; a major bump is not.
 3. Use the version you actually found, not the one hardcoded in this
    skill, in the CDN URL or `package.json` entry you generate.
 
 This is worth doing once per project/session, not on every single file —
 check at the start, then build with confidence using what was found.
+
+**Two of this skill's version pins are more likely than most to be
+stale by the time this runs**, worth calling out specifically rather
+than leaving to the general rule above:
+
+- **Preact major versions.** Preact 11 reached stable on 2026-09-30
+  (`latest` on npm), and `scripts/init-nof.sh` pins it — verified
+  together with `@preact/signals`, `@preact/preset-vite` and Vite by
+  actually building and running the output. Read
+  `npm view <pkg> dist-tags.latest` yourself rather than trusting a
+  blog post or docs banner, which lag the registry. On the *next* major,
+  don't assume a library that supported the old line supports the new
+  one at the same version — check each package's `peerDependencies`.
+- **`@preact/signals`.** Ships frequent minor releases — more frequent
+  than Preact itself or Navigo. Treat the version pinned in
+  `scripts/init-nof.sh` as a point-in-time snapshot more likely than
+  most to be behind current, and verify before trusting it, especially
+  for anything beyond the basic `signal()`/`computed()`/`useSignal()`
+  surface this skill's patterns rely on (the package also ships
+  `useSignalEffect`, a `/utils` subpath with `<Show>`/`<For>` helpers,
+  and other additions that may have shifted since this skill's last
+  update).
 
 ## Local dev server
 
@@ -67,6 +91,20 @@ links, calling `navigateTo()`) but breaks on a hard refresh or a
 directly-typed/bookmarked URL to anything other than `/` — a gap that's
 easy to miss in dev because most testing happens via in-app navigation,
 not direct loads.
+
+### `htm`: how Preact/Nano JSX stay no-build-step
+
+JSX itself needs a compiler — not valid JavaScript a browser runs
+directly — which would force `--bundler vite` onto Preact/Nano JSX as
+the price of using them without their own build step. `htm` (Hyperscript
+Tagged Markup, ~1KB) avoids that: JSX-like syntax using plain JS tagged
+template literals, which the browser parses natively, bound once to
+either library's `h()`. `scripts/init-nof.sh --ui preact|nanojsx`
+without `--bundler vite` generates a small `js/html.js` doing this
+binding — see `references/ui_libraries.md` for the generated code and
+how every other component file consumes it. This is why the no-bundler
+default stays genuinely no-build-step for all three `--ui` choices, not
+just VanJS.
 
 ### CDN imports need a full URL, not a bare specifier
 
@@ -131,10 +169,87 @@ components), Less or Sass/SCSS are reasonable additions:
   neither breaks NoF's framework-free commitment.
 - Sass has the larger ecosystem and is the more common default choice
   today if picking between the two without a specific reason to prefer
-  Less.
+  Less. It's also the one `scripts/init-nof.sh --styler sass` scaffolds
+  directly — see below for what that generates.
 - Add either the same way as Vite above: once the project's actual CSS
   complexity justifies it, not as a default scaffold choice for a small
   project where plain CSS handles things fine.
+
+**Sass needs a compiler either way — standalone CLI, or Vite's built-in
+support:**
+
+- **No bundler** (`--bundler` unset): the standalone `sass` CLI compiles
+  `css/style.scss` → `css/style.css`. This is a real build step even
+  though the rest of the project stays no-bundler — `sass --watch` (or
+  the npm script `scripts/init-nof.sh` generates, `npm run dev:css`)
+  runs as its own process alongside whatever's serving `index.html`
+  (`live-server`, etc.). There's no legitimate way to skip this compile
+  step; a browser can't parse `.scss` directly.
+- **With Vite** (`--bundler vite`): Vite has Sass support built in — no
+  plugin needed, just the `sass` package installed as a dependency.
+  Importing or linking a `.scss` file gets transpiled by Vite's dev
+  server/build automatically. This is the one case where `--styler sass`
+  doesn't need its own separate watch process.
+- `scripts/init-nof.sh --styler sass` picks the right one automatically
+  based on `--bundler` (standalone CLI without Vite, Vite's built-in
+  support with it) — pass `--css-tooling cli` explicitly with
+  `--bundler vite` if you want Sass compiled independently of Vite
+  anyway.
+
+## CSS tooling: Tailwind needs a real build step, no matter what
+
+Tailwind is a legitimate NoF addition — it doesn't pull in a framework
+runtime — but **it cannot be a CDN `<script>` tag in production.** The
+old `<script src="cdn.tailwindcss.com">` approach is explicitly
+play-only per Tailwind's own docs; it ships the full JIT compiler to the
+browser and recompiles on every page load, which is fine for a scratch
+demo and not for a real site. As of Tailwind v4, generating the actual
+compiled CSS from your class names requires one of:
+
+- **The standalone `@tailwindcss/cli`** — a dependency-free compiler
+  binary, independent of any JS bundler. Works identically whether the
+  rest of the project is no-bundler or has Vite. Run as its own watch
+  process: `npx @tailwindcss/cli -i ./css/input.css -o ./css/style.css
+  --watch` (`--minify` for a production build). This is the only valid
+  option without a JS bundler, and what `scripts/init-nof.sh --styler
+  tailwind` uses by default when `--bundler` isn't `vite`.
+- **The `@tailwindcss/vite` plugin** — requires `--bundler vite`. Folds
+  Tailwind's compilation into Vite's own dev server and build (HMR,
+  single process), which is genuinely nicer than running the CLI
+  alongside Vite as a second process. `scripts/init-nof.sh --styler
+  tailwind --bundler vite` uses this by default. Pass `--css-tooling
+  cli` explicitly if the project wants Tailwind compiled independently
+  of Vite anyway (e.g. Vite is only there for the JS side and CSS
+  tooling should stay decoupled from it).
+
+Tailwind v4 also changed the setup story versus v3: CSS-first config
+(`@import "tailwindcss";` plus `@theme`/`@layer` blocks in the CSS
+itself) rather than a required `tailwind.config.js`, and no PostCSS
+config file needed when using the Vite plugin. Verify the current
+version and setup docs before scaffolding — this is exactly the kind of
+major-version API surface step 0 above exists for.
+
+`scripts/init-nof.sh --styler tailwind` generates `css/input.css` with
+`@import "tailwindcss";` and an `@layer components` block mapping the
+scaffold's existing `.btn`/`.page`/`.product-card` classes to Tailwind
+utilities via `@apply`, so the generated `js/base/`/`js/components/`
+files work unchanged regardless of `--styler`. Reach for Tailwind's
+utility classes directly in your own markup as the project grows — the
+`@apply` block is a compatibility bridge for the scaffold's starting
+point, not a pattern to keep extending indefinitely.
+
+## `--styler`/`--css-tooling` flag summary
+
+`scripts/init-nof.sh` accepts `--styler tailwind|sass` (plain CSS
+remains the default with no flag) and `--css-tooling cli|vite-plugin` to
+pick between the two compilation paths above. `--css-tooling` only
+matters together with `--styler`, and `vite-plugin` only exists with
+`--bundler vite` — the script validates and errors on invalid
+combinations rather than silently generating something broken (e.g.
+`--css-tooling vite-plugin` without `--bundler vite`). Left unset,
+`--css-tooling` defaults to `cli` without Vite and `vite-plugin` with
+it, since those are the option that requires no extra process in each
+case.
 
 ## Not every CSS-adjacent tool is vanilla-compatible
 
@@ -145,6 +260,10 @@ at all. **StyleX is a notable example**: it's a build-time CSS-in-JS
 system originally built for and tightly integrated with React component
 patterns, requiring its own compiler step tied to that ecosystem — it is
 not a drop-in "plain CSS with superpowers" tool the way Less/Sass are.
+This is why `--styler` in `scripts/init-nof.sh` only supports `tailwind`
+and `sass`: StyleX is intentionally excluded rather than offered as a
+value that would silently generate a broken NoF app (a React-only
+compiler with nothing to run it against).
 
 Before adding any CSS-in-JS or styling tool to a NoF project, verify it
 actually runs standalone against plain DOM output (what VanJS produces)

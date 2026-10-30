@@ -1,0 +1,61 @@
+<!doctype html>
+<!-- Root router: a chooser with two cards. Real <a href> navigation, no redirect, no memory of the
+     last visit (unless the project asks for it). Keep this file tiny — it owns nothing but the choice. -->
+<html lang="ar" dir="rtl" data-theme="system">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>النموذج الأولي — اختر مدخلًا</title>
+<link rel="stylesheet" href="/css/theme.css">
+<link rel="stylesheet" href="/css/_app.css">
+<style>
+  .router { min-block-size: 100vh; display: grid; place-content: center; gap: 20px; padding: 24px; }
+  .router__title { margin: 0; font-size: 1.125rem; font-weight: 700; }
+  .router__caption { margin: 0; color: GrayText; font-size: .875rem; }
+  .router__grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); }
+  .router__card { display: grid; gap: 6px; padding: 20px; border: 1px solid color-mix(in srgb, currentColor 14%, transparent); border-radius: 14px; color: inherit; text-decoration: none; }
+  .router__card:hover, .router__card:focus-visible { border-color: AccentColor; outline: none; }
+  .router__card h2 { margin: 0; font-size: 1rem; }
+  .router__card p { margin: 0; color: GrayText; font-size: .8125rem; }
+  .router__count { font-variant-numeric: tabular-nums; font-size: .75rem; color: AccentColor; }
+</style>
+</head>
+<body data-page="router">
+<noscript>لا يحتاج هذا الصفحة JavaScript — افتح /index.pages.html أو /index.stories.html مباشرة.</noscript>
+<main class="router">
+  <h1 class="router__title">النموذج الأولي</h1>
+  <p class="router__caption">صفحات كاملة، أو مكوّنات معزولة في كل حالاتها.</p>
+  <div class="router__grid">
+    <a class="router__card" href="/index.pages.html">
+      <h2>الصفحات</h2>
+      <p>الشاشات والتدفقات كاملة — كل شاشة URL مستقل.</p>
+      <span class="router__count" data-count="pages">—</span>
+    </a>
+    <a class="router__card" href="/index.stories.html">
+      <h2>القصص (Stories)</h2>
+      <p>كل مكوّن في كل حالاته — بحث ووصف الحالة عبر الرابط.</p>
+      <span class="router__count" data-count="stories">—</span>
+    </a>
+  </div>
+</main>
+<script type="module">
+// Counts are read from the registry the gallery already owns; the page list comes from a tiny
+// generated manifest so this file never hardcodes numbers that go stale.
+try {
+  const [{ components }, pages] = await Promise.all([
+    import("/js/stories.registry.js"),
+    fetch("/js/pages.manifest.json").then(r => (r.ok ? r.json() : [])).catch(() => []),
+  ]);
+  const cards = components.reduce((n, c) => n + c.states.length, 0);
+  const set = (key, value) => {
+    const node = document.querySelector(`[data-count="${key}"]`);
+    if (node) node.textContent = value;
+  };
+  set("pages", `${pages.length} صفحة`);
+  set("stories", `${components.length} مكوّنًا · ${cards} حالة`);
+} catch {
+  // Counts are decoration. If the registry fails to load, the links still work — say nothing.
+}
+</script>
+</body>
+</html>

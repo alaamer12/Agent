@@ -1,5 +1,12 @@
 # Component Architecture
 
+> Written in VanJS terms (`--ui vanjs`) — positional-args components
+> (`Button(label, onClick)`). `--ui preact`/`--ui nanojsx` components
+> take a single props object instead (`Button({ label, onClick })`,
+> the JSX/React convention) — same pure-function philosophy and the
+> same base/business split, different call shape. See
+> `references/ui_libraries.md` for worked examples in both.
+
 ## Components are pure functions
 
 A NoF component is a function that takes props (and optionally
@@ -121,9 +128,10 @@ export const LoginButton = (onLogin) => {
 The same pattern applies to any base element: `Image` (`base/`) becomes
 `HeroImage` (`components/`) by adding a headline overlay and container;
 `Button` becomes `LoginButton` by adding auth-specific loading state.
-See `examples/base/button.js` + `examples/components/login-button.js`
-and `examples/base/image.js` + `examples/components/hero-image.js` for
-both pairings worked through in full.
+See `examples/<ui>/base/button.js` + `examples/<ui>/components/login-button.js`
+and `examples/<ui>/base/image.js` + `examples/<ui>/components/hero-image.js`
+for both pairings worked through in full (`<ui>` = `vanjs`, `preact`, or
+`nanojsx` — see the Examples index in `SKILL.md`).
 
 **When to introduce the split:** a small project is fine with just
 `js/components/`. Reach for `js/base/` once you notice the same raw

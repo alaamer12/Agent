@@ -38,6 +38,8 @@ counts as one is ecosystem-specific, so each block's own ledger line says:
 | Discussion corpus | the API query URL and the individual thread permalink (`…/issues/1234#issuecomment-…`), never just the search page |
 | Postmortem / org writing | the article URL, its date, and the archive/wayback URL when the live one moved |
 | Dataset / model | the hub card URL, the file listing API, and the specific sample rows/partition you actually opened |
+| Document file (PDF/scan/book) | the artifact URL or local path + content hash, the **page ranges read / skimmed / skipped** (skips with their evidence), the extraction command + tool version, the cached text path under `cache/` |
+| Time-based media | the recording URL + the exact timestamp ranges covered, the transcript source (official captions / own ASR pass), the cached transcript path |
 
 A claim with no matching ledger entry is the tell that it wasn't really
 checked — and a ledger entry you never opened is the tell that the census
@@ -135,7 +137,11 @@ For "how does everyone document X," "the guidance across these 8 frameworks,"
 - **Reach:** abstract from the API, then the full text: arXiv `/abs` and
   `/pdf`, Crossref `link[]` / Unpaywall for open copies (Unpaywall needs an
   email param), the authors' project pages, and openreview/PMC where they
-  apply. `Read` accepts PDFs directly, which makes local PDFs greppable.
+  apply. A reader that takes PDFs directly (this environment's `Read`) is
+  fine for a 15-page paper; for anything longer, follow the
+  **Document files** block below — extract once to `cache/` and grep the
+  text — because page-by-page reading of a 300-page PDF is exactly the
+  budget failure the noise map exists to prevent.
 - **Census:** and this one is different in kind — **the honest denominator is
   how many papers you read in full versus skimmed versus only read the abstract
   of**, and it belongs in the checkpoint before any claim about the field.
@@ -273,6 +279,99 @@ writing rather than its code.
 - **Dedup/traps:** the same corpus repackaged under several names (check by
   size and row count, not title), a benchmark with leaked test data, and a
   derivative counted as an independent source.
+
+## Document files: PDFs, ebooks, scans, single long artifacts
+
+For "mine this book / report / manual / archive", and any task whose sources
+are *files* — a user-provided PDF, a folder of vendor whitepapers, a stack of
+scanned standards, a 700-page study. This is also the sub-reach for papers,
+specs, and doc sets when they ship as one big file rather than pages.
+
+- **Candidate:** one artifact (book, report, manual) — or one *section* of it
+  if the task is section-level. Settle the unit in the plan; it decides the
+  count and every page-range split.
+- **Discovery:** the user's own files; publisher and standards-body archives;
+  arXiv / Gutenberg / OpenLibrary / agency repositories; vendor doc PDFs;
+  format-filtered search (`filetype:pdf`) against the domain.
+- **Reach: convert before you read — never mine a long file page-by-page.**
+  Search for the *current* best converter rather than trusting memory of tool
+  names — the extraction/OCR landscape turns over monthly and a fresh
+  open-source release can outrank the established hosted products (and vice
+  versa; neither category wins by default). Check installed skills and
+  shipped tools (`scrape` sibling for sites; binaries like `pdftotext`,
+  `pandoc`, `tesseract`, or Python `pypdf`/`pdfplumber` where present —
+  availability varies, check in the run, don't assume either way), run the
+  **accuracy gate** on one real page of the actual content before the run
+  commits to a tool, and surface a consequential free-vs-paid choice to the
+  user *with the measurement*, not the brand reputation. Extract once into
+  `cache/`, then grep and read the text. **A scanned PDF has no text
+  layer:** detect
+  it (extraction returns near-zero words), then OCR (render pages +
+  `tesseract`), then grep the OCR output — and if no OCR tool exists, the
+  agent adapts (chunked page-range reading via a PDF-capable reader,
+  labelled partial reach) rather than declaring the source unreachable.
+  Once the main agent has proven a pipeline on one sample, it codifies the
+  loop as a script in `tools/` for every subagent to call — see
+  `search-and-mining-technique.md` → "The extraction bootstrap".
+- **Census:** page count; text-layer vs OCR-reached (a census fact about
+  every quote you'll take from it); total words; the **structure split** —
+  front matter / body / back matter page ranges, and pages read vs skimmed
+  vs skipped with the noise-map evidence (`references/noise-and-density.md`);
+  edition/version and publication date.
+- **Why:** the preface and foreword — the author's own stated rationale,
+  which the noise pass downgrades to skim but never skips; each chapter's
+  "why this exists" opening; footnotes, where arguments are actually
+  defended; errata and revision history; the index's *term list* (skip the
+  page numbers, but the vocabulary an artifact indexes is what it thinks
+  matters).
+- **Dedup/traps:** the same book as PDF, EPUB, and scan = one source;
+  edition drift (reading v2, citing v1's page numbers — pin the edition and
+  cite pages within it); abstract-only claims reported as full-document
+  findings; **the front-matter tax** — the first tens of pages being
+  title/copyright/lists-of-figures/TOC, which a page-range split that
+  ignores the noise map hands to a subagent as "its content". A TOC read
+  is structure evidence ("from TOC, not from reading chapters"), never
+  content that was read.
+
+## Time-based media (audio, video, recordings)
+
+For talks, conference sessions, podcasts, screencasts, and archived
+webinars — the same what→why→cost dig, against a transcript and frames
+instead of text and images.
+
+- **Candidate:** one recording (episode, session, video). Say in the plan
+  whether clips of one talk count separately (they usually don't — same
+  content, Dedup below).
+- **Discovery:** event/platform archives, podcast indexes (RSS), conference
+  recording pages, YouTube/channel search scoped to the speaker or org.
+  Endpoint availability: `unverified in this environment` across the board.
+- **Reach:** never "watch" the whole thing. Transcribe into `cache/` and
+  read with timestamps. A published transcript, if one exists (platform
+  captions, the creator's own), beats any ASR choice on cost and accuracy —
+  look for it first. Otherwise **search for the current ASR landscape rather
+  than defaulting to the famous model in your weights**: open models lead
+  some languages/domains on this year's benchmarks, hosted products lead
+  others, and the standings move; pick with the bootstrap's accuracy gate —
+  one two-minute stretch of *this* audio checked against what you actually
+  hear — and surface a consequential free-vs-paid choice to the user with
+  that measurement. For visually driven media
+  (screencasts, slide talks), sample keyframes at a stride in addition to
+  or instead of audio. Silence/segment profiling before transcribing — see
+  `references/noise-and-density.md` → "Media below".
+- **Census:** duration; transcript words; the fraction of the timeline you
+  actually covered (read transcript + sampled frames vs never touched);
+  **transcript source** — official captions, creator-published, or own ASR
+  pass (auto-generated captions are usable, but their errors are yours;
+  label quotes taken from them ASR-approximate and re-check anything
+  load-bearing against the timestamp).
+- **Why:** the Q&A section is usually denser than the prepared talk; the
+  asides ("we tried X first and it failed") are unpolished and therefore
+  honest; slide decks differ from what was said — cite which you used.
+- **Dedup/traps:** the same talk cut into promo clips; a podcast episode
+  that is an ad read; a recording whose transcript is someone's summary,
+  not verbatim; a "keynote" that is the product marketing the talk was
+  hired to do (the artifact-vs-account divergence rule from the postmortem
+  block applies exactly).
 
 ## The generic shape (for anything not listed yet)
 

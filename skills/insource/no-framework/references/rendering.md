@@ -1,5 +1,10 @@
 # Rendering Pattern
 
+> Written in VanJS terms (`--ui vanjs`, `van.add()`). `--ui
+> preact`/`--ui nanojsx` generate the identically-shaped `js/utils.js`
+> with that library's own `render()` call instead — see
+> `references/ui_libraries.md` and `references/tooling.md#htm-how-preactnano-jsx-stay-no-build-step`.
+
 ## Why a shared render helper
 
 Every page should mount the same way — clear the app container, then add

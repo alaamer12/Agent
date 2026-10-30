@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- FRAMEWORK-NEUTRAL PAGE BLUEPRINT — the exact shape the crawler must see in the first
+     server-emitted bytes of every scored page. Map each marked region to your stack's
+     equivalent (see references/patterns.md). This is a TARGET, not code to ship verbatim. -->
+<html lang="xx" dir="ltr|rtl">
+<head>
+  <!-- P1/P10: keyword at token 1, once, total 30-60 chars; emitted from the FAST/CACHED data lane -->
+  <title>{EntityName}{ optional suffix } | {Site}</title>
+  <!-- P2: keyword present in real copy OR keyword-bearing fallback template, <=160 chars -->
+  <meta name="description" content="{… keyword …}">
+  <!-- P11: canonical per language variant via the one metadata funnel -->
+  <link rel="canonical" href="https://site/{locale-scheme}/{path}">
+  <!-- P11: hreflang incl. x-default; one entry per language variant -->
+  <link rel="alternate" hreflang="ar" href="…?lang=ar|/ar/…">
+  <link rel="alternate" hreflang="en" href="…">
+  <link rel="alternate" hreflang="x-default" href="…">
+  <meta name="robots" content="index, follow">   <!-- noindex ONLY on 404/error metadata -->
+  <meta property="og:title" content="…"> <meta property="og:description" content="…">
+  <meta property="og:url" content="{canonical}"> <meta property="og:image" content="…">
+  <link rel="stylesheet" href="/assets/app.css">  <!-- P8: external CSS (3 points) -->
+</head>
+<body>
+
+  <!-- ============ CRAWLER LAYER: first bytes of body, server-rendered ============ -->
+  <!-- P3: EXACTLY ONE h1 in raw HTML = the entity name ONLY (<=40 chars).
+       Rendered OUTSIDE every client-render boundary (P13). -->
+  <header>
+    <!-- P7: RAW img tag (not an optimizer wrapper); alt GENERATED from entity data,
+         never a filename. width/height to keep layout stable. -->
+    <img src="{entityLogoUrl}" alt="{EntityName} {optional qualifier}" width="48" height="48">
+    <h1>{EntityName}{ differentiator if title==name after suffix-strip (P3 trap) }</h1>
+  </header>
+
+  <!-- P5/P6: prose engine. Visually-hidden (sr-only-style) or integrated as real UI.
+       Plain tags only (P8): article/section/h2/h3/p — no inline SVG icon sets here.
+       >= 500 visible words, keyword >= 3 mentions, arising from templates interpolating
+       {EntityName}. If every source field is empty: render NOTHING, not an empty shell. -->
+  <div class="sr-only"><!-- or a real <article> that users also see -->
+    <article>
+      <h2>{about-prefix} {EntityName} {…}</h2>            <!-- P4: keyword-bearing -->
+      <p>{intro naming the entity twice + locale}</p>
+      <section><h3>{details-prefix} {EntityName}</h3><p>{fact sentence per field}</p></section>
+      <section><h3>{performance-prefix} {EntityName}</h3><p>{data-as-prose}</p></section>
+      <p>{closing mention}</p>
+    </article>
+  </div>
+
+  <!-- P14: entity JSON-LD, url consistent with canonical -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"{Entity|Article|Product|FAQPage…}"}</script>
+
+  <!-- ============ USER LAYER: interactive UI, timing-irrelevant ============
+       P13 companion: server-rendered styled blocks may be passed INTO client components
+       (children / RenderFragment / partial) so their HTML enters the stream early.
+       Client components label sections with aria-labelledby — never a second h1/h2. -->
+  <main id="app"><!-- charts, tabs, forms, hydration islands --></main>
+</body>
+</html>
