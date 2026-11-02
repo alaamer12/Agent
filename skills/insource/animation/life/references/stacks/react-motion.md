@@ -1,22 +1,8 @@
 # Stack: React with Motion
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: implementing in a React project that uses Motion or framer-motion.
-> - Skip when: the project is not React or has no animation library (use css-native.md).
-> - Read next: `springs.md` (spring settings); `performance-and-accessibility.md` (shorthand and main-thread rules).
+> Owner of Motion/framer-motion API implementation notes. Routing lives in ../../SKILL.md.
 
 Notes for projects using the Motion library for React. Check which package the project already uses before adding anything: new work uses `motion` with imports from `motion/react`; a project on the older package keeps it, and migration is a follow-up. Verify props against the installed version.
-
-## Contents
-- Basics
-- Springs and transitions
-- Presence and exit
-- Layout animation
-- Variants and stagger
-- Gestures and values
-- Reduced motion
-- Performance notes
-- Pitfalls
 
 ## Basics
 
@@ -31,7 +17,7 @@ import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "motion/
 />
 ```
 
-Never `initial={{ scale: 0 }}`. Set `style={{ originX, originY }}` or a transform-origin for anchored surfaces.
+Never `initial={{ scale: 0 }}` (the entry-scale band: ../timing-and-tokens.md). Set `style={{ originX, originY }}` or a transform-origin for anchored surfaces.
 
 ## Springs and transitions
 
@@ -76,7 +62,7 @@ const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } };
 </motion.ul>
 ```
 
-Reverse stagger on exit with `staggerDirection: -1`, and keep exit offsets shorter.
+Stagger semantics and order rules: ../synchronization.md. Reverse stagger on exit with `staggerDirection: -1`, and keep exit offsets shorter.
 
 ## Gestures and values
 
@@ -95,11 +81,11 @@ Use motion values (`useMotionValue`, `useTransform`, `useSpring`) for values tha
 const reduce = useReducedMotion();
 ```
 
-Combine with explicit gentler variants for spatial effects.
+Combine with explicit gentler variants for spatial effects; the reduced-motion policy is owned by ../performance-and-accessibility.md.
 
 ## Performance notes
 
-- The `x`, `y` and `scale` shorthands are applied by the library on the main thread; for motion that must survive a busy page, animate a full `transform` string, or use CSS or WAAPI. Hardware-accelerated paths exist for opacity, transform strings, clip-path and filter.
+- The `x`, `y` and `scale` shorthands are applied by the library on the main thread (main-thread rules and property tiers: ../performance-and-accessibility.md). Hardware-accelerated paths exist for opacity, transform strings, clip-path and filter.
 - Prefer one parent animation over many independent child animations.
 - Do not animate `width`, `height`, `top` or `left`.
 

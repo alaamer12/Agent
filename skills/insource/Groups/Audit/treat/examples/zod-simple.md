@@ -4,6 +4,8 @@ Illustrates a case where the tool's model is lightweight and additional structur
 
 ## Tool model (extracted)
 
+- Tool: zod · installed version from the lockfile · docs for that major (illustrative; a v3 review must not read
+  v4 docs, and v3 idioms found in a v4 project are the review's most valuable finding)
 - Core concepts: Schema, parse / safeParse, inferred types
 - Paradigm: schema-first runtime validation + static inference
 - Natural boundaries: a schema can live next to the domain type it validates

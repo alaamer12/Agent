@@ -1,25 +1,12 @@
 # Scroll animation
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: motion tied to scrolling: reveal on scroll, parallax, progress, pinned scenes.
-> - Skip when: the motion is not scroll-linked.
-> - Read next: `entrances-and-exits.md` (for the reveal itself); `stacks/css-native.md` (for scroll timelines).
+> Owner of the triggered-versus-scrubbed decision, the reveal observer, scroll timelines, parallax and scrollytelling. Routing lives in ../SKILL.md.
 
 Motion tied to scrolling: reveals, scrubbed progress, parallax, pinned scenes. Scroll is a user's primary control, so motion here must never fight it.
 
-## Contents
-- Gate for scroll motion
-- Triggered versus scrubbed
-- Reveal on entry
-- Scroll-driven progress
-- Parallax
-- Scrollytelling
-- Rules
-- Checklist
-
 ## Gate for scroll motion
 
-Ask first: does motion on scroll serve comprehension or wayfinding? Reading-heavy pages, documentation and dense tools get little or no scroll motion. Marketing and storytelling pages can carry more, within the novelty budget.
+Ask first: does motion on scroll serve comprehension or wayfinding? The verdict, tiers and novelty budget are gate.md's; reading-heavy pages, documentation and dense tools get little or no scroll motion, marketing and storytelling pages can carry more.
 
 ## Triggered versus scrubbed
 
@@ -28,7 +15,7 @@ Ask first: does motion on scroll serve comprehension or wayfinding? Reading-heav
 | Triggered | Starts when an element enters the viewport and plays on its own clock | Reveals, staggers, counters |
 | Scrubbed | Progress equals scroll position, so it reverses when scrolling back | Progress bars, parallax, scenes tied to reading position |
 
-Triggered reveals use an intersection observer, never a scroll listener that writes state. Scrubbed motion uses scroll timelines or a motion value mapped to scroll progress.
+Triggered reveals use an intersection observer; scrubbed motion uses scroll timelines or a motion value mapped to scroll progress (the scroll-listener ban: performance-and-accessibility.md, Main-thread discipline).
 
 ## Reveal on entry
 
@@ -45,13 +32,13 @@ document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
 
 ```css
 [data-reveal] { opacity: 0; transform: translateY(12px); }
-[data-reveal].is-visible { opacity: 1; transform: none; transition: opacity 400ms var(--ease-enter), transform 400ms var(--ease-enter); }
+[data-reveal].is-visible { opacity: 1; transform: none; transition: opacity 300ms var(--ease-enter), transform 300ms var(--ease-enter); }
 @media (prefers-reduced-motion: reduce) { [data-reveal] { opacity: 1; transform: none; } }
 ```
 
-- Reveal once. Re-animating on every scroll-up feels noisy.
+- Reveal once; the ruling is timing-and-tokens.md (Resolved conflicts). Re-animating on every scroll-up feels noisy.
 - Content must stay visible without script: the hidden starting state should only apply when script has run (add a class on the root first), or use a no-script fallback.
-- Stagger sibling reveals by about 40 to 80ms and keep the total short.
+- Stagger sibling reveals within the list/section offset bands in timing-and-tokens.md and keep the total short.
 - Reserve space so content does not shift as it reveals.
 
 ## Scroll-driven progress

@@ -1,22 +1,8 @@
 # Playbook: transition
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: the command is transition: steps, wizard, tabs, list to detail, route or page change, shared element, state graph.
-> - Skip when: the command is micro or component.
-> - Read next: `stacks/nextjs-transitions.md` (for Next.js routes); `stacks/css-native.md` (for view transitions); `gestures.md` (for swipe-back); `entrances-and-exits.md` (for the intro to the first state).
+> Owns the state-graph workflow, direction awareness, and the rule that navigation is never blocked on the animation. Routing lives in ../SKILL.md.
 
 Animating the move from one state, view or page to another. The question is always: how does the interface move from the current state to the next, and back?
-
-## Contents
-- Workflow
-- Forward and reverse table
-- Direction awareness
-- Standard recipes
-- Page and route transitions
-- Shared elements and morphs
-- Interruption, skipping, loading
-- Creative lanes for transition
-- Checklist
 
 ## Workflow
 
@@ -35,7 +21,7 @@ Animating the move from one state, view or page to another. The question is alwa
 | Step 2 to 3 | ... | ... | ... |
 | Open detail from list | Shared element expands | Collapses back to the item's position | Reverse follows the pointer or gesture when swiped |
 
-A row with an empty reverse column is an unfinished design. The reverse may be shorter, quieter or use another curve; it must feel intentional and smooth.
+A row with an empty reverse column is an unfinished design: the never-bend rule (every forward has a reverse) lives in ../SKILL.md.
 
 ## Direction awareness
 
@@ -66,8 +52,8 @@ Progress through steps: progress bar scales on X with the content swap sharing e
 
 ## Page and route transitions
 
-- Keep them short (250 to 400ms) because they happen often. Navigation used all the time is a candidate for the platform's view transitions or for a subtle crossfade only.
-- Preserve the shell (header, sidebar) so only the content area changes.
+- Keep them short — the page-transition band in timing-and-tokens.md governs the duration. Navigation used all the time is a candidate for the platform's view transitions or for a subtle crossfade only.
+- Shell preservation during a route change: entrances-and-exits.md (page load and screen mount).
 - Mount-based exit animation on route change needs the framework's exit-aware wrapper; see the Next.js stack file for the App Router pattern and the CSS-native file for view transitions.
 - Never block navigation on the animation: the new route starts loading immediately; the animation covers the wait.
 
@@ -81,19 +67,13 @@ Progress through steps: progress bar scales on X with the content swap sharing e
 
 - **Interruption**: the user taps back mid-flight. Retarget from the current state; with springs, preserve velocity. Do not queue the animations.
 - **Skipping**: a jump across several states plays one transition, not three. Choose direction from the index difference.
-- **Rapid toggling**: use transitions (retargetable), not restarting keyframes.
+- **Rapid toggling**: retargeting versus restarting is owned by performance-and-accessibility.md (Implementation order).
 - **Loading**: when the next state needs data, animate the container to its destination and show a skeleton; avoid a spinner that blocks the move.
 - **Gesture-driven**: back-swipe scrubs the reverse motion with the finger and completes on release based on velocity.
 
 ## Creative lanes for transition
 
-| Lane | Transition idea |
-|---|---|
-| Self-transformation | The current surface reshapes into the next (card to full page; step indicator becomes the next step's header) |
-| Choreography | Elements hand off in domino order along the navigation direction; linked highlights show what persisted |
-| Reveal | A wipe or mask that follows the content boundary and reverses cleanly |
-| Depth | Layers shift at different rates for forward, reverse the parallax for back |
-| Trace | A line or marker travels from the old position to the new one and carries the eye |
+The idea lanes are owned by creative-direction.md (master lanes table); pick lanes there that suit a move between two states.
 
 ## Checklist
 

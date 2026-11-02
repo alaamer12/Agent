@@ -37,6 +37,14 @@ subagents, so overlapping scopes produce duplicated or contradictory work.
    leaf's work itself, the fan-out was decorative.
 8. **Collect and reconcile reports.** Confirm each landed; resolve contradictions between subagents before
    acting on either. A contradiction between two reports is a finding, not noise.
+9. **Ask authority on the subagent's behalf.** A subagent cannot ask the user mid-task. Enumerate the
+   ask-per-session actions the task needs under section 13 - external installs, external processes,
+   existing-DB writes, credentials, machine config - and ask the user in one batch before dispatch; record
+   the grant or denial in the brief (Autonomy Bounds). A denial re-scopes the task; it is never bypassed
+   by the subagent improvising.
+10. **The subagent must respect this file.** The block and the per-task doc list are the rulebook slice;
+    the brief states that the subagent follows AGENTS.md as if it had read it, and the report names the
+    rules that shaped decisions and every granted action it took.
 
 ## Subagent duties
 
@@ -64,6 +72,17 @@ subagents, so overlapping scopes produce duplicated or contradictory work.
 
 The line that projects most often leave unwritten is the last: a subagent that discovers the task's premise is
 wrong needs permission to *stop*, or it will complete a wrong task beautifully.
+
+## Authority for subagents - and the autonomous exception
+
+- **Default: ask per session, on the subagent's behalf.** Batch the questions before dispatch ("the
+  subagent will need to <action> - do you grant authority?"), record each answer in the brief, and re-scope
+  on a denial.
+- **Autonomous sessions override the asking.** When the user has already placed the agent in an
+  anonymous, autonomous state (e.g. `iwts` - "I want to sleep", "take over"), the agent and its subagents
+  hold full authority for the delegated work unless the user carved something out. The brief says so; hard
+  constraints (privacy paths, never-sacrifice commitments) still apply, and destructive or out-of-project
+  actions are still reported.
 
 ## The baseline block
 

@@ -1,7 +1,7 @@
 # Recipe: blinds — `/animation svg blinds`
 
-Horizontal slats open one after another, each growing its own height, so the
-logo appears through venetian shutters. One-shot; ends fully visible.
+Per-style recipe — shared build rules in [foundations.md](foundations.md),
+signature and trigger words in [../SKILL.md](../SKILL.md).
 
 Distinct from `mosaic`, which is a 2-D grid of tiles gated on **opacity**. Here
 the mask geometry itself animates — each slat's `height` grows — in a single
@@ -52,4 +52,3 @@ column, so the reveal has hard moving edges instead of squares appearing.
 - To make it a *loop* (blinds opening and closing), animate `height`
   `0;10;0` with `repeatCount="indefinite"` and stagger the `begin` on the way
   back — but that is an idle treatment, not an intro.
-- **Verified in Chromium 153 only.**

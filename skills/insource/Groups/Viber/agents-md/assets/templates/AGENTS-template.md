@@ -4,7 +4,10 @@ Instructions for AI agents working in this repository. Follow them on every task
 subagents. This file is a rulebook: it states what you must do and what you must read. It does not describe
 the system - the files it points to do that.
 
-<!-- agents-md:sections 1-10. Delete a section only if the user agreed it does not apply; never leave it blank. -->
+<!-- agents-md:sections 1-15. Delete a section only if the user agreed it does not apply; never leave it blank. -->
+<!-- Budgets: ~500 lines for the file, ~50 lines per section. A section past ~50 lines is a doc with a
+pointer missing: move its detail to a file under docs/ (project convention), keep 2-4 obligation lines plus
+"Read: <path>" here. agents_lint.py flags it. -->
 
 ---
 
@@ -40,6 +43,7 @@ treat it as absent.
 | File | Purpose |
 |---|---|
 | <!-- path --> | <!-- one line: what decision this file governs --> |
+| <!-- [COMMITMENTS.md](COMMITMENTS.md) --> | <!-- declared priorities and trade-offs - read before choosing an approach that trades dimensions; owned by commitments-md --> |
 | <!-- path --> | <!-- ... --> |
 
 Shared/base context reads apply in every active context:
@@ -169,7 +173,7 @@ unavailable to it. Assume the omission will be filled by a guess.
 
 ### 10.4 Baseline block - paste at the top of every subagent prompt
 
-> Generated from sections 1-9. **When the rulebook changes, regenerate this block.** It is a projection, not a
+> Generated from sections 1-9, 11-13. **When the rulebook changes, regenerate this block.** It is a projection, not a
 > second source of truth.
 
 ```text
@@ -187,6 +191,13 @@ unavailable to it. Assume the omission will be filled by a guess.
 8. UNITS - read <!-- units file --> before implementing; reuse/extend, and add an entry for any new unit
 9. REPORT - write <!-- report path pattern --> when finished: goal, actions, files touched, decisions,
    verification. This is in addition to your returned result.
+10. PRIVACY - <!-- section 11, compressed: private paths + the rule that outputs of hidden tools stay
+   private; write only into those, never commit them -->
+11. RESOURCEFUL - <!-- section 12, compressed: project-local deps/toolchains/envs; no global installs
+   without asking -->
+12. AUTHORITY - <!-- section 13, compressed: ask before system installs, external processes, existing-DB
+   writes; if blocked, say what you cannot do and ask -->
+13. GIT - <!-- section 16, compressed: allowed/never tiers, stash pattern if allowed, commit identity rule -->
 
 TASK-SPECIFIC DOCS: <!-- master fills this -->
 SCOPE: <!-- what you may change; what you must not -->
@@ -212,7 +223,82 @@ in the merged result instead of silently re-doing its scope.
 
 ---
 
-## 11. Rulebook Maintenance
+## 11. Privacy
+
+**What stays hidden - and what hiding it hides along with it.** This section is the project's visibility
+policy for agents: paths that must not be committed or quoted in artifacts that leave the repo, and the
+duties that keep the declaration real.
+
+- Private paths: <!-- e.g. the agent-skills folder, working-plan directories, `tools/pocketbase.exe` -->
+- **Cascade:** hiding a producer hides its outputs. If the agent skills are private, the folders those
+  skills write are private too - the `.iwts/` run record, generated reports, caches.
+- **Hidden binaries:** the file stays out; the *need* stays in - record where to obtain/install it in
+  <!-- setup doc path -->, not the binary itself.
+- **Sync duty:** every private path must also appear in `.gitignore`. When this section is updated and a
+  path is missing there - or was tracked before being declared private - **ask the user before clearing
+  the cache** (`git rm --cached`, deleting local generated copies); an ignore rule hides the future, not
+  the past. Never delete silently.
+- <!-- If nothing is private, state it: "No privacy restrictions recorded; everything here is shareable as-is." -->
+
+---
+
+## 12. Resourceful
+
+**Project-local first.** Anything that can be installed, pinned, or run per-project is: dependencies,
+toolchains, interpreters, CLIs, environments. Global installs are exceptions, named here with their reason -
+never a convenience default.
+
+- Local environments are the rule, e.g. `[.venv]` for Python, a project install for JS tooling (never a
+  global `-g` install for a project need), a per-project `[Cargo]`/`[Composer]`/`[Maven]` local store, a
+  project-local toolchain for the JVM - the same idea in every language.
+- Run project binaries through the project's own tooling (the venv, `node_modules/.bin`, the package
+  manager's exec), so the version used is the version the project pinned.
+- Global installs allowed as exceptions: <!-- e.g. none, or: the company CLI the team shares; why, and who needs it -->
+
+---
+
+## 13. Authority
+
+**What agents may do in this environment, and what they must ask about first.** Every action below has one
+of two settings: **ask per session** (the safe default) or **fixed** (pre-granted - record the grant here,
+with its reason).
+
+| Action | Setting |
+|---|---|
+| Install a binary or package outside the project (system-wide; a standalone tool such as <!-- e.g. pocketbase -->) | <!-- ask per session / fixed --> |
+| Run external processes (emulators, service daemons, third-party CLIs) | <!-- ask per session / fixed --> |
+| Write to an existing database outside scratch/local data | <!-- ask per session / fixed --> |
+| Read or write credentials and secret stores | <!-- ask per session / fixed --> |
+| Change machine-level configuration (shell profiles, global config, system services) | <!-- ask per session / fixed --> |
+
+- Installing an external tool is not inherently forbidden: a project may genuinely need something it does
+  not have (a missing binary, a package the platform lacks) - that install happens under this section's
+  setting, not as a silent act and not as an automatic refusal.
+- Project-local installs belong to section 12 (Resourceful): this project's dependencies, toolchains and
+  environments install locally without asking, because they touch nothing outside the project.
+- **When an authority limit blocks the requested work, say so and ask** - never improvise around it and
+  never silently skip the blocked part. The `/honest` shape, in plain words: "Under the current authority I
+  may not be able to do X, Y, Z. Shall I continue as is, or do you grant me authority for it?"
+
+---
+
+## 14. Skills
+
+**Per-skill instructions, owned by the skills.** Each independent skill that matters to this project
+records one row here: when it applies, and what an agent must read or do before using it - the
+condition and the pointer, not the skill's whole manual.
+
+| Skill | Use it when | Read or do first |
+|---|---|---|
+| <!-- plan --> | <!-- work spans more than one session --> | <!-- docs/plans/README.md - the plan format this repo follows --> |
+| <!-- commit --> | <!-- before any commit --> | <!-- the message map in docs/commit-craft.md --> |
+
+- A skill adds its row here when the project adopts it; the row is updated when the skill's usage in
+  this project changes. Keep rows to one line.
+
+---
+
+## 15. Rulebook Maintenance
 
 **This file is current or it is wrong.** Every session that changes a project rule updates this file in the
 same change — not in a follow-up, not next sprint.
@@ -228,9 +314,14 @@ same change — not in a follow-up, not next sprint.
 | A document is renamed, moved, merged, or split | the row that pointed at it — fix the path in the same change that moved the file |
 | A document becomes obsolete or moves out of active scope | remove or fence it; do not leave a pointer that reads as current |
 | Branching, versioning, or promotion policy changes | 3 |
+| A git permission changes (allowed/ask/never tier, stash policy, commit author identity) | 16 — the tier line, **and regenerate the block's GIT clause in 10.4** |
 | A new reusable component area appears, or the units index moves | 4 |
+| A path becomes private (or stops being) | 11 — the entry **and the `.gitignore` line in the same change**; if the path was already tracked, ask the user before clearing the cache |
 | A design/prototype directory is added, or scope changes between current and future | 5 |
 | A shell, tooling, or package-manager restriction changes | 6 |
+| A dependency/local-environment rule changes, or a global install becomes an allowed exception | 12 — the exception and the local-first rule stay in one place |
+| An authority setting changes (ask-per-session vs fixed), or a grant is given/revoked | 13 — the setting, its reason, and its scope in the same change |
+| A skill gains a project-specific usage note (read X first, run it this way), or stops needing one | 14 — one row, condition + pointer |
 | The environment or secrets strategy changes (new schema layer, new provider, new generation step) | 7 |
 | Debug permissions change (new environment, new inspection tool) | 8 |
 | A startup step is added or removed | 9 |
@@ -253,3 +344,25 @@ Run the check after editing:
 ```bash
 python scripts/agents_lint.py AGENTS.md      # sections, dead links, scope fence, block sync, review date
 ```
+
+## 16. Version Control
+
+<!-- The git-specific half of authority: what the agent may DO with git, and under whose name. The
+     `commit` and `branch` skills detect conventions and ask the authorship question precisely
+     because this section should answer it; keep it in sync with section 3's branch model. -->
+
+- **Allowed:** read-only git always (`status`, `log`, `diff`, `show`); <!-- and: commit on which
+  branches, following section 3; create branches? tag? -->
+- **Ask first:** <!-- push / PR creation / merge into shared branches / delete branches / release
+  tags - outward-facing git actions -->
+- **Never without explicit user order:** history rewrites (`rebase`, amending pushed commits,
+  `reset --hard`, `git clean`, force-push), and never `--no-verify` to pass a failing hook - fix
+  the cause instead.
+- **Stash policy:** <!-- allowed / forbidden. If allowed, the pattern: `git stash push -u -m
+  "agent/<task-slug>"`; in a shared worktree apply the exact entry by message, never bare `pop`,
+  and drop only entries this agent created. If forbidden, say what to use instead (a WIP commit
+  on a scratch branch, a dedicated worktree). -->
+- **Author identity:** commits keep <!-- the repository's configured human identity / an agent
+  identity -->; agent involvement is <!-- disclosed with a `Co-authored-by:` trailer naming the
+  tool - state the exact name and address / invisible by choice -->. Never edit `git config` to
+  change authorship; the `commit`/`branch` skills defer to this line.

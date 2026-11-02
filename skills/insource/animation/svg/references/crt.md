@@ -1,8 +1,7 @@
 # Recipe: crt — `/animation svg crt`
 
-A TV tube powering on: a bright hot line appears on the centreline, the logo
-opens vertically out of it, a scanline texture rides along and fades, and the
-logo lands clean. One-shot.
+Per-style recipe — shared build rules in [foundations.md](foundations.md),
+signature and trigger words in [../SKILL.md](../SKILL.md).
 
 Distinct from `iris`, which grows a circle radially from the centre. This
 opens a **1-D band** off a horizontal axis, and clips with CSS `clip-path`
@@ -54,13 +53,10 @@ rather than a `url()` reference.
 
 ## Notes
 
-- **Use bare `inset()` — the `view-box` keyword is dead.** `inset(50% 0
-  view-box)` was measured to *not* interpolate in Chromium: the animation ran
-  and the frame never changed. Plain `inset(50% 0)` → `inset(0 0)` works. The
-  cost is that percentages resolve against the element's **object bounding
-  box**, not the canvas, so the band closes at the artwork's centreline rather
-  than the viewport's. On a logo that nearly fills its frame the difference is
-  sub-pixel; on a small mark in a large canvas it will look off-centre.
+- **Bare `inset()` — never the `view-box` keyword** (foundations §6). The
+  bbox-relative percentages mean the band opens about the **artwork's**
+  centreline rather than the viewport's: sub-pixel on a frame-filling logo,
+  visibly off-centre for a small mark in a large canvas.
 - **The scanline overlay must be clipped to the logo union.** The first build
   painted the pattern across the whole canvas and the counter gate caught it
   inking every one of the 111 sampled gap pixels mid-beat — the letterform
@@ -77,4 +73,3 @@ rather than a `url()` reference.
 - Geometry: open duration ≈ 0.35 × H/100 scaled by the timing column, hot line
   `h = max(1.5, H/73)`, pattern pitch 4 with a 1.5 stripe (below ~1.5 the
   stripes vanish at 1× raster).
-- **Verified in Chromium 153 only.**

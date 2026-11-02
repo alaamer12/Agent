@@ -1,23 +1,8 @@
 # Performance and accessibility
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: building (every run): choosing properties, reduced motion, hover on touch, loops, focus.
-> - Skip when: you are only classifying, naming or running discovery.
-> - Read next: `review-standards.md` (phase 6 checks these rules).
+> Owner of property cost tiers, reduced-motion policy, main-thread rules, will-change, input devices and hover-on-touch, looping, the scroll-listener ban, and focus mechanics. Routing lives in ../SKILL.md.
 
 Rules that apply to every build. The audit script checks the mechanical ones.
-
-## Contents
-- Property tiers
-- Implementation order
-- Main-thread discipline
-- Layers and will-change
-- Looping and off-screen work
-- Theme switching
-- Reduced motion
-- Input devices
-- Focus and keyboard
-- Checklist
 
 ## Property tiers
 
@@ -79,12 +64,12 @@ Every spec and every build states its reduced-motion variant. Test the same task
 ## Input devices
 
 - Gate hover motion with `@media (hover: hover) and (pointer: fine)`; touch devices replay hover on tap. Some frameworks already gate their hover utilities: inspect the generated CSS before adding another gate.
-- Tappable controls respond at 0ms on press and set `touch-action: manipulation`; interactive targets are at least 44px.
+- Tappable controls respond at 0ms on press and set `touch-action: manipulation`; interactive targets are at least 44px (gesture-specific use of these: gestures.md).
 - During direct manipulation keep the element locked to the pointer with no easing; ease only after release.
 
 ## Focus and keyboard
 
-Keyboard focus and repeated navigation stay immediate. An animated state change may play as long as focus placement and task completion do not wait for it. Keep visible focus styles on anything interactive, including inside prototypes.
+Keyboard focus and repeated navigation stay immediate. An animated state change may play as long as focus placement and task completion do not wait for it. Keep visible focus styles on anything interactive, including inside prototypes. Whether such an animation should exist at all is the gate's verdict (gate.md).
 
 ## Checklist
 

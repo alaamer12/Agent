@@ -1,22 +1,8 @@
 # Stack: CSS and native web APIs
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: plain CSS, Web Animations, view transitions, scroll-driven CSS, Tailwind, or Vue or Svelte without an animation library.
-> - Skip when: React with Motion already covers the need.
-> - Read next: `stacks/nextjs-transitions.md` (for route transitions in Next.js).
+> Owner of CSS/Web Animations/View Transitions/scroll-driven CSS implementation mechanics. Routing lives in ../../SKILL.md.
 
 Notes for projects with no animation library, or when the platform can do the job. Check browser support in the project's target list before relying on newer features, and keep a fallback.
-
-## Contents
-- Transitions
-- Entry and discrete properties
-- Keyframes
-- Web Animations API
-- Sampled curves
-- View transitions
-- Scroll-driven animation
-- Relational selectors
-- Utility frameworks
 
 ## Transitions
 
@@ -26,7 +12,7 @@ Notes for projects with no animation library, or when the platform can do the jo
 }
 ```
 
-Name the properties. `transition: all` is never right: it animates properties nobody meant to and can fall off the compositor. Transitions retarget when interrupted; use them for anything triggered rapidly.
+Name the properties; `transition: all` is banned by ../performance-and-accessibility.md (checklist). In CSS the retarget-versus-restart choice is mechanical: transitions retarget when interrupted, keyframes restart from zero — so use transitions for anything triggered rapidly.
 
 ## Entry and discrete properties
 
@@ -60,7 +46,7 @@ a.reverse();
 
 ## Sampled curves
 
-`linear()` accepts sampled points, so springs and overshoot curves can be expressed in CSS:
+`linear()` accepts sampled points, so springs and overshoot curves can be expressed in CSS (sampling technique here; canonical curve list: ../timing-and-tokens.md):
 
 ```css
 transition-timing-function: linear(0, 0.45, 0.78, 1, 1.17, 1.21, 1.18, 1.12, 1.05, 1.02, 1);
@@ -85,6 +71,7 @@ if (document.startViewTransition) {
 - Direction-aware: set a data attribute on the root before the transition and select on it in the pseudo-element rules; remove it after `t.finished`.
 - Cross-document support differs from same-document support: check the target browsers.
 - Provide the non-supporting fallback: update the DOM without animation.
+- Next.js App Router integration: nextjs-transitions.md.
 
 ## Scroll-driven animation
 
@@ -97,7 +84,7 @@ Use only with a fallback for engines without support (an intersection observer r
 
 ## Relational selectors
 
-`:has()` lets CSS express relationships without script, such as de-emphasizing siblings while one is hovered:
+`:has()` lets CSS express relationships without script — the linked-relationship rules it can implement are owned by ../synchronization.md (Linked); example, de-emphasizing siblings while one is hovered:
 
 ```css
 .list:has(.row:hover) .row:not(:hover) { opacity: 0.55; }

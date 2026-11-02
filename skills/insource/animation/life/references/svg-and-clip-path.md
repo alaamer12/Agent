@@ -1,22 +1,8 @@
 # SVG and clip-path
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: line drawing, path morphs, clip or mask reveals, before and after sliders, hold-to-fill, animated SVG icons.
-> - Skip when: elements animate with plain transform and opacity.
-> - Read next: `creative-direction.md` (reveal and trace lanes).
+> Owner of clip/mask reveals, before and after sliders, line drawing, morphs and the mask-versus-clip edge rule. Routing lives in ../SKILL.md.
 
 Vector animation, reveals, masks and shape-following motion.
-
-## Contents
-- Clip-path reveals
-- Masks
-- Before and after sliders
-- Hold-to-confirm fills
-- Line drawing
-- SVG transform traps
-- Morphing
-- Ambient life
-- Checklist
 
 ## Clip-path reveals
 
@@ -35,11 +21,11 @@ Use a mask when the edge should be soft or fadeable (a gradient mask wiping a fe
 
 ## Before and after sliders
 
-Stack two images, clip the top one with an inset driven by the pointer position, and move the handle with transform. Keep the handle locked to the pointer during drag, ease only after release.
+Stack two images, clip the top one with an inset driven by the pointer position, and move the handle with transform. During the drag the usual pointer-tracking rules apply (gestures.md).
 
 ## Hold-to-confirm fills
 
-A filled layer clipped to an inset that shrinks from right to left while the user holds (about 2s linear), snapping back in 200ms on release. Linear is correct here because progress is the information.
+The hold-to-confirm recipe (fill, duration, snap-back) is owned by playbooks-micro.md; implement the fill as a clip-path inset here.
 
 ## Line drawing
 
@@ -59,7 +45,7 @@ For several paths, stagger by 60 to 100ms in drawing order. For round caps, star
 
 ## SVG transform traps
 
-- CSS transforms on SVG children default to a different origin than HTML elements. Set `transform-box: fill-box` and `transform-origin: center` (or explicit values) before scaling or rotating.
+- CSS transforms on SVG children default to a different origin than HTML: set `transform-box: fill-box` and `transform-origin` before scaling or rotating (the matching symptom row: debugging.md).
 - Do not mix the SVG `transform` attribute and CSS transforms on the same element.
 - Filters on large SVG groups are expensive; apply blur to a small group or pre-render.
 
@@ -69,7 +55,7 @@ Path morphs need the same number of points and compatible commands; use a morph 
 
 ## Ambient life
 
-Gentle idle motion (float, pulse, drifting gradients) gives static art life. Use offset durations so loops never sync, keep amplitude small, pause off-screen, and stop under reduced motion.
+Gentle idle motion (float, pulse, drifting gradients) gives static art life. Use offset durations so loops never sync and keep amplitude small; the looping policy (pause off-screen, reduced motion) is owned by performance-and-accessibility.md (Looping and off-screen work).
 
 ## Checklist
 

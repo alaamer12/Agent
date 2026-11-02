@@ -1,18 +1,8 @@
 # Debugging animation
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: existing animation feels off, janky, flickers, jumps, stutters, restarts or goes the wrong way.
-> - Skip when: you are designing new animation with nothing existing to diagnose.
-> - Read next: `review-standards.md` (existing mode and the remedy order); `performance-and-accessibility.md` (for load and property causes).
+> Owns symptom→cause→fix; routing lives in `../SKILL.md`.
 
 Symptom first. Use when existing animation "feels off", flickers, jumps or stutters, before deciding whether to improve or redesign.
-
-## Contents
-- Quick symptom table
-- Method
-- Common causes
-- Inspecting in the browser
-- When to redesign
 
 ## Quick symptom table
 
@@ -23,7 +13,7 @@ Symptom first. Use when existing animation "feels off", flickers, jumps or stutt
 | Jumps at start or end | Missing starting state or layout shift | Define the start with a starting-style or initial state; reserve space |
 | Flickers on hover | The animating element moves out from under the pointer | Animate an inner element; keep the hover target static |
 | Hover replays on touch | Hover not gated | Gate with the hover media query |
-| Stutters under load | Non-compositor properties, main-thread work in the same tick | Transform and opacity only; defer work; use CSS or WAAPI |
+| Stutters under load | Off-compositor work; see performance-and-accessibility.md | Transform and opacity only; defer work; use CSS or WAAPI |
 | Restarts when triggered rapidly | Keyframes instead of transitions | Use transitions or interruptible springs |
 | Goes the wrong way | Wrong origin or direction logic | Set transform origin; derive direction from the layout |
 | Shaky by 1px at start or end | Layer handoff | Hint the property during the animation |
@@ -43,10 +33,7 @@ Symptom first. Use when existing animation "feels off", flickers, jumps or stutt
 
 ## Common causes
 
-- `transition: all` animating properties nobody intended.
-- A CSS variable on a parent updated every frame.
-- Animating width, height or margin where a transform would do.
-- Missing `will-change` removal or too many promoted layers.
+- Property and promotion causes (`transition: all`, a parent CSS variable updated every frame, animating layout properties, will-change layer management): see performance-and-accessibility.md.
 - Entry animation firing again on every re-render (a changing key or remount).
 - Exit animations that never run because the element is removed immediately.
 - Toggling a class and immediately measuring layout.

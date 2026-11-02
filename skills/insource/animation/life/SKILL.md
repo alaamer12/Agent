@@ -13,7 +13,7 @@ metadata:
 
 Life turns "make this move well" into deliberate decisions: what is animated, whether it should animate at all, how its parts relate, and only then which technique and timing. It prefers creative animation where the gate allows, shows options as prototypes before building, and reviews its own work.
 
-This file is a router. It tells you what the skill covers, how to read the request, and exactly which file to open next and why. Open a file only when its row says so; every file below has a reason to read and a reason to skip.
+This file is the one router: it is the **only** place that maps requests to files. Open a file only when a row here sends you to it; references carry no routing tables of their own.
 
 ## In scope
 
@@ -44,33 +44,33 @@ The target is a file, component, page or route, directory, the whole project, or
 
 ## Interpret the request
 
-1. Decide the **scope** (which command) from what changes: one element, a whole unit, or a change between states.
-2. Name the **job** from the user's words using the table below. If the wording is vague (a feeling, a loose description), read intent-resolution and vocabulary first to translate it into precise terms, restate it in one line, then continue.
-3. Open the files in the **read order** column, in that order, skipping any whose row in the directory map says to skip.
-4. Whenever the target is broad or the user does not know what to animate, discovery runs first, whatever the words said.
+1. Every run reads two mandatory files whatever the job: [classification.md](references/classification.md) (phase 1) and [gate.md](references/gate.md) (phase 2). Unsure what a phase requires or where to stop? [run-procedure.md](references/run-procedure.md) is the sole home of the phase detail.
+2. Decide the **scope** (which command) from what changes: one element, a whole unit, or a change between states.
+3. Name the **job** from the user's words using the table below. If the wording is vague (a feeling, a loose description), read intent-resolution and vocabulary first to translate it into precise terms, restate it in one line, then continue.
+4. Read the job's files from the table. If the job produces code, finish with the **build tail**, in order: timing-and-tokens → exactly one stacks file → performance-and-accessibility → review-standards. Whenever the target is broad or the user does not know what to animate, discovery runs first, whatever the words said.
 
-| The user says (examples) | Job | Typical command | Read, in order |
+| Job | The user says (examples) | Typical command | Job files, in order |
 |---|---|---|---|
-| intro, onboarding, welcome, "on starting", appear, show up, fade in, pop in, hero, page load | Entrance | component (one screen or surface) or transition (between onboarding steps) | intent-resolution, entrances-and-exits, the playbook, synchronization if ordered, timing-and-tokens |
-| close, dismiss, disappear, remove, leave | Exit | component | entrances-and-exits, playbooks-component |
-| press, hover, focus, toggle, tick, shake, icon swap, count changes, loading button | Feedback or state swap | micro | playbooks-micro, timing-and-tokens |
-| modal, popover, menu, drawer, toast, card, accordion, list item | Component lifecycle | component | playbooks-component, entrances-and-exits |
-| steps, wizard, tabs, back, list to detail, route or page change | Transition | transition | playbooks-transition, then a stack file for routes |
-| cascade, one after another, ripple, connected, highlights related, all together | Synchronization | any | synchronization |
-| bouncy, springy, weighty, momentum, alive | Physics | any | intent-resolution, springs |
-| drag, swipe, flick, reorder, knob | Gesture | micro or component | gestures, springs |
-| on scroll, parallax, pinned scene, scroll progress | Scroll | component or transition | scroll, entrances-and-exits |
-| draws itself, wipe, mask, morph a shape, before and after | Vector or clip | micro or component | svg-and-clip-path |
-| premium, snappy, playful, calm, cinematic | Feeling | any | intent-resolution, vocabulary |
-| unique, wow, something different, light, reflection, 3D | Creative | any | creative-direction, prototype-ascii, prototype-html if needed |
-| what should I animate, whole page or project, "the app feels flat" | Discovery | any | discovery, gate |
-| janky, laggy, flickers, "feels off", review my animations | Diagnosis | any | debugging, review-standards, performance-and-accessibility |
-| "like this recording or GIF", attached media | Match | any | match-existing, timing-and-tokens |
-| "what is that effect called", "that thing where..." | Naming | any | vocabulary, intent-resolution |
-| sound, click sound | Sound | micro | interface-sound |
-| reduced motion, accessible, performance, 60fps | Constraints | any | performance-and-accessibility |
+| Entrance | intro, onboarding, welcome, "on starting", appear, show up, fade in, pop in, hero, page load | component (one screen or surface) or transition (between onboarding steps) | intent-resolution, entrances-and-exits, the playbook, synchronization if ordered |
+| Exit | close, dismiss, disappear, remove, leave | component | entrances-and-exits, playbooks-component |
+| Feedback or state swap | press, hover, focus, toggle, tick, shake, icon swap, count changes, loading button | micro | playbooks-micro |
+| Component lifecycle | modal, popover, menu, drawer, toast, card, accordion, list item | component | playbooks-component, entrances-and-exits |
+| Transition | steps, wizard, tabs, back, list to detail, route or page change | transition | playbooks-transition, synchronization; nextjs-transitions for routes |
+| Synchronization | cascade, one after another, ripple, connected, highlights related, all together | any | synchronization |
+| Physics | bouncy, springy, weighty, momentum, alive | any | intent-resolution, springs |
+| Gesture | drag, swipe, flick, reorder, knob | micro or component | gestures, springs |
+| Scroll | on scroll, parallax, pinned scene, scroll progress | component or transition | scroll, entrances-and-exits |
+| Vector or clip | draws itself, wipe, mask, morph a shape, before and after | micro or component | svg-and-clip-path |
+| Feeling word | premium, snappy, playful, calm, cinematic | any | intent-resolution, vocabulary |
+| Creative | unique, wow, something different, light, reflection, 3D | any | creative-direction, prototype-ascii, prototype-html if needed, review-standards in spec mode |
+| Discovery | what should I animate, whole page or project, "the app feels flat" | any | discovery, gate, then the pick's job row |
+| Diagnosis | janky, laggy, flickers, "feels off", review my animations | any | debugging, review-standards, performance-and-accessibility |
+| Match | "like this recording or GIF", attached media | any | match-existing, then the matching job's files |
+| Naming | "what is that effect called", "that thing where..." | any | vocabulary, intent-resolution |
+| Sound | sound, click sound | micro | interface-sound |
+| Constraints | reduced motion, accessible, performance, 60fps | any | performance-and-accessibility |
 
-Worked example: "I want an onboarding animation on starting." The job is a first-run **entrance** at the rare tier. One screen appearing is `component`; the move between onboarding steps is `transition`. Read intent-resolution (confirms the job), then entrances-and-exits (intro rules: play once, skippable, staged beats), then playbooks-component or playbooks-transition, then timing-and-tokens and the project's stack file.
+Worked example: "I want an onboarding animation on starting." The job is a first-run **entrance** at the rare tier. One screen appearing is `component`; the move between onboarding steps is `transition`. Read intent-resolution (confirms the job), entrances-and-exits (intro rules: play once, skippable, staged beats), then the playbook, then the build tail.
 
 ## The run at a glance
 
@@ -91,7 +91,7 @@ Rules that never bend: classify before choosing a technique; the gate comes befo
 
 ## Directory map
 
-Paths below are relative to this file. Each row says when to open the file and when not to. Each reference also repeats this in a Connections block at its top, with its own "read next" pointers.
+Paths below are relative to this file. Each row says when to open the file and when not to; the job table above says which requests send you there.
 
 ### references/: process and diagnosis
 
@@ -114,8 +114,8 @@ Paths below are relative to this file. Each row says when to open the file and w
 | [synchronization.md](references/synchronization.md) | two or more elements animate together, in order, or react to each other (cascade, ripple, hover affecting neighbors, connected nodes) | a single element animates alone |
 | [entrances-and-exits.md](references/entrances-and-exits.md) | something appears or leaves: first-run or onboarding intros, hero, page load, sections, lists, dialogs opening and closing, dismissal, removal; words like intro, appear, show up, fade in, pop in, close, dismiss | the change is between two states that both stay (use the transition playbook) or it is pure press, hover or focus feedback (use the micro playbook) |
 | [principles.md](references/principles.md) | a judgment call the playbooks do not settle, or when you need to explain why a choice is right | a recipe already fixes the decision |
-| [timing-and-tokens.md](references/timing-and-tokens.md) | you are about to write any duration, easing, stagger, scale or blur value, or the project has no tokens | you are only naming, classifying or discovering, not choosing values |
-| [performance-and-accessibility.md](references/performance-and-accessibility.md) | building (every run): choosing properties, reduced motion, hover on touch, loops, focus | you are only classifying, naming or running discovery |
+| [timing-and-tokens.md](references/timing-and-tokens.md) | you are about to write any duration, easing, stagger, scale or blur value, or the project has no tokens — **the single owner of every value range**; other files link here instead of re-listing numbers | you are only naming, classifying or discovering, not choosing values |
+| [performance-and-accessibility.md](references/performance-and-accessibility.md) | building (every run): choosing properties, reduced motion, hover on touch, loops, focus — owner of property tiers and input-device rules | you are only classifying, naming or running discovery |
 | [springs.md](references/springs.md) | physics, bounce, momentum, interruption, gestures, 'feels alive', layout animation | plain fade or ease motion with no physics |
 | [gestures.md](references/gestures.md) | drag, swipe, flick, pull, reorder, knob, detents, swipe to dismiss | nothing is directly manipulated |
 | [scroll.md](references/scroll.md) | motion tied to scrolling: reveal on scroll, parallax, progress, pinned scenes | the motion is not scroll-linked |
@@ -134,9 +134,9 @@ Paths below are relative to this file. Each row says when to open the file and w
 
 | File | Read when | Skip when |
 |---|---|---|
-| [creative-direction.md](references/creative-direction.md) | the user chose creative style, or asks for something unique, innovative or 'not the usual fade' | the user chose traditional style or the gate said none |
+| [creative-direction.md](references/creative-direction.md) | the user chose creative style, or asks for something unique, innovative or 'not the usual fade' — owner of the master idea-lanes table | the user chose traditional style or the gate said none |
 | [prototype-ascii.md](references/prototype-ascii.md) | phase 4: writing the prototype spec or building the options file | traditional style, or no options are being shown |
-| [prototype-html.md](references/prototype-html.md) | an option depends on light, reflection, depth, 3D, blur, continuous curves or pointer response, or the user asks for a live prototype | every option reads clearly in ASCII |
+| [prototype-html.md](references/prototype-html.md) | an option depends on light, reflection, depth, 3D, blur, continuous curves or pointer response, or the user asks for a live prototype — owner of the HTML-escalation criteria | every option reads clearly in ASCII |
 
 ### references/stacks/: implementation notes per stack (read exactly one that matches the project)
 
@@ -159,27 +159,13 @@ Paths below are relative to this file. Each row says when to open the file and w
 
 Each script prints usage with `--help`. If scripts cannot run, use the manual fallback described in the matching reference.
 
-### assets/, examples/, evals/
+### assets/ and examples/
 
 | Path | Open when | Otherwise |
 |---|---|---|
 | `assets/tokens.json` | You need the machine-readable tokens and the project has none | Use timing-and-tokens instead |
 | `assets/prototype-template.html` | Never during a run; the build script fills it | Do not read or edit |
 | `examples/*.md`, `examples/*.json` | You are unsure what a finished run, discovery report or prototype spec looks like (one example only) | Skip; the references are sufficient |
-| `evals/` | Maintaining the skill | Never during a run |
-
-## Routes
-
-Typical read orders once the job is known. Each step is optional when its skip condition holds.
-
-- **Entrance or onboarding intro:** intent-resolution, entrances-and-exits, playbook, synchronization, timing-and-tokens, stack file, performance-and-accessibility, review-standards.
-- **Press, hover or state feedback:** playbooks-micro, timing-and-tokens, then (creative) creative-direction, prototype-ascii, prototype-html, then performance-and-accessibility, review-standards.
-- **Overlay or card lifecycle:** playbooks-component, entrances-and-exits, timing-and-tokens, stack file, performance-and-accessibility, review-standards.
-- **Steps, tabs or routes:** playbooks-transition, synchronization, entrances-and-exits (first state), stack file (with nextjs-transitions for Next.js routes), review-standards.
-- **Whole page or project:** discovery, gate, then the pick's command route.
-- **Feels off:** debugging, review-standards, performance-and-accessibility.
-- **Recording supplied:** match-existing, classification, timing-and-tokens, stack file.
-- **Creative options:** creative-direction, prototype-ascii, prototype-html if needed, review-standards in spec mode, then build.
 
 ## Output contract
 

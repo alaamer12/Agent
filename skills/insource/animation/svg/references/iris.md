@@ -1,8 +1,7 @@
 # Recipe: iris — `/animation svg iris`
 
-Cinematic circular reveal: a `<circle>` clip starts at r=0 at the logo's
-center and expands until the whole logo is visible. One-shot. The logo keeps
-its real fills throughout — only visibility is animated.
+Per-style recipe; shared build rules in foundations.md. One-shot. The logo
+keeps its real fills throughout — only visibility is animated.
 
 ## Template
 

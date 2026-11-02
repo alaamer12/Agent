@@ -1,7 +1,7 @@
 # Recipe: flip — `/animation svg flip`
 
-3D card-flip intro: the logo swings in around its vertical axis, edge-on to
-the viewer, and settles flat. One-shot; playful but clean.
+Per-style recipe; shared build rules in foundations.md. One-shot; playful but
+clean.
 
 ## Template
 

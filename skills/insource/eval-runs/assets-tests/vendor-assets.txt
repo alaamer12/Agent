@@ -1,0 +1,2 @@
+https://cdn.example.com/logo.png icons/logo.png
+https://cdn.example.com/fonts/Inter.woff2 fonts/Inter.woff2

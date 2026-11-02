@@ -1,20 +1,8 @@
 # HTML prototype
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: an option depends on light, reflection, depth, 3D, blur, continuous curves or pointer response, or the user asks for a live prototype.
-> - Skip when: every option reads clearly in ASCII.
-> - Read next: `prototype-ascii.md` (the spec format is shared; read it first if you have not).
+> Owner of the when-to-escalate criteria and of the live demo contract. Routing lives in ../SKILL.md.
 
 A live, runnable preview of an option, used when ASCII cannot convey the effect. It lets the user see the animation before it is implemented in production code.
-
-## Contents
-- When to escalate
-- Asking the user
-- The demo contract
-- Writing demo_html
-- What the builder adds
-- Fidelity rules
-- Fallback
 
 ## When to escalate
 
@@ -30,7 +18,7 @@ If an option is clear from ASCII, keep ASCII. Do not build live prototypes by de
 
 ## Asking the user
 
-When any option is marked `needs_html`, ask one question: continue with ASCII, or build a live HTML prototype for those options? Mixed files are fine: ASCII for options that read well, live demos for the rest. If the user keeps ASCII, still describe the unreadable aspects in the option's `feel` and `risk` fields.
+The stop point itself is owned by run-procedure.md (phase 4, stop points). Prototype-specific details: mixed files are fine — ASCII for options that read well, live demos for the rest. If the user keeps ASCII, still describe the unreadable aspects in the option's `feel` and `risk` fields.
 
 ## The demo contract
 
@@ -73,8 +61,7 @@ Prefer CSS transitions, CSS animations and the Web Animations API: the preview's
 ## Fidelity rules
 
 - The demo is a preview of the chosen values, not a different design. If the user picks the option, the production build must match the demo's numbers.
-- Do not use libraries the project does not use. The demo only needs to show the motion.
-- Record in the report that the demo is a prototype and where it lives; it stays outside the source tree.
+- Dependency and prototype-location rules: run-procedure.md (phase 5).
 
 ## Fallback
 

@@ -6,7 +6,7 @@
 
 ## Why
 
-The 2-4 dimensions that actually drove this decision, each tied to a stated project priority or feature. Not an exhaustive dimension-by-dimension scorecard — just what mattered.
+The 2-4 dimensions that actually drove this decision, each tied to a stated project priority or feature. Not an exhaustive dimension-by-dimension scorecard — just what mattered. If the decision was split by **mechanism** (the candidates tied on features but deliver a daily-used capability differently — native vs re-implemented, surfaced hooks vs pierced overrides), say so here and name the evidence, since that is the difference the feature table hides.
 
 ## Trade-offs
 

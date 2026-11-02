@@ -1,17 +1,8 @@
 # Interface sound
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: the user asks for sound, or the product already plays interface audio.
-> - Skip when: always, unless one of those is true; never add sound unprompted.
-> - Read next: none.
+> Owner of the optional audio-feedback gate and rules. Routing lives in ../SKILL.md.
 
 Optional audio feedback for interactions. Only when the user asks for sound, or when the product already uses it.
-
-## Contents
-- Gate for sound
-- Rules
-- Implementation notes
-- Checklist
 
 ## Gate for sound
 
@@ -25,7 +16,7 @@ Sound is the most intrusive feedback channel. It earns its place only for low-fr
 - Match the visual timing: the sound lands with the peak of the visual (the check completes, the click lands).
 - Vary pitch or sample slightly across repeated triggers so it does not fatigue.
 - Never autoplay on load. Audio contexts need a prior user gesture to start in most browsers.
-- Respect reduced motion as a hint to lower or remove non-essential feedback where the platform exposes a related setting.
+- Respect reduced motion as a hint to lower or remove non-essential feedback where the platform exposes a related setting (policy owner: performance-and-accessibility.md).
 
 ## Implementation notes
 

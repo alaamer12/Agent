@@ -1,22 +1,8 @@
 # Creative direction
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: the user chose creative style, or asks for something unique, innovative or 'not the usual fade'.
-> - Skip when: the user chose traditional style or the gate said none.
-> - Read next: `prototype-ascii.md` (to write and build the option file); `prototype-html.md` (if an option needs light, depth or live behavior).
+> Owner of the master idea-lanes table and of how creative options are conceived and presented. Routing lives in ../SKILL.md.
 
 How to produce animation ideas that are not the default fade or slide, and how to present them so the user can choose.
-
-## Contents
-- What creative means here
-- When creative is appropriate
-- Idea sources
-- Idea lanes
-- Building the option set
-- Anti-clichés
-- Constraints that never bend
-- Comparing options
-- Traditional fallback
 
 ## What creative means here
 
@@ -24,13 +10,7 @@ A creative animation expresses the specific change or the specific thing, instea
 
 ## When creative is appropriate
 
-| Context | Style to recommend |
-|---|---|
-| Rare or first-time moments, onboarding, success, empty states, hero, showcase | Creative |
-| Occasional surfaces with a strong brand personality | Creative, restrained |
-| Frequent or functional UI, data the user reads, keyboard-driven actions | Traditional or none |
-
-Ask once. State the recommendation and the reason, and let the user decide.
+The tier and animate/reduce/none verdict are owned by gate.md, and the style question procedure by run-procedure.md (phase 3). When ideating, state the recommendation and its reason and let the user decide.
 
 ## Idea sources
 
@@ -60,13 +40,11 @@ Draw options from different lanes so they are genuinely different, not variation
 
 ## Building the option set
 
-1. Produce two to four options, each from a different lane. Three is a good default.
-2. For each option write: a name, the concept in one sentence, techniques, synchronization form, timing (duration and easing), the tier it fits, a one-line description of the feel, the reverse behavior (for pairs), and the main risk (performance, accessibility, complexity).
-3. Make the options differ in idea, not in duration or easing.
-4. Add one restrained option when the others are bold, so the user can see the range.
-5. Rank and recommend one with a reason.
-6. Run every option through the standards before showing it: no layout-property animation, a reduced-motion plan, interruptibility, and a duration within tier.
-7. Decide per option whether ASCII can communicate it. Light, reflection, depth, blur, continuous curves, 3D and pointer response usually cannot; mark those `needs_html` with a reason.
+The phase procedure (spec, validator, review in spec mode, the pick) is owned by run-procedure.md (phase 4); the spec fields by prototype-ascii.md; the `needs_html` escalation criteria by prototype-html.md. Creative-specific guidance for the set itself:
+
+1. Make the options differ in idea, not in duration or easing.
+2. Add one restrained option when the others are bold, so the user can see the range.
+3. Rank and recommend one with a reason.
 
 ## Anti-clichés
 
@@ -74,12 +52,7 @@ Reject options that are only: fade plus a 20px upward slide on everything, confe
 
 ## Constraints that never bend
 
-- Animate transform and opacity (plus small, bounded filter changes). No width, height, top, left, margin or padding, except a deliberate, labeled container tween.
-- Interruptible: transitions and springs, not restarting keyframes, for anything triggered rapidly or by gesture.
-- Reduced motion has a defined, gentler variant.
-- Tier limits on duration.
-- Hover effects are gated to devices that hover.
-- Looping decoration pauses off-screen.
+Owned elsewhere: review-standards.md (the ten standards) and performance-and-accessibility.md (properties, interruptibility, reduced motion, hover gating, looping). Every option must satisfy them before it is shown.
 
 ## Comparing options
 
@@ -87,4 +60,4 @@ Present the options so the user can compare quickly: the prototype file, one lin
 
 ## Traditional fallback
 
-If the user chooses traditional, or the gate leaves little room, choose from the playbooks' standard recipes and tokens. State the spec in a few lines. Even traditional animation gets correct origin, easing, interruptibility and a designed reverse.
+The traditional route and its spec form are owned by run-procedure.md (phases 3 to 5); choose from the playbooks' standard recipes and tokens.

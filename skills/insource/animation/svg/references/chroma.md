@@ -1,8 +1,7 @@
 # Recipe: chroma — `/animation svg chroma`
 
-Chromatic aberration: the artwork splits into three single-channel ghosts that
-slide apart horizontally, then converge and sum back to the exact brand colour
-before a solid layer lands. One-shot. Needs a dark stage.
+Per-style recipe — shared build rules in [foundations.md](foundations.md),
+signature and trigger words in [../SKILL.md](../SKILL.md). Needs a dark stage.
 
 Different from `chrome-liquid`'s sheen, which lays a gradient *over* a finished
 logo. Here the artwork itself is decomposed and reassembled.
@@ -60,11 +59,8 @@ logo. Here the artwork itself is decomposed and reassembled.
   and measured. `multiply` with three arbitrary dark ghosts summed to mud — it
   only reconstructs a colour if you work in true subtractive inks. `screen`
   with single channels is exact, so it wins.
-- **The `animation` shorthand collision is a real trap.** Declaring the fade
-  on `.ch` and the split on `.split-r` means the later shorthand *replaces* the
-  animation list entirely — the ghosts never faded, and two stacked
-  anti-aliased copies of the same path left 1px slivers inside the counters.
-  Each split rule must list both animations itself.
+- **Each split rule lists both animations itself** (foundations §6, the
+  `animation` shorthand trap — the shipped bug left 1px slivers in the counters).
 - **Why the ghosts fade out at all:** the solid layer alone is pixel-exact
   (end drift 0.00%); ghosts left stacked underneath it are not (0.51% drift,
   counters flagged). Land the solid, remove the scaffolding.
@@ -78,4 +74,3 @@ logo. Here the artwork itself is decomposed and reassembled.
   ghosts blend against transparency instead of the stage.
 - Offset ±3px, horizontal only — this logo has ~3px of clearance per edge, so
   a vertical split would clip.
-- **Verified in Chromium 153 only.**

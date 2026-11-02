@@ -1,26 +1,8 @@
 # Vocabulary
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: you must name an effect, or turn a description ('slides off', 'draws itself') into a precise term.
-> - Skip when: the terms are already unambiguous.
-> - Read next: `intent-resolution.md` (to turn the term into classification values and a route).
+> Pure reverse-lookup glossary: description to precise term; routing and rules live elsewhere (`../SKILL.md` and the owner files below).
 
-Reverse-lookup glossary: description to precise term. Use the wording below as written when answering a naming question, and lead with the term. Terms marked (Animate) are this skill's own additions.
-
-## Contents
-- Entrances and exits
-- Sequencing and timing
-- Movement and transforms
-- Transitions between states
-- Scroll
-- Feedback and interaction
-- Easing
-- Springs
-- Looping and ambient motion
-- Polish and effects
-- Performance
-- Principles
-- Synchronization (Animate)
+Use the wording below as written when answering a naming question, and lead with the term.
 
 ## Entrances and exits
 - **Fade in / Fade out**: element appears or disappears by changing opacity.
@@ -82,12 +64,14 @@ Reverse-lookup glossary: description to precise term. Use the wording below as w
 
 ## Easing
 - **Easing**: the rate at which an animation speeds up or slows down.
-- **Ease-out**: starts fast, ends slow; the default for most UI and anything responding to the user.
-- **Ease-in**: starts slow, ends fast; usually avoided because it feels sluggish.
-- **Ease-in-out**: slow, fast, slow; good for elements already on screen moving from A to B.
-- **Linear**: constant speed; reserve for spinners, marquees and scroll-scrubbed motion.
+- **Ease-out**: starts fast, ends slow.
+- **Ease-in**: starts slow, ends fast.
+- **Ease-in-out**: slow, fast, slow.
+- **Linear**: constant speed.
 - **Cubic-bezier**: a custom easing curve you define for precise control.
-- **Asymmetric easing**: a curve that accelerates and decelerates at different rates; feels more alive than a symmetric one.
+- **Asymmetric easing**: a curve that accelerates and decelerates at different rates.
+
+Curve names only; which curve for which job and the never-ease-in rule: see timing-and-tokens.md §Easing.
 
 ## Springs
 - **Spring**: motion driven by physics (tension, mass, damping) rather than a set duration.
@@ -99,6 +83,8 @@ Reverse-lookup glossary: description to precise term. Use the wording below as w
 - **Momentum**: motion that carries velocity, especially after a drag or interruption.
 - **Velocity**: how fast and in which direction an element is moving; a spring carries it into the next animation when interrupted.
 - **Interruptible animation**: an animation that can be smoothly redirected mid-flight instead of finishing first.
+
+Presets, parameters and implementation: see springs.md.
 
 ## Looping and ambient motion
 - **Marquee**: text or content that scrolls continuously in a loop.
@@ -123,12 +109,14 @@ Reverse-lookup glossary: description to precise term. Use the wording below as w
 - **Typewriter**: text appearing one character at a time.
 
 ## Performance
-- **Frame rate (FPS)**: frames drawn per second; 60 is the baseline for smooth motion.
+- **Frame rate (FPS)**: frames drawn per second.
 - **Jank**: visible stutter when the browser drops frames.
 - **Dropped frame**: a frame the browser missed its deadline to draw.
 - **Compositing**: letting the GPU move or fade an element on its own layer without redoing layout or paint.
 - **will-change**: a CSS hint that an element is about to animate.
 - **Layout thrashing**: animating width, height, top or left, forcing layout recalculation every frame.
+
+Property tiers and rules: see performance-and-accessibility.md.
 
 ## Principles
 - **Purposeful animation**: motion should serve a function, not just decorate.
@@ -141,7 +129,9 @@ Reverse-lookup glossary: description to precise term. Use the wording below as w
 - **Hardware acceleration**: animating transform and opacity lets the GPU keep motion smooth.
 - **Reduced motion**: respecting the user's reduced-motion setting by toning down or removing movement.
 
-## Synchronization (Animate)
+## Synchronization
 - **Instant synchronous**: several animations share the same start and end timing, even if their techniques differ.
 - **Domino / sequential**: animations follow one another in order, each depending on or handing off to the previous.
 - **Linked**: an action or animation on one element causes a corresponding effect on elements related to it.
+
+Forms, rules and patterns: see synchronization.md.

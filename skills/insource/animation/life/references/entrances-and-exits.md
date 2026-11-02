@@ -1,22 +1,8 @@
 # Entrances and exits
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: something appears or leaves: first-run or onboarding intros, hero, page load, sections, lists, dialogs opening and closing, dismissal, removal; words like intro, appear, show up, fade in, pop in, close, dismiss.
-> - Skip when: the change is between two states that both stay (use the transition playbook) or it is pure press, hover or focus feedback (use the micro playbook).
-> - Read next: `playbooks-component.md` (for overlays and containers); `playbooks-transition.md` (for onboarding steps and route changes); `synchronization.md` (for ordered arrivals); `scroll.md` (when the entrance fires on scroll).
+> Owns the entrance kinds map, first-run intro policy, exits and the pairs table; routing lives in `../SKILL.md`.
 
-How things arrive and leave: first-run and onboarding intros, hero and page load, sections and lists appearing, overlays opening and closing, dismissal and removal. Everything the user describes as "appear", "show up", "intro", "on start", "fade in", "pop in", "close", "dismiss" or "disappear" lands here.
-
-## Contents
-- Which kind of entrance
-- Entrance anatomy
-- First-run and onboarding intros
-- Page load and screen mount
-- Lists and groups appearing
-- Exits
-- Pairs table
-- Mistakes
-- Checklist
+How things arrive and leave: first-run and onboarding intros, hero and page load, sections and lists appearing, overlays opening and closing, dismissal and removal.
 
 ## Which kind of entrance
 
@@ -31,19 +17,21 @@ How things arrive and leave: first-run and onboarding intros, hero and page load
 
 ## Entrance anatomy
 
-1. **Start state.** Offset (8 to 16px) plus reduced scale (0.95 to 0.97) plus opacity 0. Never from nothing: no scale from zero.
+Numeric bands for offset, scale and blur: timing-and-tokens.md §Distance, scale and blur.
+
+1. **Start state.** Offset plus reduced scale plus opacity 0. Never from nothing: no scale from zero.
 2. **Origin.** Where the attention is or where it came from: trigger, edge, center.
 3. **Easing.** Ease-out: fast start, gentle landing. Use the entrance curve from the tokens.
 4. **Duration.** Tier-appropriate; scale with distance.
-5. **Container first, content after.** If the container itself moves in, its children are already laid out. If the children stagger, the container does not also move. One level of entrance per container.
-6. **Secondary action.** A small blur (2 to 4px) or slight scale layered on the fade adds depth without a second big motion.
+5. **Container first, content after.** One level of entrance per container (rule: synchronization.md §Domino).
+6. **Secondary action.** A small blur bridge or slight scale layered on the fade adds depth without a second big motion.
 7. **Overlap and follow-through.** Parts land slightly after the main move (50 to 100ms) and settle.
 
 ## First-run and onboarding intros
 
 The most expressive entrance, and the one most likely to annoy on the tenth visit.
 
-- **Play once.** Gate with a stored flag so returning users get the final state immediately. A reload never replays an intro.
+- **Play once.** Returning users get the final state immediately; a reload never replays an intro. The general one-shot and stored-flag rule: gate.md.
 - **Never block.** Input works while the intro plays; offer skip (tap, key, or a visible control). A forced intro longer than a couple of seconds is a defect.
 - **Stage in beats.** One idea per beat, in order of importance, with overlap:
 
@@ -54,9 +42,9 @@ The most expressive entrance, and the one most likely to annoy on the tenth visi
 360ms   call to action lands last (slight scale 0.97 -> 1)
 ```
 
-  Keep the total inside the tier cap: about 600ms for rare, longer only at showcase with labeled beats.
+  Keep the total inside the tier cap (caps: timing-and-tokens.md §Tiers).
 - **Staging.** Lead with the element the user should look at first; the call to action arrives last so it is not buried or missed.
-- **Variety without clutter.** Keep roughly 90% familiar and 10% novel. One memorable beat beats five.
+- **Variety without clutter.** Novelty policy (90% familiar / 10% novel): gate.md. One memorable beat beats five.
 - **Multi-step onboarding.** The intro is an entrance; the move between onboarding steps is a transition with a designed reverse. Treat them separately.
 - **Creative lanes that suit intros:** self-transformation (a logo becomes the first screen), reveal (a mask following the headline), typographic (per-word arrival, hero only), depth (layered parallax settle), ambient (a gentle idle after arrival). Each needs the gate's tier to allow it.
 - **Reduced motion.** Show the final state immediately or a short opacity fade; drop travel, scale and parallax.
@@ -71,19 +59,18 @@ The most expressive entrance, and the one most likely to annoy on the tenth visi
 
 ## Lists and groups appearing
 
-- Domino stagger: 30 to 50ms per item, whole list done within about 300ms; section-level offsets 80 to 100ms.
-- Past about five items, animate groups or only the first visible items; the rest appear instantly.
+- Domino stagger at the list-item and section bands, grouped past their cap (offsets and totals: timing-and-tokens.md §Stagger; form rules: synchronization.md §Domino).
 - Vary offset and distance by importance; uniform steps feel mechanical.
 - Never block interaction while a stagger plays. Items added later (not first load) enter alone, without stagger.
 
 ## Exits
 
 - **Quieter and faster than the entrance**: roughly 20% shorter, simpler.
-- **Small fixed offset** (4 to 12px) in the direction it leaves, rather than full travel.
+- **Small fixed offset** in the direction it leaves, rather than full travel (exit offset band: timing-and-tokens.md §Distance, scale and blur).
 - **Same path back** for dismissible surfaces, so swipe-away and button-close feel like one motion.
 - **Removal closes the gap**: neighbors move up with a layout animation after the item leaves.
 - **Never skip the exit.** A surface that animates in and vanishes out feels broken. In frameworks, exits need the presence wrapper (see the stack file).
-- **Dismissal by gesture** continues in the direction of travel with the release velocity.
+- **Dismissal by gesture** continues in the direction of travel with the release velocity (release physics: gestures.md).
 - **Destructive removals** can be slightly slower than routine ones so the action reads as deliberate.
 - **Reduced motion**: opacity only.
 
@@ -98,13 +85,7 @@ Fill it for the target:
 
 ## Mistakes
 
-- Starting from scale zero or from fully offscreen for a small element.
-- Animating a container and its children together.
-- Intros that replay on every visit, or that cannot be skipped.
-- Long staggers on frequent lists.
-- Entrance with no exit, or an exit slower than the entrance.
-- Center origin on an anchored surface.
-- Opacity-only entrances on surfaces that deserve a spatial cue.
+Entrance mistakes are review flags and debugging symptoms; the lists live there: review-standards.md and debugging.md. Entrances-specific ones are already covered above: replaying or unskippable intros, blocking input, animating a container and its staggered children, and entering with no exit.
 
 ## Checklist
 

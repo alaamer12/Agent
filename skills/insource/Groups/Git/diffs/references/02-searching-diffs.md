@@ -21,6 +21,47 @@ git log -S'x' -p --follow -- path/one_file.ts            # one file across renam
 The classic failure: searching `-S` for a string that was *edited in place* — the count never changed, so nothing
 is found. If `-S` is empty, retry with `-G`, then with `git log -p | grep`.
 
+## The topic dossier — "give me everything about one word, cheaply"
+
+The question "extract every reference to **Sentry** (or any topic) in code *and* commit messages" is not one
+search — it is **four channels**, and the naive answer (dump every patch: `git log -S topic -p`) is the most
+expensive thing you can do. One deterministic command runs the whole ladder:
+
+```bash
+python scripts/diff_survey.py --topic Sentry            # + --cwd <repo> --rev <snap> --budget KB --max-rows N
+```
+
+The four channels, in the order that keeps the bill small:
+
+```bash
+git log --grep='Sentry' -i -F --format='%h %ad %s' --date=short   # MESSAGE level - the channel -S/-G never see
+git grep -Ic -F -i 'Sentry' HEAD                                  # CODE now: per-file counts (cheap map first)
+git log -S'Sentry' --format='%h %s'                               # CODE history: occurrences added/removed
+git log -G'Sentry' -i --format=%h | wc -l                         # touched-mentioning-lines count (refactors/moves)
+```
+
+Then, and only then, spend content: `git show <sha> -- <one file>` or `--at <rev> --path <file> --grep` for the
+two or three items the map says matter.
+
+Measured on a mid-size mobile-app repo (a few hundred commits, hundreds of files): `git log -S Sentry -p` ran to
+**~50 k tokens**; the full dossier (a message hit, a per-file mention map, pickaxe history, follow-ups) fit in
+**~600 tokens** — roughly 80× cheaper, and it *contains more*, because the naive dump had no message-level
+channel and no code-at-HEAD at all.
+
+Dossier rules that generalize:
+
+- **`--grep` is its own channel.** Commit messages mention topics that code never does (decisions, incidents,
+  reversions); `-S`/`-G` scan *diffs*, never messages. A "Sentry history" answer without the message channel is
+  missing the merge that explains the whole thing.
+- **`-G` > `-S` is information, not noise**: commits that touched lines mentioning the topic while keeping its
+  occurrence count — refactors, renames, file moves. Report both numbers.
+- **Counts before lines, lines before patches.** `-Ic` (per-file count) is ~600 bytes for a whole repo; the same
+  repo's `-n` lines are ~4 KB; `-p` patches are the 173 KB. Always ask the cheaper question first.
+- **Case-insensitive by default** (`-i`): a topic is `Sentry` in code, `sentry` in prose, `SENTRY` in config
+  keys. Exact case is what `--at --grep` is for.
+- **Truncate subjects** (`clip`): squash histories put whole changelogs in one subject line; 120 chars is an
+  honest budget, full message via `git show --format=%B <sha>` when chosen.
+
 ## A function's history, not a file's
 
 ```bash

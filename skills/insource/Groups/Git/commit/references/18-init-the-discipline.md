@@ -33,7 +33,7 @@ because mixed history means no decision was ever made, which is exactly what thi
 
 ## Step 2 — the questionnaire
 
-Ask these seven, one at a time, with the detected default proposed so the user only has to disagree. Keep the
+Ask these eight, one at a time, with the detected default proposed so the user only has to disagree. Keep the
 stakes attached to each: every one has a silent failure mode.
 
 | # | Ask | Propose from the repo | Why it matters (the failure) |
@@ -44,7 +44,8 @@ stakes attached to each: every one has a silent failure mode.
 | 4 | **Which branches are named branches** — the ones that must not carry `wip:`/`temp:`/`debug:`? | `origin/HEAD` if set, else the trunk-named local branch, else ask outright | a wrong list blocks nothing and *looks like it works*. Never guess this one silently — say how you detected it |
 | 5 | **Ticket keys** — subject prefix, footer, or untracked here? | whatever the last 40 show | a key in the subject eats the length budget; a key only in the body is invisible to the board |
 | 6 | **Body policy** — required when the *why* is non-obvious, or required always? | whether existing commits have bodies at all | "always" produces filler bodies; "when non-obvious" needs the doc to name what counts as non-obvious |
-| 7 | **Enforcement** — document only, or do you want a check wired up too? | report what already exists and ask whether to extend it | a policy with no check decays within a quarter; a check with no documented escape hatch teaches people to bypass everything |
+| 7 | **Authorship** - does an agent's involvement get a `Co-authored-by:` trailer (with the exact name and address), or is the human the sole author and the tool invisible in history? | how many of the last 20 commits carry such a trailer; any commit template, alias, or `AGENTS.md` line that adds one; whether branch names already carry an agent segment | a trailer is a public claim about who did the work, so guessing it in either direction is a decision nobody authorised - and it must agree with the branch-name rule, or history and refs contradict each other |
+| 8 | **Enforcement** — document only, or do you want a check wired up too? | report what already exists and ask whether to extend it | a policy with no check decays within a quarter; a check with no documented escape hatch teaches people to bypass everything |
 
 Two extra prompts worth their cost: *"what would make you break this rule?"* (that answer becomes the escape
 hatch sentence) and *"who owns this document?"* (an unowned policy file is a suggestion).
@@ -62,7 +63,9 @@ gets re-litigated in every review; a reason without a rule gets ignored.
                                and the two or three gray-zone rulings this project has hit (CSS,
                                chore vs refactor, perf) with the answer, not the debate
 ## Body and trailers           when a body is required, the 72-column wrap, ticket footer shape,
-                               BREAKING CHANGE shape, attribution rules
+                               BREAKING CHANGE shape, and the attribution rule: agent co-author trailer
+                               (its exact spelling) or none - plus the matching branch-name rule (an agent
+                               segment or not), recorded together so the two never contradict
 ## Staging hygiene             named paths / git add -p, no blind git add ., formatting commits alone,
                                tests travel with the code that needs them
 ## Cadence and vocabulary      commit after a logical change; the checkpoint words; which branches

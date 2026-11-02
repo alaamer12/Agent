@@ -1,7 +1,7 @@
 # Recipe: tide — `/animation svg tide`
 
-The logo fills from below behind a **wavy** waterline that rises and flattens.
-One-shot; ends fully visible.
+Per-style recipe — shared build rules in [foundations.md](foundations.md),
+signature and trigger words in [../SKILL.md](../SKILL.md).
 
 The skill's first use of an **animated `d` attribute**. `chrome-liquid` also
 fills bottom-to-top, but its meniscus is a straight edge on a sliding rect; the
@@ -39,8 +39,8 @@ moving curve is what makes this read as liquid rather than a rising bar.
 
 - **Every `values` stop must have the identical command sequence and
   cardinality.** `M C C L L Z` in all three, or the animation silently refuses
-  to interpolate. This is the same rule as number-list attributes on filters,
-  and it is easy to break while retuning the wave by hand.
+  to interpolate — easy to break while retuning the wave by hand (same trap
+  as filter number lists, foundations §6).
 - Generate the three paths from one function (line height + amplitude), which
   is what keeps the structure aligned. Hand-editing them is where the bug
   comes from.
@@ -55,4 +55,3 @@ moving curve is what makes this read as liquid rather than a rising bar.
 - If the user wants the water to keep moving after the fill, that is a loop
   style, not this one — add a fourth and fifth stop that returns to the third
   and mark the animation `infinite`.
-- **Verified in Chromium 153 only.**

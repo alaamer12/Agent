@@ -1,9 +1,7 @@
 # Recipe: loading-loop — `/animation svg load`
 
-Progress-loader feel: outlines draw themselves and reverse, forever. The
-fills never appear — this is a pure-line loading treatment.
-
-Derived from an 1800×1800 reference. Scale numbers per the SKILL.md table.
+Per-style recipe; shared build rules in foundations.md. Derived from an
+1800×1800 reference; scale numbers per foundations §5.
 
 ## Template (hero scale, two paths)
 
@@ -41,10 +39,5 @@ Derived from an 1800×1800 reference. Scale numbers per the SKILL.md table.
   `animation-delay`, e.g. 0s and −2s) if the user wants a chasing effect.
 - `infinite alternate` makes the draw reverse smoothly each cycle — do not
   use `forwards` here.
-- **Dash values**: same rule as draw-fill — ≥ the target's longest subpath,
-  ~1.2–2× ideal. Don't copy the reference's 15000 to a small logo.
-- Keep `fill-rule="evenodd"` on every path even though fill is invisible:
-  if the user later asks to convert this into a filled variant, the
-  attribute must already be there.
 - `stroke="none"` from the original must be removed/overridden for the
   stroke to show (the reference uses `!important` in the class).

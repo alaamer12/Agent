@@ -32,10 +32,27 @@ If two sources conflict (lockfiles for two managers, CI on three), **that** is a
 named: "There is both `bun.lockb` and `package-lock.json`; history shows both used. Which is authoritative -
 the other gets deleted or ignored?"
 
+## Rounds - the interview is delivered in waves, not one wall
+
+Each round settles one small group of sections (2-5 questions). Present a round, collect its answers,
+restate the decisions in a 3-6 line list, and only then open the next round. Rounds the repository already
+answers are skipped with one line saying so.
+
+| Round | Sections | Question numbers from the bank |
+|---|---|---|
+| **1 - What this project is, right now** | 2, 3 | 1, 2, 3, 4 |
+| **2 - The toolchain as it actually is** | 6, 7, 9 | 7, 8, 9, 11 |
+| **3 - What the project already has** | 4, 5, 14 | 5, 6, 19 |
+| **4 - Agents working in this project** | 8, 10 | 10, 12, 13, 14, 15 |
+| **5 - Trust and boundaries** | 11, 12, 13, 16 | 16, 17, 18, 20 |
+
+Maintenance (14) is not a round: it is the fixed duty. Ask only for an owner or review cadence if the user
+has an opinion. If the user stops early, the remaining rounds become numbered pending items - never defaults.
+
 ## Must ask - the decision bank
 
-Ask only for the sections the repo left unresolved. Recommended grouping for one `inquire` page; each row shows
-the rule it produces.
+Ask only for the sections the repo left unresolved. Each row shows the rule it produces; the round table
+above says which rows travel together.
 
 | # | Question | Feeds | If unanswered |
 |---|---|---|---|
@@ -54,16 +71,23 @@ the rule it produces.
 | 13 | What may a subagent decide alone vs return undecided? | 10 | default: reversible local edits in scope = decide; anything crossing files/branches/destructive = return undecided |
 | 14 | Fan-out: max depths and max total workers; what happens when a leaf fails | 10 | cap at 2 depths and report the cap as a default |
 | 15 | Any mandatory-skill rule for this project? | 1, 10 | omit; do not invent an obligation to use skills the project may not have |
+| 16 | What stays private from version control and other agents' sight - skill folders, plans, run records? What do those tools output (the cascade - hidden tool means hidden outputs)? Which binaries are hidden, and where does their install note live instead? If any of that was already tracked, may it be cleared from the cache after asking? | 11 | state "no privacy restrictions recorded"; never guess what the user wants hidden |
+| 17 | Is anything ever installed globally on purpose - a shared CLI, a system package? Everything else stays project-local (dependencies, toolchains, interpreters, environments) | 12 | default: local-first, no exceptions |
+| 18 | Which environment actions need permission - external binary installs, external processes (emulators, daemons), existing-database writes, credentials, machine config? Ask per session (safe default) or fixed per action? | 13 | default: ask per session; when a limit blocks work, say what cannot be done and ask |
+| 19 | Which project skills does the team rely on, and what must an agent read or do before using each (required document, scratch rule, format)? One row per skill | 14 | omit; skills add their own rows when adopted |
+| 20 | Git: which operations may an agent do freely (read-only? commits?), which need asking (push, PR, shared-branch merge), which are never without explicit order (rebase/amend of pushed work, `reset --hard`, `clean`, force-push)? Is `git stash` allowed - and with which message pattern so entries are identifiable in a shared worktree, or what replaces it? Whose name do agent-made commits carry - human sole author, a `Co-authored-by:` trailer (exact name and address), or an agent identity? (`commit` and `branch` ask the authorship question only because this answer is missing.) | 16 | default: read-only + local commits allowed, push asks, rewrites/clean/reset never; stash forbidden (use worktrees or WIP commits); keep configured identity, no trailer - all marked *default, unconfirmed* |
 
 ## How to hand it to `inquire`
 
-Build one page rather than fifteen pings: group by section, lead with the context the user needs to answer well
-("your repo has both lockfiles; here is what each implies"), order options by my recommendation first with the
-trade-off visible, and use branching where an answer opens a follow-up (e.g. env strategy → which provider).
-Every question must be answerable by someone who has not read this skill's references.
+**One page per round** - not one page for everything, and not fifteen pings. Inside a round: group by section,
+lead with the context the user needs to answer well ("your repo has both lockfiles; here is what each
+implies"), order options with the recommendation first and the trade-off visible, and use branching where an
+answer opens a follow-up (e.g. env strategy → which provider). Every question must be answerable by someone
+who has not read this skill's references.
 
-Then, after the answers: **state the decisions back in one short list before drafting.** Silent incorporation
-loses the chance to catch a misread answer, and the file is going to enforce it every session.
+Then, after each round's answers: **restate the decisions back in a short list and wait for corrections**
+before opening the next round. Silent incorporation loses the chance to catch a misread answer, and the file
+is going to enforce it every session.
 
 ## Recording answers without smuggling assumptions
 

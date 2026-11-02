@@ -1,8 +1,7 @@
 # Recipe: assemble — `/animation svg assemble`
 
-The artwork is cut into rectangular fragments that fly in from scattered
-positions and slight rotations and lock into the complete logo. One-shot; ends
-pixel-exact.
+Per-style recipe — shared build rules in [foundations.md](foundations.md),
+signature and trigger words in [../SKILL.md](../SKILL.md).
 
 Distinct from `rise` (whole paths translating, no clipping) and from `mosaic`
 (tiles gate opacity in a mask; here the pieces themselves move).
@@ -67,4 +66,3 @@ buildable in declarative SVG at all.
   its own delay instead of sitting assembled for a moment first.
 - Total beat = last delay + 0.9s. Keep it under ~1.8s or the pieces start
   looking unrelated.
-- **Verified in Chromium 153 only.**

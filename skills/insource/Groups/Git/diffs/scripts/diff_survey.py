@@ -472,6 +472,34 @@ def selftest():
             rc_bin = at_region(rev2, "pic.png", t4, lines="1:5")
         check("binary blob refused, not dumped as text", rc_bin == 1 and "is binary" in buf.getvalue())
 
+    # topic dossier: messages + code + history for one word, budgeted
+    with tempfile.TemporaryDirectory() as t5:
+        _sh(t5, "init", "-q", "-b", "main"); _sh(t5, "config", "user.email", "t@t")
+        _sh(t5, "config", "user.name", "t")
+        _write(t5, "prog.cs", "// Sentry init here\nSentry SDK line\n")
+        _sh(t5, "add", "-A"); _sh(t5, "commit", "-qm", "feat: wire Sentry reporting")
+        rev1 = _sh(t5, "rev-parse", "HEAD").stdout.strip()
+        _write(t5, "prog.cs", "// removed\nplain line\n")           # drops both mentions
+        _sh(t5, "commit", "-qam", "chore: clean up")                # message WITHOUT the topic
+        _write(t5, "notes.txt", "see sentry docs\n")                # lowercase, no code
+        _sh(t5, "add", "-A"); _sh(t5, "commit", "-qm", "docs: mention the sentry setup")
+        buf = _io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc5 = topic_dossier("sentry", t5, rev=rev1)
+        got5 = buf.getvalue()
+        check("dossier rc clean", rc5 == 0)
+        check("dossier finds the message-level hit (case-insensitive, up to the given rev)",
+              "COMMIT MESSAGES" in got5 and "feat: wire" in got5 and "docs: mention" not in got5)
+        check("dossier counts code at the given rev", "prog.cs" in got5 and "2 mentions" in got5)
+        check("dossier lists pickaxe history both ways",
+              "wire Sentry" in got5 and "-G" in got5)
+        check("dossier never dumps patches", "+Sentry SDK line" not in got5)
+        buf = _io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            topic_dossier("sentry", t5, budget_kb=0)
+        check("dossier respects --budget", "budget 0KB reached" in buf.getvalue()
+              and "FOLLOW-UPS" in buf.getvalue())
+
     print("self-test: %d/%d checks passed" % (checks - fails, checks))
     return 0 if fails == 0 else 1
 
@@ -723,6 +751,91 @@ def render_commits(rows, hidden, total, max_commits, max_hidden=10):
 
 
 
+# ------------------------------------------------------------------ topic dossier
+
+def topic_dossier(pattern, cwd, rev="HEAD", budget_kb=16, max_rows=15):
+    """Everything about one topic word - messages, code, history - under one byte budget.
+
+    Order is the efficiency: cheap counts and subjects first, content lines last, patches never
+    (the follow-up pointers show how to fetch one patch of your choosing instead of dumping all).
+    Case-insensitive: a topic appears as Sentry, sentry and SENTRY; use --at --grep for exactness.
+    """
+    out = []
+    used = [0]
+    capped = [False]
+
+    def put(line):
+        b = len(line) + 1
+        if used[0] + b > budget_kb * 1024:
+            if not capped[0]:
+                out.append("... budget %dKB reached - remaining rows omitted; refetch single items "
+                           "with the follow-ups below" % budget_kb)
+                capped[0] = True
+            return
+        used[0] += b
+        out.append(asc(line))
+
+    def rows(cmd):
+        try:
+            return [l for l in git(cmd, cwd=cwd).splitlines() if l.strip()]
+        except RuntimeError:
+            return []
+
+    def clip(s):
+        # squash-merge histories put whole diffs in the subject; 120 chars is the honest budget
+        return s if len(s) <= 120 else s[:117] + "..."
+
+    put("TOPIC DOSSIER '%s'  rev=%s  (%dKB budget)" % (pattern, rev, budget_kb))
+
+    msgs = rows(["log", "--grep", pattern, "-i", "-F", "--format=%h %ad %s", "--date=short", rev])
+    put("")
+    put("[1] COMMIT MESSAGES mentioning the topic (%d):" % len(msgs))
+    for l in msgs[:max_rows]:
+        put("  " + clip(l))
+    if len(msgs) > max_rows:
+        put("  ... %d more (raise --max-rows)" % (len(msgs) - max_rows))
+
+    grep_rows = rows(["grep", "-Ic", "-F", "-i", pattern, rev])
+    total_mentions = 0
+    parsed = []
+    for l in grep_rows:
+        parts = l.split(":")
+        if len(parts) >= 3:
+            try:
+                n = int(parts[-1])
+                total_mentions += n
+                parsed.append((n, ":".join(parts[1:-1])))
+            except ValueError:
+                pass
+    parsed.sort(reverse=True)
+    put("")
+    put("[2] CODE AT REV - files and mention counts (%d files, %d mentions):" % (len(parsed), total_mentions))
+    for n, path in parsed[:max_rows]:
+        put("  %4d  %s" % (n, path))
+    if len(parsed) > max_rows:
+        put("  ... %d more files (raise --max-rows)" % (len(parsed) - max_rows))
+
+    adds = rows(["log", "-S", pattern, "--format=%h %ad %s", "--date=short", rev])
+    touched = rows(["log", "-G", re.escape(pattern), "-i", "--format=%h", rev])
+    put("")
+    put("[3] CODE HISTORY - -S (occurrences added/removed): %d commits; -G (lines mentioning it "
+        "touched at all): %d commits. -G > -S means refactors/moves/renames carried the word without "
+        "changing its count:" % (len(adds), len(touched)))
+    for l in adds[:max_rows]:
+        put("  " + clip(l))
+    if len(adds) > max_rows:
+        put("  ... %d more (raise --max-rows)" % (len(adds) - max_rows))
+
+    out.append("")
+    out.append("[4] FOLLOW-UPS - pay only for what you choose (never -p over all of the above):")
+    out.append("  lines in one file now : git grep -In -F -i '%s' %s -- <file>" % (pattern, rev))
+    out.append("  lines in a past rev   : --at <rev> --path <file> --grep '%s' --context 2" % pattern)
+    out.append("  one commit's patch    : git show <sha> -- <file from [2]>   (scoped, not the whole commit)")
+    out.append("  churn the aggregate hides: --per-commit --range <a>..<b>")
+    emit(chr(10).join(out) + chr(10))
+    return 0
+
+
 def main(argv):
     ap = argparse.ArgumentParser(prog="diff_survey.py")
     ap.add_argument("--range", metavar="REV")
@@ -752,16 +865,27 @@ def main(argv):
     ap.add_argument("--first-parent", action="store_true",
                     help="in merge-heavy history: list the mainline only (HEAD~20..HEAD can be 100 commits)")
     ap.add_argument("--to-file", metavar="PATH", help="write the diff to PATH and print only its size")
+    ap.add_argument("--topic", metavar="STRING",
+                    help="dossier everything about one topic word: commit messages + code at a rev + "
+                         "history, case-insensitive, under --budget; patches are pointed at, never dumped")
+    ap.add_argument("--rev", metavar="REV", default="HEAD", help="snapshot for --topic code counts")
+    ap.add_argument("--max-rows", type=int, default=15, help="rows per --topic section (default 15)")
     a = ap.parse_args(argv)
 
-    for name in ("range", "merge", "file", "match", "hunk", "to_file", "path", "cwd"):
+    for name in ("range", "merge", "file", "match", "hunk", "to_file", "path", "cwd", "topic", "rev"):
         val = getattr(a, name)
         if isinstance(val, str):
             setattr(a, name, val.strip())
-    for name in ("range", "merge", "file", "match", "hunk", "to_file", "path"):
+    for name in ("range", "merge", "file", "match", "hunk", "to_file", "path", "topic"):
         if getattr(a, name) == "":
             print("error: --%s was given an empty value" % name.replace("_", "-"))
             return 2
+
+    if a.topic:
+        if not check_repo(a.cwd):
+            return 2
+        return topic_dossier(a.topic, a.cwd or ".", a.rev,
+                             a.budget if a.budget is not None else DEFAULT_BUDGET_KB, a.max_rows)
 
     if a.at:
         if not a.path:

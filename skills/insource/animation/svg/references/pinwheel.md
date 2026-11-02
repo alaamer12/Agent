@@ -1,8 +1,7 @@
 # Recipe: pinwheel — `/animation svg pinwheel`
 
-The logo is revealed by wedges that each scale up from the centre on their own
-beat, so the reveal turns like a turbine instead of spreading evenly.
-One-shot; ends pixel-exact.
+Per-style recipe; shared build rules in foundations.md. One-shot; ends
+pixel-exact.
 
 Distinct from `iris`, which grows one circle's radius from the centre. Same
 origin, but segmentation plus stagger is what makes it read as rotation.
@@ -63,4 +62,3 @@ origin, but segmentation plus stagger is what makes it read as rotation.
 - Wedge count 6–12. Fewer reads as a shutter opening; more approaches `iris`
   and loses the point. Delay stagger ≈ 0.075s per wedge.
 - Reverse the delays for the opposite spin direction.
-- **Verified in Chromium 153 only.**

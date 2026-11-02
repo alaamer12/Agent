@@ -1,0 +1,2 @@
+http://127.0.0.1:58940/logo.png icons/logo.png
+http://127.0.0.1:58940/Inter.woff2 fonts/Inter.woff2

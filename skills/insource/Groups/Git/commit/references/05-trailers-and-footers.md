@@ -41,8 +41,20 @@ Reviewed-by / Acked-by / Tested-by: Name <mail>   # review and test credit
   sign on someone else's behalf, never invent an email.
 - `Co-authored-by:` should list people who actually authored or lost work to this commit - not a courtesy
   mention of the reviewer (that is `Reviewed-by`).
-- Where the project records AI assistance, follow its convention exactly and only when it asks. Do not
-  attach generated-by lines to a human's commit, and do not strip credit the project expects.
+- **Agent authorship is the project's decision, asked once.** Detect before acting:
+  ```bash
+  git log -20 --format='%(trailers:key=Co-authored-by)'                       # already used here?
+  grep -niA4 'author\|co-author\|agent' AGENTS.md CONTRIBUTING.md 2>/dev/null | head -20
+  git config --get alias.cm; ls .gitmessage 2>/dev/null                       # something appends one?
+  ```
+  Detected -> use that spelling verbatim, every time, and say where you read it from. Undecided -> ask one
+  question (question 7 of `commit` init), and keep it consistent with the branch-name twin in
+  [`branch`](../../branch/SKILL.md) so history and ref names never disagree. A trailer is a public claim
+  about who did the work: adding one nobody asked for is as unauthorised as removing one the project
+  expects. Never invent a name, address, or model string to fill it in - if the exact spelling is unknown,
+  ask, because a plausible guess becomes permanent history people cite.
+- Do not attach generated-by lines to a human's commit uninvited, and do not strip credit the project
+  expects - including from commits made before the rule changed. History is evidence, not a preference.
 
 ## Breaking changes
 

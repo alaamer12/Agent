@@ -1,22 +1,8 @@
 # ASCII prototype
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: phase 4: writing the prototype spec or building the options file.
-> - Skip when: traditional style, or no options are being shown.
-> - Read next: `prototype-html.md` (if any option is marked needs_html); `review-standards.md` (to review the spec before showing it).
+> Owns the options-page structure, the prototype spec schema and field rules, the ASCII drawing rules, frame cadence and the lanes strip. Routing lives in ../SKILL.md.
 
 The default way to present creative options. One HTML file with one section per option; each option shows its animation as a sequence of ASCII states over time, so the user can see how it progresses before anything is implemented.
-
-## Contents
-- What the user sees
-- The spec file
-- Drawing rules
-- Frame cadence
-- Transitions and pairs
-- Synchronization lanes
-- Worked frame example
-- Running the scripts
-- Manual fallback
 
 ## What the user sees
 
@@ -24,56 +10,15 @@ Each option section contains: name, concept, feel, technique tags, synchronizati
 
 ## The spec file
 
-The prototype is generated from a JSON spec. Write the spec, validate it, then build.
-
-```json
-{
-  "title": "Save button - micro animation options",
-  "target": "SaveButton.tsx",
-  "command": "micro",
-  "tier": "rare",
-  "options": [
-    {
-      "id": "A",
-      "name": "Label rolls into a check",
-      "concept": "The label slides up out of a clipped window while a check draws itself in.",
-      "feel": "Precise and satisfying",
-      "techniques": ["mask", "line drawing"],
-      "sync": "domino",
-      "interactive": false,
-      "timing": { "duration_ms": 360, "easing": "cubic-bezier(0.22, 1, 0.36, 1)" },
-      "properties": ["transform", "opacity", "stroke-dashoffset"],
-      "reduced_motion": "Crossfade label to check, no movement.",
-      "risk": "Needs a fixed button width to avoid layout shift.",
-      "needs_html": false,
-      "sequences": [
-        { "label": "forward", "frames": [
-          { "t": 0,   "art": "[  Save  ]", "note": "rest" },
-          { "t": 120, "art": "[  ^^^^  ]", "note": "label exits upward" },
-          { "t": 360, "art": "[   ok   ]", "note": "check drawn" }
-        ] },
-        { "label": "reverse", "frames": [
-          { "t": 0,   "art": "[   ok   ]" },
-          { "t": 160, "art": "[  Save  ]" }
-        ] }
-      ],
-      "lanes": [
-        { "element": "Label", "start": 0, "end": 160, "technique": "slide out" },
-        { "element": "Check", "start": 120, "end": 360, "technique": "line drawing" }
-      ]
-    }
-  ],
-  "recommendation": { "option": "A", "reason": "Fits the rare tier and confirms in place." }
-}
-```
+The prototype is generated from a JSON spec. Write the spec, validate it, then build. Worked example: examples/prototype-spec.json.
 
 Field rules
 - `command` is `micro`, `component` or `transition`. `tier` is `routine`, `rare` or `showcase`.
-- `timing.duration_ms` must fit the tier cap (300, 600 or 1600) or carry a `duration_exception` string explaining why.
+- `timing.duration_ms` must fit the tier cap in timing-and-tokens.md or carry a `duration_exception` string explaining why.
 - `properties` lists what actually animates. Layout properties are errors unless `layout_exception` explains a deliberate container tween.
 - `reduced_motion` is required for every option.
 - Every option of a `transition` command needs a `forward` and a `reverse` sequence (labels may add detail, for example `forward: step 1 to 2`).
-- `needs_html` with `html_reason` marks an option ASCII cannot convey. `demo_html` is added only when the user chooses a live prototype.
+- `needs_html` with `html_reason` marks an option ASCII cannot convey (escalation criteria: prototype-html.md). `demo_html` is added only when the user chooses a live prototype.
 - `lanes` are optional; use them whenever more than one element animates.
 
 ## Drawing rules
@@ -121,12 +66,7 @@ In a spec these are three frames of one sequence, each with its own `t` and `art
 
 ## Running the scripts
 
-```bash
-python scripts/validate_spec.py spec.json
-python scripts/build_prototype.py spec.json --out .animate/prototypes/save-button-micro.html
-```
-
-Fix every validator error before building. The builder refuses an invalid spec. Report the output path to the user.
+Command lines are in the hub scripts table (../SKILL.md). Fix every validator error before building; the builder refuses an invalid spec. Report the output path to the user.
 
 ## Manual fallback
 

@@ -1,21 +1,8 @@
 # Discovery
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: the target is a directory, a page with many parts, a route tree or the whole project, or the user says 'what should I animate?' or 'the app feels flat'.
-> - Skip when: a single known element or component is targeted.
-> - Read next: `gate.md` (every survivor must pass it); `playbooks-micro.md` (for the picked command, then the matching playbook); `playbooks-component.md` (for component picks); `playbooks-transition.md` (for transition picks).
+> Owns the opportunity posture, the seams catalog, script usage, the report format and grouping; routing lives in `../SKILL.md`.
 
 Find where a target should animate, and reject the rest. Read-only: it proposes with exact values and implements nothing until the user picks.
-
-## Contents
-- Posture
-- When it runs
-- Procedure
-- Seams to sweep
-- Using the script
-- Report format
-- Broad targets
-- Handoff
 
 ## Posture
 
@@ -67,16 +54,11 @@ It prints, per seam, candidate locations with a snippet, plus an inventory of an
 |---|---|---|---|---|---|---|
 | 1 | `path:line` | what happens now | named purpose | tier from gate | micro, component or transition | one line with exact values or the creative idea |
 
-Every suggested direction carries exact values (properties, durations, easing) drawn from the tokens, never approximations. Hover suggestions mention the pointer gate; every suggestion mentions its reduced-motion behavior.
+Every suggested direction carries exact values (properties, durations, easing) drawn from the tokens (see timing-and-tokens.md), never approximations. Hover suggestions mention the pointer gate; every suggestion mentions its reduced-motion behavior.
 
 ### Part 2: rejected candidates (required)
 
-List two to five places considered and deliberately not suggested, each with the gate question that killed it:
-
-- `path:line`: command palette open and close. Rejected: keyboard-initiated and very frequent.
-- `path:line`: animated line drawing on a data chart. Rejected: functional data the user reads.
-
-This section is what separates discovery from a wishlist.
+List two to five places considered and deliberately not suggested, each with the gate question that killed it (verdict rules: see gate.md). This section is what separates discovery from a wishlist.
 
 ### Part 3: verdict
 
@@ -88,4 +70,4 @@ For a whole project, group by area (navigation, forms, overlays, lists, onboardi
 
 ## Handoff
 
-When the user picks, restate the pick as a command line (`life component Dialog.tsx`) and continue the run from the gate onward. Record unpicked survivors as follow-ups in the final report.
+When the user picks, resume per run-procedure.md §Resuming after a pick; record unpicked survivors as follow-ups in the final report.

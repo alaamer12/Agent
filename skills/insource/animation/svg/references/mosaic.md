@@ -1,8 +1,8 @@
 # Recipe: mosaic — `/animation svg mosaic`
 
-The logo dissolves in through a grid of square tiles, each opening on its own
-slightly-jittered beat, so a wave crosses the artwork. One-shot; ends fully
-visible. Nothing in the other styles is tiled.
+Per-style recipe — shared build rules in [foundations.md](foundations.md),
+signature and trigger words in [../SKILL.md](../SKILL.md). Nothing in the
+other styles is tiled.
 
 ## Template
 
@@ -37,10 +37,8 @@ them; the `begin` values are arithmetic.
 
 ## Notes
 
-- **Every mask child is white.** A `<mask>` keys on *luminance* by default, and
-  the artwork's own navy `#040c24` is almost black — a `<use>` of the real
-  paths inside the mask hides nearly everything. The mask is a separate
-  black-and-white drawing of *where*, never a copy of *what*.
+- **Every mask child is `fill="#fff"`** (foundations §6 — a mask is a
+  luminance map of *where*, never a copy of the artwork).
 - **`begin` must be a literal value in the file.** SMIL cannot compute
   `0.7 * gx/14` at runtime, so the generator writes each resolved number in.
   Formula used: `begin = 0.05 + 0.70·(gx/maxGx) + 0.15·(gy/maxGy) + jitter(≤0.12)`,
@@ -61,4 +59,3 @@ them; the `begin` values are arithmetic.
   the reason to avoid it here is the look, not browser support.)
 - Cost check: 90 tiles ≈ 14KB of extra markup. Above ~200 tiles, drop to a
   coarser grid.
-- **Verified in Chromium 153 only.**

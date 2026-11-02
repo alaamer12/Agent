@@ -1,7 +1,7 @@
 # Recipe: unroll — `/animation svg unroll`
 
-The logo falls into place around a fixed top hinge, like a sheet of paper being
-unrolled toward the viewer. One-shot; ends pixel-exact.
+Per-style recipe; shared build rules in foundations.md. One-shot; ends
+pixel-exact.
 
 Distinct from `flip`, which rotates a card about its **centre** on Y. Different
 axis *and* different origin: this one pivots on the top edge, so the bottom
@@ -55,11 +55,8 @@ travels and the top stays put.
 - The opacity ramp finishing at ~28% hides the earliest frames, where the sheet
   is so foreshortened that it is unreadable anyway — same reasoning as `flip`'s
   mid-keyframe opacity dip.
-- **No scale, and watch clearance.** The artwork reaches within ~3 units of the
-  frame, and a 3D rotation about a top hinge pushes the bottom edge downward in
-  screen space early on; the viewport clips that silently. If the bottom row of
-  small marks looks like it is being cut in the first frames, reduce the start
-  angle rather than the duration.
+- **No scale.** If the bottom row of small marks looks cut in the first
+  frames, reduce the start angle rather than the duration (clearance test per
+  foundations §5).
 - Ends at `rotateX(0)` with no residual transform, so the resting frame is the
   source artwork (measured 0.08% drift, 0 of 111 counters filled).
-- **Verified in Chromium 153 only.**

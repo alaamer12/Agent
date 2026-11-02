@@ -1,31 +1,12 @@
 # Run procedure
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: starting any run, or whenever you are unsure what a phase requires or where to stop for the user.
-> - Skip when: you are mid-run, know the phase, and only need a value (go to the specific reference instead).
-> - Read next: `gate.md` (phase 2 follows the survey); `review-standards.md` (phase 6 closes every build).
+> Sole home of the 8-phase run procedure and the stop points; routing lives in `../SKILL.md`.
 
-The detailed steps of every run. The hub (`SKILL.md`) lists the phases; this file says exactly what to do in each, what to decide, and where to stop for the user.
-
-## Contents
-- Phase 0: Understand
-- Phase 1: Survey and classify
-- Phase 2: Gate
-- Phase 3: Style
-- Phase 4: Options (creative style)
-- Phase 5: Build
-- Phase 6: Review
-- Phase 7: Report
-- Stop points
-- Mixed scopes and mismatches
-- Resuming after a pick
+The detailed steps of every run. The hub (`../SKILL.md`) lists the phases; this file says exactly what to do in each, what to decide, and where to stop for the user.
 
 ## Phase 0: Understand
 
-1. Parse the command and target. No command: infer the scope from what the user wants to change (one element, a whole unit, a change between states) and say which command you chose. No target: ask for one.
-2. Read the request in the user's own words and sort it: effect name, feeling, relationship, job (entrance, exit, feedback, state swap), problem (janky, slow), reference (recording), or exploration ("what should I animate?"). Route it using the hub's interpretation table.
-3. If wording is vague, translate it into precise terms and classification values and restate it in one line. Ask for confirmation only if two readings would lead to different builds.
-4. If the user asked for several scopes, do the command's scope and list the rest as follow-ups.
+Parse the command and target and interpret the request per the hub (Commands table and "Interpret the request"), translating vague wording via intent-resolution.md and restating it in one line; confirm only if two readings would lead to different builds. If the user asked for several scopes, do the command's scope and list the rest as follow-ups.
 
 ## Phase 1: Survey and classify
 
@@ -45,10 +26,10 @@ Ask one question: creative or traditional, with a recommendation (creative for r
 
 ## Phase 4: Options (creative style)
 
-1. Produce two to four options that differ in concept, from different lanes.
-2. Review each option against the standards in spec mode before showing it.
-3. Write the spec and run the validator; fix every error. Build the prototype with the builder. Default location: `.animate/prototypes/`, outside the source tree.
-4. ASCII is the default. If an option depends on light, reflection, depth, blur, continuous curves, 3D or pointer response, ask: continue with ASCII or build a live HTML prototype? Build live demos only for the options that need them.
+1. Produce two to four options that differ in concept, from different lanes (lanes: creative-direction.md).
+2. Review each option against the standards in spec mode (review-standards.md) before showing it.
+3. Write the spec and run the validator; fix every error. Build the prototype with the builder (spec format and prototype writing: prototype-ascii.md). Default location: `.animate/prototypes/`, outside the source tree.
+4. ASCII is the default. Ask the ASCII-or-HTML question only when an option meets the escalation criteria in prototype-html.md; build live demos only for the options that need them.
 5. Give the file path, one line per option, and a recommendation. Offer a remix. Wait for the pick. Write no production code first.
 
 Traditional style: state the spec in a few lines (technique, duration, easing, properties, origin, reverse) and go to the build.
@@ -64,9 +45,8 @@ Traditional style: state the spec in a few lines (technique, duration, easing, p
 ## Phase 6: Review
 
 1. Run the audit script on the files you changed (tier flag matches the gate's tier). The script never edits files.
-2. Review against the ten standards in built mode. Fix findings from the top of the remedy hierarchy down, then re-run the script.
-3. Stop when the script is clean or each remaining finding has a one-line justification. Write the verdict (Approve or Block).
-4. State what only a human can judge (feel, timing under real load, gestures on a device) and how to check it.
+2. Review against the ten standards in built mode and run the fix loop; the loop, the findings format and the verdict live in `review-standards.md`.
+3. State what only a human can judge (feel, timing under real load, gestures on a device) and how to check it.
 
 ## Phase 7: Report
 

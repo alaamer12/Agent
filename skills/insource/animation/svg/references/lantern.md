@@ -1,8 +1,7 @@
 # Recipe: lantern — `/animation svg lantern`
 
-A soft round light enters at one side and wanders across the logo, leaving the
-artwork revealed in its wake; at the end it blooms to cover everything.
-One-shot; ends pixel-exact.
+Per-style recipe; shared build rules in foundations.md. One-shot; ends
+pixel-exact.
 
 Distinct from `spark` (hard accumulating edge plus a travelling dot) and from
 `iris` (a single circle growing from the centre). Here the reveal is one
@@ -53,7 +52,6 @@ Distinct from `spark` (hard accumulating edge plus a travelling dot) and from
   `gradientUnits="userSpaceOnUse"` if you genuinely want a circle.
 - Stops at 0% / 50% / 100% give a firm core with a feathered rim. Pull the 50%
   toward 30% for a tighter lamp, toward 70% for a haze.
-- Mask contents white, as always — a mask keys on luminance.
+- Mask contents white (foundations §6).
 - If the user wants the light to *linger* rather than finish, drop the second
   phase and loop `cx` — but that is an idle treatment, not a reveal.
-- **Verified in Chromium 153 only.**

@@ -1,22 +1,8 @@
 # Intent resolution
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: the request has a feeling (premium, snappy), a loose description, a job word (intro, dismiss, press), or no command.
-> - Skip when: the user already named exact terms and a command.
-> - Read next: `vocabulary.md` (to name an effect precisely); `entrances-and-exits.md` (when the job is an entrance or exit); `classification.md` (once the words are mapped to dimensions).
+> Owns vague-wording and feeling translation plus the confirmation template; routing lives in `../SKILL.md`.
 
 Turn vague wording into precise animation terms and classification values. The user should leave knowing the name of what they asked for.
-
-## Contents
-- Procedure
-- Three kinds of vague input
-- Feeling to parameters
-- Relationship phrases to synchronization
-- Scope phrases to commands
-- Job words to files
-- Disambiguation pairs
-- When nothing matches
-- Confirmation template
 
 ## Procedure
 
@@ -49,39 +35,13 @@ Turn vague wording into precise animation terms and classification values. The u
 
 "Feels dead" or "feels janky" are diagnoses, not briefs: the first leads to discovery, the second to the debugging reference.
 
-## Relationship phrases to synchronization
+## Relationship phrases
 
-| Phrase | Form |
-|---|---|
-| "all together", "at the same time", "as one" | Instant synchronous |
-| "one after another", "cascade", "ripple through", "in order" | Domino |
-| "when I hover/select X the related ones react", "connected", "highlights its neighbors" | Linked |
-| "react to my finger/cursor" | Interactive, possibly with one of the above |
+Phrases like "all together", "one after another", "the related ones react" name a synchronization form; the forms and their rules: see synchronization.md.
 
-## Scope phrases to commands
+## Routing
 
-| Phrase | Command |
-|---|---|
-| "this button", "this icon", "the badge", "the toggle" | micro |
-| "the dialog", "the card", "the menu", "the toast", "the panel" | component |
-| "between steps", "when I switch tabs", "page change", "going back", "route", "from list to detail" | transition |
-
-## Job words to files
-
-Name the job first; the job decides which file to read next. Example: "I want an onboarding animation on starting" is a first-run **entrance**: tier rare, likely `component` (one screen appearing) or `transition` (between onboarding steps); read the entrances-and-exits reference, then the command's playbook.
-
-| Words | Job | Reference to read |
-|---|---|---|
-| intro, onboarding, welcome, on start, appear, show up, fade in, pop in, hero, page load | Entrance | entrances-and-exits |
-| close, dismiss, disappear, remove, leave | Exit | entrances-and-exits |
-| press, hover, focus, toggle, tick, shake, icon swap, number change, loading button | Feedback or state swap | playbooks-micro |
-| modal, popover, menu, drawer, toast, card, accordion, list item | Component lifecycle | playbooks-component |
-| steps, tabs, back, route, page change, list to detail | Transition | playbooks-transition |
-| cascade, ripple, one after another, connected, highlights related | Synchronization | synchronization |
-| bouncy, springy, weighty, momentum, alive | Physics | springs |
-| drag, swipe, flick, reorder, knob | Gesture | gestures |
-| on scroll, parallax, pinned, scroll progress | Scroll | scroll |
-| draws itself, wipe, mask, morph, before and after | Vector or clip | svg-and-clip-path |
+Name the job (entrance, exit, feedback, transition, ...) and take it to the hub's job table (`../SKILL.md`); routing is the hub's job, not this file's.
 
 ## Disambiguation pairs
 

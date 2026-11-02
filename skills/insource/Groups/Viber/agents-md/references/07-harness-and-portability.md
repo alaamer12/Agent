@@ -56,7 +56,7 @@ Expect cohabitation and define the boundary in the report rather than silently o
 | Other skill | What it owns in `AGENTS.md` | agents-md's duty |
 |---|---|---|
 | A skill-pinning tool | a managed block between two comment markers | pass the region through verbatim; never edit inside the markers; mention it in the report |
-| A units/system-catalog skill | the units file and its generation | reference the file and the duty; do not generate or stub the file |
+| [`units-md`](../../units-md/SKILL.md) | `UNITS.md` and its generation, incl. the UI builder profile | reference the file and the duty; do not generate or stub the file |
 | A subagent-brief skill | the content of one delegation prompt | own the *contract* (section 10) that such prompts must satisfy; do not write briefs |
 | A docs/steering skill | the documents section 2 points at | keep pointers accurate; report dead paths for that skill to fix |
 

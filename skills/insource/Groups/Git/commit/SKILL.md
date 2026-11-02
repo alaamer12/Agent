@@ -1,6 +1,6 @@
 ---
 name: commit
-description: "Professional git commits, in two modes. GUIDE (default, writes nothing): detect the repo's incumbent convention from its history instead of importing one, split work into atomic units, stage with git add -p, write an imperative subject that survives git log --oneline, a what/why body, readable trailers - plus the scenario calls: when to commit, N similar files, type/scope gray zones, a fix interrupting a feature, wip/checkpoint vocabulary, squash or not, repairing history behind a backup ref, releases and tags. INIT (/commit init): co-author this repository's written commit discipline - read what the history and existing tooling do, ask the seven questions the repo cannot answer (shape, types, budget, named branches, ticket keys, body policy, enforcement), draft one document, merge never clobber existing prose, install nothing: no hook, no git config, no CI file - enforcement is the maintainers' choice. Rails: no --no-verify, no committing unread files, no claiming unrun tests, no rewriting pushed history."
+description: "Professional git commits, in two modes. GUIDE (default, writes nothing): detect the repo's incumbent convention from its history, split work into atomic units, stage with git add -p, write an imperative subject that survives git log --oneline, a what/why body, readable trailers - plus scenario calls: when to commit, gray zones, a fix interrupting a feature, wip vocabulary, squash or not, repairing history behind a backup ref. INIT (/commit init): co-author this repository's written commit discipline - read what the history and existing tooling do, ask the eight questions the repo cannot answer (shape, types, budget, named branches, ticket keys, body policy, agent authorship (trailer + branch segment), enforcement), draft one document, merge never clobber existing prose, install nothing: no hook, no git config, no CI file - enforcement is the maintainers' choice. Rails: no --no-verify, no committing unread files, no claiming unrun tests, no rewriting pushed history."
 when_to_use: The user asks to commit, to write or review a commit message, to split work into professional commits, or to tidy local history. Init mode when they ask to set up commit conventions here, write down the project's commit rules, or document a commit policy. Also /commit, /commit init.
 argument-hint: "[init] — or a hint like 'split into atomic commits'"
 ---
@@ -162,6 +162,10 @@ Then report the short hashes, one line each, and anything deliberately left unco
 - Commit only when the user asked. Writing a message for review is a different request: produce the text, wait.
 - Never commit files you have not read; never stage by wildcard with several concerns present.
 - Never `--no-verify`, never sign or co-author on someone's behalf, never rewrite pushed history unasked.
+- **Never decide authorship disclosure either way.** Whether an agent's `Co-authored-by:` trailer appears is the
+  project's answer, not yours: read it from history/`AGENTS.md`; if undecided, ask once, then record it (and the
+  matching branch-name rule in [`branch`](../branch/SKILL.md)). Adding attribution nobody asked for is as much an
+  unconsented change as erasing the provenance of who did the work.
 - **Always create a backup ref before a history rewrite**, prove it was content-neutral with
   `git diff backup/… HEAD` (must be empty), and delete it only after the result verifies.
 - Never `git push --force`; `--force-with-lease` only, and only on a branch nobody else builds on.
@@ -205,7 +209,7 @@ nothing — no hook, no `git config`, no CI file, nothing to uninstall.
 Questionnaire, section skeleton, merge rules, and the enforcement table:
 [`18-init-the-discipline.md`](references/18-init-the-discipline.md).
 
-## The seven questions
+## The eight questions
 
 1. **Message shape** — keep the dialect the history uses, or change it? Changing it is a project decision made
    *before* init, not a default init applies.
@@ -216,7 +220,15 @@ Questionnaire, section skeleton, merge rules, and the enforcement table:
    list blocks nothing and still looks like it works.
 5. **Ticket keys** — subject prefix, footer, or not tracked here.
 6. **Body policy** — required always, or when the *why* is not obvious — and what counts as non-obvious here.
-7. **Enforcement appetite** — document only, or a check too? Say plainly that a local check is a courtesy and a
+7. **Authorship** — does an agent's involvement get a `Co-authored-by:` trailer (with what exact name and
+   address), or is the human the sole author and the tool invisible in the history? Detect first
+   (`git log -20 --format='%(trailers:key=Co-authored-by)'`, plus `AGENTS.md` - its Version Control section is the
+   decided home for authorship - and any git alias or template that appends trailers); ask only what the
+   repository cannot answer. The same decision has a twin in branch naming
+   (an agent segment or none) — see [`branch`](../branch/SKILL.md); record both together so history and ref names
+   do not contradict each other. Neither side may be decided silently: adding attribution nobody asked for and
+   erasing provenance are the same mistake in opposite directions.
+8. **Enforcement appetite** — document only, or a check too? Say plainly that a local check is a courtesy and a
    CI check over the commit range is the layer that survives `--no-verify`.
 
 Two prompts pay for themselves: *"what would make you break this rule?"* — that answer becomes the documented
@@ -262,7 +274,7 @@ escape hatch — and *"who owns this document?"*, because an unowned policy file
 | [`15-releases-tags-bumps.md`](references/15-releases-tags-bumps.md) | One bump per release not per commit, version commits and where the bump command lives per stack, tag pushing (`--follow-tags` vs `--tags`), `-S` vs `-s`, the `-am` untracked-file trap, pre-release checklist | Releases and version files |
 | [`16-decision-trees.md`](references/16-decision-trees.md) | Every decision as a fast path: when to commit, which type, which scope, one commit or N, squash or not, broken-and-pushed, the safety gate | Mid-task, no time to read |
 | [`17-command-reference.md`](references/17-command-reference.md) | The command set with the trap annotated per command, including the backup sequence and recovery commands | Typing a git command you're unsure about |
-| [`18-init-the-discipline.md`](references/18-init-the-discipline.md) | The detection commands, the seven questions with their failure modes, the discipline document's section skeleton, merge-never-clobber rules, enforcement as roles (not products), the maintenance duty, what init refuses to do | Mode 2, before writing anything |
+| [`18-init-the-discipline.md`](references/18-init-the-discipline.md) | The detection commands, the eight questions with their failure modes, the discipline document's section skeleton, merge-never-clobber rules, enforcement as roles (not products), the maintenance duty, what init refuses to do | Mode 2, before writing anything |
 
 ## Examples
 

@@ -1,8 +1,7 @@
 # Recipe: elastic-entrance — `/animation svg elastic`
 
-Playful full-logo intro loop: the logo elastically scales/rotates in,
-wobbles like it landed with a bounce, glows softly, then fades out and
-repeats. The whole `<g>` transforms as one — no stroke/mask work.
+Per-style recipe; shared build rules in foundations.md. The whole `<g>`
+transforms as one — no stroke/mask work.
 
 Derived from an 1800×1800 reference that also framed the logo with a pulsing
 hexagon on black. The hexagon was brand framing — optional here; the core
@@ -66,8 +65,8 @@ treatment is the keyframed group + glow filter.
 - **`transform-box: fill-box`** centers the scale/rotate on the logo's own
   bounding box. The reference relied on a centered logo in a square viewBox;
   fill-box makes the recipe work on wordmarks and off-center art too.
-- **Glow blur** scales with logo size: `stdDeviation ≈ W/120` (reference: 15
-  at W=1800). Too-large blur on a small logo turns it to mush.
+- **Glow blur**: reference stdDeviation 15 at W=1800 (σ scaling and the F
+  clamp per foundations §5).
 - **Loop timing**: keep the 8s cycle unless the user asks otherwise — the
   entrance/wobble/glow/fade rhythm is tuned to it. Percentage keyframe
   structure stays fixed; only `s` durations scale.

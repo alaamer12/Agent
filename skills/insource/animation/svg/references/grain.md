@@ -1,8 +1,7 @@
 # Recipe: grain — `/animation svg grain`
 
-The logo resolves out of film grain: a noise field is thresholded upward until
-nothing is masked away, so the artwork appears through growing speckle.
-One-shot; ends pixel-exact.
+Per-style recipe — shared build rules in [foundations.md](foundations.md),
+signature and trigger words in [../SKILL.md](../SKILL.md).
 
 Distinct from `ripple`, which *warps* geometry with the same noise source. Here
 noise decides **visibility**, never position.
@@ -59,4 +58,3 @@ noise decides **visibility**, never position.
 - Filter region is `100%` here on purpose: this filter never expands the
   artwork, so unlike the glow and displacement styles it wants no margin.
 - `seed` is a style choice; fix it for reproducible frame comparisons.
-- **Verified in Chromium 153 only.**

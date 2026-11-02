@@ -1,8 +1,8 @@
 # Recipe: ripple — `/animation svg ripple`
 
-The logo settles out of water: fractal noise displaces its actual geometry and
-the warp relaxes until the edges go crisp. One-shot. The only style here that
-touches the shape's vertices instead of painting over it.
+Per-style recipe — shared build rules in [foundations.md](foundations.md),
+signature and trigger words in [../SKILL.md](../SKILL.md). The only style
+here that touches the shape's vertices instead of painting over it.
 
 ## Template
 
@@ -42,10 +42,8 @@ touches the shape's vertices instead of painting over it.
 
 ## Notes
 
-- **`color-interpolation-filters="sRGB"` is required, not decorative.** The
-  default is `linearRGB`, which for a displacement map produces a systematic
-  global offset and dulls the colours. None of the older glow recipes set it —
-  new work should.
+- **`color-interpolation-filters="sRGB"` on the filter** (foundations §6 —
+  required for displacement maps, not decorative).
 - **`scale` is the amplitude.** The safety clamp is ~F/2 (2.4px on the test
   logo, whose thinnest feature is 4.84px), but landing *on* the clamp makes the
   effect nearly invisible. The build deliberately peaks at 5 and holds 3.5
@@ -59,11 +57,9 @@ touches the shape's vertices instead of painting over it.
 - **`baseFrequency` ≈ 1/(H/2.2)** puts one noise cell across roughly half the
   logo height. Much higher and the edge turns to static; much lower and the
   whole shape just slides.
-- **Animate the filter's attributes with SMIL — CSS cannot touch them.**
-  `stdDeviation`, `baseFrequency`, `radius` and `scale` are all animatable, but
-  only as attributes. Number-*list* values (`baseFrequency`, `stdDeviation`)
-  only interpolate between same-cardinality stops: `"0.02;0.005"` is fine,
-  `"0.02;0.014 0.005"` is not.
+- **`baseFrequency`/`scale` animate via SMIL only** (foundations §6 — CSS
+  cannot touch filter primitive attributes; number-list `values` keep the
+  same cardinality at every stop).
 - **`seed` is a style choice.** Fix it for a reproducible frame-by-frame
   comparison; change it to vary the water.
 - Do **not** try to sweep a band of distortion across the logo — that needs a
@@ -73,4 +69,3 @@ touches the shape's vertices instead of painting over it.
   region percentages are relative to the element's **bbox**, not the canvas.
   Applied to the wrapper `<g>` (bbox ≈ canvas) `-15%/130%` is enough; applied
   per-path it is not.
-- **Verified in Chromium 153 only.**

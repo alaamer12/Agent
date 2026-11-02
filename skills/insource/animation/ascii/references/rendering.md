@@ -66,7 +66,7 @@ function gridSize(imgW, imgH, cols, cellAspect = 0.5) {
 }
 ```
 
-Draw the source into an offscreen canvas at exactly `cols × rows`, then one `getImageData(0, 0, cols, rows)` per frame.
+Draw the source into an offscreen canvas at exactly `cols × rows`, then one `getImageData(0, 0, cols, rows)` per frame. For video/webcam sources, keep a hidden `<video>` element and re-draw it into the same offscreen canvas every tick — the grid math is identical to still images.
 
 ## `<pre>` vs canvas
 

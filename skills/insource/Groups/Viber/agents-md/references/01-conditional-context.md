@@ -82,8 +82,8 @@ resolve every relative path (the linter does this). When a path is missing, repo
 
 ```text
 DEAD REFERENCE: docs/UNITS.md does not exist.
-  -> the units index is another skill's job; until it exists, section 4's duty cannot be honored.
-  -> either generate it, or set section 4 to: "pending - no units index in this project yet".
+  -> the units index is units-md's job; until it exists, section 4's duty cannot be honored.
+  -> either run units-md to generate it, or set section 4 to: "pending - no units index in this project yet".
 ```
 
 agents-md does not create the target. Creating a stub would turn a visible gap into an invisible one.

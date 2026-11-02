@@ -1,6 +1,7 @@
 ---
 name: techstack
-description: 'Recommend a technology/framework/library/tech stack (mobile, web, backend, desktop, infra) in any language or platform through rigorous, current, requirements-driven evaluation — never from memorized popularity. Trigger on "what should I use to build X", "recommend a tech stack", "React Native vs Flutter", "should we use X or Y here", or any choose/add/replace-tech request. Discover candidates by searching the topic, never from memory (tech rises, stagnates, gets superseded), classify by scope (library to meta-framework), weigh consolidated tools against separate specialists, and count only features the project will use. Weigh its priorities across ecosystem, maintenance, API design, abstraction, quality, performance and fit; state trade-offs honestly — no "clear winner" without caveats. Two modes: normal (primary technology plus close dependencies) and ultra (every real need — validation, retries, timeouts, caching, observability); use ultra on "ultra", "full coverage", or when supporting tooling was missed.'
+description: 'Recommend a technology/framework/library/tech stack (mobile, web, backend, desktop, infra) in any language or platform via rigorous, current, requirements-driven evaluation, never memorized popularity. Trigger on "recommend a tech stack", "React Native vs Flutter", choose/add/replace-tech requests. Discover candidates by topic search, never memory; classify by scope (library to meta-framework); weigh consolidated vs specialists; count only features the project will use. Surface parity is not implementation parity: probe how constantly-used capabilities are actually delivered (native vs re-implemented focus/forms, style hooks vs `:deep()`-style penetration) - equal feature lists hide the internals that make a pick feel wrong later. Weigh ecosystem, maintenance, API design, abstraction, quality, performance, mechanism and fit; state trade-offs honestly. Two modes: normal (primary tech plus close dependencies) and ultra (every real need: validation, retries, caching, observability), on "ultra"/"full coverage".'
+
 ---
 
 # Tech Stack Recommendation
@@ -27,6 +28,7 @@ This skill is ecosystem-agnostic. The core steps never name a product, language,
 3. **Requirements before options.** Figure out what the project actually needs — priorities *and* the specific capability list — before recommending anything. Questions are formulated fresh per project, never recited from a memorized list, and there is no fixed cap: if the agent does not understand the user's full goal, it asks as many questions as it takes, in rounds, until it can state the goal back — see `references/question-method.md`.
 4. **Existing project?** Determine what kind of change is being asked for before proposing a stack. See `references/process.md#step-2`.
 5. **Weigh dimensions (including consolidated vs. specialist tools), decide, be honest about trade-offs.** See `references/process.md#step-3` and `#step-4`.
+6. **Establish mechanism from public sources, not reverse engineering.** Equal feature lists and API shapes hide different internals — how each constantly-used capability is delivered (native vs re-implemented, surfaced hooks vs pierced internals) is what splits a tie. The evidence is already public: docs, the component's own source on the repo, its issue tracker and discussions, Q&A sites. See `references/dimensions.md` §Mechanism.
 
 ## Bundled resources
 
@@ -36,7 +38,7 @@ This skill is ecosystem-agnostic. The core steps never name a product, language,
 - `references/ultra-mode.md` — ultra mode: the concern-inventory method, the trace rule, verdicts, depth requirements, the DIY rule, and output shape. Read in full whenever running in ultra mode.
 - `examples/ultra-examples.md` — worked illustrations of ultra mode, including an inflated anti-example. Illustrative only; tools named there must be verified fresh.
 - `references/dimensions.md` — the dimension checklist with guidance on when each one matters; consult while doing Step 3.
-- `examples/feature-fit-examples.md` — worked examples (mobile, web, backend) of the *pattern* that a capability can be easy in one stack and a workaround in another; illustrative only, not a lookup table — verify specifics fresh for whatever the user actually names.
+- `examples/feature-fit-examples.md` — worked examples (mobile, web, backend, and the mechanism-parity case) of the *pattern* that a capability can be easy in one stack and a workaround in another, and that two candidates with equal feature lists can deliver the same capability through different internals; illustrative only, not a lookup table — verify specifics fresh for whatever the user actually names.
 - `assets/templates/recommendation-template.md` — the shape a final recommendation should take when the user wants it written up rather than just spoken conversationally.
 
 ## Anti-patterns (see `references/process.md` for the full list)
@@ -48,6 +50,7 @@ This skill is ecosystem-agnostic. The core steps never name a product, language,
 - Recommending before the goal is understood, or limiting questions to a token few when the goal is still unclear
 - Defaulting to one ecosystem's tools or habits (for example assuming a package-library answer where the platform already provides it, or vice versa) instead of working inside the user's actual ecosystem
 - Treating more features, or a higher tier, as better in itself rather than counting only what the project will use
+- Scoring two candidates equal because their capability lists match, without probing *how* each delivers the daily-used ones (native vs re-implemented internals, customization through surfaced hooks vs piercing workarounds like `:deep()`) — surface parity is not implementation parity
 - Reciting a memorized question list or a memorized "usual options for this situation" shortlist instead of formulating both fresh for the actual project
 - Presenting strengths without trade-offs, or vice versa
 - Proposing a stack for an existing project without first clarifying what kind of change is wanted

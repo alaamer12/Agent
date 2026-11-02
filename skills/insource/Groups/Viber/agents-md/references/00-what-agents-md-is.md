@@ -41,19 +41,56 @@ same-task requirement that prevents a rotting index.
 Bad: `git checkout -b feature/x` tutorials. Good: "work lands on `canary` first; never commit directly to
 `main`; `main` advances only by owner-approved promotion." Constraints, not commands.
 
+**Version control (section 16).**
+
+Bad: "use git responsibly" - unfalsifiable; and a wall of git commands - documentation. Good: the three tiers
+named ("allowed: read-only git and local commits on feature branches; ask first: push, PRs, shared-branch
+merges; never without explicit order: rebase or amend of pushed work, `reset --hard`, `clean`, force-push,
+`--no-verify`"), a stash verdict (allowed with an `agent/<task>` message pattern, or forbidden in favor of a
+WIP commit / separate worktree), and the identity line ("commits keep the configured human author; no
+`Co-authored-by` trailer" - or the exact trailer name, decided once). The `commit` and `branch` skills look
+for this answer and stop asking; without it they must ask every session.
+
 ## Why ~500 lines, and what the limit is really protecting
 
 The file is loaded every session. A 1,200-line rulebook costs context permanently and, worse, **dilutes
 compliance**: when everything is mandatory, nothing is. The limit is not vanity; it is attention budget.
 
+Two budgets, both enforced by `scripts/agents_lint.py`:
+
+| Budget | Rule |
+|---|---|
+| Whole file | ~500 lines maximum (soft warning at 420) |
+| **One section** | **~50 lines maximum** - past that, the section is a doc with a pointer missing |
+
 Practical consequences:
 
 - Prefer one line per rule, with the reason in a clause ("because X hangs"), not a paragraph.
 - Tables beat prose for routing (file → purpose, task → skill, location → scope).
-- If a section needs 100 lines, it is a document with a pointer missing.
+- When a section passes ~50 lines, do not "trim it down" - **extract**: move the detail into a doc at the
+  project's docs location, leave the obligations plus one pointer line. Trimming loses information; extracting
+  keeps it one `Read` away.
 - Cut in this order when over budget: (1) duplicated content from referenced docs, (2) explanatory prose,
   (3) examples that the referenced file already carries, (4) rarely-triggered conditional rules → move behind
   a conditional pointer, (5) never the scope fence or the delegation contract.
+
+The section split, bad and good:
+
+Bad - section 7 grows to 70 lines: the env-validation library's rationale, a table of every variable, three
+examples of the generation script's output, and the fallback behavior, all inline. Every session pays for the
+generation-script trivia even when the task is a one-line CSS fix.
+
+Good - section 7 is 8 lines:
+
+```markdown
+## 7. Environment and Secrets
+- Strategy: build-time generation from `.env.example` - never edit `.env` by hand.
+- Validation: typed schema at startup; a missing var fails boot, no silent defaults.
+- Read: `docs/environment-strategy.md` (variable table, generator, fallbacks).
+```
+
+The agent obeys the three obligation lines every session and opens the doc only when the task touches
+environment code. The rulebook stays cheap; the detail stays findable.
 
 ## Stability and drift
 

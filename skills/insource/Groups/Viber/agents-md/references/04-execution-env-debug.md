@@ -26,6 +26,8 @@ of the shared one ([`07`](07-harness-and-portability.md)).
 
 **Package manager.** Record exactly one, plus the prohibitions that follow. Infer it from evidence first:
 
+Installs themselves are governed by section 12 (Resourceful): project-local first - the project's own environment, the project's own install, never a global one for a project need.
+
 ```bash
 ls bun.lockb package-lock.json pnpm-lock.yaml yarn.lock 2>/dev/null
 node -e "console.log(require('./package.json').packageManager || 'unset')"

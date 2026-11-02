@@ -1,20 +1,8 @@
 # Match an existing animation
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: the user supplies a recording, GIF, screenshots or says 'like this one'.
-> - Skip when: there is no reference media.
-> - Read next: `timing-and-tokens.md` (to compare fitted values with the tokens); `classification.md` (to classify the measured motion).
+> Owns the recording→frames→tracks→curve pipeline and the measurement reading table; routing lives in `../SKILL.md`.
 
 Recreate an animation from a recording or a reference so the result matches its feel. Applies to any command: a recorded micro interaction, a component animation, a transition.
-
-## Contents
-- When this applies
-- Pipeline
-- Reading the measurements
-- Fitting curves
-- Emitting code
-- Limits
-- Manual fallback
 
 ## When this applies
 
@@ -25,7 +13,7 @@ The user supplies a screen recording, a GIF, a short video, a screenshot sequenc
 1. **Extract frames.** `python scripts/match/extract_frames.py <video> --out frames/` (needs ffmpeg). Use the frame rate of the source; sample densely around the action.
 2. **Track motion.** `python scripts/match/track_motion.py frames/` follows the region of interest and records position, scale and opacity over time (needs opencv-python and numpy).
 3. **Fit curves.** `python scripts/match/fit_curves.py <tracks.json>` fits cubic-bezier or spring parameters to the tracked series (needs numpy and scipy). Try springs when there is overshoot or settling oscillation; cubic-bezier otherwise.
-4. **Decide the structure.** Identify what animates, in what order (the synchronization form), the duration, the delays, and whether the reverse was shown.
+4. **Decide the structure.** Identify what animates, in what order (the synchronization form: see synchronization.md), the duration, the delays, and whether the reverse was shown.
 5. **Emit code** in the project's stack, using the fitted values.
 
 ## Reading the measurements
@@ -41,11 +29,11 @@ The user supplies a screen recording, a GIF, a short video, a screenshot sequenc
 
 ## Fitting curves
 
-Compare the fitted curve against the nearest token; if within tolerance, use the token (consistency beats exact match). Report the fitted values and the chosen token with the error. For a spring, report both perceptual (duration, bounce) and physical (stiffness, damping) forms.
+Compare the fitted curve against the nearest token; nearest token wins (see timing-and-tokens.md §Adopting tokens). Report the fitted values and the chosen token with the error. For a spring, report both perceptual (duration, bounce) and physical (stiffness, damping) forms.
 
 ## Emitting code
 
-Produce the same output the chosen stack uses: CSS transition or keyframes, Web Animations options, the library's transition object, or native platform parameters. Include the reduced-motion variant and the reverse if the recording shows or implies it. Add a short handoff spec listing the measured values and what was inferred.
+Produce the same output the chosen stack uses: CSS transition or keyframes, Web Animations options, the library's transition object, or native platform parameters. Include the reduced-motion variant and the reverse if the recording shows or implies it (requirements: see review-standards.md). Add a short handoff spec listing the measured values and what was inferred.
 
 ## Limits
 

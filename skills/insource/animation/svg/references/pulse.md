@@ -1,8 +1,7 @@
 # Recipe: pulse — `/animation svg pulse`
 
-Ambient idle loop: the logo breathes — a slow scale swell with a soft glow
-at the peak of each breath. No entrance, no exit; it runs forever behind
-content or on a resting screen.
+Per-style recipe; shared build rules in foundations.md. No entrance, no exit;
+runs forever behind content or on a resting screen.
 
 ## Template
 

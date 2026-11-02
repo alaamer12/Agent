@@ -1,33 +1,22 @@
 # Principles
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: a judgment call the playbooks do not settle, or when you need to explain why a choice is right.
-> - Skip when: a recipe already fixes the decision.
-> - Read next: `entrances-and-exits.md` (for arrival and departure rules); `playbooks-component.md` (to apply the principles).
+> Rationale only, no numbers (all ranges: timing-and-tokens.md; tiers and novelty policy: gate.md); routing lives in `../SKILL.md`.
 
 The reasoning behind the playbooks. Use it to make judgment calls the recipes do not cover, especially for entrances, exits and states that come in pairs.
 
-## Contents
-- Purpose
-- Disney's principles applied to UI
-- Paired states
-- Continuity and spatial consistency
-- Delight scales inversely with frequency
-- Perceived speed
-
 ## Purpose
 
-Animation exists to explain hierarchy, confirm an action, guide attention, maintain continuity, or add earned polish. If it serves none of these, delete it.
+The valid purposes are gate.md's list; if an animation serves none of them, delete it.
 
 ## Disney's principles applied to UI
 
 | Principle | Application |
 |---|---|
-| Squash and stretch | Small elasticity on entry (scale 0.95 to 1) makes elements feel less rigid. Exaggerate only in rare, playful moments. |
-| Anticipation | A slight opposite wind-up (a 4 to 10px offset before sliding) creates expectation. Keep it tiny and never on frequent actions. |
+| Squash and stretch | Small elasticity on entry makes elements feel less rigid. Exaggerate only in rare, playful moments. |
+| Anticipation | A slight opposite wind-up before the move creates expectation. Keep it tiny and never on frequent actions. |
 | Staging | Enter from where the user's attention is: list items from the top, modals from the center, sidebars from their edge, popovers from their trigger. |
 | Pose to pose | Define a clear start state and end state, then let the browser interpolate. |
-| Follow-through and overlap | Children lag slightly behind the container (50 to 100ms). The container arrives first, content follows. |
+| Follow-through and overlap | Children lag slightly behind the container. The container arrives first, content follows. |
 | Slow in, slow out | Entrances ease out: fast start, gentle landing. |
 | Arcs | Natural movement curves. Combine small x and y offsets instead of straight lines where it fits the personality. |
 | Secondary action | Pair a fade with a small scale or blur; add depth without a second big motion. |
@@ -36,9 +25,11 @@ Animation exists to explain hierarchy, confirm an action, guide attention, maint
 | Solid drawing | Keep a consistent sense of space: elements from behind scale up, from the side slide, from a trigger grow out of it. |
 | Appeal | Entrances feel welcoming. Avoid jarring pops. |
 
+Numeric amounts for all of the above: timing-and-tokens.md; how expressive a moment may be: gate.md §Tiers.
+
 ## Paired states
 
-If open animates, close animates. If hover has motion, focus and pressed get equivalent feedback. If forward is designed, reverse is designed. Polishing only one half is the most common craft failure. Paired parts (surface and overlay, tooltip and arrow) share easing and duration.
+Polishing only one half is the most common craft failure: every pair gets both halves, and paired parts share easing and duration. Dimensions: classification.md; pairs and their rules: entrances-and-exits.md.
 
 ## Continuity and spatial consistency
 
@@ -49,7 +40,7 @@ If open animates, close animates. If hover has motion, focus and pressed get equ
 
 ## Delight scales inversely with frequency
 
-Rarer moments earn more personality. Frequent actions must be nearly invisible. Keep roughly 90% of a surface familiar and 10% novel, and put quiet structure between novel beats.
+Rarer moments earn more personality; frequent actions must be nearly invisible. The 90/10 novelty policy and tier definitions: gate.md.
 
 ## Perceived speed
 

@@ -1,9 +1,8 @@
 # Recipe: draw-fill — `/animation svg draw`
 
-Self-drawing logo, one-shot: every outline traces itself with its own color,
-then the fills fade in on top. Calm, precise, "pen signing the logo" feel.
-
-Derived from an 1800×1800 reference. Scale numbers per the SKILL.md table.
+Per-style recipe; shared build rules in foundations.md. Calm, precise, "pen
+signing the logo" feel. Derived from an 1800×1800 reference; scale numbers per
+foundations §5.
 
 ## Template (hero scale, two paths)
 
@@ -36,10 +35,9 @@ added — no defs/uses needed. fill-rule stays inline on each path, untouched.
 
 ## Notes
 
-- **Dash values**: `15000` fit the reference's ~3000-unit contours. Set
-  `stroke-dasharray/-offset` ≥ the target's longest subpath from
-  `extract_paths.py --lengths` (a value 1.2–2× the longest subpath is ideal —
-  large enough for a complete draw, small enough for a visible stroke).
+- **Dash values**: `15000` fit the reference's ~3000-unit contours; 1.2–2× the
+  longest subpath is ideal — large enough for a complete draw, small enough
+  for a visible stroke (the ≥ floor itself is foundations §3).
 - **Two animations on one element**: the draw runs first; `fill-in` starts at
   `2s` (just before draw ends at 2.5s) so color lands as the pen finishes.
   Scale both timings together: fill delay ≈ draw duration − 0.5s.

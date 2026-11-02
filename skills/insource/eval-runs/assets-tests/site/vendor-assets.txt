@@ -1,0 +1,4 @@
+https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap css/inter.css
+https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiA.woff2 fonts/inter-400.woff2
+https://cdn.jsdelivr.net/npm/@material-design-icons/svg@0.14.15/filled/home.svg icons/home.svg
+https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f600.png images/emoji.png

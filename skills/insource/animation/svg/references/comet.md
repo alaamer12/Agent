@@ -1,8 +1,7 @@
 # Recipe: comet — `/animation svg comet`
 
-The logo stays fully drawn at all times; a bright dash segment travels
-endlessly along its outlines like a spark tracing the letterforms. Infinite
-loop — an ambient "energy" treatment, not a loader.
+Per-style recipe; shared build rules in foundations.md. Infinite loop — an
+ambient "energy" treatment, not a loader.
 
 ## Template
 

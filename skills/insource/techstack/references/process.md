@@ -17,6 +17,7 @@ This process runs in one of two modes. **Normal** (default) follows Steps 0 to 4
 5. **Honest trade-offs, always.** Every real recommendation carries a cost somewhere. State what is being given up, not just what is being gained.
 6. **Existing-project awareness.** If there's an existing codebase/stack, understand exactly what kind of change is being asked for before proposing anything.
 7. **The agent decides.** This skill's job is to think it through and land on an answer for the user, not to lay out a neutral menu of options and leave the decision to them.
+8. **Surface parity is not implementation parity.** Two candidates that offer the same capability through the same-shaped API may achieve it through different internals — native vs re-implemented (a tool that defines "focus" itself instead of using the platform's loses accessibility), and extension vs penetration (customization through surfaced hooks vs forced piercing like `:deep()` or `!important` wars). Feature checklists cannot see this; mechanism probes can (see `dimensions.md` §Mechanism). A mechanism flaw on a daily-used capability is exactly what makes an otherwise-even choice feel like a bad decision a month after adoption.
 
 ---
 
@@ -92,7 +93,17 @@ Classify every candidate by scope breadth: **library** (one job), **meta-library
 
 ## Step 3: Identify the dimensions that matter here {#step-3}
 
-See `dimensions.md` for the full checklist (ecosystem, maintenance, API design, abstraction level, quality, performance, fit-to-requirements, design/architecture, user-specific dimensions) and guidance on when each one matters.
+See `dimensions.md` for the full checklist (ecosystem, maintenance, API design, abstraction level, quality,
+performance, fit-to-requirements, **mechanism** — how each constantly-used capability is actually implemented,
+design/architecture, user-specific dimensions) and guidance on when each one matters.
+
+For capabilities the project will touch daily (focus/forms/keyboard, styling customization, scrolling, routing),
+settle the mechanism from **public evidence** before any feature-table tie counts: the candidates' theming/a11y
+docs, their public repositories — component source, issue tracker, discussions (search the capability plus
+"accessibility", "override", "custom style") — and Q&A sites. Published source means no reverse engineering:
+reading what is already on GitHub is the probe, and building experiments to rediscover it is wasted effort
+(reserve behavioral probing for closed-source candidates). Answers that require piercing internals are a real
+cost even when the feature table says parity. A feature-parity tie is not a tie. If the public record cannot answer a mechanism question, state that plainly as an unknown with its confidence cost - never fill the gap with an assumed mechanism.
 
 Include **consolidation vs. specialization** as a dimension whenever more than one concern is in play: breadth of coverage, per-concern depth, glue cost, and paradigm cost (see the tiers section above). In ultra mode, apply the relevant dimensions to each tool picked in Step 2.5 as well as to the primary technology, and check that the picks fit with each other.
 
@@ -130,3 +141,4 @@ This is where the agent does the actual thinking — weighing dimensions against
 - Asking an exhaustive, generic checklist of questions unrelated to the specific type of project being built, or reciting a memorized question list instead of formulating questions fresh from `question-method.md`'s axes
 - Silently blocking on missing information instead of falling back to a clearly-labeled general recommendation when the user declines to elaborate
 - Producing a neutral side-by-side comparison and leaving the actual choice to the user when the user asked for a recommendation
+- Scoring two candidates equal because their feature lists and API shapes match, without probing *how* each delivers the capabilities the project uses daily (native vs re-implemented, surfaced hooks vs pierced internals) - or guessing a mechanism the published sources never confirmed; "not establishable from what is public" is the honest line

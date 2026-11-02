@@ -1,13 +1,8 @@
 # Recipe: chrome-liquid — `/animation svg liquid`
 
-The signature treatment. Three layered phases in this exact order:
-
-1. Chrome gradient outline draws itself along every path
-2. True colors rise bottom-to-top like liquid filling a mold (SMIL mask)
-3. Soft diagonal sheen sweeps across the finished logo
-
-Derived from an 1800×1800 reference. Numbers below are that reference's;
-scale them per the SKILL.md scaling table.
+Per-style recipe; shared build rules in foundations.md. Derived from an
+1800×1800 reference. Numbers below are that reference's; scale them per
+foundations §5.
 
 ## Template (hero scale, W=H=1800, two paths)
 
@@ -105,20 +100,15 @@ scale them per the SKILL.md scaling table.
 
 ## Notes
 
-- **Dash values**: `stroke-dasharray/-offset` must be ≥ the target's longest
-  subpath (get it from `extract_paths.py --lengths`). The reference's 10000
-  covered its ~3000-unit contours; do not copy it blindly to a much smaller
-  or larger logo.
-- **Sheen geometry**: rect width = 2×W; translateX runs from −2W to +2W (the
-  reference used ±4000/width 4000 for W=1800 — same proportions).
+- **Dash values**: the reference's 10000 covered its ~3000-unit contours; do
+  not copy it blindly to a much smaller or larger logo (foundations §3).
+- **Sheen geometry**: the reference used ±4000/width 4000 for W=1800; the
+  2×W / ±2×W rule itself is foundations §5.
 - **Optional dark stage**: the reference sits on a dark radial backdrop:
   `.bg { fill: radial-gradient(circle at center, #2b323b 0%, #000000 100%); }`
   on a full-size rect. Add only if the user wants a dark presentation —
   keep the source's background (usually none) otherwise.
-- **`<use>` inherits `fill-rule`** from the referenced def — which is exactly
-  why the rule must live on the def, not (only) on the `<use>`.
 - SMIL `<animate>` inside `<mask>` drives the liquid rise; CSS drives the
   rest. Both run in all modern browsers; no JS needed.
-- Fill colors always come from the ORIGINAL file — `.fill-white`/`.fill-blue`
-  are role names from the reference logo; rename to match the actual colors
-  (e.g. `.fill-teal`).
+- `.fill-white`/`.fill-blue` are role names from the reference logo; rename
+  them to match the actual colors (e.g. `.fill-teal`).

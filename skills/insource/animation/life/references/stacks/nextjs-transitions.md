@@ -1,19 +1,8 @@
 # Stack: Next.js route transitions
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: Next.js App Router route or page transitions, especially with exit animation.
-> - Skip when: other frameworks, or in-page transitions.
-> - Read next: `stacks/css-native.md` (view transitions); `stacks/react-motion.md` (presence and layout APIs).
+> Owner of App Router transition structure: template enter, FrozenRouter exit, view transitions integration, route-transition debugging. Routing lives in ../../SKILL.md.
 
 Page and route transitions in the App Router. The router replaces content on navigation, so exit animations need extra structure. Verify details against the installed Next.js and animation library versions; the exit approach relies on internals that can change.
-
-## Contents
-- Choosing an approach
-- Enter-only with a template
-- Exit and enter with a frozen router
-- View transitions
-- Direction awareness
-- Debug checklist
 
 ## Choosing an approach
 
@@ -22,9 +11,8 @@ Page and route transitions in the App Router. The router replaces content on nav
 | Subtle enter animation on every page | `template.tsx` with an entry animation |
 | True exit then enter between routes | `template.tsx` plus a presence wrapper and a frozen router context |
 | Shared elements across pages, minimal code | The platform's view transitions |
-| Core navigation used constantly | Keep it very light, or a short crossfade only |
 
-Do not block navigation on animation: loading begins immediately and the animation covers the wait.
+How light frequent navigation should be is gate.md's call; the navigation-versus-animation obligation is owned by ../playbooks-transition.md.
 
 ## Enter-only with a template
 
@@ -77,13 +65,13 @@ Where the framework and browser support it, wrap navigations in the view transit
 
 ## Direction awareness
 
-Compute direction from navigation history or route depth (deeper is forward) and expose it to the transition (a data attribute on the root, or the presence `custom` value). Back and forward gestures should reverse the motion.
+Direction awareness (history or route depth, forward and back travel, gesture reversal) is owned by ../playbooks-transition.md; expose the computed direction to the transition as a data attribute on the root or the presence `custom` value.
 
 ## Debug checklist
 
 - Exit never plays: the old tree unmounted; check the frozen router and the presence wrapper placement.
 - Double animation: both a layout and a template animate; keep one level.
-- Flash on first load: use `initial={false}` on the presence wrapper.
+- Flash on first load: skip the mount animation (`initial={false}`, react-motion.md).
 - Scroll jumps: reset scroll deliberately at the right time.
-- Layout shift: reserve space; use `popLayout` so the exiting page leaves the flow.
+- Layout shift: reserve space; keep the exiting page out of the flow with the presence mode documented in react-motion.md.
 - Hydration warnings: avoid random keys or time-based values in the animated wrapper.

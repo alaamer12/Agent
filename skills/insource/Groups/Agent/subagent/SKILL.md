@@ -1,6 +1,6 @@
 ---
 name: subagent
-description: Create high-quality professional prompts for sub-agents. Use when the main agent needs to delegate work to a specialized sub-agent or worker. Produces a structured brief with hierarchical Context, precise Goal, How, Autonomy Bounds, and Output Contract so the sub-agent stays focused, never decides, and returns full raw results instead of summaries. Also covers pre-delegation environment consistency checks (to prevent sub-agent drift), requirements for exhaustive slightest-detail reporting back to the main agent, detecting/mitigating race conditions between concurrently running sub-agents (e.g. shared scripts or files), and the default dispatch mode — sub-agents always run in the background unless the user explicitly asks for foreground. Triggers include sub-agent, subagent, delegate, spawn worker, professional brief, task handoff, isolated prompt, parallel agents, concurrent agents, background agents.
+description: 'Create high-quality professional prompts for sub-agents. Use when the main agent needs to delegate work to a specialized sub-agent or worker. Produces a structured brief with hierarchical Context, precise Goal, How, Autonomy Bounds, and Output Contract so the sub-agent stays focused, never decides, and returns full raw results instead of summaries. Also covers pre-delegation environment consistency checks (to prevent sub-agent drift), requirements for exhaustive slightest-detail reporting back to the main agent, detecting/mitigating race conditions between concurrently running sub-agents (e.g. shared scripts or files), and the default dispatch mode — sub-agents always run in the background unless the user explicitly asks for foreground. Triggers include sub-agent, subagent, delegate, spawn worker, professional brief, task handoff, isolated prompt, parallel agents, concurrent agents, background agents. It also carries the rulebook in the brief and clears the subagent''s authority questions with the user first.'
 ---
 
 # Professional Subagent
@@ -19,6 +19,20 @@ Before writing or dispatching any brief, the main agent must ensure the environm
 5. **State the snapshot in the brief.** Every Domain section should reference the exact snapshot/version used ("as of commit X" / "file read at Y") so drift is detectable after the fact if the environment changes underneath the sub-agent.
 
 If the main agent cannot guarantee a consistent starting point (e.g., a live system actively being edited by something else), it must say so explicitly in the brief's Domain section and instruct the sub-agent to re-verify the specific facts it depends on before acting.
+
+## AGENTS.md travels with the brief — and authority is asked by the parent
+
+A subagent inherits nothing: not the rulebook, not the conversation, not the user's authority grants. Two duties follow, both mandatory before dispatch.
+
+**1. The brief carries the rulebook.** Read the project's AGENTS.md before writing the brief. Copy in the slice the task touches: the compressed baseline block (mandatory context, skills, shell, env, units, reports — per `agents-md` §10), the Privacy paths the task could write into, the Resourceful rule (project-local installs), and the Authority settings. Instruct the subagent plainly: *these rules bind you exactly as if you had read AGENTS.md; your report must name the rules that shaped your decisions and every action you took under an authority grant.* A subagent that has never seen the rulebook is not "independent" — it is unconstrained.
+
+**2. The parent asks on the subagent's behalf.** A subagent cannot ask the user mid-task. So before dispatch, enumerate every action the task requires that AGENTS.md §13 marks *ask-per-session* — installing a binary outside the project, running an external process (emulator, daemon), writing to an existing database, touching credentials, changing machine config — and ask the user up front, in one batch:
+
+> "The subagent will need to <action> to complete <task>. Do you grant authority for it?"
+
+Record each answer in the brief's Autonomy Bounds as an explicit grant or denial. A denial is not a suggestion: re-scope the task, or drop the blocked step and report it. Never let the subagent meet the limit mid-task and improvise around it.
+
+**3. Autonomous mode overrides the asking.** When the user has already put the agent in an anonymous, autonomous state — a skill like `iwts` ("I want to sleep", "take over", "finish it while I'm away") — the agent and its subagents hold **full authority** for the delegated work unless the user carved something out. Skip the batch question; state in each brief: "Autonomous session: full authority for this task within the project; anything the user excluded stays out, and the rulebook's hard constraints (privacy paths, never-sacrifice commitments) remain in force; destructive or out-of-project actions are still reported." Hard constraints are not authority grants — they stay binding even here.
 
 ## Mandatory Brief Structure
 
@@ -59,6 +73,11 @@ You are an executor, not a decision-maker.
 - If a choice appears, surface the options and stop.
 - Do not expand scope. Do not start related work.
 - Do not invent requirements, architecture, or product decisions.
+
+**Authority (per the parent's pre-delegation ask):**
+- Granted for this task: [actions the user approved, or "none beyond project-local work"]
+- Denied / unavailable: [actions to avoid - report instead of executing]
+- Session mode: [normal - ask-per-session rules carry over to the parent, not to you; or AUTONOMOUS - full authority within the project, hard constraints still apply]
 
 ## 5. Output Contract
 1. Emit every raw search result, tool output, and intermediate finding in full inside the conversation.
@@ -161,6 +180,12 @@ the exception:
 
 10. **Dispatch in background, never poll**  
     Background is the default for every spawn; foreground happens only on the user's explicit, per-ask instruction. No sleep-looping or progress-guessing while agents run — treat each completion report as the first moment its results are knowable (see Background by Default).
+
+11. **Subagents obey AGENTS.md**  
+    The brief carries the rulebook slice the task touches (baseline block, privacy paths, resourceful rule, authority settings); the report names which rules shaped decisions and every granted action taken. A subagent operating without the rulebook is unconstrained, not independent.
+
+12. **Ask authority before dispatch, on the subagent's behalf**  
+    Enumerate the ask-per-session actions the task needs (external installs, external processes, existing-DB writes, credentials, machine config) and get the user's grant or denial in one batch before spawning; record it in Autonomy Bounds. In an autonomous session (e.g. `iwts`), the agent and its subagents hold full authority unless the user carved something out — the brief says so, and hard constraints still apply.
 
 ## Optional Forked Mode
 

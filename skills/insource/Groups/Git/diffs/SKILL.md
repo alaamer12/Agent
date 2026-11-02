@@ -1,8 +1,9 @@
 ---
 name: diffs
-description: 'Read git diffs like evidence, not text: triage huge diffs, find what a change really does, and search inside diff history. Establishes the right baseline (A..B vs A...B, worktree vs staged vs HEAD, merge base), surveys a change set (stat, name-status, renames, whitespace-only, binary, generated files), reads hunks correctly (arithmetic, function context, word-diff for long lines, color-moved), spots risk (removed error handling, changed defaults, boundaries, mode bits, dependency and migration changes, secrets), and searches with pickaxe -S/-G, log -L, git grep at a revision, range-diff and remerge diffs for merges. Also answers "is this diff truthful?" - message vs changes, tests present, debug leftovers, partial staging, scope creep. Ships scripts/diff_survey.py (deterministic triage: status, churn, flags, risk summary, --json, --fail-on high). Use for reviewing PRs or commits, investigating what a commit did, hunting where a string was added or removed, or when a diff is too large to read top to bottom.'
+description: 'Read git diffs like evidence, not text: triage huge diffs and search diff history. Establishes the right baseline (A..B vs A...B, worktree/staged/HEAD, merge base), surveys a change set (stat, name-status, renames, generated/binary/whitespace), reads hunks correctly (arithmetic, function context, word-diff, color-moved), spots risk (removed error handling, changed defaults, boundaries, mode bits, dependency and migration changes, secrets), and searches with pickaxe -S/-G, message-level --grep, log -L, git grep at a revision, range-diff, remerge diffs. Topic dossier (--topic): messages + code + history in four budgeted channels, never a -p dump. Also answers "is this diff truthful?" - message vs changes, tests present, debug leftovers, partial staging, scope creep. Ships scripts/diff_survey.py (deterministic triage, --json, --fail-on, budgets). Use for reviewing PRs or commits, investigating what a commit did, hunting where a string was added or removed, or when a diff is too large to read.'
 when_to_use: The user asks what a commit/PR/branch changed, asks to review a diff, points at a huge or confusing diff, asks where a string or behaviour was introduced or removed, or a change must be verified against its description.
 argument-hint: "[range|staged|worktree|merge <sha>] [path...]"
+
 ---
 
 # Diffs
@@ -119,14 +120,27 @@ When the question is "where did this come from" rather than "what does this hunk
 ```bash
 git log -S'<literal>' --oneline -p -- path/        # pickaxe: commits that changed the NUMBER of occurrences
 git log -G'<regex>'  --oneline -p -- path/         # commits where an added/removed line MATCHES the regex
+git log --grep='<topic>' -i --format='%h %s'       # commit MESSAGES - a channel -S/-G never search
 git log -L :function:path -p                       # history of one function, not one file
 git grep -n '<pattern>' <rev> -- path/             # search a snapshot, not the worktree
 git range-diff origin/main...v1 origin/main...v2   # what changed between two versions of a series
 git diff <rev> -- <path> | grep -n '^[+-]'         # narrow a huge hunk stream to changed lines only
 ```
 
-`-S` answers "when did this appear/disappear"; `-G` answers "when did a line mentioning it change". Choosing the
-wrong one is the most common reason a search "finds nothing".
+`-S` answers "when did this appear/disappear"; `-G` answers "when did a line mentioning it change"; `--grep`
+answers "what did humans *say* about it" — a channel the diff scanners never see. Choosing the wrong one is the
+most common reason a search "finds nothing".
+
+**"Extract everything about topic X" is a dossier, not one search** — four channels (messages, code-at-rev
+counts, `-S` history, `-G` count-vs-history) in cheapest-first order, patches pointed at but never auto-dumped:
+
+```bash
+python scripts/diff_survey.py --topic Sentry [--cwd <repo>] [--rev <snap>] [--budget KB] [--max-rows N]
+```
+
+Measured on a mid-size app repo: `git log -S Sentry -p` cost ~50 k tokens; the complete dossier was ~600 —
+and it surfaced the merge-commit message the diff-only searches had no channel for
+([`02`](references/02-searching-diffs.md) §topic dossier).
 
 ## Step 4b — the range spans commits: read the path, not just the endpoints
 
@@ -197,16 +211,17 @@ Verdict: <does it do what it claims? what would falsify that?>
 | Aggregate range read as the story | commits that cancel out are invisible: `--per-commit` exposes hidden churn |
 | `blame` treated as authorship | it reports the **last touch** — a move or reformat reassigns the line; use `-w -M -C`, then `log -L` |
 | "This file has no history" | `git log -- path` stops at a rename — add `--follow` |
+| Topic hunt answered by dumping every patch | `git log -S topic -p` can run to tens of k tokens in a few-hundred-commit repo; the `--topic` dossier said more in ~600 - and covered the message channel too |
 | `--range <single-sha>` treated as worktree | a single revision means **that commit's own diff**; use `--worktree`/`--staged` for local state |
 
 ## Scripts and assets
 
 | Path | Owns |
 |---|---|
-| `scripts/diff_survey.py` | `--range` · `--staged` · `--worktree` · `--merge` · `--path` · `--json` · `--fail-on high`; deterministic per-file map + risk flags. Context budgeting: `--file` · `--to-file` · `--hunks [--match]` · `--hunk 1,4` · `--budget KB` · `--force` · caps of 40 rows. Content at a revision: `--at REV --path F --lines A[:B]` / `--grep RE [--context N]` (deleted files included, 16 KB default budget, **binary blobs refused rather than dumped**). Commit level: `--cwd <repo>` · `--per-commit [--max-commits 15] [--max-hidden 10] [--first-parent]`. Self-test with no arguments (33 checks) |
+| `scripts/diff_survey.py` | `--range` · `--staged` · `--worktree` · `--merge` · `--path` · `--json` · `--fail-on high`; deterministic per-file map + risk flags. Context budgeting: `--file` · `--to-file` · `--hunks [--match]` · `--hunk 1,4` · `--budget KB` · `--force` · caps of 40 rows. Content at a revision: `--at REV --path F --lines A[:B]` / `--grep RE [--context N]` (deleted files included, 16 KB default budget, **binary blobs refused rather than dumped**). Commit level: `--cwd <repo>` · `--per-commit [--max-commits 15] [--max-hidden 10] [--first-parent]`. Topic level: `--topic <word> [--rev] [--max-rows 15] [--budget]` - one budgeted dossier of messages + per-file counts + pickaxe history, case-insensitive, subjects clipped at 120 chars, patches pointed at only. Self-test with no arguments (39 checks) |
 | [`references/00-anatomy-of-a-diff.md`](references/00-anatomy-of-a-diff.md) | headers, hunk arithmetic, renames, modes, binary, combined diffs, word-diff markers |
 | [`references/01-triage-and-risk.md`](references/01-triage-and-risk.md) | reading order, size thresholds, the risk checklist, big-diff strategies |
-| [`references/02-searching-diffs.md`](references/02-searching-diffs.md) | pickaxe -S/-G, `-L`, range-diff, grep at a rev, orderfile, algorithms, parsing `-z` |
+| [`references/02-searching-diffs.md`](references/02-searching-diffs.md) | pickaxe -S/-G, message-level `--grep`, the topic dossier (`--topic`), `-L`, range-diff, grep at a rev, orderfile, algorithms, parsing `-z` |
 | [`references/03-truthfulness-review.md`](references/03-truthfulness-review.md) | message vs hunks, tests, leftovers, partial staging, scope creep, secrets |
 | [`references/04-merges-and-series.md`](references/04-merges-and-series.md) | merge diffs (`--cc`, `--remerge-diff`, `-m`, `--first-parent`), `range-diff` for series |
 | [`references/05-token-efficient-reading.md`](references/05-token-efficient-reading.md) | the narrowing ladder, hunk addressing and budgets, what to do when a file diffs as one hunk, sub-agent handoffs |

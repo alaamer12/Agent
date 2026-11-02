@@ -1,7 +1,7 @@
 # Recipe: rise — `/animation svg rise`
 
-Classic UI reveal: each path floats up from slightly below and fades in,
-staggered left-to-right (DOM order). One-shot; ends fully visible.
+Per-style recipe; shared build rules in foundations.md. One-shot; ends fully
+visible.
 
 ## Template
 

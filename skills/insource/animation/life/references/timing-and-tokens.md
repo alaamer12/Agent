@@ -1,21 +1,10 @@
 # Timing and tokens
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: you are about to write any duration, easing, stagger, scale or blur value, or the project has no tokens.
-> - Skip when: you are only naming, classifying or discovering, not choosing values.
-> - Read next: `springs.md` (if the motion needs physics); `performance-and-accessibility.md` (to check properties and reduced motion).
+> The single owner of every duration, easing, stagger, scale and blur range and the tier caps; routing lives in `../SKILL.md`.
 
 One canonical set of values, scoped by tier, so the sources of motion advice stop contradicting each other. The machine-readable copy is `assets/tokens.json`. A project's own tokens always win: detect them in recon and extend them.
 
-## Contents
-- Adopting tokens
-- Easing
-- Duration
-- Tiers
-- Stagger
-- Distance, scale and blur
-- Resolved conflicts
-- CSS custom properties block
+Values owned elsewhere: spring presets → springs.md; gesture thresholds → gestures.md; enter/exit asymmetry → entrances-and-exits.md.
 
 ## Adopting tokens
 
@@ -30,9 +19,11 @@ One canonical set of values, scoped by tier, so the sources of motion advice sto
 | enter | `cubic-bezier(0.22, 1, 0.36, 1)` | Entrances, exits, transform hovers, default for responding to the user |
 | move | `cubic-bezier(0.25, 1, 0.5, 1)` | Slides, drawers, panels |
 | onScreen | `cubic-bezier(0.645, 0.045, 0.355, 1)` | Back-and-forth movement that stays on screen |
-| drawer | `cubic-bezier(0.32, 0.72, 0, 1)` | iOS-like sheets; steep start lets 500ms feel quick |
+| drawer | `cubic-bezier(0.32, 0.72, 0, 1)` | iOS-like sheets; the steep start keeps even the top of the drawer band (350ms) feeling quick |
 | expo | `cubic-bezier(0.19, 1, 0.22, 1)` | Dramatic reveals, card hovers |
 | press | `cubic-bezier(0.25, 0.46, 0.45, 0.94)` | Button press feedback |
+| morphOpen | `linear(0, 0.45, 0.78, 1, 1.17, 1.21, 1.18, 1.12, 1.05, 1.02, 1)` | Shape/container morph openings; the overshoot is built into the curve |
+| morphClose | `cubic-bezier(0.32, 0.72, 0, 1)` | Morph closings; same curve as drawer |
 | constant | `linear` | Spinners, marquees, scroll-scrubbed progress only |
 
 Entering and exiting use ease-out. Moving on screen uses ease-in-out. Hover color and opacity use plain `ease`. Never ease-in on UI: it delays the moment the user is watching. Built-in named curves are weak; prefer the custom curves above, tuned in the browser's curve editor if contested. Use a spring (see the springs reference) when the motion needs physics.
@@ -52,7 +43,7 @@ Entering and exiting use ease-out. Moving on screen uses ease-in-out. Hover colo
 | Rare moments | 300 to 600ms |
 | Showcase | 600 to 1600ms with labeled beats |
 
-Scale duration with distance: a 6px shift stays under 150ms; a full-screen slide may exceed 300ms. Exits run roughly 20% faster and simpler than entrances.
+Scale duration with distance: a 6px shift stays under 150ms; a full-screen slide may exceed 300ms. Enter/exit asymmetry: see entrances-and-exits.md §Exits.
 
 ## Tiers
 
@@ -92,8 +83,10 @@ Use smaller offsets on small screens. Vary delay and distance by importance. Nev
 | Hero sequence 800 to 1600ms vs 300ms | Showcase tier only, with labeled beats |
 | Layout tween exceptions | Default never; a deliberate container tween (card resize, container morph) is allowed when labeled `layout_exception` |
 | Blur amount | 2 to 4px default, 8px rare entrance, 20px hard cap |
-| Package name for new work | `motion` with `motion/react` imports; if the project already uses the older package, follow the project and flag a migration as a follow-up |
-| Scroll reveal replay | Reveal once, never replay on scroll-up |
+| Drawer and modal duration | 200 to 350ms stands as the canonical range (wider numbers elsewhere are pending correction by their files) |
+| Stagger bands | 30 to 50ms items, 80 to 100ms sections, about 80ms hero words: these are THE ranges; other files link here |
+| Package name for new work | New React work uses `motion` with `motion/react` imports; follow the project otherwise (details: stacks/react-motion.md) |
+| Scroll reveal replay | Reveal once, never replay on scroll-up (implementation: scroll.md) |
 
 ## CSS custom properties block
 

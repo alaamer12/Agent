@@ -1,6 +1,16 @@
 # Extracting a Tool's Model
 
-Goal: recover the concepts and usage patterns the tool itself expects, not the lowest-level functions it exports.
+Goal: recover the concepts and usage patterns the tool itself expects, for the version actually installed — not the
+lowest-level functions it exports, and not the previous major's habits.
+
+## Which version's model
+
+1. Resolve the installed version from the lockfile (not the range in the manifest). No lockfile → use the manifest
+   range, say so, and lower the confidence of the findings that depend on it.
+2. Read documentation for that version, or for its major. Never from memory, and never from docs of a different major.
+3. Docs for the installed version unfindable → say so, lower confidence, do not silently fall back to memory.
+4. When a major changed the tool's **model** (not just its API surface), that is the highest-value finding of the
+   review. In Physical mode, code still following the previous major's idioms is a finding.
 
 ## Primary sources (prefer in order)
 
@@ -38,6 +48,8 @@ A short, explicit list:
 
 ```
 Tool: <name>
+Installed version: <from the lockfile, or the manifest range if there is none>
+Docs source and version used: <page/site and version>
 Core concepts: …
 Paradigm: …
 Natural boundaries: …
@@ -45,4 +57,4 @@ Result/error model: …
 Official guidance on structure: …
 ```
 
-This list becomes the left-hand side of the later comparison.
+This list becomes the left-hand side of the later comparison, and its version lines carry straight into the report.

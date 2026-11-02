@@ -7,17 +7,21 @@ Usage:
   python scripts/agents_lint.py AGENTS.md              standard checks
   python scripts/agents_lint.py AGENTS.md --strict     adds vague-mandate and doc-dump heuristics
   python scripts/agents_lint.py --fixtures             write a sample project to a temp dir and lint it
-  python scripts/agents_lint.py                        self-test (15 fixtures; every defect must be caught)
+  python scripts/agents_lint.py                        self-test (20 fixtures; every defect must be caught)
 
 Exit: 0 clean, 1 findings, 2 usage/read error. Paths are resolved relative to the AGENTS.md directory.
 stdout is ASCII.
 
 Checks:
-  section   the ten required sections exist, in canonical order
-  size      line budget (soft 420, hard 500) and per-section bloat
+  section   the sixteen required sections exist, in canonical order
+  size      line budget (soft 420, hard 500) and the 50-line per-section budget
   scope     the active-context fence names BOTH what is in scope and what is excluded
   links     every referenced relative path resolves; no absolute or foreign-project paths
   structure "read everything in <dir/>" rows, unbalanced managed-block markers, template leftovers
+  privacy   the Privacy section carries the .gitignore-sync duty and the ask-before-cache-clear rule
+  resourceful the Resourceful section states local-over-global for dependencies and toolchains
+  authority the Authority section names the ask-per-session default and the honest-consult rule
+  version-control the Version Control section states operation tiers, a stash policy, and commit authorship
   pending   unanswered items are counted, never silently filled
   freshness the maintenance section exists, carries the update duty, and has a recent review date
   block     the subagent block: size, required slots, clause-to-section traceability
@@ -34,13 +38,13 @@ import re
 import sys
 import tempfile
 
-SOFT_LINES, HARD_LINES, SOFT_SECTION = 420, 500, 70
+SOFT_LINES, HARD_LINES, SOFT_SECTION = 420, 500, 50
 
 # canonical section -> the heading keywords that count as it (real projects rename things)
 SECTIONS = [
     (("agent instructions", "core rules", "ground rules", "behavior", "principles", "general rules"), "1"),
     (("mandatory context", "context", "read first", "source of truth", "steering"), "2"),
-    (("development workflow", "workflow", "branching", "release", "versioning", "git"), "3"),
+    (("development workflow", "workflow", "branching", "release", "versioning"), "3"),
     (("units", "component index", "catalog", "registry"), "4"),
     (("design", "prototype", "mockup", "visual"), "5"),
     (("execution", "shell", "command", "tooling", "tool usage", "terminal"), "6"),
@@ -48,11 +52,18 @@ SECTIONS = [
     (("debugging", "debug", "diagnos", "troubleshoot"), "8"),
     (("startup", "starting", "session start", "bootstrap", "begin work", "agent execution"), "9"),
     (("subagent", "sub-agent", "delegation", "agent pool", "fan-out", "master agent", "orchestrat"), "10"),
+    (("privacy", "visibility", "confidential", "what to hide", "private paths", "secrecy"), "11"),
+    (("resourceful", "local first", "local-first", "project local", "project-local", "local resources",
+      "project resources"), "12"),
+    (("authority", "permissions", "permission", "what agents may do", "consent", "ask per session"), "13"),
+    (("skills", "skill notes", "skill instructions", "skill registry", "per-skill"), "14"),
     (("rulebook maintenance", "maintenance", "keeping the rulebook", "staying current",
-      "up-to-date", "currency"), "11"),
+      "up-to-date", "currency"), "15"),
+    (("version control", "source control", "git", "scm", "commit policy", "git policy"), "16"),
 ]
 SECTION_LABELS = ["agent instructions", "mandatory context", "development workflow", "units", "design",
-                  "execution", "environment", "debugging", "startup", "subagent", "maintenance"]
+                  "execution", "environment", "debugging", "startup", "subagent", "privacy", "resourceful",
+                  "authority", "skills", "maintenance", "version control"]
 BLOCK_SLOTS = ("TASK-SPECIFIC DOCS", "SCOPE", "OUTPUT CONTRACT")
 # clause keyword -> the section that must exist for the clause to be traceable
 BLOCK_CLAUSES = {
@@ -64,6 +75,10 @@ BLOCK_CLAUSES = {
     "DEBUG": "debugging",
     "UNITS": "units",
     "REPORT": "subagent",
+    "PRIVACY": "privacy",
+    "RESOURCEFUL": "resourceful",
+    "AUTHORITY": "authority",
+    "GIT": "version control",
 }
 VAGUE_PATTERNS = [
     r"\bwrite clean code\b", r"\bbest practices\b", r"\bbe careful\b", r"\buse common sense\b",
@@ -151,8 +166,9 @@ def lint(path: str, strict: bool = False) -> list[str]:
         f.append("size: %d non-blank lines - approaching the %d budget" % (total, HARD_LINES))
     for key, (a, b) in present.items():
         if b - a > SOFT_SECTION:
-            f.append("size: the '%s' section is %d lines - that is a document with a pointer missing"
-                     % (key, b - a))
+            f.append("size: the '%s' section is %d lines - over the %d-line section budget; extract the detail "
+                     "to a referenced doc and keep the obligations here"
+                     % (key, b - a, SOFT_SECTION))
 
     # ---------- active scope fence
     ctx_a, ctx_b = present.get("mandatory context", (0, len(lines)))
@@ -191,6 +207,56 @@ def lint(path: str, strict: bool = False) -> list[str]:
     else:
         f.append("freshness: no maintenance section - the rulebook must carry its own update duty, or it "
                  "silently goes stale (see references/08)")
+
+    # ---------- privacy duties
+    if "privacy" in present:
+        a, b = present["privacy"]
+        pblock = "\n".join(lines[a:b]).lower()
+        if "gitignore" not in pblock:
+            f.append("privacy: the Privacy section does not require every private path to also appear in "
+                     ".gitignore - an ignore rule without the ignore file is only an intention")
+        if not re.search(r"ask[^.]{0,60}(cache|clear|delete|remove)|git rm --cached", pblock):
+            f.append("privacy: the Privacy section lacks the ask-before-clearing-the-cache rule - a path "
+                     "tracked before it was declared private stays visible until the cache is cleared, and "
+                     "that removal must be asked for, never assumed")
+
+    # ---------- resourceful duty
+    if "resourceful" in present:
+        a, b = present["resourceful"]
+        rblock = "\n".join(lines[a:b]).lower()
+        if "local" not in rblock or "global" not in rblock:
+            f.append("resourceful: the Resourceful section does not state the local-over-global rule - "
+                     "name what stays project-local (dependencies, toolchains, environments) and that "
+                     "global installs are named exceptions")
+
+    # ---------- authority duty
+    if "authority" in present:
+        a, b = present["authority"]
+        ablock = "\n".join(lines[a:b]).lower()
+        if "ask" not in ablock and "consult" not in ablock:
+            f.append("authority: the Authority section states neither the ask-per-session default nor the "
+                     "consult-the-user rule - record which actions need permission and what happens when "
+                     "the limit blocks the work")
+        if "honest" not in ablock and "consult" not in ablock and "report" not in ablock:
+            f.append("authority: the Authority section lacks the honest-blocked rule - when a limit stops "
+                     "the requested work, the agent must say what it cannot do and ask, not silently skip")
+
+    # ---------- version control duties
+    if "version control" in present:
+        a, b = present["version control"]
+        gblock = "\n".join(lines[a:b]).lower()
+        if not re.search(r"allow|never|forbid|prohibit|read-only|ask before", gblock):
+            f.append("version-control: the Version Control section names no permission tiers - state which git "
+                     "operations are allowed (read-only, commits), which need asking (push, shared-branch "
+                     "merges), and which are never without explicit user order (history rewrite, reset --hard, "
+                     "clean, force-push)")
+        if "stash" not in gblock:
+            f.append("version-control: no stash policy - is stashing allowed at all, and with which message "
+                     "pattern? in a shared worktree a bare stash/pop collides with other agents")
+        if not re.search(r"author|committer", gblock):
+            f.append("version-control: no commit authorship rule - which identity do agent-made commits carry "
+                     "(human sole author, Co-authored-by trailer, an agent identity)? the commit and branch "
+                     "skills hand this decision to this section")
 
     # ---------- links and paths
     checked = set()
@@ -357,6 +423,10 @@ A subagent cannot see this conversation and cannot ask questions.
 6. DEBUG - local inspection allowed; ask before mutating
 7. UNITS - read docs/UNITS.md before implementing
 8. REPORT - write agents/<name>.md when finished
+9. PRIVACY - section 11 lists private paths; write outputs only to those, never commit them
+10. RESOURCEFUL - use project-local dependencies and toolchains; ask before any global install
+11. AUTHORITY - <!-- ask before DB writes, system installs, external processes; consult on limits -->
+12. GIT - commit on feature branches only; never rewrite pushed history; stash only via "agent/<task>" message
 
 TASK-SPECIFIC DOCS: <fill per delegation>
 SCOPE: <paths you may modify>
@@ -366,12 +436,62 @@ OUTPUT CONTRACT: <exact deliverable>
 
 - Each subagent writes [agents/](agents/) report with goal, actions, files, decisions, verification.
 
-## 11. Rulebook Maintenance
+## 11. Privacy
+
+- Private paths - never commit, never quote in reports that leave this repo: `agents/` and its reports,
+  skill folders, and the output folders the hidden tools write (`.iwts/` run records are private because the
+  skills are private).
+- Hiding a producer hides its output too: a private tool's working folders are private by cascade.
+- Every private path must also appear in `.gitignore`; if it is missing there or still tracked, ask the user
+  before clearing the cache - never delete silently.
+- Hidden binaries: keep the install note, not the file.
+
+## 12. Resourceful
+
+- Prefer project-local resources over global ones for everything that can be local: dependencies, toolchains,
+  interpreters, CLIs.
+- Local environments are the rule - e.g. a project `[.venv]` for Python, project installs for JS tooling
+  (never a global `-g` install for a project need), a per-project `[Cargo]`/`[Composer]`/`[Maven]` local
+  store; the same idea in every language.
+- A global install is an exception named in this section, never a convenience default - record it with its
+  reason and who needs it.
+- Run project binaries through the project's own tooling (the venv, `node_modules/.bin`, the package
+  manager's exec), so the version used is the version the project pinned.
+
+## 13. Authority
+
+- Default: ask per session before anything outside the project's own scope - writing to an existing
+  database, installing a binary system-wide, running external processes such as an emulator.
+- Fixed authority, when the user grants it, is recorded here per action; project-local installs are
+  section 12, not this section.
+- If an authority limit blocks the requested work, the agent says honestly what it cannot do, what that
+  costs, and asks whether to continue under the restriction or to grant authority.
+
+## 14. Skills
+
+| Skill | Use it when | Read or do first |
+|---|---|---|
+| `plan` | work spans more than one session | `docs/plans/README.md` - the plan format this repo follows |
+| `benchmark` | comparing implementations | run it under `scratch/bench/` and delete the folder afterwards |
+| `commit` | before any commit | the message map in `docs/commit-craft.md` |
+
+## 15. Rulebook Maintenance
 
 Every session that changes a project rule updates this file in the same change.
 
 - **Last reviewed:** 2026-10-27
 - New channel/version: update section 2. New or renamed doc: update its row.
+
+## 16. Version Control
+
+- Read-only git (`status`, `log`, `diff`, `show`) is always allowed; commits are allowed on feature
+  branches per the section 3 model; push and shared-branch merges need asking.
+- Never without an explicit user order: `rebase`, amending pushed work, `reset --hard`, `git clean`,
+  force-push.
+- Stash is allowed only with a named pattern - `git stash push -u -m "agent/<task-slug>"`; in a shared
+  worktree apply the exact entry and never bare-pop; drop only entries this agent created.
+- Authorship: commits keep the repository's configured identity; agent involvement is disclosed with
+  a `Co-authored-by:` trailer [exact name to confirm with the user]; never edit git config to change it.
 """
 
 
@@ -400,6 +520,22 @@ def broken_doc(kind: str) -> str:
                       "- <!-- e.g. what is permitted -->")
     elif kind == "over budget":
         d = d + "\n".join("- filler rule %d to blow the budget for the test" % i for i in range(420))
+    elif kind == "privacy duties":
+        d = re.sub(r"- Private paths[\s\S]*?note, not the file\.",
+                   "- Skill folders and their run outputs stay out of commits.\n", d)
+    elif kind == "authority duties":
+        d = re.sub(r"## 13\. Authority[\s\S]*?(?=## 14\.)",
+                   "## 13. Authority\n\n- The user grants permissions.\n\n", d)
+    elif kind == "version control duties":
+        d = re.sub(r"## 16\. Version Control[\s\S]*",
+                   "## 16. Version Control\n\n- Commit when the work is done.\n", d)
+    elif kind == "resourceful duties":
+        d = re.sub(r"## 12\. Resourceful[\s\S]*?## 13\.",
+                   "## 12. Resourceful\n\n- Use the tooling that is available.\n\n## 13.", d)
+    elif kind == "fat section":
+        d = d.replace("\n## 2. Mandatory Context",
+                      "".join("\n- filler rule %d for the per-section budget test" % i for i in range(55))
+                      + "\n## 2. Mandatory Context")
     elif kind == "dir as context":
         d = d.replace("| [docs/base.md](docs/base.md) | structure and boundaries |",
                       "| [docs/](docs/) | read everything in docs |")
@@ -407,7 +543,7 @@ def broken_doc(kind: str) -> str:
         d = d.replace("## 3. Development Workflow",
                       "<!-- BEGIN pinned-skills -->\n\n## 3. Development Workflow")
     elif kind == "no maintenance section":
-        d = re.sub(r"## 11\. Rulebook Maintenance[\s\S]*", "", d)
+        d = re.sub(r"## 15\. Rulebook Maintenance[\s\S]*", "", d)
     elif kind == "stale review":
         d = re.sub(r"\*\*Last reviewed:\*\* \d{4}-\d{2}-\d{2}", "**Last reviewed:** 2020-01-01", d)
     elif kind == "no review date":
@@ -428,6 +564,11 @@ FIXTURES = [
     ("block missing a slot", broken_doc("block slots"), ["block"]),
     ("template leftovers", broken_doc("template leftovers"), ["pending"]),
     ("over line budget", broken_doc("over budget"), ["size"]),
+    ("fat section", broken_doc("fat section"), ["size"]),
+    ("privacy missing duties", broken_doc("privacy duties"), ["privacy"]),
+    ("resourceful missing duties", broken_doc("resourceful duties"), ["resourceful"]),
+    ("authority missing duties", broken_doc("authority duties"), ["authority"]),
+    ("version control missing duties", broken_doc("version control duties"), ["version-control"]),
     ("directory as context", broken_doc("dir as context"), ["structure"]),
     ("unbalanced markers", broken_doc("unbalanced markers"), ["structure"]),
     ("vague mandate", broken_doc("vague"), []),
@@ -500,4 +641,4 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:]))

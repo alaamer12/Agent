@@ -1,9 +1,7 @@
 # Recipe: neon — `/animation svg neon`
 
-Neon-sign switch-on: each outline flickers alight in its own color with a
-colored halo, sputtering like a real tube for the first second, then the
-fills fade in underneath. One-shot; ends fully lit. Designed for dark
-backgrounds.
+Per-style recipe; shared build rules in foundations.md. One-shot; ends fully
+lit.
 
 ## Template
 
@@ -73,7 +71,7 @@ backgrounds.
   the tube is stable (`0.9s` here).
 - **Glow blur** scales like the other filters: stdDeviation ≈ W/120.
 - `stroke-width` ≈ 1.5 at small sizes (slightly heavier than draw strokes —
-  a tube has thickness); scale per the SKILL.md table.
+  a tube has thickness); scale per foundations §5.
 - If a path's own color is very dark (like #040c24), the glow is subtle on
   the dark stage — acceptable; the tube still reads via its halo against
   near-black.

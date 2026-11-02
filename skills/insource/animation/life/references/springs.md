@@ -1,20 +1,8 @@
 # Springs
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: physics, bounce, momentum, interruption, gestures, 'feels alive', layout animation.
-> - Skip when: plain fade or ease motion with no physics.
-> - Read next: `gestures.md` (for drag and release); `stacks/react-motion.md` (for the web API); `stacks/react-native.md` (for the native API).
+> Owner of the spring concept (perceptual versus physical), the preset table and tuning guidance. Routing lives in ../SKILL.md.
 
 Physics-based motion. Use when motion should feel alive, respond to gestures, or be interrupted gracefully. Keep CSS easing for simple, predetermined motion.
-
-## Contents
-- When to use springs
-- Two ways to describe a spring
-- Presets
-- Bounce rules
-- Interruption and velocity
-- Asymmetric open and close
-- Pitfalls
 
 ## When to use springs
 
@@ -47,7 +35,7 @@ Higher stiffness is snappier; lower damping means more bounce; higher mass feels
 
 ## Bounce rules
 
-- Bounce only when the user imparts momentum (a flick, a drag release) or the moment is rare and playful. A spring that overshoots on a routine dropdown feels sloppy.
+- Bounce only when the user imparts momentum (a flick, a drag release) or the moment's tier allows it; the tier verdict is gate.md's. A spring that overshoots on a routine dropdown feels sloppy.
 - Overshoot of about 2 to 8% is plenty. More reads as cartoon.
 - Utility and productivity tools use zero or minimal bounce; consumer and playful products can go further.
 - Do not combine heavy bounce with a long duration: the settle drags.
@@ -58,7 +46,7 @@ A spring carries its current velocity into the next target. Redirect mid-flight 
 
 ## Asymmetric open and close
 
-Opening can overshoot slightly (an energetic arrival) while closing uses a clean critically damped spring or ease-out (a quiet departure). In CSS, a sampled spring curve can serve the opening side:
+Opening can overshoot slightly (an energetic arrival) while closing uses a clean critically damped spring or ease-out (a quiet departure). In CSS, a sampled spring curve can serve the opening side (example of the sampling technique; canonical curve list: timing-and-tokens.md):
 
 ```css
 .surface { transition: transform 420ms linear(0, 0.45, 0.78, 1, 1.17, 1.21, 1.18, 1.12, 1.05, 1.02, 1); }

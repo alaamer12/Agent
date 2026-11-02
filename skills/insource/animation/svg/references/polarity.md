@@ -1,8 +1,7 @@
 # Recipe: polarity — `/animation svg polarity`
 
-A band sweeps across the logo and inverts whatever it touches, so a negative
-strip runs through the artwork and the plain logo is left behind. One-shot;
-ends pixel-exact.
+Per-style recipe — shared build rules in [foundations.md](foundations.md),
+signature and trigger words in [../SKILL.md](../SKILL.md).
 
 The skill's first use of **`mix-blend-mode: difference`**. Distinct from
 `chroma` (which decomposes the artwork into channels and sums them) and from
@@ -56,10 +55,7 @@ The skill's first use of **`mix-blend-mode: difference`**. Distinct from
 - **`isolation: isolate` is required**, on the group containing both the artwork
   and the band. Without it the blend reaches past the SVG's own content and the
   result depends on where the file is embedded.
-- The band is a `<rect>`, not a `<path>` — decorative geometry never adds a
-  path (see SKILL.md).
 - Soft edges: give the band a linear gradient from white to black instead of a
   flat fill and the inversion feathers in. Flat white is a hard cut.
 - Pacing: 1.1–1.5s. Slower turns a scan into a crawl; faster loses the read of
   what inverted.
-- **Verified in Chromium 153 only.**

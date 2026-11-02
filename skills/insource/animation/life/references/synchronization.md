@@ -1,20 +1,8 @@
 # Synchronization
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: two or more elements animate together, in order, or react to each other (cascade, ripple, hover affecting neighbors, connected nodes).
-> - Skip when: a single element animates alone.
-> - Read next: `playbooks-component.md` (to apply the form to a component); `playbooks-transition.md` (to apply it across states); `performance-and-accessibility.md` (for linked effects on dense graphs).
+> Owns the instant/domino/linked forms (definitions, propagation, per-form rules, pitfalls); routing lives in `../SKILL.md`.
 
 How animated elements relate to each other. Choose the form from the relationship, then implement it.
-
-## Contents
-- Choosing the form
-- Instant synchronous
-- Domino / sequential
-- Linked
-- Combining forms
-- Interaction with synchronization
-- Pitfalls
 
 ## Choosing the form
 
@@ -53,13 +41,13 @@ One animation depends on or follows another, so motion travels through the inter
 Rules
 - Order by hierarchy: the primary element leads, supporting elements follow, the call to action lands last.
 - Overlap beats waiting. Start the next element before the previous finishes (a stagger offset smaller than the duration) unless a hard hand-off is the point.
-- Keep the total short. For lists and routine UI the whole chain stays under about 300ms; section-level entrances can use 80 to 100ms offsets; word-level offsets of about 80ms are for a hero headline only.
+- Keep the total short: domino uses the list-item and section stagger bands, and each band's numbers belong to timing-and-tokens.md §Stagger.
 - Never block interaction while a chain plays.
 - Vary delay and distance by importance. A uniform offset reads as a metronome.
 - A chain of more than about five items needs grouping, or the later items feel slow. Animate groups as units.
 
 ```css
-.item { animation: enter 300ms var(--ease) both; animation-delay: calc(var(--i) * 40ms); }
+.item { animation: enter var(--dur) var(--ease) both; animation-delay: calc(var(--i) * var(--stagger-list)); }
 ```
 
 ```js
@@ -68,10 +56,7 @@ await elA.animate(kfA, timing).finished;
 await elB.animate(kfB, timing).finished;
 ```
 
-```tsx
-// Motion: stagger children from the parent
-<motion.ul variants={{ show: { transition: { staggerChildren: 0.04 } } }} animate="show" />
-```
+Motion `staggerChildren` on the parent: see stacks/react-motion.md.
 
 Choose one level of entrance per container. If the container animates in, its children are already visible on arrival; if the children stagger, the container does not also move.
 
@@ -127,11 +112,7 @@ for (const [id, s] of linkedStrengths(graph, hoveredId)) {
 .node { opacity: calc(0.45 + 0.55 * var(--link, 1)); transition: opacity 160ms var(--ease); }
 ```
 
-For plain DOM relationships, CSS can carry the link without script:
-
-```css
-.grid:has(.chip:hover) .chip:not(:hover) { opacity: 0.5; filter: blur(2px); }  /* peripheral de-emphasis */
-```
+For plain DOM relationships, CSS can carry the link without script (`:has()` de-emphasis pattern: see stacks/css-native.md).
 
 ### Implementation notes
 - Reset on leave or deselect: restore all linked elements, including ones a fast pointer skipped.
@@ -143,7 +124,7 @@ For plain DOM relationships, CSS can carry the link without script:
 
 ## Combining forms
 
-The forms nest. A selection can be linked (neighbors react) while the reaction itself is a domino (neighbors respond in order of distance, 30 to 50ms per hop). A transition can run instant for the container and domino for its contents. Name each layer in the classification line.
+The forms nest. A selection can be linked (neighbors react) while the reaction itself is a domino (neighbors respond in order of distance at list-item offsets, timing-and-tokens.md §Stagger). A transition can run instant for the container and domino for its contents. Name each layer in the classification line.
 
 ## Interaction with synchronization
 

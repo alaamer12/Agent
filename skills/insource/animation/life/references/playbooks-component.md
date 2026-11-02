@@ -1,21 +1,8 @@
 # Playbook: component
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: the command is component: dialog, popover, dropdown, drawer, toast, card, menu, accordion, list item, container morph.
-> - Skip when: the command is micro or transition.
-> - Read next: `entrances-and-exits.md` (for arrival and departure rules); `synchronization.md` (for children and container relations); `gestures.md` (for drag-to-dismiss surfaces).
+> Owns component lifecycle recipes, origin choices and the component workflow. Routing lives in ../SKILL.md.
 
 Animating a complete component as one visual unit: dialog, popover, dropdown, drawer, toast, card, menu, accordion, list item, panel. The component may contain many parts; the animation is designed around the component.
-
-## Contents
-- Workflow
-- Enter, exit, move, emphasize
-- Origin
-- Container versus children
-- Standard recipes
-- Layout changes
-- Creative lanes for component
-- Checklist
 
 ## Workflow
 
@@ -27,10 +14,10 @@ Animating a complete component as one visual unit: dialog, popover, dropdown, dr
 
 ## Enter, exit, move, emphasize
 
+Enter and exit treatments are owned by entrances-and-exits.md.
+
 | Step | Typical treatment |
 |---|---|
-| Enter | Start slightly offset and reduced in scale with opacity 0, ease-out, tier duration |
-| Exit | Faster and quieter than the enter, small fixed offset, same path back |
 | Move | Layout animation to the new position, ease-in-out or a spring |
 | Emphasize | A single brief scale or color pulse; never a loop on routine UI |
 
@@ -49,13 +36,7 @@ Setting the origin is the single cheapest fix for animation that feels wrong.
 
 ## Container versus children
 
-Pick one level of entrance per container:
-
-- **Container moves, children static.** The surface slides or scales in; its content is already laid out. Use for most dialogs, menus and drawers.
-- **Container static, children stagger.** The frame is there; contents arrive in order (instant, domino or linked). Use for first-time or rare surfaces.
-- Do not do both. A moving container with staggering children reads as two competing motions.
-
-When children relate (a menu whose items highlight neighbors), see the linked form in the synchronization reference.
+The one-level rule (container moves xor children stagger) and every relation between parts are owned by synchronization.md.
 
 ## Standard recipes
 
@@ -69,15 +50,15 @@ Popover or dropdown (origin-aware, fast)
 @keyframes pop-out { to   { opacity: 0; transform: scale(0.95); } }
 ```
 
-Modal: overlay fades in; the dialog enters with opacity and scale from 0.95 (or a small translate), 200 to 300ms; the exit is shorter. Overlay and dialog share easing and duration.
+Modal: overlay fades in; the dialog enters with opacity and scale from 0.95 (or a small translate) within the modal/drawer band in timing-and-tokens.md; the exit is shorter. The paired overlay/dialog clocks follow synchronization.md (Instant).
 
-Drawer: translate from the edge with the drawer curve; 300 to 500ms is acceptable because the curve is steep. Swipe-to-dismiss follows the finger with no easing and springs after release (see the gestures reference).
+Drawer: translate from the edge with the drawer curve at the modal/drawer duration band in timing-and-tokens.md. Swipe-to-dismiss follows the finger with no easing and springs after release (see the gestures reference).
 
-Toast: slide and fade in from the edge, 200 to 300ms; new toasts push others with a layout animation; the exit runs 150 to 200ms. Interruption: toasts fire rapidly, so use transitions that retarget, not restarting keyframes.
+Toast: slide and fade in from the edge, 200 to 300ms; new toasts push others with a layout animation; the exit runs 150 to 200ms. Interruption: toasts fire rapidly, so use transitions that retarget, not restarting keyframes (policy: performance-and-accessibility.md).
 
 List item add and remove: new item enters with opacity and an 8px offset; removed items exit and the remainder close the gap with a layout animation. Remove uses a short fade rather than reversing the entrance.
 
-Accordion or collapse: avoid animating height with layout tweens on large content when you can use clipping or grid-row transitions; if a measured-height tween is chosen, label it as a container tween exception, 200 to 300ms, ease-out.
+Accordion or collapse: avoid animating height with layout tweens on large content when you can use clipping or grid-row transitions; if a measured-height tween is chosen, label it as a container tween exception — the ruling and values live in timing-and-tokens.md (Resolved conflicts).
 
 Card hover or select: transform lift with the expo curve; shadows change on a separate fading layer.
 
@@ -89,14 +70,7 @@ Card hover or select: transform lift with the expo curve; shadows change on a se
 
 ## Creative lanes for component
 
-| Lane | Component idea |
-|---|---|
-| Self-transformation | The trigger grows into the surface (container morph) with overshoot opening and a clean close |
-| Reveal | A mask or clip-path wipe that follows the surface's geometry |
-| Depth | Layered parallax inside a card, a slight perspective tilt on enter |
-| Choreography | Header, body and actions arrive in domino order with overlap; or linked highlights across a menu |
-| Physics | A drawer that settles with weight and responds to flick velocity |
-| Light and material | Surface edge light that tracks the pointer; glass surfaces that sharpen as they settle |
+The idea lanes are owned by creative-direction.md (master lanes table); pick lanes there that suit a whole surface arriving, moving or leaving.
 
 ## Checklist
 

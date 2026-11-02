@@ -1,20 +1,8 @@
 # Playbook: micro
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: the command is micro: a button, icon, badge, toggle, number, text swap, hover, press, focus, loading indicator, success or error feedback.
-> - Skip when: the command is component or transition.
-> - Read next: `timing-and-tokens.md` (for values); `svg-and-clip-path.md` (for drawn checks, fills and masks); `springs.md` (for physical press feel).
+> Owns the micro recipes (press, toggle, swaps, hold-to-confirm) and the micro state workflow. Routing lives in ../SKILL.md.
 
 Animating a single element or a small visual unit: a button, icon, badge, toggle, number, input, link, chip. Small in scope, but it can be interactive, synchronized, and as creative as the tier allows.
-
-## Contents
-- Workflow
-- State inventory
-- Standard recipes
-- Creative lanes for micro
-- Number and text changes
-- Success, error and loading
-- Checklist
 
 ## Workflow
 
@@ -29,14 +17,16 @@ Animating a single element or a small visual unit: a button, icon, badge, toggle
 | State | Animate? | Notes |
 |---|---|---|
 | rest | n/a | The reference every other state returns to |
-| hover | Only on devices that hover; low frequency elements | Subtle; 100 to 200ms |
+| hover | Only on devices that hover; low frequency elements | Subtle; ranges in timing-and-tokens.md |
 | focus | Immediate visible indicator, optional short fade | Never remove the outline; keyboard users depend on it |
-| press / active | Yes, almost always | 0ms response, scale 0.97 |
+| press / active | Yes, almost always | Immediate response; press-scale band in timing-and-tokens.md |
 | disabled | No motion; static change | Do not animate toward unavailable |
 | loading | Spinner or progress; button keeps its size | Avoid layout shift |
 | success / error | Yes, rare tier | Confirm in place |
 
 ## Standard recipes
+
+Ranges for press, hover, swap scale and blur belong to timing-and-tokens.md (sole owner of values); the numbers in the snippets below are examples.
 
 Press feedback
 
@@ -45,40 +35,23 @@ Press feedback
 .btn:active { transform: scale(0.97); }
 ```
 
-Hover that does not flicker on touch
-
-```css
-@media (hover: hover) and (pointer: fine) {
-  .card { transition: transform 150ms var(--ease-enter); }
-  .card:hover { transform: translateY(-2px); }
-}
-```
+Hover is gated to hover-capable devices; the media-query policy lives in performance-and-accessibility.md (owner).
 
 Hover target flicker: when the hovered element moves out from under the pointer, animate an inner element and keep the hover target (the wrapper) static.
 
-Toggle or checkbox: animate the thumb with transform, color with a 200ms ease; indeterminate and checked share a curve. Radio: scale the dot from 0.8 to 1 with opacity; the ring changes color only.
+Toggle or checkbox: animate the thumb with transform, color with an eased fade; indeterminate and checked share a curve. Radio: fade-scale the dot with opacity; the ring changes color only.
 
-Icon swap (two icons, one slot): animate both icons with opacity, scale from 0.25 to 1 and a 4px blur, so the swap reads as one object changing. Keep both mounted for a continuous crossfade, or use presence animation with an exit.
+Icon swap (two icons, one slot): animate both icons with opacity, scale and a small blur (bands in timing-and-tokens.md), so the swap reads as one object changing. Keep both mounted for a continuous crossfade, or use presence animation with an exit.
 
-Badge or count pop: spring from scale 0.6 to 1 with a light bounce; the number swaps with the number rule below.
+Badge or count pop: spring from scale 0.6 to 1 with a light bounce — a named exception to the entry-scale band in timing-and-tokens.md; the number swaps with the number rule below.
 
 Input focus: ring fades in 150ms; label floats with transform, not font-size changes.
 
-Hold to confirm: fill progress with a clip-path inset that tracks the hold (about 2s linear while pressed), snap back in 200ms on release, with ease-out. Pair with a tiny 0.97 press scale.
+Hold to confirm: fill progress with a clip-path inset that tracks the hold (about 2s linear while pressed — linear is correct because progress is the information), snap back in 200ms on release, with ease-out. Pair with a tiny 0.97 press scale.
 
 ## Creative lanes for micro
 
-| Lane | Micro idea | Notes |
-|---|---|---|
-| Light and material | A sheen sweeps across on hover or on success; glass-like brightening on press; subtle depth shadow that tightens on press | Usually needs the HTML prototype. Keep the sheen on a compositor layer. |
-| Self-transformation | Label morphs into a check; button becomes a progress bar then a confirmation | Fix the width to avoid layout shift; clip, don't resize |
-| Physics | Magnetic pull toward the cursor with a spring, weighted press with overshoot on release | Cap the pull distance; disable on touch |
-| Reveal | Underline draws from the pointer's entry side; fill wipes in with a clip-path | Reverse from the exit side |
-| Typographic | Letters shift weight on hover; label rolls vertically like a counter | Keep tabular widths |
-| Trace | An outline draws around the element on focus or success | Measure the path length instead of guessing |
-| Ambient | Idle glow breathing on a primary call to action | Rare; pause off-screen |
-
-All of these are subject to the gate. A frequently pressed control gets the press recipe and nothing creative.
+The idea lanes and their micro applications are owned by creative-direction.md (master lanes table). All options are subject to the gate: a frequently pressed control gets the press recipe and nothing creative.
 
 ## Number and text changes
 

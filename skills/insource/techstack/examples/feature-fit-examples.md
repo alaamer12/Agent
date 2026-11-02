@@ -29,6 +29,30 @@ Everything above is phrased by capability, not by product. When naming products,
 - **CPU-bound heavy numerical/ML workloads**: naturally suited to ecosystems with mature numerical/ML libraries and native-extension support; possible elsewhere via bindings to native code, but that's an added integration layer rather than a first-class capability.
 - **Strict compile-time type safety across a large team**: naturally suited to statically-typed languages/frameworks; achievable with gradual typing or added tooling in a dynamically-typed stack, but that's a bolt-on discipline rather than an enforced guarantee.
 
+## Mechanism parity — same capability list, different internals
+
+The pattern the feature table cannot catch: two candidates tick every box identically, use the same
+API shapes, and still feel different to work with daily, because *how* they deliver a capability is
+not the same. Worked illustration (verify fresh before repeating as current):
+
+- **Two Vue component ecosystems, say an Ionic-based kit vs a self-contained one (e.g. Ionic-Vue vs
+  Quasar).** Both claim forms, focus states, themable components, date pickers — the checklist ties.
+- **Focus:** the Ionic-style kit largely rides the platform's native focus (its components are thin
+  wrappers over standard elements/web components); the self-contained kit maintains its own internal
+  notion of which component is focused, independent of the browser's. Same feature, different
+  mechanism — and the mechanism difference leaks as lower accessibility, keyboard-flow surprises and
+  screen-reader incoherence that no feature table predicts.
+- **Styling customization:** the wrapper-style kit lets you restyle through ordinary selectors and
+  its documented variables; the self-contained kit seals its internals, so real customizations need
+  piercing (`:deep()` selectors, specificity fights). If the community answer to "how do I change
+  this component's style" is a piercing workaround, extension has become penetration.
+- **How to catch this before choosing:** for the two or three capabilities used *every screen*
+  (focus/forms, styling overrides, scrolling), read each candidate's theming and a11y docs and inspect
+  its **public repository**: the component source itself, the issue tracker and discussions, plus Q&A
+  sites — search the capability with "accessibility", "custom style", "override". Published code needs
+  no black-box probing; read what is already public. If the published record gives no answer, report that honestly as an unknown rather than deciding the tie by assumption. Tie on features, split on mechanism. A month into the project, mechanism is what "was this a bad decision?" actually
+  measures.
+
 ## How to use these
 
 Treat these as prompts for the kind of question to ask about *this* project's actual feature list, not as a lookup table to apply mechanically. When the user names a feature not covered here, research its real support level across the actual candidates under consideration (Step 0's verification discipline applies) rather than guessing from a pattern that happens to look similar.

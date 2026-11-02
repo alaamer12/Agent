@@ -4,6 +4,8 @@ Illustrates a case where the tool's model introduces richer concepts that often 
 
 ## Tool model (extracted)
 
+- Tool: effect · installed version from the lockfile · docs for that major (illustrative; the model is
+  version-scoped and evolves between majors)
 - Core concepts: Effect, Schema, Decode / encode, Layer, Context, Program
 - Paradigm: effect system with explicit success/failure, dependencies, and decoding
 - Natural boundaries: schema definition is distinct from the decoding operation that produces an Effect

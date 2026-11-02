@@ -1,7 +1,7 @@
 # Recipe: spark — `/animation svg spark`
 
-A bright spark travels the width of the logo and the artwork stays lit behind
-it, so the reveal reads as something being welded into existence. One-shot.
+Per-style recipe — shared build rules in [foundations.md](foundations.md),
+signature and trigger words in [../SKILL.md](../SKILL.md).
 
 The skill's first use of **`<animateMotion>`**.
 
@@ -48,11 +48,8 @@ The skill's first use of **`<animateMotion>`**.
 
 ## Notes
 
-- **`animateMotion` on its own is not a reveal.** The first build was a masked
-  spotlight following a motion path and nothing else: it animated correctly and
-  ended with **1% of the artwork visible**, because a moving light has no
-  memory. The reveal must *accumulate* — here a growing mask rect — and the
-  motion path is the flourish riding its leading edge.
+- **The growing mask rect is the reveal; the spark motion is only the flourish
+  on its leading edge** (a reveal must accumulate, foundations §6).
 - **Repeat the identical `path`, `dur`, `calcMode` and `keySplines` on every
   `animateMotion`.** The mask bulge and the visible dot are two separate
   elements; matching parameters is the only thing keeping them in step. Any
@@ -62,4 +59,3 @@ The skill's first use of **`<animateMotion>`**.
   cut.
 - The dot fades out at 100% so the resting frame is the logo alone.
 - Spark size ≈ r/6 of the mask bulge; the bulge radius ≈ H/4.
-- **Verified in Chromium 153 only.**

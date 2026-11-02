@@ -1,30 +1,15 @@
 # Gestures and drag
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: drag, swipe, flick, pull, reorder, knob, detents, swipe to dismiss.
-> - Skip when: nothing is directly manipulated.
-> - Read next: `springs.md` (for the motion after release).
+> Owner of drag core rules, velocity projection, rubber-banding, axis commitment, pointer capture, dismiss, detents, rotary, reorder and gesture thresholds. Routing lives in ../SKILL.md.
 
 Direct manipulation: dragging, swiping, flicking, rotary controls, detents, swipe to dismiss, drag to reorder. The finger leads; animation only takes over after release.
-
-## Contents
-- Core rules
-- Velocity and momentum
-- Boundaries and rubber-banding
-- Axis commitment
-- Pointer capture
-- Swipe to dismiss
-- Detents and snapping
-- Rotary controls
-- Drag to reorder
-- Checklist
 
 ## Core rules
 
 - While the pointer is down, the element is locked to it with no easing and no delay. Any smoothing during drag makes the interface feel disconnected.
-- After release, hand velocity to a spring or a momentum projection so the motion continues naturally.
+- After release, hand velocity to a spring or a momentum projection so the motion continues naturally (release velocity into the spring: springs.md).
 - Record the grab offset on pointer-down so the element does not jump to center on the cursor.
-- Set transform directly on the moving element. Do not write a CSS variable on a parent: every update recalculates every child.
+- Set transform directly on the moving element; the parent-CSS-variable ban and its reason: performance-and-accessibility.md (Main-thread discipline).
 - Interactive targets are at least 44px; set `touch-action` to the axis you handle so the browser does not scroll against you.
 
 ## Velocity and momentum
@@ -47,7 +32,7 @@ Capture the pointer on pointer-down so the gesture keeps working when the pointe
 
 - Follow the finger, scale or fade lightly with distance.
 - On release: dismiss if the projected position passes the threshold or velocity is high; otherwise spring back.
-- The exit continues in the direction of travel with the release velocity, and the same path as the normal exit.
+- Exit path and direction of travel after a gesture dismissal: entrances-and-exits.md (Exits).
 - Multi-touch and nested scrolling: prevent a dismiss while the inner content is scrolled away from its top.
 - Keep a non-gesture dismiss (a button, the escape key) with the same animation.
 

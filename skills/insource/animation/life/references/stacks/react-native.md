@@ -1,24 +1,8 @@
 # Stack: React Native
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: implementing in React Native or Expo.
-> - Skip when: the target is web.
-> - Read next: `gestures.md` (pan handling); `springs.md` (spring settings).
+> Owner of Reanimated and gesture-handler implementation notes. Routing lives in ../../SKILL.md.
 
-Notes for React Native animation with Reanimated and the gesture handler. Verify API names and options against the installed versions.
-
-## Contents
-- Principles
-- Shared values and styles
-- Timing and springs
-- Layout and presence
-- Gestures
-- Reduced motion
-- Performance
-
-## Principles
-
-The same rules apply: gate by frequency, ease-out for responsive motion, springs for gestures, animate transform and opacity, define reverses, handle interruption. The main difference is that animation should run on the UI thread, not the JavaScript thread.
+Notes for React Native animation with Reanimated and the gesture handler. Verify API names and options against the installed versions. The one native difference: animation runs on the UI thread, not the JavaScript thread; the general rules (gate, timing, pairs, interruption) are unchanged and owned by the hub, gate.md and timing-and-tokens.md.
 
 ## Shared values and styles
 
@@ -41,7 +25,7 @@ withSpring(0, { stiffness: 500, damping: 40 });                 // physical
 withSpring(0, { duration: 400, dampingRatio: 1 });                // perceptual style where supported
 ```
 
-Pass release velocity into `withSpring` after a gesture via the `velocity` option.
+Pass release velocity into `withSpring` after a gesture via the `velocity` option (principle: ../springs.md).
 
 ## Layout and presence
 
@@ -51,7 +35,7 @@ Built-in entering, exiting and layout transitions animate mount, unmount and pos
 <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)} layout={LinearTransition} />
 ```
 
-Use custom entering and exiting only when the defaults are not enough. Exits are shorter than entrances.
+Use custom entering and exiting only when the defaults are not enough; the exits-shorter rule: ../entrances-and-exits.md.
 
 ## Gestures
 
@@ -61,15 +45,15 @@ const pan = Gesture.Pan()
   .onEnd((e) => { x.value = withSpring(target(e), { velocity: e.velocityX }); });
 ```
 
-Handle cancel and fail states, commit to an axis, keep targets at least 44pt, and provide a non-gesture alternative.
+Handle cancel and fail states, commit to an axis, and keep a non-gesture alternative (semantics: ../gestures.md); the native minimum touch target is 44pt.
 
 ## Reduced motion
 
-Use the library's reduced-motion hook or per-animation reduce setting, and the platform accessibility setting for reduce motion. Replace travel with a short fade; keep user-triggered feedback.
+Use the library's reduced-motion hook or per-animation reduce setting, and the platform accessibility setting for reduce motion; the policy (what to keep and what to drop) is owned by ../performance-and-accessibility.md.
 
 ## Performance
 
-- Animate transform and opacity; avoid animating layout properties (width, height, margin) per frame.
+- Animate transform and opacity; avoid animating layout properties (width, height, margin) per frame (tiers: ../performance-and-accessibility.md).
 - Avoid reading layout on every frame; precompute on the UI thread.
 - Use native driver equivalents for platform animation APIs when not using Reanimated.
 - Test on a low-end device and with the performance monitor open.

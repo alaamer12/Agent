@@ -1,70 +1,90 @@
-# TREAT.md Report Template
+# Report Template
 
-Write the report to `TREAT.md` (project root or user-specified path). Use this exact section order. Keep language precise and diagnostic.
+Use this structure for both outputs: the compact in-chat report (default) and the `TREAT.md` file (only when the
+user asks). Same fields, same order; the chat version may omit sections that would be empty instead of pasting the
+skeleton.
 
 ```markdown
 # TREAT Report — <Tool or Tools>
 
-**Mode:** Empirical | Physical  
-**Scope:** <feature / module / project area>  
+**Scope:** <feature / module / project area>
 **Date:** <YYYY-MM-DD>
 
-## 1. Tool Model Summary
+## 1. Tools under review
 
-For each tool under review:
+| Tool | Installed version (lockfile) | Docs source and version used | Mode | Verdict |
+|------|------------------------------|------------------------------|------|---------|
+| …    | …                            | …                            | Empirical / Physical | fits cleanly / partial mismatch / significant mismatch |
+
+No lockfile: say so, state the manifest range instead, and lower the confidence of every finding that depends on
+the version. Mixed versions installed: report the migration as unfinished rather than picking a side.
+
+## 2. Tool Model Summary
+
+Per tool, from documentation **for the installed version or its major**:
 
 - **Core concepts & terminology**
 - **Paradigm / execution model**
 - **Natural boundaries the tool expects**
 - **Result / error model**
-- **Official structural guidance** (quote or paraphrase primary sources)
+- **Official structural guidance** (quote or paraphrase; name the docs version it came from)
 
-## 2. Project Side Snapshot
+## 3. Project Side Snapshot
 
 - Current organization of the relevant area
-- How the tool is currently imported and used (Physical) or how the area is currently structured (Empirical)
+- How the tool is imported and used (Physical) or how the area is currently structured (Empirical)
 - Existing naming and module conventions that touch the tool
 
-## 3. Diagnosis
+## 4. Diagnosis
+
+Per tool.
 
 ### Respectful aspects
-List what already aligns with the tool's model.
+What already aligns with the tool's model.
 
 ### Gaps and mismatches
-For each mismatch:
+For each finding:
+
 - What the tool's model expects
 - What the project currently does
 - Why it matters (complexity, hidden concepts, mixed responsibilities, brittle usage)
+- **Confidence:** high / medium / low — and the reason whenever lowered (indirect version evidence, no docs found
+  for the installed major, code path only partially read)
+- **Version note** when the mismatch is a previous-major idiom still in use, or a migration that stalled partway
 
 ### Over-structuring risks
-Note any places where adding structure would be pure bureaucracy.
+Where adding structure would be pure bureaucracy.
 
-## 4. Recommendations
+## 5. Recommendations
 
-Only recommendations that restore or preserve respect for the tool's model.
+Only what restores or preserves respect for the tool's model. Each one:
 
-For each recommendation:
 - **What** to change (structure, naming, boundaries, explicitness)
 - **Why** (link back to a concrete part of the tool model)
-- **Proportionality** (smallest change that achieves respect)
-- **Do not change** (explicitly list what should stay as-is)
+- **Proportionality** (the smallest change that achieves respect)
+- **Do not change** (what should stay as-is)
 
-Never include implementation patches or file edits. Describe the target shape only.
+No patches and no file edits — describe the target shape only. If the structure already respects the model, say so
+and recommend no change.
 
-## 5. Decision Summary
+## 6. Decision Summary
 
 | Concept / concern | Current state | Recommended action | Rationale |
 |-------------------|---------------|--------------------|-----------|
 | … | … | Keep / Adjust / Introduce | … |
 
-## 6. Sources
+## 7. Sources
 
-Primary documentation and examples consulted.
+Per tool: the primary documentation consulted, with its version and, where useful, the page.
 ```
 
 ## Writing rules
 
+- **In chat, lead with the verdict per tool**, then the findings, then the recommendations. Omit empty sections.
+- **`TREAT.md` only on request** — "save it", "export", "write TREAT.md", or a named path. It is the only file this
+  skill may ever write.
 - Be concrete. Name files, modules, and concepts that exist or should exist.
 - Prefer the tool's own terms over project-local translations when diagnosing.
-- If the current structure is already respectful, say so clearly and keep the recommendations section short.
-- Do not produce code diffs or apply changes. The report is the only deliverable.
+- State the reviewed version and the docs version per tool; when either is uncertain, say so and lower confidence
+  rather than presenting a guess as fact.
+- Do not produce code diffs, do not edit source, configs, lockfiles, or package files. The report is the deliverable.

@@ -1,30 +1,18 @@
 # Classification
 
-> **Connections** (paths are relative to `references/`)
-> - Read when: phase 1 of every run, before choosing any technique, or when unsure whether something is scope, interaction, synchronization, technique or timing.
-> - Skip when: the classification line is already written and unchanged.
-> - Read next: `synchronization.md` (if two or more elements animate); `gate.md` (the next phase).
+> Owns the six descriptive dimensions and the classification line; routing lives in `../SKILL.md`.
 
-Animation is described along five independent dimensions. Mixing them up is the most common reason an animation feels arbitrary: "fade" is a technique, not a role. Decide the roles first.
+Animation is described along six independent dimensions. Mixing them up is the most common reason an animation feels arbitrary: "fade" is a technique, not a role. Decide the roles first.
 
-## Contents
-- The five dimensions
-- Design order
-- Interaction
-- Scope
-- Synchronization (summary)
-- Direction
-- Technique and timing
-- The classification line
-
-## The five dimensions
+## The six dimensions
 
 ```text
 1 Synchronization   how animations relate to each other
 2 Interaction       whether the animation responds to the user
 3 Scope             what part of the interface is animated
-4 Technique         how the visual movement is performed
-5 Timing            how the animation progresses over time
+4 Direction         for transitions: forward and backward
+5 Technique         how the visual movement is performed
+6 Timing            how the animation progresses over time
 ```
 
 They are independent. An animation can be interactive and linked and component-scoped, using a scale technique with an ease-out timing. Changing one dimension does not force a change in the others.
@@ -53,30 +41,15 @@ Interactive animations need immediate response: press at 0ms, drag locked to the
 
 ## Scope
 
-| Scope | Unit | Typical decisions |
-|---|---|---|
-| Micro | One element or a small part of one | Which states exist, how often it is seen, which technique expresses feedback |
-| Component | The component as one visual unit | Enter, exit, move, emphasis; relation between container and children |
-| Transition | The change from state A to state B | State graph, forward and backward, direction awareness, interruption |
+The three scopes, their units and their commands: the hub's Commands table (`../SKILL.md`). A transition always answers: how does the interface move from the current state to the next, and back?
 
-Micro animations stay small in scope but can use any technique and can be interactive. A component animation treats the component as one thing even though it contains many parts. A transition always answers: how does the interface move from the current state to the next, and back?
+## Synchronization
 
-## Synchronization (summary)
-
-```text
-Synchronized animation
-├── Instant synchronous   elements share the same timing
-├── Domino / sequential   elements follow one another in order
-└── Linked                elements respond through a defined relationship
-```
-
-Synchronization does not require identical animations. Different elements can use different techniques and still be synchronized through shared timing, sequence, or relationship. Patterns and code are in the synchronization reference.
+The three forms (instant, domino, linked), their rules and patterns: see synchronization.md. Synchronization does not require identical animations: different elements can use different techniques and still be synchronized through shared timing, sequence, or relationship.
 
 ## Direction
 
-Only transitions require explicit direction, and a professional transition defines both. For every forward step there is a designed reverse. The reverse is usually not a mirror image: it can be shorter, quieter, or use a different curve. Never design only the forward path and let the backward path fall back to a default.
-
-The equivalent pairs elsewhere: enter and exit for components; press and release, hover in and hover out for micro animations. Design both halves of every pair.
+Only transitions require explicit direction, and a professional transition defines both halves of every pair (enter/exit, press/release, forward/reverse); the pairs and their design rules: see entrances-and-exits.md.
 
 ## Technique and timing
 
@@ -84,10 +57,4 @@ Technique answers "what movement": fade, slide, scale, move, rotate, reflect, mo
 
 ## The classification line
 
-Write the result as one line and keep it visible through the run:
-
-```text
-scope=component · interaction=non-interactive · sync=domino · direction=enter/exit · technique=<later> · timing=<later>
-```
-
-Fill technique and timing only after the gate and the style decision. If a dimension is unknown, say so and resolve it before building.
+Write the result as the Classification row of the hub's Output contract (`../SKILL.md`) and keep it visible through the run. Fill technique and timing only after the gate and the style decision; if a dimension is unknown, say so and resolve it before building.

@@ -1,8 +1,7 @@
 # Recipe: engrave — `/animation svg engrave`
 
-The logo appears as blind embossed paper — a highlight sweeps across the relief
-like light raking a seal — and then the real colours land on top. One-shot;
-ends as the plain logo.
+Per-style recipe — shared build rules in [foundations.md](foundations.md),
+signature and trigger words in [../SKILL.md](../SKILL.md).
 
 The skill's first use of the **lighting primitives** (`feDiffuseLighting`).
 
@@ -67,4 +66,3 @@ The skill's first use of the **lighting primitives** (`feDiffuseLighting`).
   **new colour, not a replacement** — the originals still appear verbatim on
   the solid layer, so `validate.py`'s colour check passes.
 - Sweep the azimuth across ~180°; a shorter arc reads as a flicker.
-- **Verified in Chromium 153 only.**

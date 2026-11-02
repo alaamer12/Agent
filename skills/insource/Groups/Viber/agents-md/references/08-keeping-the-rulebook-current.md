@@ -15,7 +15,7 @@ This is the difference between the rulebook and the docs. Technical detail goes 
 Pair it with a review marker the linter can check:
 
 ```markdown
-## 11. Rulebook Maintenance
+## 15. Rulebook Maintenance
 **Last reviewed:** 2026-10-27
 ```
 
@@ -36,6 +36,11 @@ Pair it with a review marker the linter can check:
 | Debug permissions changed (new environment is inspectable, new tool available) | **yes** — section 8 |
 | Startup steps changed | **yes** — section 9 |
 | Delegation rules changed | **yes** — section 10, **and regenerate the pasteable block** |
+| A dependency/local-environment rule changed, or a global install became an allowed exception | **yes** — section 12, exception and rule in one place |
+| An authority setting changed (ask-per-session vs fixed), or a grant was given/revoked | **yes** — section 13, with its reason and scope |
+| A git rule changed (operation tier, stash policy, commit author identity) | **yes** — section 16, **and regenerate the block's GIT clause**; the `commit`/`branch` skills read this section before asking anything about authorship |
+| A skill gains (or loses) a project-specific usage note | **yes** — section 14, one row: condition + pointer |
+| A path became private, or a privacy rule changed (hidden tool ⇒ its outputs, binary ⇒ install note elsewhere) | **yes** — section 11, **and the `.gitignore` entry in the same change**; if the path was already tracked, ask the user before clearing the cache — never silently |
 | A function was renamed inside the product | no — that is the units index / code |
 | An architectural decision about the diff engine | no — that is an ADR, referenced from section 2 |
 | A dependency was bumped | no — that is history and the lockfile |
@@ -66,9 +71,10 @@ changes how the system works, it belongs in a doc and this file keeps the pointe
 | Stale active scope | the file says V1 while V2 is in development | review date + verify section 2 first each session |
 | Missing dimension | a channel exists in practice, not in the file | the decision→section table above |
 | Dead references | agents stop honoring mandatory reading | `agents_lint.py` link check; report, do not stub |
-| Block/body divergence | subagents follow rules the repo abandoned | regenerate 10.4 whenever 1–9 change; the linter traces clauses |
+| Block/body divergence | subagents follow rules the repo abandoned | regenerate 10.4 whenever 1–9, 11, or 16 change; the linter traces clauses |
 | Rulebook creep | the file absorbs technical docs and passes 500 lines | the "does it change what the agent must do?" test; move out, keep a pointer |
-| Unowned updates | everyone assumes someone else keeps it current | make the duty explicit in section 11, and in the delegation contract for subagents |
+| Unowned updates | everyone assumes someone else keeps it current | make the duty explicit in section 15, and in the delegation contract for subagents |
+| Ignored-in-name privacy | section 11 declares paths private while they stay committed or still tracked | a privacy edit updates `.gitignore` in the same change; the linter checks both duties in the section; the already-tracked case raises the ask-before-cache-clear question |
 
 ## Subagents and maintenance
 
