@@ -82,7 +82,7 @@ You are an executor, not a decision-maker.
 ## 5. Output Contract
 1. Emit every raw search result, tool output, and intermediate finding in full inside the conversation.
 2. Do not summarize or omit evidence.
-3. The final report to the parent must be exhaustive, not a digest. It must let the main agent fully reconstruct what happened without re-running anything:
+3. The report is **written to the project's reports directory** - default `.subagents/<name>.md`, which belongs in `.gitignore` (hidden dir ⇒ hidden outputs, per the rulebook's privacy section); a project-declared location wins; the brief names it. Never report into committed docs. The final report to the parent must be exhaustive, not a digest. It must let the main agent fully reconstruct what happened without re-running anything:
    - Every file touched, with exact paths, and what changed (not "updated the config" — the actual before/after or diff).
    - Every command run and its exact output, including failures, retries, and warnings — not just the successful final one.
    - Every assumption made along the way, even small ones, and why.

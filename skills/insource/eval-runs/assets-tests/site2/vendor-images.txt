@@ -1,4 +1,0 @@
-# from fahlwy data.csv providers (keyless image CDNs)
-https://picsum.photos/800/1400 photos/random-photo
-https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&h=1400&fit=crop photos/unsplash-lake
-https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=800 photos/pexels-dog

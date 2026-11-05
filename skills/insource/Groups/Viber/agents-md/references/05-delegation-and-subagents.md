@@ -1,8 +1,22 @@
-# The delegation contract - section 10
+# The delegation contract - section 6
 
 The user's original ask had three parts: what the **main agent** does, how it **submits subagents**, and how
 **subagents do their tasks**. This section is where all three live, and it is the part of the rulebook that
 scales the project's throughput - so it gets its own reference.
+
+<!-- Principle that outranks every checklist below: a subagent is bound by the ENTIRE rulebook,
+     exactly like the main agent. Per-delegation scope narrows its ACTIONS (it does not commit,
+     push, bump versions, or run version-control work unless ordered), never its OBLIGATIONS -
+     golden rules, privacy, and authority still bind it - and it leaks no context: private paths
+     and other tasks' material stay out of every artifact it writes.
+
+<!-- THE BLOCK IS A TEMPLATE, NOT A SNAPSHOT. Two kinds of clause line: VOLATILE facts that go stale
+     between regenerations (active version, channel, excluded paths, per-task docs) are written as
+     <FILL: from section 2.1 at paste time> slots the parent substitutes per delegation; STABLE policy
+     (golden rules, privacy paths, VCS tiers, toolchain) keeps its fixed text, because it IS the rule.
+     A volatile value burned into the block is a time bomb: the next version bump makes every pasted
+     block lie confidently. The three TASK-SPECIFIC slots work exactly this way - extend the pattern to
+     the context clause, never to the policy clauses.
 
 ## The premise to state first
 
@@ -35,10 +49,13 @@ subagents, so overlapping scopes produce duplicated or contradictory work.
 6. **Set the autonomy level** (see the table).
 7. **Merge, don't re-do.** In fan-out, the orchestrator splits, launches, and integrates. If it is doing every
    leaf's work itself, the fan-out was decorative.
-8. **Collect and reconcile reports.** Confirm each landed; resolve contradictions between subagents before
-   acting on either. A contradiction between two reports is a finding, not noise.
+8. **Collect and reconcile reports.** Reports default to `.subagents/<name>.md` - hidden, gitignored via
+   section 7's sync duty, never committed: a report is the working record of a delegation, not repo
+   content; a project-declared location wins and the brief names whichever applies. Confirm each landed;
+   resolve contradictions between subagents before acting on either - a contradiction between two reports
+   is a finding, not noise.
 9. **Ask authority on the subagent's behalf.** A subagent cannot ask the user mid-task. Enumerate the
-   ask-per-session actions the task needs under section 13 - external installs, external processes,
+   ask-per-session actions the task needs under section 9 - external installs, external processes,
    existing-DB writes, credentials, machine config - and ask the user in one batch before dispatch; record
    the grant or denial in the brief (Autonomy Bounds). A denial re-scopes the task; it is never bypassed
    by the subagent improvising.
@@ -79,7 +96,8 @@ wrong needs permission to *stop*, or it will complete a wrong task beautifully.
   subagent will need to <action> - do you grant authority?"), record each answer in the brief, and re-scope
   on a denial.
 - **Autonomous sessions override the asking.** When the user has already placed the agent in an
-  anonymous, autonomous state (e.g. `iwts` - "I want to sleep", "take over"), the agent and its subagents
+  anonymous, autonomous state (whatever mode does that in this project - "take over", "finish it while
+  I'm away"), the agent and its subagents
   hold full authority for the delegated work unless the user carved something out. The brief says so; hard
   constraints (privacy paths, never-sacrifice commitments) still apply, and destructive or out-of-project
   actions are still reported.
@@ -91,7 +109,7 @@ inside the prompt**. Two disciplines make it safe:
 
 1. **It is a projection, not a second source.** Every clause maps to a section (context→2, skills→1, shell/
    tooling→6, env→7, debug→8, units→4, report→10). The body wins on any disagreement.
-2. **Regenerate on change.** State that in the file: *"editing sections 1-9 requires regenerating this block."*
+2. **Regenerate on change.** State that in the file: *"editing sections 1-5 requires regenerating this block."*
    `scripts/agents_lint.py` compares clause topics against the sections and flags a block clause with no
    corresponding section (and vice versa), which is how drift gets caught before it mis-informs every
    subagent.

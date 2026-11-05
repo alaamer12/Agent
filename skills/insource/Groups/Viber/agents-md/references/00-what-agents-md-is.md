@@ -41,15 +41,38 @@ same-task requirement that prevents a rotting index.
 Bad: `git checkout -b feature/x` tutorials. Good: "work lands on `canary` first; never commit directly to
 `main`; `main` advances only by owner-approved promotion." Constraints, not commands.
 
-**Version control (section 16).**
+**Ambiguity and decision records (section 13).**
 
-Bad: "use git responsibly" - unfalsifiable; and a wall of git commands - documentation. Good: the three tiers
-named ("allowed: read-only git and local commits on feature branches; ask first: push, PRs, shared-branch
-merges; never without explicit order: rebase or amend of pushed work, `reset --hard`, `clean`, force-push,
-`--no-verify`"), a stash verdict (allowed with an `agent/<task>` message pattern, or forbidden in favor of a
-WIP commit / separate worktree), and the identity line ("commits keep the configured human author; no
-`Co-authored-by` trailer" - or the exact trailer name, decided once). The `commit` and `branch` skills look
-for this answer and stop asking; without it they must ask every session.
+Bad: the section storing the questions that were asked - transcripts, quoted intent, example wording.
+AGENTS.md states POLICY here, nothing else: question types and their triggers. Good: "Mode: Broad - the
+user answers intent-level questions; internals are the agent's, best-for-project. Exact list: cipher suite,
+retention window (the decisions the user claimed)" - plus the always-ask mandate for weight-bearing
+decisions, the rule that critical questions get asked before any anonymous run, and the record
+convention: one file per decision at `docs/decisions/<slug>.md` anchored Date + Commit + App-Version (a
+single combined decisions.md is the explosion anti-pattern), where even the decision NOT to ask gets
+recorded. The moment this section quotes a question, it has become a transcript of one session instead
+of the standing policy every session follows.
+
+**Version control (section 12).**
+
+Bad: "use git responsibly" - unfalsifiable; and a wall of git commands for a tool the project may not even
+use. Good: the VCS named first ([Git], [Unity VCS/Plastic], [Perforce], [SVN] - concepts bind, commands
+illustrate), the tiers as concepts ("allowed: inspect history/state + local check-ins per section 3; ask
+first: anything outward - push/submit, PRs, shared merges; never without explicit order: published-history
+rewrites, destructive restores, workspace purges, hook bypass"), a parked-work verdict (stash/[shelve]
+allowed with an `agent/<task>` naming pattern, or forbidden in favor of a WIP check-in / separate
+workspace), and the identity line ("check-ins keep the configured human author; no `Co-authored-by`
+trailer" - or the exact trailer name, decided once). The `commit` and `branch` skills look for this answer
+and stop asking; without it they must ask every session.
+
+**Review sections.**
+
+Bad (what it becomes after three months): twenty named review tasks with per-task checklists inlined into
+`AGENTS.md` - fifty lines of procedure the agent carries into every session to run in a few. Good: the
+always-first rule stays ("hunt rulebook violations, code and docs, before any named task"); the task bodies
+live in `<docs>/review.md`; AGENTS.md keeps one index line per task plus `Read: <docs>/review.md`. Growth is
+the failure mode - sections that start as obligations end as documents unless the budget is enforced on them
+*as they grow*, not at next year's audit.
 
 ## Why ~500 lines, and what the limit is really protecting
 
@@ -76,11 +99,11 @@ Practical consequences:
 
 The section split, bad and good:
 
-Bad - section 7 grows to 70 lines: the env-validation library's rationale, a table of every variable, three
+Bad - section 3 grows to 70 lines: the env-validation library's rationale, a table of every variable, three
 examples of the generation script's output, and the fallback behavior, all inline. Every session pays for the
 generation-script trivia even when the task is a one-line CSS fix.
 
-Good - section 7 is 8 lines:
+Good - section 3 is 8 lines:
 
 ```markdown
 ## 7. Environment and Secrets

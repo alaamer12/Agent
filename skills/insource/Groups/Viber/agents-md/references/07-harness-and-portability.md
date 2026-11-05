@@ -38,6 +38,14 @@ Some harnesses support a local override file (this environment's own conventions
 When unsure, write the rule conditionally and state the scope: *"if your shell hangs on X, do Y"* rather than
 asserting a project-wide rule about one laptop.
 
+## When the user keeps global personal preferences
+
+Some users maintain a personal instruction file loaded into every project (the `personalize` skill owns those
+lines and the precedence ladder - brief plus pointer, do not restate it here). The project rulebook's duty:
+**the project inherits and respects the user's preferences; where it must differ, the override is written
+here explicitly** - "This project overrides a global preference: [what], because [why]" - so no agent ever
+faces a silent contradiction between the two files, which is the one shape neither file gets trusted.
+
 ## What not to encode as fact
 
 - Which files the tool auto-loads, precedence order, or memory locations - verify, or describe the *duty*
@@ -57,7 +65,7 @@ Expect cohabitation and define the boundary in the report rather than silently o
 |---|---|---|
 | A skill-pinning tool | a managed block between two comment markers | pass the region through verbatim; never edit inside the markers; mention it in the report |
 | [`units-md`](../../units-md/SKILL.md) | `UNITS.md` and its generation, incl. the UI builder profile | reference the file and the duty; do not generate or stub the file |
-| A subagent-brief skill | the content of one delegation prompt | own the *contract* (section 10) that such prompts must satisfy; do not write briefs |
+| A subagent-brief skill | the content of one delegation prompt | own the *contract* (section 6) that such prompts must satisfy; do not write briefs |
 | A docs/steering skill | the documents section 2 points at | keep pointers accurate; report dead paths for that skill to fix |
 
 The general principle: agents-md writes the rulebook's **structure and obligations**. Every mechanism the

@@ -35,7 +35,12 @@ Hard rules, any count of layers:
    system: read the existing chain (folder order, `@use`/`using`/import graph) before adding a
    file, and slot new work into the layer whose question it answers. Where the project has
    *services* or modules with declared purposes, styling joins as another named layer, not as a
-   side channel.
+   side channel. The same law places the folders: ONE styling root whose NAME comes from the
+   project's incumbent location first, the framework's idiom second ([styles], [css], [themes],
+   [resources], co-located files - `styles` is an example, never a default this skill imposes),
+   and layer names that speak their concern (values, tokens, skins, modules) —
+   never a directory named after the styling language (`[sass]/` under any root): one project, one
+   styling system, the extension speaks it.
 
 ## The topmost layer is style-free
 

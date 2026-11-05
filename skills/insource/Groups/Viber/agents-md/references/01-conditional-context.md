@@ -2,7 +2,14 @@
 
 `AGENTS.md` states **which context is active** and **which files that context requires**. Everything conditional
 hangs off that one table. This is the mechanism with the highest failure rate in real rulebooks, because the
-negative half is usually missing.
+negative half is usually missing - and because labels are written where mechanics were required:
+
+<!-- A dimension value is declared only when it is OPERATIONAL: the file says what the active value
+     GOVERNS and how to recognize it in the tree and at runtime - the folder its code lives in, a
+     docs split (docs/[main] vs docs/[canary]), the file-naming pattern (e.g. the [App.Canary.cs]
+     suffix), the [build flag / channel argument], the manifest field, the deploy target.
+     "main + canary" as two bare words is a mystery, not context. When the meaning runs longer than a
+     line per value, it goes to subsections (### 3.1...) or a referenced doc - never to implication. -->
 
 ## Version and channel are separate dimensions
 
@@ -17,19 +24,29 @@ Do not collapse them. They differ in what they select:
 A project can have V1 docs and V2 docs, each shipping on stable and canary, with different rules per cell. That
 is a matrix, and the file must say **which cell is active now** and how to tell.
 
-## The fence has two sides
+## The fence has two sides - and every dimension has a reach
 
 ```md
 ### Active context
-| Dimension | Active | Out of scope - do not read or apply |
-| Version   | V1     | v2/ - future features only        |
-| Channel   | canary | stable-only rules where they differ |
+| Dimension | Active | Recognized by - what it governs        | Out of scope - do not read or apply |
+| Version   | V1     | the `v1/` code tree; docs/v1.md        | v2/ - future features only          |
+| Channel   | canary | docs/[main] vs docs/[canary] split, a   | stable-only rules where they differ |
+|                      | [build flag], the deploy target          |                                     |
 ```
 
 **The excluded column is the rule.** "Read `base/` and `v1/`" leaves the agent to decide whether `v2/` is
 harmless background. It is not: an agent that has read future requirements starts implementing them, or worse,
 resolves a conflict by picking the newer-sounding document. Write it as a prohibition: *treat excluded-context
 files as absent*.
+
+**The Recognized-by column is the depth.** A dimension is not a label sitting in a cell - it is a fence that
+can run through *any surface*: it may split the docs tree (docs/[main] vs docs/[canary]), the code tree, the
+build (a [flag], a [file-naming suffix]), which rules apply, and what gets deployed where. Shallow failure
+looks like a perfect little table that answers nothing: "Version | V2 | beta" - now the agent opens a file in
+`docs/main/` and cannot tell whether it belongs to its context. Write for each active value where it SHOWS
+and what it governs; a dimension that genuinely reaches only one surface says so ("docs split only") - what
+is banned is the empty label. When the reach of one dimension needs explaining, it grows a subsection or a
+doc pointer, the same way the development how-to doc explains a branch.
 
 Corresponding duties:
 
@@ -82,8 +99,8 @@ resolve every relative path (the linter does this). When a path is missing, repo
 
 ```text
 DEAD REFERENCE: docs/UNITS.md does not exist.
-  -> the units index is units-md's job; until it exists, section 4's duty cannot be honored.
-  -> either run units-md to generate it, or set section 4 to: "pending - no units index in this project yet".
+  -> the units index is units-md's job; until it exists, section 2's duty cannot be honored.
+  -> either run units-md to generate it, or set section 2 to: "pending - no units index in this project yet".
 ```
 
 agents-md does not create the target. Creating a stub would turn a visible gap into an invisible one.

@@ -19,6 +19,18 @@ pages|modules/
   <module>   its own style scope, loaded with its module
 ```
 
+**One root; its name belongs to the framework and the project.** If the project already keeps
+styling somewhere, that location wins - extend the incumbent, never open a rival root. If none
+exists, take the name the stack's own idiom uses: [styles], [css], [assets], [resources],
+[themes], [ui], co-located per-component files ([Vue SFC], [Blazor `.razor.css`]) - or barely a
+folder at all for a [Tailwind]-style utility stack. `styles` is an example, not a default: import
+the project's naming language, not this file's word. Do not create a subfolder for the styling
+language inside whatever root you use: `[sass]/`, `[scss]/`, `[less]/` as directories are
+structure errors, not organization. A project has exactly one styling system; the file extension
+already names it, and a tool-named directory implies parallel systems that do not exist - and
+reads wrong on any stack where the language differs ([plain CSS] has no `sass/`, [Tailwind] has
+no tree to nest). Choose the root the framework uses, once.
+
 Native scoping mechanisms — use the one your stack provides instead of inventing naming rituals:
 
 - Web: [CSS Modules], [one plain stylesheet per page with a BEM/namespace convention], [framework

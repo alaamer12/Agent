@@ -1,0 +1,12 @@
+# Private paths per AGENTS.md section 11 - keep the two lists in sync.
+docs/drafts/
+tools/
+.subagents/
+
+# Working scratch and local artifacts
+scratch/
+.env
+.venv/
+node_modules/
+__pycache__/
+data/dev.sqlite

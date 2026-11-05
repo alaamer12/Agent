@@ -82,7 +82,15 @@ into, and their names — belongs to the project: two tiers in a small app, five
 design system ([a values file → a compiled-token file imported once → token-alias mixins +
 functions → variants → scoped module styles] is one real shape). Read the project's existing
 chain first and slot every new style into it; where a project has no chain yet, lay one down in
-this order and say so in one line. `references/04-layer-chain-and-naming.md`.
+this order and say so in one line. **Folder placement follows the framework too, and the root's
+name belongs to the framework and the project, not to this skill:** if the project already has a
+styling location, that wins - reuse it, never open a rival. If none exists, take the name the
+stack's idiom uses ([styles], [css], [assets], [themes], [ui], co-located per-component files
+([Vue SFC], [Blazor `.razor.css`]), or barely a folder at all ([Tailwind]-style utility stacks) -
+`styles` is an example, not a default). NEVER nest a subfolder named after the styling language -
+`[sass]/` inside any root is a structure error: the project has exactly one styling system, the
+file extension already speaks it, and a tool-named directory implies parallel systems that don't
+exist. `references/04-layer-chain-and-naming.md`.
 
 ## The ambiguity trap
 

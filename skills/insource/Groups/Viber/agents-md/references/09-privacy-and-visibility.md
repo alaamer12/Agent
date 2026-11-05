@@ -1,4 +1,4 @@
-# Privacy and visibility (section 11)
+# Privacy and visibility (section 7)
 
 AGENTS.md decides what the agent *does*; the Privacy section decides what the agent *reveals and leaves
 visible*. A project's private machinery - the agent skills it runs, the plans and run records they produce,
@@ -6,7 +6,7 @@ the binaries it ships - is often exactly what should not reach version control o
 repo. Undeclared, those things leak by default, because "commit what the task touched" is every agent's
 normal behavior.
 
-**Privacy here is visibility policy, not secret management.** Actual secrets belong to section 7. This
+**Privacy here is visibility policy, not secret management.** Actual secrets belong to section 3. This
 section answers: *which paths, and the things generated from them, stay out of the repo and out of
 anything that travels?*
 
@@ -16,7 +16,7 @@ anything that travels?*
    output, selected binaries - written as paths or patterns, each with a one-clause reason. "No privacy
    restrictions" is a valid entry; silence is not.
 2. **The cascade.** Hiding a producer hides its outputs. If the agent skills are private, the folders the
-   skills write are private too - `/revoke`'s sanitized copies, `.iwts/` run records, `agents/` reports,
+   skills write are private too - sanitized copies, anonymous-run records, per-run reports,
    caches - even though no one typed those paths by hand. When the user declares a tool folder private,
    ask what that tool writes and fold the answer into the same section. The cascade prevents the failure
    mode where a hidden skill happily commits its own output under a fresh path every run.
@@ -40,7 +40,7 @@ anything that travels?*
 ## 11. Privacy
 
 - Private paths - never commit, never quote in anything leaving this repo:
-  - `skills/` (project agent skills) and everything they write: `.iwts/`, `agents/<run>.md` reports
+  - `skills/` (project agent skills) and everything they write: run records, `agents/<run>.md` reports
   - `plans/` working plans and fan-out briefs
   - `tools/pocketbase.exe` - install note lives in `docs/setup.md`; keep the need, not the binary
 - Every path above must appear in `.gitignore`; if one is missing there or still tracked, ask the user
@@ -57,7 +57,7 @@ forbids.
 
 ## Subagents inherit nothing - restate the rule
 
-Subagents do not read AGENTS.md by default; the baseline block (section 10) carries a compressed PRIVACY
+Subagents do not read AGENTS.md by default; the baseline block (section 6) carries a compressed PRIVACY
 clause - private paths and the cascade in one line, plus "write your outputs only into those." A subagent
 that reports "created `plans/x.md`" about a private path into a public channel is a leak the block clause
 exists to prevent.

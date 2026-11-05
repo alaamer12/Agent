@@ -24,7 +24,7 @@ A well-kept AGENTS.md is a **pointer table**. Read every pointer it declares, in
 | `# Glossary` or GLOSSARY.md | project vocabulary — reading code without it misreads domain terms |
 | COMMITMENTS.md or a Commitments section | declared priorities; "does the project agree with itself" is judged against these |
 | IDEA.md / design/spec docs | the intended behavior statements that become ledger claims |
-| Decision records (`docs/decisions/`, `.iwts/*/decisions/`) | why non-obvious things are the way they are |
+| Decision records (`<docs>/decisions/` - one file per decision, plus the run ledger `states.md`) | why non-obvious things are the way they are; the anchors Date+Commit+Version place each on the timeline |
 | Skills section ("whenever you use skill X, read source Y") | per-skill standing instructions — read the referenced sources before treating that area |
 | Environment/config docs | variable *names*, ports, services — presence only; values of secrets are never read or reported |
 
