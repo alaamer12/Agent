@@ -47,7 +47,35 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    overflow: hidden;
+    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1), border-right-width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  #sidebar-inner {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+  #sidebar.collapsed { width: 0; border-right-width: 0; }
+  #btn-expand-sidebar {
+    position: fixed;
+    top: 7px;
+    left: 8px;
+    z-index: 60;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  #btn-expand-sidebar:hover { color: var(--text-bright); background: var(--bg-hover); }
+  #btn-expand-sidebar.show { display: flex; }
   .branch-pill {
     display: inline-flex;
     align-items: center;
@@ -514,6 +542,8 @@
   }
   /* Mobile Responsive Styles */
   @media (max-width: 768px) {
+    #btn-collapse-sidebar { display: none; }
+    #btn-expand-sidebar, #btn-expand-sidebar.show { display: none; }
     body { overflow: hidden; }
     #ide-container { flex-direction: column; height: 100vh; }
     #mobile-navbar {
@@ -590,8 +620,12 @@
 </div>
 
 <div id="ide-container">
+  <button id="btn-expand-sidebar" title="Expand Panel (Ctrl+B)" aria-label="Expand panel">
+    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M3 5h18v2H3zm0 12h18v2H3zm2-8h9v6H5zm2 1.5v3h5v-3z" opacity=".9"/></svg>
+  </button>
   <!-- Sidebar Explorer -->
   <div id="sidebar">
+    <div id="sidebar-inner">
     <div class="sidebar-title-bar">
       <div style="display:flex; align-items:center; gap:8px;">
         <span id="explorer-title" style="font-weight:700; font-size:11px;">MuslimTube</span>
@@ -604,6 +638,9 @@
       <div class="sidebar-actions">
         <button class="icon-btn" id="btn-collapse-all" title="Collapse All">
           <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-collapse-sidebar" title="Collapse Panel (Ctrl+B)" aria-label="Collapse panel">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
         </button>
       </div>
     </div>
@@ -619,6 +656,7 @@
 
     <div class="tree-wrapper">
       <ul class="tree root" id="tree"></ul>
+    </div>
     </div>
   </div>
 
@@ -1228,7 +1266,7 @@ function renderPreview(data, ext, container) {
   } else if (ext === 'html' || ext === 'htm') {
     const iframe = document.createElement('iframe');
     iframe.className = 'html-preview-frame';
-    iframe.sandbox = 'allow-same-origin';
+    iframe.sandbox = 'allow-scripts allow-popups allow-modals';
     iframe.srcdoc = data.content;
     wrapper.appendChild(iframe);
   }
@@ -1415,6 +1453,30 @@ document.getElementById('btn-collapse-all').addEventListener('click', () => {
   }
   renderTree();
 });
+
+(function () {
+  const sidebar = document.getElementById('sidebar');
+  const btnCollapse = document.getElementById('btn-collapse-sidebar');
+  const btnExpand = document.getElementById('btn-expand-sidebar');
+  function setCollapsed(collapsed) {
+    sidebar.classList.toggle('collapsed', collapsed);
+    btnExpand.classList.toggle('show', collapsed);
+    try { localStorage.setItem('dtb-sidebar-collapsed', collapsed ? '1' : '0'); } catch (e) {}
+  }
+  btnCollapse.addEventListener('click', () => setCollapsed(true));
+  btnExpand.addEventListener('click', () => setCollapsed(false));
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'b') {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+      e.preventDefault();
+      setCollapsed(!sidebar.classList.contains('collapsed'));
+    }
+  });
+  try {
+    if (localStorage.getItem('dtb-sidebar-collapsed') === '1' && window.innerWidth > 768) setCollapsed(true);
+  } catch (e) {}
+})();
 
 document.getElementById('btn-copy-code').addEventListener('click', () => {
   if (CURRENT_FILE_CONTENT) {

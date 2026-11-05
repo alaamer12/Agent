@@ -1,6 +1,6 @@
 ---
 name: dtb
-description: 'Do the Best: decide HOW the work is done while the user keeps owning WHAT is to be built. Use when the user hands over a goal, prototype or reference without every technical detail, says "make it good" / "you decide how", or when an autonomous run needs a decision method. The user''s vision is a constraint: improve its execution, never replace its direction - redesign only on explicit request. Looks past the visible requirement to the systems behind it (a "search feature" may imply indexing, filtering, ranking, empty states, latency), judges alternatives, edge cases and trade-offs, and picks the strongest appropriate solution - not the first that works, not the most complex. Records lasting decisions as question -> options -> choice -> consequences -> reversal, in .iwts/<task>/decisions/ when delegated, else the project''s docs. Interrupts only about vision, requirements, irreversible or costly calls - never to choose details already delegated. Pairs with iwts; runs alone.'
+description: 'Do the Best: decide HOW the work is done while the user keeps owning WHAT is to be built. Use when the user hands over a goal, prototype or reference without every technical detail, says "make it good" / "you decide how", or when an autonomous run needs a decision method. The user''s vision is a constraint: improve its execution, never replace its direction - redesign only on explicit request. Looks past the visible requirement to the systems behind it (a "search feature" may imply indexing, filtering, ranking, empty states), judges alternatives, edge cases and trade-offs, and picks the strongest appropriate solution - not the first that works, not the most complex. Records lasting decisions as question -> options -> choice -> consequences -> reversal, one file per decision in docs/decisions/ anchored Date+Commit+Version; the ask-or-decide call is recorded too. Interrupts only about vision, requirements, irreversible or costly calls - never to choose details already delegated. Pairs with iwts; runs alone.'
 when_to_use: The user delegates implementation judgment ("you decide how", "make it the best version", "I only care about the result"), hands over a design/prototype to be built properly, or asks the agent to take ownership of engineering decisions — including during an iwts run.
 argument-hint: "[the goal or artifact whose implementation is being decided]"
 ---
@@ -83,8 +83,13 @@ why the losers lost, the choice, its consequences, and its reversal boundary. An
 not a record; if you cannot phrase the question, it was an implementation detail and does not get a file.
 
 Use [`../iwts/assets/decision-record-template.md`](../iwts/assets/decision-record-template.md) — one template,
-shared, not copied. Write into `.iwts/<task-slug>/decisions/` during a delegated run; otherwise into the
-project's own convention (`docs/decisions/`, an ADR folder). Never invent a new location mid-run
+shared, not copied; it owns what a record *says*. **Where it goes is the project's convention, not dtb's**
+(dtb and iwts are thin operating modes; agents-md's Ambiguity section owns the recording convention): the
+project's `AGENTS.md` decision-records rule wins; otherwise **one file per decision** at
+`<docs>/decisions/<slug>.md` — never a combined `decisions.md`, which explodes with project age — each record
+anchored **Date + Commit hash + App-Version** (version stated whenever it changed between decisions). The
+ask-or-decide call itself — what was decided without asking, what was assumed instead of asking — is a
+recordable decision. Never invent a new location mid-run
 ([`03`](references/03-running-under-iwts.md)).
 
 ## Anti-patterns
@@ -105,7 +110,7 @@ project's own convention (`docs/decisions/`, an ADR folder). Never invent a new 
 | [`00-the-authority-line.md`](references/00-the-authority-line.md) | Vision vs implementation ownership, reading a prototype/design as requirements, the redesign exception, the seven ways an agent silently redefines a requirement | Any design, prototype, mockup or "make it like this" is in play |
 | [`01-behind-the-visible-requirement.md`](references/01-behind-the-visible-requirement.md) | The complete-problem method, the relevance test for internal systems, and what "genuinely strong and professional" demands per shape of product | A one-line feature ask that clearly implies more than one component |
 | [`02-what-is-the-best-way.md`](references/02-what-is-the-best-way.md) | Alternatives and trade-off ledgers, edge cases worth designing for, reversibility, best ≠ most complex, the re-ask loop, when to stop optimizing | Any decision with more than one plausible answer |
-| [`03-running-under-iwts.md`](references/03-running-under-iwts.md) | The shared `.iwts/` path, the recording duty while unsupervised, escalation differences, how to report decisions back, standalone mode | dtb is invoked inside a delegated/iwts run |
+| [`03-running-under-iwts.md`](references/03-running-under-iwts.md) | The shared one-file-per-decision path (<docs>/decisions/ + states.md), what changes while unsupervised, escalation differences, how to report decisions back, standalone mode | dtb is invoked inside a delegated/iwts run |
 | [`../iwts/SKILL.md`](../iwts/SKILL.md) | Who decides and when: autonomy, stop conditions, state and resume | The user has left the work to the agent unsupervised |
 
 ## Cases

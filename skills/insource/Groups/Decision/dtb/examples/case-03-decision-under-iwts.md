@@ -3,8 +3,9 @@
 > Worked example, invented for teaching. Shows dtb's method running inside an iwts delegation: decide the
 > internal thing, record it, and stop only for the call that genuinely belongs to the user.
 
-**The setup.** The user says *"the dashboard is unusable on our real data — take it to done, iwts."* The run gets
-folder `.iwts/analytics-volume-fix/`, one index row, and works unsupervised.
+**The setup.** The user says *"the dashboard is unusable on our real data — take it to done, iwts."* The run
+opens its ledger at `docs/decisions/states.md` (the project's docs folder) and works unsupervised; every
+lasting decision gets its own file beside it.
 
 Mid-run the objective forces a hard choice: where do the daily aggregates come from?
 
@@ -49,29 +50,32 @@ Backfilling 270 days of history is a 5–7 hour table scan on the production ins
 - it **did not** start the production backfill. That is significant cost and an externally visible consequence
   on a live database — a user-owned call under iwts's stop conditions, not an implementation detail.
 
-`.iwts/analytics-volume-fix/state.md` at the moment autonomy stopped:
+`docs/decisions/states.md` at the moment autonomy stopped:
 
 ```markdown
-# iwts state — objective: dashboard usable on real data · task: analytics-volume-fix · updated 2026-10-28
+# iwts state — objective: dashboard usable on real data · updated 2026-10-28 · commit 8f2c1ab · app 1.4.2
 status: blocked-on-user (start the 270-day production backfill? ~5-7 h scan on the main instance, or accept
   aggregates from today forward and let history fill in over time)
 remaining: [x] aggregate table + write path · [x] dashboard reads aggregates · [x] staging backfill + timing
             · [~] production backfill (needs go) · [ ] the two slowest cards need a per-day breakdown drill-in
-decisions: read-time vs materialized totals -> materialized, recomputed on write — decisions/002-aggregation-at-write.md
+decisions: read-time vs materialized totals -> materialized, recomputed on write - aggregation-at-write.md;
+            decided-not-asked: staging backfill run without go (read-only cost) - see same record
 uncertainties: append-only assumption not verified through the admin correction path; if wrong, add the nightly
                recompute (option C) — reversal is one function, see the record
 findings: the export path still reads raw events (fine today, slow at 10 M) — parked, not started
 ```
 
-The record itself, `.iwts/analytics-volume-fix/decisions/002-aggregation-at-write.md`, is the shared template
+The record itself, `docs/decisions/aggregation-at-write.md` - anchored Date 2026-10-28 · Commit 8f2c1ab ·
+App-Version 1.4.2 (unchanged since the previous record) - is the shared template
 ([`../../iwts/assets/decision-record-template.md`](../../iwts/assets/decision-record-template.md)) filled with
 exactly the six blocks above — and note that its first line is the **question**, not the answer. A successor who
 finds "totals are materialized" with no question cannot re-decide anything; they can only obey it.
 
 ## Handover
 
-Nothing under `.iwts/` was committed. The decision record was **moved** to `docs/decisions/0004-daily-aggregates.md`
-and committed there, in the project's own convention, as part of the same work.
+The record was written where it lives: `docs/decisions/aggregation-at-write.md`, committed with the code it
+explains - thin modes, one destination, no staging folder and no later move. The ask-decision (backfill waits
+for the user) is stated in the same file.
 
 One line to the user when they woke:
 

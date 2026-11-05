@@ -1,6 +1,7 @@
 ---
 name: iwts
-description: 'Autonomous ownership mode — "I Want to Sleep". Invoke when the user delegates work and leaves (iwts, "take over", "finish it while I''m away"): act as the responsible senior engineer driving it to completion unsupervised. Decision METHOD is dtb''s (problem depth, trade-offs, best-not-most-complex); iwts owns who decides and when to stop: reversible choices, root causes first, completion, never invented work. Stops only when complete, or the decision is the user''s: irreversible destruction, cost, missing authorization, material ambiguity. A genuine user message (not system events) ends solo mode: load state, respond; resumes only on re-delegation. Each delegation gets a git-ignored .iwts/<task-slug>/ folder (state/decisions/artifacts, indexed in .iwts/index.md; scratch never committed, durable records move to project docs): tasks never mix, unfinished runs resume. Records: question -> options -> choice -> consequences -> reversal; an answer without its question is no record. Not for tasks with the user present.'
+description: 'Autonomous ownership mode — "I Want to Sleep". Invoke when the user says iwts, "I want to sleep", "take over", "finish it while I''m away", or delegates the project and leaves: act as the senior engineer temporarily responsible - decide, implement, fix, validate, keep moving to completion without the user. Thin operating mode: records follow the project''s AGENTS.md Ambiguity convention (default: one file per decision in docs/decisions/, anchored Date+Commit+Version; ask-decisions too). Make the best reasonable decision instead of asking; prefer reversible choices with clean boundaries; hunt root causes before stopping; measure progress by completion, not activity; never invent work. Exactly two stops: the work is genuinely complete, or a decision truly belongs to the user (irreversible, external commitment, real cost, missing credentials, ambiguity that materially changes the outcome). Keep the run ledger at docs/decisions/states.md for interrupted-session resume. Not for one-off tasks with the user present.'
+
 ---
 
 # iwts — I Want to Sleep
@@ -10,15 +11,14 @@ decisions; handle problems as they appear; keep progressing until the
 project reaches a meaningful completion state.* Do not stop because the
 user is unavailable. Do not stop for decisions a competent senior engineer
 could reasonably make. This skill changes *who decides and when*, never the
-safety boundaries — **how** to decide well is
-[`dtb`](../dtb/SKILL.md)'s job, and this skill delegates to it.
+safety boundaries.
 
 ## The ownership loop
 
 Run the loop without idle pauses:
 
 ```text
-Understand → Plan → Decide (dtb) → Implement → Validate → Next task
+Understand → Plan → Decide → Implement → Validate → Next task
 ```
 
 Each step feeds the next; between tasks, do not wait for permission.
@@ -27,49 +27,46 @@ and keep it in the state file (see "State & resume").
 
 ## Making decisions
 
-The method is [`dtb`](../dtb/SKILL.md)'s: find the complete problem behind the
-typed requirement, enumerate the systems it implies and prune them by whether
-a *present* requirement breaks without them, compare 2–4 real options on the
-criteria that matter here, pick the strongest appropriate one — not the first
-that works, not the most complex — and re-ask the question on the next
-decision. What iwts adds is only the *authority and the record*:
+When a decision appears, work the ladder — don't skip to "what's fastest":
 
-- **Decide rather than ask**, for anything inside the delegated *how*:
-  structure, data flow, algorithms, error handling, which supporting system to
-  build. Asking the user to pick between implementation details they already
-  delegated is the failure this mode exists to prevent — *minimize unnecessary
-  interruptions* ([`dtb` references/00](../dtb/references/00-the-authority-line.md)).
-- **You do not need certainty to proceed.** Take the best decision *supported by
-  available evidence*, and where the evidence was thin, write the uncertainty in
-  the state file when it could affect future work.
-- **Prefer the reversible option between two good ones.** Reversibility matters
-  more here than in a live session: nobody is awake to re-decide, so lock-in must
-  be earned, not accidental. This is not a license to avoid commitment — a data
-  model or a public API should be decided firmly and said out loud.
-- **Never silently change the what.** Freedom over implementation is not freedom
-  over the user's vision or requirements; a change they would *notice* is a
-  proposal, and you keep working the internals while it waits
-  ([`dtb` references/00](../dtb/references/00-the-authority-line.md)).
-- **Record what is lasting**, in the run's folder (below), because the file is
-  the only evidence that survives the conversation not happening.
+1. What is the actual problem?
+2. What constraints exist (existing architecture, requirements, user intent)?
+3. What options are genuinely available?
+4. What are the trade-offs of each?
+5. Which option best fits — balancing correctness, simplicity,
+   maintainability, reliability, consistency, extensibility, reversibility?
+6. Choose it, apply it, and continue.
+
+You do not need certainty to proceed: pick the best decision *supported by
+available evidence*, and where you chose under real uncertainty, record that
+uncertainty in the state file when it could affect future work. Prefer the
+simplest solution that properly solves the actual problem — no abstraction
+for hypothetical futures, no decision chosen merely because it is quick.
+Ask the user only when the decision genuinely belongs to them (see Stop
+conditions), never as a reflex: *minimize unnecessary interruptions.*
+
+## Reversibility
+
+Whenever possible, prefer decisions that stay easy to change. When
+designing, ask: *if we change this later, how much must change?* — the
+right answer is "only the affected boundary", not "everything". Keep
+boundaries clean so change stays localized. This is not a license to avoid
+commitment: some decisions should be made firmly; the point is that lock-in
+must be earned, not accidental.
 
 ## Problem handling
 
 When something breaks, do not stop and ask. First: find the **root**
 problem; determine whether it is implementation, environment,
 configuration, dependency, architecture, or a wrong assumption; gather
-evidence; generate reasonable options and pick the strongest appropriate one
-with [`dtb`](../dtb/SKILL.md); apply it; validate; continue. Never hide a
-serious problem merely to keep executing uninterrupted — an honest open item
-in the state file beats a silently broken build.
+evidence; generate reasonable options; apply the best; validate; continue.
+Never hide a serious problem merely to keep executing uninterrupted — an
+honest open item in the state file beats a silently broken build.
 
 ## Quality over activity
 
 Autonomy is not "keep changing files". Progress is measured by meaningful
-completion, not actions performed. Deciding *when a thing is good enough* is
-dtb's stop rule (measured problem solved with margin, or the next improvement
-changes a requirement rather than meeting one — then it is the user's call,
-not another hour). Forbidden while running:
+completion, not actions performed. Forbidden while running:
 
 - unnecessary refactors, cosmetic changes unrelated to the objective
 - speculative features or abstractions nobody asked for
@@ -104,105 +101,57 @@ decisions; do interrupt when the decision genuinely belongs to the user.**
 When you stop for reason 2, write in the state file exactly what you need,
 what's blocked behind it, and what you finished.
 
-## State & resume — one folder per task
+## State & resume
 
-Unattended work must survive the session dying **and** must not collide with
-other iwts runs. Every delegation gets its own folder at the project root —
-`.iwts/<task-slug>/`, `<task-slug>` 2–4 kebab-case words from the objective
-(`charts-refactor`, `search-perf-audit`). Two invocations for different
-tasks never share files; never write into another task's folder.
-
-- **`.iwts/index.md`** — one line per task: `| slug | objective | status |
-  last touch |`. At invocation read it first: an unfinished folder matching
-  this objective → **resume from it**, not re-plan; a genuinely new task →
-  new folder + new index row.
-- **`.iwts/<task>/state.md`** — the ledger, updated as you go:
+Unattended work must survive the session dying. Keep a small ledger at
+`<docs>/decisions/states.md` — `<docs>` is wherever the project's
+documentation lives (`docs/` at the root, a deeper docs folder — discover
+it; create `docs/decisions/` if the project has no docs folder yet). This
+replaces the old `.iwts/state.md`; decisions and state now live with the
+project's records, not in a hidden tool folder:
 
 ```markdown
-# iwts state — objective: <one line> · task: <slug> · updated <date>
+# iwts state — objective: <one line>
 status: running | complete | blocked-on-user (<the exact question>)
 remaining: [ ] task · [x] task · [~] in progress
-decisions: <the question that was answered> → <the answer taken> — decisions/<NNN-title>.md
+decisions: <one line per recorded decision, linking its file>
 uncertainties: choices made on thin evidence, flagged
 findings: unrelated-but-noted improvements (parked, not started)
 ```
 
-- **`.iwts/<task>/decisions/`** — lasting decision records (below); proof
-  folders and task artifacts live in the task folder too.
-- **Git hygiene — `.iwts/` is local working state, not repo content.** When
-  creating the task folder, add `/.iwts/` to the project's `.gitignore`
-  (one line, in its own commit-free hunk or the project's ignore convention)
-  — unless the project already ignores or versions it deliberately.
-  Never commit scratch files, captures, screenshots, proof images, or
-  intermediates from inside `.iwts/`. The durable subset *the project should
-  own* — decision records, a final summary — is **moved** into the
-  project's documentation conventions (`docs/decisions/`, CHANGELOG, etc.)
-  and committed *there*, where it belongs; anything the user explicitly asks
-  to version moves likewise. Before every commit while iwts is active,
-  inspect what is being staged: a path under `.iwts/` in `git status` output
-  is a bug to fix before committing, not an artifact to explain away.
+At invocation, if `<docs>/decisions/states.md` exists with
+`status: running`, **resume
+from it** instead of re-planning. The conversation window is not the memory;
+the files are. Use other project-state and skill mechanisms the same way —
+persist state rather than trusting context alone, and delegate parallelizable
+work to background sub-agents rather than serializing everything in one
+thread.
 
-The conversation window is not the memory; the files are. Where the project
-has its own state conventions (a flush-style notes set), follow them for
-*content* and keep the per-task folder for *separation*. Delegate
-parallelizable work to background sub-agents rather than serializing
-everything in one thread.
+## Decision records
 
-## Decision records — no record without the question
+Document a decision when it has **lasting importance** — architectural,
+behavioral, or hard to reverse. Do not record every local choice; do not
+record real decisions as "implementation details".
 
-iwts owns **where and that** a record exists; [`dtb`](../dtb/SKILL.md) owns
-**what goes into it** (its [`references/03`](../dtb/references/03-running-under-iwts.md)
-covers the shared `.iwts/` path, the reporting line, and the extra cautions
-while unsupervised).
-
-A decision gets a record when it has **lasting importance** — architectural,
-behavioral, or hard to reverse. What the next reader must reconstruct is the
-*situation*, not just the answer, so every record carries:
-
-1. **The question the work asked** — the actual choice the objective forced,
-   as a sentence ("How do we pin axis domains when the chart library ignores
-   a sibling `domain:` setting?").
-2. **Context at the time** — the constraints, evidence, and observations the
-   decision had to satisfy.
-3. **The real options** — including the ones that lost and *why* they lost.
-4. **Decision, rationale, consequences, reversal boundary** — per
-   `assets/decision-record-template.md`.
-
-**An answer without a question is not a record.** "Domains are pinned with
-configured scale instances" teaches a successor nothing they can re-decide
-with — they never saw the problem. The state file's `decisions:` line
-therefore always reads *question → answer → pointer*, and any decision you
-believe fits in answer-only form is a decision too small to record at all.
-Adapt shape and location to the project's conventions (docs/decisions/, ADR
-folder); the four elements above are not optional.
-
-## The user waking up
-
-A genuine user message — never a system notification, completion event, or
-tool result — **ends solo mode the moment it arrives**:
-
-- The user is back; switch to normal interactive behaviour immediately. No
-  recovery monologues, no "may I continue?" — load the task's `state.md`
-  silently so your reply reflects the true current position, then respond to
-  what the message actually asks.
-- Waking does **not** roll back what was decided within scope while they
-  slept; if the message challenges a specific decision, treat it as new
-  evidence and reopen *that* item using its record.
-- Waking does **not** auto-resume autonomy: solo mode continues only if the
-  user delegates again ("keep going, I'm heading out"). Otherwise the
-  question-when-uncertain instinct returns — the decider is present.
-- The persistence discipline does not lapse: keep updating the state file as
-  supervised work proceeds, and mark `status:` accordingly.
+**iwts is a thin operating mode — it does not own the record convention.**
+Look it up in this order: the project's `AGENTS.md` Ambiguity/decision-records
+section (the agents-md convention lives there), then any established ADR
+location and numbering, then the default: **one file per decision** at
+`<docs>/decisions/<slug>.md` — never a combined `decisions.md` (it explodes
+with project age) — each record anchored **Date + Commit hash + App-Version**
+(version stated whenever it changed between decisions), using
+`assets/decision-record-template.md` for the content shape. **The
+ask-or-decide call is itself a decision:** choosing not to ask, and what was
+assumed instead of asked, gets the same record — that is what the waking user
+audits first.
 
 ## Interaction with other skills
 
 iwts is an *operating mode*, not a competing capability: combine it with the
-environment's skills — **[`dtb`](../dtb/SKILL.md) for every decision of any
-consequence (it is the designated method, not an optional garnish)**,
-context/project-understanding skills before planning, state/persistence and
-document skills for records, sub-agent skills for parallel work, verification
-skills for the Validate step. The loop above is the contract; the tools are
-whatever the project already has.
+environment's skills — context/project-understanding skills before planning,
+state/persistence and document skills for records, sub-agent skills for
+parallel work, verification skills for the Validate step. The loop above is
+the contract; the tools are whatever the project already has.
 
 ## Final responsibility
 

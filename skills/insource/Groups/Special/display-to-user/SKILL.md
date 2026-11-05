@@ -73,15 +73,33 @@ If ngrok isn't ready, `launch.py` prints which check failed
 (`NOT_INSTALLED` or `NOT_AUTHED`) and confirms the viewer server is still
 running locally so nothing is wasted — read `references/ngrok-setup.md`
 and relay the exact remediation steps to the user; don't guess or paraphrase
-vaguely. **Always use ngrok's default random URL** (e.g.
-`https://a1b2c3.ngrok-free.app`) — do not pass `--subdomain` unless the
-user explicitly asked for a specific custom one by name (it requires a paid
-plan and will make the command fail on free accounts).
+vaguely. **Always use ngrok's default random URL** — do not pass
+`--subdomain` unless the user explicitly asked for a specific custom one by
+name (it requires a paid plan and will make the command fail on free
+accounts).
+
+**Critical invariant: copy the public URL verbatim from `launch.py`'s stdout —
+never retype, reconstruct, or recall an ngrok hostname or TLD.** ngrok has
+cycled its free-plan domain (`*.ngrok.io` → `*.ngrok-free.app` →
+`*.ngrok-free.dev`) and any URL you "remember" from earlier in the session
+may have the wrong suffix — the user then gets `ERR_NGROK_3200 (endpoint
+offline)` on a tunnel that is perfectly alive, which looks like a tunnel
+failure and wastes a debugging cycle. If the printed URL is no longer in
+your transcript, fetch it live instead of guessing:
+
+```bash
+curl -s http://127.0.0.1:4040/api/tunnels
+```
+
+and use the `public_url` field character-for-character. Optionally confirm
+it answers before reporting: `curl -s -o /dev/null -w "%{http_code}" <public_url>`.
 
 Once you have the URL, report it back to the user directly — this is the
 actual deliverable of the whole skill, don't bury it in a longer message:
 
-> Here's a live view of the project: **https://a1b2c3.ngrok-free.app**
+> Here's a live view of the project: **https://a1b2c3.ngrok-free.dev**
+> (paste the exact URL `launch.py` printed — the domain shown here is only
+> an example)
 > It shows the file tree, highlights what's changed, and you can
 > right-click any Markdown or HTML file to preview it.
 
@@ -136,6 +154,13 @@ reference.
   listening on the port ngrok was pointed at (wrong `--port` value between
   the two commands is the most common cause). Re-run `launch.py` from
   scratch rather than trying to patch a half-working setup.
+- **User reports `ERR_NGROK_3200 "endpoint ... is offline"` but the tunnel
+  is running** — the reported URL is almost certainly not the URL ngrok
+  actually issued: a mistyped or remembered TLD (`-app` vs `-dev`) points at
+  an endpoint that belongs to nobody. Do NOT restart the tunnel first —
+  query `curl -s http://127.0.0.1:4040/api/tunnels`, compare its
+  `public_url` against what you sent the user, and re-send the exact string.
+  Only if the API shows no such tunnel is the endpoint genuinely down.
 - **Server starts but `/api/tree` errors** — check `--root` actually points
   at a real directory the server process can read; see
   `references/server-architecture.md`.

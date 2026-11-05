@@ -36,6 +36,10 @@ Select a small relevant subset; do not default to all 67. For each selected ID, 
 
 Inspect the complete page where possible, including content below the first viewport, and select relevant responsive/interaction states. Route to patterns suggested by the page’s role and evidence. Run only applicable source detectors. Report the exact viewports and states reviewed.
 
+### Interactive-state coverage (all scopes)
+
+Primary controls (CTAs, submits, toggles) carry contrast in several states, and the states are separate rendered pairs: resting, hover, focus-visible, pressed, and disabled — including **hover while disabled**, which CSS still matches. A review clears control contrast only when each reachable state was either captured (hover/focus the element and measure) or resolved statically through the cascade (see `low-contrast` detection signal 5, "state-algebra collisions"). If neither was done, the report must list the untested states as a coverage gap that blocks any "no low-contrast findings" wording — a resting-state screenshot alone cannot clear a control.
+
 ### Multi-page
 
 Compare selected routes for repeated visual treatments, patterns that differ by context, and shared design tokens/components. Do not call consistency monotonous without comparing content roles and user tasks. Record each route and distinguish shared evidence from route-specific evidence.

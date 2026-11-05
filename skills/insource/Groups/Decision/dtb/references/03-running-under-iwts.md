@@ -19,22 +19,27 @@ unrecorded choices — which is the failure mode this file exists to prevent.
 
 ## The shared path
 
-Under an iwts delegation, dtb's records go into the run's folder — the **same path iwts uses**, so the user
-finds one ledger, not two:
+dtb and iwts are **thin operating modes** - they decide how to operate anonymously; the *recording
+convention* belongs to the project's rulebook (agents-md's Ambiguity section). Both skills write to the
+same place, so the user finds one ledger, not two:
 
 ```text
-.iwts/<task-slug>/            git-ignored local working state (created and owned by iwts)
-  state.md                    the ledger: status, remaining, decisions, uncertainties, findings
-  decisions/NNN-title.md      dtb's decision records, one per lasting decision
-  <proof folders, artifacts>
+<docs>/decisions/               <docs> = wherever the project keeps its docs; create docs/ if none
+  states.md                     the run ledger: status, remaining, decisions as links, uncertainties, findings
+  <slug>.md                     one file per lasting decision (dtb's template defines the content)
 ```
 
-- Never write into another task's folder; the slug comes from iwts's index.
-- Never commit anything under `.iwts/`. The durable subset the project should own — decision records, the final
-  summary — is **moved** into the project's documentation convention (`docs/decisions/`, an ADR folder,
-  CHANGELOG) and committed there. That move is the only time a decision record becomes repo content.
-- If iwts is not active, do not create `.iwts/`. It is another skill's contract; in a normal session the
-  project's own docs convention is the destination, and most decisions stay in the conversation.
+- **One file per decision, always.** A combined `decisions.md` is the explosion anti-pattern - the index
+  role belongs to `states.md`, never to a growing document.
+- Each record carries its **anchors: Date + Commit hash + App-Version** (version stated whenever it changed
+  between decisions) so any record can be placed on the timeline exactly.
+- **The ask-or-decide call is itself a decision:** what was decided without asking, what was assumed because
+  the user was asleep - recorded, because that is the first thing the waking user audits.
+- If the project's `AGENTS.md` names another decisions location or ADR numbering, **it wins**; follow it.
+  If no docs folder exists anywhere, create `docs/decisions/` and say so in one line. Records written there
+  are normal repo content - commit them with the work; there is no staging folder and no later "move".
+- If neither iwts nor an AGENTS.md is active, the same default applies in a supervised session; most
+  decisions still stay in the conversation - only lasting ones earn a file.
 
 ## What changes when nobody is awake
 
@@ -43,7 +48,7 @@ The method is identical. The **duties** around it get heavier, in three specific
 1. **Record more, because there is no conversation to consult.** In a live session the user watched you choose;
    unsupervised, the file is the only surviving evidence. Any decision that is architectural, behavioral, or
    hard to reverse gets a record — and one you would have mentioned out loud counts.
-2. **Flag uncertainty in `state.md`.** The `uncertainties:` line is where a guess with thin evidence goes, plus
+2. **Flag uncertainty in `states.md`.** The `uncertainties:` line is where a guess with thin evidence goes, plus
    what measurement would overturn it. An unflagged guess becomes a fact the next run builds on.
 3. **Park, do not fix, unrelated discoveries.** Autonomy plus good taste is a tempting engine for scope creep:
    the `findings:` list is where "this would be better" goes when it is not required for the objective.
