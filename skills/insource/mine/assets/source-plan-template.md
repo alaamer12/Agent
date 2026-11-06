@@ -11,17 +11,26 @@ file's generic shape — the list is an index, not a whitelist>
 **Mining method:** <"Read-mining — understand the sources (reach, census, chase
 the why; ends in a free-form distillation)" | "Run-mining — decide and rank (put
 every candidate through ONE identical, measured trial; ends in a tested verdict
-with a score table)" | "Both — a short read pass to map the credible option space,
-then run the contenders" — the task's verb is usually the tell ("why/how does" →
-read; "best N / test / compare / try versions" → run); see workflow.md → "Settle
-the mining method and the candidate provenance first" and `references/run-mining.md`>
+with a score table)" | "Case-mining — enumerate the topic's concrete situations
+into a catalog (each case actionable on its own, attested by a source or labeled
+derived; ends in a case catalog whose count is a coverage target)" | "Both — a
+short read pass to map the credible option space, then run the contenders" — the
+task's verb is usually the tell ("why/how does" → read; "best N / test / compare
+/ try versions" → run; "50 cases / every way X fails / hard-scenario X / the
+situations where / playbook" → case); see workflow.md → "Settle the mining
+method and the candidate provenance first", `references/run-mining.md` and
+`references/case-mining.md`>
 
 **Candidate provenance:** <"Found — real, existing artifacts to discover (repos,
 packages, models, screens)" | "Authored — approaches you build to one common spec
 in order to compare them (5 styles, 3 architectures)" — matters most for
 run-mining: authored contenders must be built to the *same* fixture set and metric
 before they're comparable, and near-identical approaches are collapsed to one
-candidate before any of them is built>
+candidate before any of them is built. In case-mining the same axis reads as
+"Attested — cases documented in real sources" | "Derived — cases reasoned out of
+the scenario grid where no source writes them down"; state the expected split,
+because an all-derived catalog is a list of guesses and an attested-only one
+silently misses the holes nobody wrote up>
 
 **Mining directives:** <the user's explicit instructions about *how* to mine,
 quoted one per line and mapped to how this plan executes them — e.g.
@@ -58,6 +67,13 @@ research line. Settle it here, because the budget arithmetic depends on it>
   cost before fixing N and say so in the basis (see run-mining.md → "Budget and
   safety of running things"). A candidate that can't build inside its slot is a
   recorded "did not run in budget" result, not a silent drop.
+
+  For case-mining the count is a *coverage target*, not a quota to fill: price
+  N honest, distinct, evidenced cases against the budget, and when the budget
+  only supports fewer than were asked for, present the smaller list and say so
+  plainly — padding to 50 with restatements of one handling is the exact failure
+  this mode exists to prevent (see case-mining.md → "Coverage without
+  duplication is the whole game").
 -->
 
 **Discovery method:** <how these candidates were found — e.g. "searched
@@ -91,7 +107,9 @@ performs the deep mining')" | "Within-source fan-out — subagents split
 *inside* one large artifact by page range / directory / date window (what
 'each subagent reads 100 pages' means); ranges come from the noise map and
 TOC, never raw page counts; per-slice part checkpoints stitched into one
-source checkpoint">
+source checkpoint" | "Case families — in a case-mine, one subagent per scenario
+family, each brief carrying the shared axis grid so families tile the space
+instead of emitting the same handling under two names">
 
 **Extraction plan:** <for sources that aren't directly readable (PDFs, scans,
 HTML, audio/video): the conversion chain you'll use — installed skill,
@@ -114,7 +132,11 @@ actually viewed, so dedup happens after collection, before deep analysis
 removed as duplicates once mining starts. For run-mining with authored
 candidates: the *approaches* are deduped before building any of them — two named
 styles that resolve to the same layout and tokens, or a contender that is just
-another's thin wrapper, are one candidate, not two.">
+another's thin wrapper, are one candidate, not two. For case-mining: two
+situations whose recognition *and* remedy are the same are one case however
+differently the sources name them — that merge is judged after collection, on
+the written handling, never at plan time (case-mining.md → "Coverage without
+duplication is the whole game").">
 
 **Fair-trial sketch (run-mining only):** <the one test every contender faces —
 the frozen input/fixture set (naming the deliberately-hard cases that break the
@@ -123,6 +145,14 @@ identically to all, the per-contender adapter, the pass gate vs the quality
 metric, and what you're actually measuring vs the proxy you'll read. Omit this
 field entirely for a read-mining run. See `references/run-mining.md` → "What
 makes a trial fair.">
+
+**Coverage plan (case-mining only):** <the scenario axes the space is mapped
+onto (e.g. phase × environment × artifact × trigger-shape — settled from the
+sources that attest the cases, never a guessed generic grid), the families with
+their target case counts, the expected attested/derived split, and the hardness
+bar (cases that defeat the obvious approach outrank table stakes). Omit this
+field entirely for read- or run-mining runs. See `references/case-mining.md` →
+"Coverage without duplication is the whole game".">
 
 ## Candidates
 
@@ -164,6 +194,32 @@ authored contenders have no URL yet — they have a spec they'll all be built to
   is replaced or noted, exactly like a broken link. List the SAME fixture set and
   metrics for every row — that uniformity is what turns the eventual ranking into
   a comparison instead of five unrelated demos.
+-->
+
+### Candidates — case-mining variant
+
+Swap the table above for this one when Mining method is case-mining. The rows
+are **cases**, not sources: sources appear in the evidence column, one source
+may back several rows, and one row may cite several sources. Derived cases have
+no URL — they carry the grid cell and the reason the situation must be possible.
+
+| # | Case (situation, one line) | Family / grid cell | Attested / derived | Backing evidence (source URL, or derivation) | Distinct handling — why it merges with no other row |
+|---|------------------------------|--------------------|--------------------|-----------------------------------------------|-------------------------------------------------------|
+| 1 | <the hard situation> | <phase × artifact × trigger …> | attested | <postmortem / thread / guide URL> | <what its remedy does that no other row's does> |
+| 2 | <the hard situation> | <cell> | derived | <the axes it falls out of + why reachable> | <one clause> |
+| ... | | | | | |
+
+<!--
+  Verification here has two gates, not one. Attested rows: the cited URL must
+  resolve (same no-4xx / no-unrelated-redirect duty as the read table) AND the
+  source must actually document both the situation and the handling — a URL
+  that merely mentions the symptom downgrades the row to derived, recorded as
+  such rather than quietly kept. Derived rows: the derivation must name real
+  cells of the settled coverage grid, not "logically possible". The count is a
+  coverage target: if the honest, distinct, evidenced set comes out smaller
+  than the user asked for, present the smaller list with the reason — padding
+  rows to hit N is the one outcome worse than missing the number
+  (case-mining.md → "Coverage without duplication is the whole game").
 -->
 
 ---

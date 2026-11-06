@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<g data-layer="torso">
+<path d="M30 600C60 505 190 468 262 458C285 454 315 454 338 458C410 468 540 505 570 600Z" fill="var(--shirt)"/>
+</g>
+</svg>

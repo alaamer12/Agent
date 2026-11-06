@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<g data-layer="eyes">
+<path d="M241 264Q258 248 275 264Q258 276 241 264Z" fill="var(--ink)"/><path d="M325 264Q342 248 359 264Q342 276 325 264Z" fill="var(--ink)"/><circle cx="262" cy="261" r="2.4" fill="var(--white)"/><circle cx="346" cy="261" r="2.4" fill="var(--white)"/>
+</g>
+</svg>

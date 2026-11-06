@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<g data-layer="head">
+<path d="M212 235C208 335 246 408 300 408C354 408 392 335 388 235C386 172 348 140 300 140C252 140 214 172 212 235Z" fill="var(--skin)"/><circle cx="254" cy="332" r="21" fill="var(--blush)" opacity=".28"/><circle cx="346" cy="332" r="21" fill="var(--blush)" opacity=".28"/>
+</g>
+</svg>

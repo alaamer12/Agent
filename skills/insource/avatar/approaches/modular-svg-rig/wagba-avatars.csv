@@ -1,0 +1,41 @@
+id,kind,slot,name,params,status,last_verified,first_seen,file,notes
+rig-slot-backdrop,slot,backdrop,,"layers=backdrop; envelope=0,0,600,600; backdrop=true",verified,2026-10-30,2026-10-30,assets/rig-template/rig.json,Painted first; only slot allowed to fill the whole canvas.
+rig-slot-hair,slot,hair,,"layers=hair_back+hair_front; envelope=100,30,500,540",verified,2026-10-30,2026-10-30,assets/rig-template/rig.json,Spans two layers - the only slot that renders both behind and in front of the face.
+rig-slot-torso,slot,torso,,"layers=torso; envelope=0,430,600,600",verified,2026-10-30,2026-10-30,assets/rig-template/rig.json,Shoulder_line_y=456 anchor is the neck handshake.
+rig-slot-neck,slot,neck,,"layers=neck; envelope=240,330,360,545",verified,2026-10-30,2026-10-30,assets/rig-template/rig.json,neck_port_x=[262,338] must stay covered by every head part.
+rig-slot-ears,slot,ears,,"layers=ears; envelope=170,235,430,335",verified,2026-10-30,2026-10-30,assets/rig-template/rig.json,ear_line_y=285; sits under head edges - leaks show as ears floating off the silhouette.
+rig-slot-head,slot,head,,"layers=head; envelope=190,125,410,425",verified,2026-10-30,2026-10-30,assets/rig-template/rig.json,chin=[300,408] and head_center=[300,265] are the anchors everything else is placed against.
+rig-slot-nose,slot,nose,,"layers=nose; envelope=270,258,340,350",verified,2026-10-30,2026-10-30,assets/rig-template/rig.json,nose_base_y=310.
+rig-slot-mouth,slot,mouth,,"layers=mouth; envelope=240,330,360,400",verified,2026-10-30,2026-10-30,assets/rig-template/rig.json,mouth_center=[300,360].
+rig-slot-eyes,slot,eyes,,"layers=eyes; envelope=230,235,370,300",verified,2026-10-30,2026-10-30,assets/rig-template/rig.json,eye_line_y=262.
+rig-slot-brows,slot,brows,,"layers=brows; envelope=220,200,380,260",verified,2026-10-30,2026-10-30,assets/rig-template/rig.json,brow_line_y=232.
+rig-part-backdrop-flat,part,backdrop,flat,"fills canvas; two-stop-free",verified,2026-10-30,2026-10-30,assets/rig-template/parts/backdrop/flat.svg,Default.
+rig-part-backdrop-gradient,part,backdrop,gradient,"radial shade variant",verified,2026-10-30,2026-10-30,assets/rig-template/parts/backdrop/gradient.svg,Uses backdrop + backdrop-shade palette vars only.
+rig-part-brows-arched,part,brows,arched,"two arcs",verified,2026-10-30,2026-10-30,assets/rig-template/parts/brows/arched.svg,Default.
+rig-part-brows-flat,part,brows,flat,"two bars",verified,2026-10-30,2026-10-30,assets/rig-template/parts/brows/flat.svg,
+rig-part-ears-round,part,ears,round,"two ellipses",verified,2026-10-30,2026-10-30,assets/rig-template/parts/ears/round.svg,Default.
+rig-part-ears-small,part,ears,small,"tighter ellipses",verified,2026-10-30,2026-10-30,assets/rig-template/parts/ears/small.svg,
+rig-part-eyes-almond,part,eyes,almond,"almond pair + pupils",verified,2026-10-30,2026-10-30,assets/rig-template/parts/eyes/almond.svg,
+rig-part-eyes-round,part,eyes,round,"circle pair + pupils",verified,2026-10-30,2026-10-30,assets/rig-template/parts/eyes/round.svg,Default.
+rig-part-hair-buzz,part,hair,buzz,"cap silhouette",verified,2026-10-30,2026-10-30,assets/rig-template/parts/hair/buzz.svg,
+rig-part-hair-crop,part,hair,crop,"short front sweep",verified,2026-10-30,2026-10-30,assets/rig-template/parts/hair/crop.svg,Default.
+rig-part-hair-long,part,hair,long,"back mass + front sweep",verified,2026-10-30,2026-10-30,assets/rig-template/parts/hair/long.svg,Exercises the hair_back+hair_front dual-layer slot.
+rig-part-hair-wavy,part,hair,wavy,"scalloped outline",verified,2026-10-30,2026-10-30,assets/rig-template/parts/hair/wavy.svg,
+rig-part-head-oval,part,head,oval,"ellipse faceplate",verified,2026-10-30,2026-10-30,assets/rig-template/parts/head/oval.svg,Default.
+rig-part-head-square,part,head,square,"rounded-rect jaw",verified,2026-10-30,2026-10-30,assets/rig-template/parts/head/square.svg,
+rig-part-mouth-closed,part,mouth,closed,"single line",verified,2026-10-30,2026-10-30,assets/rig-template/parts/mouth/closed.svg,
+rig-part-mouth-grin,part,mouth,grin,"open arc + teeth",verified,2026-10-30,2026-10-30,assets/rig-template/parts/mouth/grin.svg,
+rig-part-mouth-smile,part,mouth,smile,"curved stroke",verified,2026-10-30,2026-10-30,assets/rig-template/parts/mouth/smile.svg,Default.
+rig-part-neck-regular,part,neck,regular,"full-width column",verified,2026-10-30,2026-10-30,assets/rig-template/parts/neck/regular.svg,Default.
+rig-part-neck-slim,part,neck,slim,"narrow column",verified,2026-10-30,2026-10-30,assets/rig-template/parts/neck/slim.svg,
+rig-part-neck-v-neck,part,neck,v-neck,"column + shirt V",verified,2026-10-30,2026-10-30,assets/rig-template/parts/neck/v-neck.svg,Only neck part that paints shirt color - legal because its layers include the collar overlap.
+rig-part-nose-button,part,nose,button,"small circle",verified,2026-10-30,2026-10-30,assets/rig-template/parts/nose/button.svg,
+rig-part-nose-long,part,nose,long,"extended bridge",verified,2026-10-30,2026-10-30,assets/rig-template/parts/nose/long.svg,
+rig-part-nose-wedge,part,nose,wedge,"angled wedge",verified,2026-10-30,2026-10-30,assets/rig-template/parts/nose/wedge.svg,Default.
+rig-part-torso-broad,part,torso,broad,"wide shoulders",verified,2026-10-30,2026-10-30,assets/rig-template/parts/torso/broad.svg,
+rig-part-torso-standard,part,torso,standard,"normal shoulders",verified,2026-10-30,2026-10-30,assets/rig-template/parts/torso/standard.svg,Default.
+rig-combo-default,combo,,"template-default","backdrop=flat;hair=crop;torso=standard;neck=regular;ears=round;head=oval;nose=wedge;mouth=smile;eyes=round;brows=arched",verified,2026-10-30,2026-10-30,assets/rig-template/rig.json#default,Must equal the pre-split matched render (parity rule).
+rig-bad-ears-floating,part,ears,floating,"ears drawn off the head silhouette",known-bad,-,2026-10-30,examples/broken-parts/ears/floating.svg,Selftest proves verify_parts catches it.
+rig-bad-hair-gap,part,hair,gap,"hair_back leaves a gap at the crown",known-bad,-,2026-10-30,examples/broken-parts/hair/gap.svg,Selftest fixture.
+rig-bad-neck-short,part,neck,short,"neck ends above chin - seam",known-bad,-,2026-10-30,examples/broken-parts/neck/short.svg,Selftest fixture.
+rig-bad-nose-leaky,part,nose,leaky,"nose paints outside its envelope",known-bad,-,2026-10-30,examples/broken-parts/nose/leaky.svg,Selftest fixture.

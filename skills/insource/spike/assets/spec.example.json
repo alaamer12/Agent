@@ -1,0 +1,79 @@
+{
+  "_comment": [
+    "Illustrative capture spec for scripts/spike.mjs. Every route, selector, name and number here",
+    "is a placeholder: the point of the file is the SHAPE, and the shape is written per spike from",
+    "the state list you derived out of the code (see references/states-and-metrics.md).",
+    "Selectors key off data attributes you own, never off the unit's internal structure - a spike",
+    "that selects through the component's child nodes is measuring a thing you are about to change."
+  ],
+
+  "name": "card-swap-before-and-after",
+  "viewport": { "width": 390, "height": 844 },
+  "deviceScaleFactor": 2,
+  "locale": "en",
+  "permissions": [],
+
+  "defaults": {
+    "waitUntil": "load",
+    "waitFor": "[data-spike-root]",
+    "awaitFonts": true,
+    "settleMs": 300,
+    "timeoutMs": 15000,
+    "nodeDepth": 3,
+    "tabProbe": 2,
+    "styles": [
+      "display", "position", "width", "height", "padding", "margin", "gap",
+      "color", "background-color", "border-radius", "box-shadow",
+      "font-size", "font-weight", "line-height", "visibility", "opacity", "overflow",
+      "outline-width", "outline-style", "outline-color"
+    ]
+  },
+
+  "states": [
+    {
+      "id": "unit-default",
+      "route": "/screens/unit",
+      "query": { "fixture": "populated" },
+      "locator": "[data-spike=unit]",
+      "interactions": []
+    },
+    {
+      "id": "unit-empty",
+      "route": "/screens/unit",
+      "query": { "fixture": "empty" },
+      "locator": "[data-spike=unit]",
+      "comment": "every state the code can produce, not the three you remember"
+    },
+    {
+      "id": "unit-loading",
+      "route": "/screens/unit",
+      "query": { "fixture": "pending" },
+      "locator": "[data-spike=unit]",
+      "settleMs": 120
+    },
+    {
+      "id": "unit-variant-compact",
+      "route": "/screens/unit",
+      "query": { "fixture": "populated", "variant": "compact" },
+      "locator": "[data-spike=unit]",
+      "styles": ["display", "padding", "gap", "font-size", "outline-width"]
+    },
+    {
+      "id": "unit-keyboard-focus",
+      "route": "/screens/unit",
+      "query": { "fixture": "populated" },
+      "locator": "[data-spike=unit]",
+      "focusProbe": "[data-spike=previous-stoppable]",
+      "tabProbe": 3,
+      "_why": "the crop cannot see a focus ring: this row is what step 6 of the workflow measures",
+      "interactions": [{ "action": "focus", "target": "[data-spike=unit-primary]", "afterWaitMs": 120 }]
+    },
+    {
+      "id": "unit-pressed",
+      "route": "/screens/unit",
+      "query": { "fixture": "populated" },
+      "locator": "[data-spike=unit]",
+      "interactions": [{ "action": "click", "target": "[data-spike=unit-primary]", "afterWaitMs": 150 }]
+    }
+  ]
+}

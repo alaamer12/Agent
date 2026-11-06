@@ -1,0 +1,82 @@
+{
+  "name": "template",
+  "viewBox": "0 0 600 600",
+  "frame": { "shape": "circle", "cx": 300, "cy": 300, "r": 290 },
+  "palette": {
+    "backdrop": "#ffd25a",
+    "backdrop-shade": "#f6bf45",
+    "skin": "#f0997a",
+    "skin-shade": "#d9795a",
+    "blush": "#e8553f",
+    "hair": "#251e19",
+    "hair-light": "#3d332c",
+    "shirt": "#5b8791",
+    "shirt-shade": "#456a72",
+    "ink": "#241b17",
+    "lip": "#a24a32",
+    "white": "#fffaf2"
+  },
+  "layers": [
+    "backdrop",
+    "hair_back",
+    "torso",
+    "neck",
+    "ears",
+    "head",
+    "nose",
+    "mouth",
+    "eyes",
+    "brows",
+    "hair_front"
+  ],
+  "slots": {
+    "backdrop": { "layers": ["backdrop"], "backdrop": true, "envelope": [0, 0, 600, 600] },
+    "hair": { "layers": ["hair_back", "hair_front"], "envelope": [100, 30, 500, 540] },
+    "torso": { "layers": ["torso"], "envelope": [0, 430, 600, 600] },
+    "neck": { "layers": ["neck"], "envelope": [240, 330, 360, 545] },
+    "ears": { "layers": ["ears"], "envelope": [170, 235, 430, 335] },
+    "head": { "layers": ["head"], "envelope": [190, 125, 410, 425] },
+    "nose": { "layers": ["nose"], "envelope": [270, 258, 340, 350] },
+    "mouth": { "layers": ["mouth"], "envelope": [240, 330, 360, 400] },
+    "eyes": { "layers": ["eyes"], "envelope": [230, 235, 370, 300] },
+    "brows": { "layers": ["brows"], "envelope": [220, 200, 380, 260] }
+  },
+  "default": {
+    "backdrop": "flat",
+    "hair": "crop",
+    "torso": "standard",
+    "neck": "regular",
+    "ears": "round",
+    "head": "oval",
+    "nose": "wedge",
+    "mouth": "smile",
+    "eyes": "round",
+    "brows": "arched"
+  },
+  "interacts": [
+    ["hair", "head"],
+    ["hair", "ears"],
+    ["hair", "brows"],
+    ["hair", "neck"],
+    ["head", "ears"],
+    ["head", "neck"],
+    ["head", "nose"],
+    ["head", "mouth"],
+    ["head", "eyes"],
+    ["neck", "torso"],
+    ["nose", "mouth"],
+    ["eyes", "brows"]
+  ],
+  "anchors": {
+    "head_center": [300, 265],
+    "chin": [300, 408],
+    "ear_line_y": 285,
+    "eye_line_y": 262,
+    "brow_line_y": 232,
+    "nose_base_y": 310,
+    "mouth_center": [300, 360],
+    "neck_top_y": 340,
+    "neck_port_x": [262, 338],
+    "shoulder_line_y": 456
+  }
+}

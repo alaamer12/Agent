@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<g data-layer="neck">
+<path d="M262 340V472C262 496 284 506 300 506C316 506 338 496 338 472V340Z" fill="var(--skin)"/><path d="M262 395C282 426 318 426 338 395V430C318 450 282 450 262 430Z" fill="var(--skin-shade)" opacity=".5"/><path d="M262 472C262 496 284 506 300 506C316 506 338 496 338 472" fill="none" stroke="var(--shirt-shade)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>

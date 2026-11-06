@@ -1,0 +1,11 @@
+timestamp,action,subject,note
+2026-11-06 16:40,REFACTOR,avatar,"Skill split: SKILL.md+data.csv+catalog.py = global unbiased approach catalog; the reference-rig method encapsulated into approaches/modular-svg-rig/ (references, scripts, assets, examples, wagba-avatars.csv) with isolation+abstraction; all prior information preserved."
+2026-11-06 16:40,CONFIRM,modular-svg-rig,"Status verified on evidence of the 2026-10-30 run (selftest + walkthrough output preserved in examples/); re-run selftest after the folder move before new builds."
+2026-11-06 16:40,ADD,initials-monogram,"Seeded as candidate family - unverified until a build proves the grapheme rule and palettes."
+2026-11-06 16:40,ADD,hash-identicon,"Seeded as candidate family - unverified; note the non-humanizing limit."
+2026-11-06 16:40,ADD,parameterized-service,"Seeded as candidate family - unverified; param docs go stale, verify current landscape when used; cross-ref fahlwy avatar endpoints."
+2026-11-06 16:40,ADD,emoji-composite,"Seeded as candidate family - unverified; platform emoji-font variance is the trap."
+2026-11-06 16:40,ADD,photo-derived,"Seeded as candidate family - unverified; biometric/retention disclosure required before shipping."
+2026-11-06 16:40,ADD,generated-raster,"Seeded as candidate family - unverified; no palette consistency across regenerations."
+2026-11-06 16:40,ADD,single-flat-svg,"Seeded as candidate family - the no-rig honest default."
+2026-11-06 16:41,NOTE,wagba-avatars.csv,"Resource registry created: 10 slots + 25 parts + default combo + 4 known-bad selftest fixtures, all rows carrying file path and verification date."

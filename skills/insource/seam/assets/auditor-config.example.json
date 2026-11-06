@@ -1,0 +1,38 @@
+{
+  "_comment": "Illustrative shape of an auditor config. Every path, glob, code and count here is a placeholder, not a measured value. The point of this file is that the auditor and scripts/glob-liveness.mjs read the SAME config, so liveness is proven about the rules that actually run.",
+
+  "root": ".",
+
+  "exclude": ["**/generated/**", "**/*.snap"],
+
+  "rules": [
+    {
+      "code": "VENDOR_IMPORT_OUTSIDE_SEAM",
+      "severity": "hard-zero",
+      "message": "the third party is named outside the seam file",
+      "globs": ["src/**/*.{ts,tsx,js,jsx,vue,svelte}", "src/**/*.{ts,tsx,vue}"],
+      "seamFiles": ["src/ui/base/vendor.ts"]
+    },
+    {
+      "code": "VENDOR_TAG_IN_MARKUP",
+      "severity": "hard-zero",
+      "message": "a vendor tag or utility class reached the template layer",
+      "globs": ["src/**/*.{vue,svelte,jsx,tsx,razor,html}"],
+      "seamFiles": ["src/ui/base/vendor.ts", "src/ui/adaptive/**"]
+    },
+    {
+      "code": "OVERRIDE_OF_LOWER_LAYER_APPEARANCE",
+      "severity": "ratcheted",
+      "message": "a lower layer's appearance was overridden from above",
+      "globs": ["src/components/**/*.{vue,svelte,jsx,tsx}"],
+      "countsFile": "counts.example.json"
+    }
+  ],
+
+  "allowEmpty": [
+    {
+      "glob": "legacy/**/*.vue",
+      "reason": "the legacy tree was deleted in this sweep; this row is kept for one release so the deletion shows up as an intentional allowlist entry rather than a silently green rule"
+    }
+  ]
+}

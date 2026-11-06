@@ -1,0 +1,5 @@
+@inject INetworkCondition Network
+@if (!Network.IsOnline)
+{
+    <SearchDisabledMessage />
+}

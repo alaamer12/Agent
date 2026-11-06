@@ -1,8 +1,8 @@
 ---
 name: revoke
-description: 'Sanitise an artifact by revoking what ties it to a specific project, person, customer or deployment: the substance survives, the identity does not. Use when a report, spec, config, log, ticket thread, screenshot must leave its origin - inventory what is specific (names, ids, endpoints, secrets, amounts, dates, paths, metadata), choose per item [redact] [pseudonymize] [generalize] [aggregate] [keep] under one consistent substitution map; verify nothing leaks (token sweeps, entropy scans, file and image metadata, links, the map itself); and check the text still makes its argument before recording what was lost. Calibrate to the audience: internal share, external public, third-party tool, regulated data. NOT polyglot - polyglot makes a document stack-neutral, revoke makes it identity- and context-neutral. Boundaries: never to hide wrongdoing, evade a legal hold, strip safety or consent notices, or erase accountability from a timeline; the original stays intact; revocation is a disclosure decision, not deletion.'
-when_to_use: The user asks to sanitise, redact, anonymise, de-identify, genericise or "remove anything that identifies our project/customer" from a document, passage, config, log, screenshot or case study before sharing or reusing it. Also /revoke.
-argument-hint: "[artifact or path] + [where it is going]"
+description: 'Sanitise an artifact by revoking what ties it to a specific project, person, customer or deployment: the substance survives, the identity does not. Use when a report, spec, config, log, ticket thread, screenshot must leave its origin - inventory what is specific (names, ids, endpoints, secrets, amounts, dates, paths, metadata), choose per item [redact] [pseudonymize] [generalize] [aggregate] [keep] under one consistent substitution map, deciding per entity between placeholder stand-ins ([username]) and reserved fake data (alice@example.com) by the artifact genre; verify nothing leaks (token sweeps, entropy scans, file and image metadata, links, the map itself); and check the text still makes its argument before recording what was lost. Two explicit modes: /revoke partial masks values to a recognizable fragment (A****) for owner-viewing screens like recovery flows - never for secrets, never for shared artifacts; /revoke image treats screenshots and pictures as first-class artifacts - inventory every visible identifier, paint opaque blocks (blur is de-identification, not revocation), strip metadata and embedded thumbnails, render to temp files and look before finalising. Calibrate to the audience: internal share, external public, third-party tool, regulated data. NOT polyglot - polyglot makes a document stack-neutral, revoke makes it identity- and context-neutral. Boundaries: never to hide wrongdoing, evade a legal hold, strip safety or consent notices, or erase accountability from a timeline; the original stays intact; revocation is a disclosure decision, not deletion.'
+when_to_use: The user asks to sanitise, redact, anonymise, de-identify, genericise or "remove anything that identifies our project/customer" from a document, passage, config, log, screenshot, image or case study before sharing or reusing it. Also /revoke, /revoke partial (owner-recognition masks), /revoke image (pixel-level redaction of a picture).
+argument-hint: "[artifact or path] + [where it is going] | partial: [values] + [who will see them] | image: [image path] (+ regions, else revoke all visible identity)"
 ---
 
 # Revoke - strip the identity, keep the point
@@ -67,6 +67,10 @@ The rule that catches most bad revocations: **distinct entities must stay distin
 collapse into `[service]`, the causal chain dies. And a stand-in must not accidentally assert something false
 — generalizing "we use the free tier" into "a small deployment" is a claim the document no longer supports.
 
+When the chosen operation is a stand-in, there are two styles of it - the honest bracket `[username]` and the
+reserved fake `alice@example.com` - and the artifact's genre (claiming truth vs demonstrating) decides which,
+by rules ([`09`](references/09-placeholder-or-fake-data.md)).
+
 ## Step 3 - Apply one map, consistently
 
 Build the substitution map once and apply it everywhere, including code blocks, filenames, and image
@@ -82,7 +86,9 @@ Run the mechanical checks in [`04`](references/04-verification.md) before callin
 - every original token absent - search the exact strings, including case variants and split forms;
 - no high-entropy leftovers (keys, tokens, UUIDs, base64 blobs) and no precise dates or amounts that re-identify;
 - metadata and non-text surfaces actually cleared;
-- no partial redaction that reveals shape (`a**@acme.com` tells you the domain);
+- no partial redaction that reveals shape (`a**@acme.com` tells you the domain) - unless the artifact *is* a
+  `/revoke partial` owner-view screen, where the shape is the point and [`07`](references/07-partial-masking.md)
+  governs instead;
 - the map is not anywhere inside the artifact;
 - `scripts/revoke.py scan <file>` finds candidates you missed, and
   `scripts/revoke.py verify --map map.yaml --out sanitized.md` fails loudly on leaks, collisions, and
@@ -96,6 +102,29 @@ you be able to act on it? List what was lost, honestly, in the record.
 Three lines minimum, more if the artifact is consequential: what was revoked and at which operation, which
 audience it was cleared for, where the untouched original lives, and the re-check condition ("redo if the
 incident gets a second root cause"). Put it where the project already keeps such records.
+
+## Explicit modes - `/revoke partial` and `/revoke image`
+
+Entered by name, each with its own reference read in full before acting. Neither relaxes Steps 0-5; they
+change what the operations are applied *to*.
+
+**`/revoke partial` - the mask that only the owner can finish.** For recovery/confirmation screens where
+showing `A****` or `****4821` lets the owner recognize their own value while strangers get a fragment worth
+nothing. It is deliberately the inverse of the Step-4 shape rule, valid only under the owner-viewer
+assumption: head-vs-tail is a threat-model choice per field, masked parts keep their entropy, credential-class
+values get no fragment at all, and the result must never be copied into a shared artifact
+([`07`](references/07-partial-masking.md)).
+
+**`/revoke image` - revoking pixels, not just prose.** Screenshots and pictures are first-class artifacts:
+the agent looks, inventories every visible identifier (avatars, faces, name labels *wherever they repeat* -
+header, quoted replies, toasts), and treats each region with an operation translated into pixels. Opaque
+flattened blocks are the redaction; blur is de-identification and gets recorded as such; the file is re-encoded
+with metadata and embedded thumbnails stripped; every frame of a multi-frame file is treated. With no region
+list given, the default is the document default - revoke everything that identifies. The non-negotiable loop:
+render to a temp file, look at the result (this agent has eyes; zoom the edges), fix coverage misses, and only
+then produce the final ([`08`](references/08-image-redaction.md)). `scripts/revoke_image.py` is the default
+mechanics - the script applies the spec, the agent decides it; any tool that meets the same obligations
+(opaque paint, flatten, strip, every frame) is equally valid.
 
 ## Boundaries - these stop the job, not style it
 
@@ -126,6 +155,9 @@ Read [`06`](references/06-boundaries-and-misuse.md) before touching anything in 
 | [`04-verification.md`](references/04-verification.md) | The mechanical and human checks, the residual-risk question, and how to report what was lost | Step 4 |
 | [`05-purpose-calibration.md`](references/05-purpose-calibration.md) | Audience levels, what must survive at each, and the questions to ask when the destination is vague | Step 0 |
 | [`06-boundaries-and-misuse.md`](references/06-boundaries-and-misuse.md) | The stop list: concealment, legal holds, protective content, accountability, third-party data, originals, theatre | Step 0 and whenever tempted |
+| [`07-partial-masking.md`](references/07-partial-masking.md) | The owner-view mode: head/tail fragment choice as threat model, entropy floors, the never-for-secrets rule, why partial output must not leak into shared artifacts | Only under `/revoke partial` |
+| [`08-image-redaction.md`](references/08-image-redaction.md) | Pixel revocation: visible-identifier inventory, block-vs-blur honesty, corner/edge coverage, embedded thumbnails and multi-frame traps, the temp-render-then-look loop | Only under `/revoke image`, or whenever an image is in the artifact set |
+| [`09-placeholder-or-fake-data.md`](references/09-placeholder-or-fake-data.md) | The two stand-in styles and the genre question that picks between them, reserved name-spaces, the no-structure-inheritance rule, fake identifiers never fake evidence | Step 2, whenever a stand-in is chosen |
 
 ## Examples and script
 
@@ -141,6 +173,8 @@ it:
 | [`case-04`](examples/case-04-over-revoked-argument.md) | a spec that stopped making sense | meaning-survival failure, and the fix |
 | [`case-05`](examples/case-05-screenshot-and-metadata.md) | screenshot + PDF hand-off | the non-text surface nobody re-reads |
 | [`case-06`](examples/case-06-cannot-be-shared.md) | what "no viable sanitized version" looks like | reporting the stop instead of shipping a leak |
+| [`case-07`](examples/case-07-partial-mask-recovery-screen.md) | account-recovery screen | head-vs-tail per field, the refused password fragment, prose around the masks re-identifying |
+| [`case-08`](examples/case-08-chat-screenshot-image-revocation.md) | chat screenshot | block vs blur, the avatar corner that leaked past a tight box, the temp pass that caught it |
 
 - `scripts/revoke.py` - `scan` finds candidate specific data (emails, URLs, IPs, keys, tokens, UUIDs, private
   key headers, paths, precise dates and money, internal hostnames) so your inventory is not memory-based;
@@ -148,3 +182,13 @@ it:
   placeholder collisions, two entities sharing one placeholder, the map itself being embedded. Exit 0 clean,
   1 findings, 2 usage or read error. No argument runs the self-test - nine verify fixtures plus four scan
   checks, thirteen in total. On Windows use `python`, not `python3`. Output is ASCII.
+- `scripts/revoke_image.py` - the pixel mechanics for `/revoke image`: `info` lists frames and the metadata
+  surface, `redact` applies a region spec (block/mosaic/blur, padded boxes, background-matched block color),
+  strips metadata, flattens, re-encodes, treats every frame, and refuses to write over the original; `check`
+  reports metadata/thumbnail findings on a produced file. Needs Pillow in a **project-local venv** (never the
+  global interpreter - the script prints the exact commands); any other tool meeting the same obligations
+  works too, the loop matters more than the library. Exit 0/1/2 as its sibling. No argument runs the
+  self-test - synthetic avatar+name fixture, seven checks. On Windows use `python`, not `python3`.
+  **Verification status:** self-test and a real four-variant run (block/blur x normal/partial on a chat
+  screenshot) executed against Pillow 13.0.0 in a temp venv on 2026-11-06; the temp-inspection pass caught
+  and fixed a real coverage miss, so the loop it documents is the loop that worked.

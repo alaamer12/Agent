@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<g data-layer="eyes">
+<ellipse cx="258" cy="262" rx="9" ry="10.5" fill="var(--ink)"/><ellipse cx="342" cy="262" rx="9" ry="10.5" fill="var(--ink)"/><circle cx="261" cy="258" r="2.6" fill="var(--white)"/><circle cx="345" cy="258" r="2.6" fill="var(--white)"/>
+</g>
+</svg>

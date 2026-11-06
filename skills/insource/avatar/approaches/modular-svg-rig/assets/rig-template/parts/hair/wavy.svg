@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<g data-layer="hair_front">
+<path d="M198 256C186 215 192 172 218 148C222 106 270 90 306 94C336 80 382 86 394 118C422 132 414 188 402 224C402 238 402 248 402 256L378 256C378 236 372 214 358 200C340 208 326 194 314 184C294 204 262 210 246 198C230 212 224 236 222 256Z" fill="var(--hair)"/><path d="M262 128C292 112 332 112 362 128" fill="none" stroke="var(--hair-light)" stroke-width="6" stroke-linecap="round" opacity=".7"/>
+</g>
+</svg>

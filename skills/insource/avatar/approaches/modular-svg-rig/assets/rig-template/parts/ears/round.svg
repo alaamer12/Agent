@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<g data-layer="ears">
+<ellipse cx="208" cy="285" rx="22" ry="32" fill="var(--skin-shade)"/><ellipse cx="392" cy="285" rx="22" ry="32" fill="var(--skin-shade)"/>
+</g>
+</svg>

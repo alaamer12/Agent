@@ -28,8 +28,10 @@ break the weak ones, and a ranked, evidence-backed pick. Same engine (plan real,
 distinct candidates and get them approved; interrogate each past the surface;
 accumulate cross-checked evidence; distill once at the end), different
 interrogation: *read* the source to understand it, or *run* it to decide between
-it and its rivals. `references/run-mining.md` is that second mode in full; the
-four phases below are written to serve both.
+it and its rivals — or *enumerate* its concrete situations into a catalog of
+cases, which is what "collect the hard cases of X" wants.
+`references/run-mining.md` and `references/case-mining.md` are those modes in
+full; the four phases below are written to serve all three.
 
 ## This skill is task-based — what a source is, how you mine it, where candidates come from
 
@@ -70,17 +72,25 @@ it: **read-mining** (the default throughout this file — reach, census, chase t
 why) answers "what does this class of thing look like, and why"; **run-mining**
 (put each candidate through an identical, measured trial) answers "which of these
 is best — prove it," which is what "find the best 5 OCR libraries and test them on
-hard scans" or "try 5 styles on this screen" actually wants. The **third** is
-where candidates come from: **found** instances you discover, or **authored**
-approaches you build yourself to one spec before any trial can compare them (a
-styles bake-off has no five ready-made artifacts to fetch — you make them).
-`references/run-mining.md` is the second mode in full; it reuses this spine —
-plan → mine → budget → distill, and census → dig → why → checkpoint → ledger —
-with each part given a run-mode reading, so nothing here is GitHub-only or
-read-only. The axes compose freely: a run-mine of authored candidates is usually
-*seeded* by a quick read-mine of the credible option space. Which method and
-which provenance a task wants is settled at the top of Phase 1, exactly like its
-source type.
+hard scans" or "try 5 styles on this screen" actually wants; **case-mining**
+answers a third question — "what are the distinct concrete situations of this
+topic, and how do I handle each one" — which is what "/mine 50 cases on
+hard-scenario debugging" or "every way this API fails, with the playbook for
+each" actually wants, and whose unit of work is the *case* rather than the
+source. The **third** is where candidates come from: **found** instances you
+discover, or **authored** approaches you build yourself to one spec before any
+trial can compare them (a styles bake-off has no five ready-made artifacts to
+fetch — you make them); in case-mining the same split reads as **attested**
+cases (documented in real sources) versus **derived** ones (reasoned out of the
+scenario space). `references/run-mining.md` and `references/case-mining.md` are
+the second and third modes in full; they reuse this spine — plan → mine →
+budget → distill, and census → dig → why → checkpoint → ledger — with each part
+given a mode reading, so nothing here is GitHub-only or read-only. The axes
+compose freely: a run-mine of authored candidates is usually *seeded* by a quick
+read-mine of the credible option space, and a case-mine is usually *seeded* by
+reading the postmortems, threads and guides that attest its cases. Which method
+and which provenance a task wants is settled at the top of Phase 1, exactly like
+its source type.
 
 ## Phase 1 — Build and propose the plan
 
@@ -265,13 +275,18 @@ apply:
 Two more readings shape the run before discovery, and both go on the plan so the
 user can correct them at approval, exactly like "Source type":
 
-- **Method — read-mining or run-mining.** The task's verb is usually a strong
-  tell. "Understand / how does / why / what do they do" points to **reading** the
+- **Method — read-mining, run-mining, or case-mining.** The task's verb is usually a
+  strong tell. "Understand / how does / why / what do they do" points to **reading** the
   sources. "Find the best N / which one / test them / benchmark / compare / try N
   versions / see what happens" points to **running** each candidate through a
-  trial (`references/run-mining.md`). Name the chosen method in the plan's
+  trial (`references/run-mining.md`). "Collect / enumerate / all the cases of X /
+  50 cases on X / every way X fails / hard-scenario X / the situations where /
+  playbook for X" points to **case-mining** — the deliverable is a catalog of
+  distinct, individually actionable cases, each with its handling and its evidence
+  (`references/case-mining.md`). Name the chosen method in the plan's
   "Mining method" field. Ask before discovery only when it's genuinely ambiguous
-  — "look into OCR libraries" could be a survey *or* a bake-off — because the two
+  — "look into OCR libraries" could be a survey *or* a bake-off; "the hard cases
+  of this system" could be a read-survey *or* a case catalog — because the methods
   plan different candidates and cost very differently: installing and running one
   candidate can outweigh reading five, so picking the wrong method mis-sizes the
   whole budget.
@@ -282,14 +297,25 @@ user can correct them at approval, exactly like "Source type":
   changes discovery (search a registry vs enumerate the credible option set, often
   via a short read-mine first), the distinctness check (two authored styles that
   collapse to the same thing are one candidate, and you catch that before building
-  all five), and the plan's cost. Record it in "Candidate provenance."
+  all five), and the plan's cost. Record it in "Candidate provenance." In
+  case-mining the same axis is **attested vs derived** — cases documented in real
+  sources versus cases reasoned out of the scenario grid where no source writes
+  them down — recorded the same way, because a healthy catalog is mostly attested
+  with a derived minority, and the split is a coverage-map fact (see
+  `references/case-mining.md` → "Where cases come from").
 
 Method and provenance cross-cut the ecosystem and independence choices below,
 they don't replace them: a run-mine still names its source type (usually a package
 registry, a model hub, or authored implementations) and still settles
-true-independents vs industry/products for its contenders. The four phases then run
-identically; only the interrogation step inside Phase 2 swaps from reading to
-testing, and the Phase 4 deliverable from a distillation to a verdict.
+true-independents vs industry/products for its contenders. A case-mine names its
+source type too, but the relation flips: the ecosystems (postmortems/org writing,
+discussion corpora, documentation sets' troubleshooting pages, bug trackers,
+books/reports, specs' error sections) are the *evidence that attests cases*, not
+the candidates themselves — the cases are the candidates, and one source may yield
+several of them. The four phases then run identically; only the interrogation step
+inside Phase 2 swaps from reading to testing (run) or to lifting-and-reasoning
+cases (case), and the Phase 4 deliverable from a distillation to a verdict or a
+catalog.
 
 ### Honor mining directives — the user may specify the *how*, not just the *what*
 
@@ -575,7 +601,14 @@ the digging.
 Everything below reads for **read-mining**, the default. In a **run-mining** run,
 the *interrogation* steps (0 reach, 2 dig, 3 push past what into why) become one
 fair, identical **trial** instead of a read — `references/run-mining.md` holds the
-whole mode. Every other Phase 2 obligation is unchanged and still applies: the
+whole mode. In a **case-mining** run the unit of Phase 2 is the **case**, not the
+source: you still *read* the attesting sources (so the reach/census/dig/ledger
+steps apply to them as evidence, many cases per source and vice versa), but the
+checklist enumerates cases, the per-unit output is a **case card**, the census
+becomes the **coverage map**, and the ledger becomes **per-case evidence**
+(`attested@`/`derived`/`inferred`) — `references/case-mining.md` holds the whole
+mode, including dedup-by-handling after collection. Every other Phase 2
+obligation is unchanged and still applies: the
 same run directory; "census before you interpret," but the census is a **run
 record** (exact version/build, environment, install command, how many fixtures you
 actually executed vs the frozen set, the score) instead of a file count; the same
@@ -656,7 +689,10 @@ protocol instead of re-planning:
    holds extractions that must not be redone; `tools/` scripts get one smoke
    test before reuse, not a rewrite; `witness/` skip-decisions stay valid;
    in run-mining, cached builds in `cache/` and the kept harness in
-   `sources/`/`fixtures/` mean a resume doesn't re-pay setup.
+   `sources/`/`fixtures/` mean a resume doesn't re-pay setup; in case-mining,
+   the coverage map plus the finished cards say exactly which scenario families
+   are attested or derived already, so the resume enumerates the remaining
+   grid cells instead of re-reading every source from zero.
 3. **Detect half-done work honestly.** A checklist unit marked `in progress`
    with partial slice files or a missing checkpoint means the interruption
    landed mid-source: keep the finished slices (read them back), mine only
@@ -903,11 +939,19 @@ this line, unchanged. A **run-mining** run ends as a tested **verdict**: a score
 table (candidate × metric, gate-failures and reach bounds shown), a ranked
 recommendation with the *cause* and *cost* behind each placement, and a
 "when you'd still pick the other one" clause — `references/run-mining.md` → "What
-run-mining ends in." Only that comparison table is structured, and only
-deliberately: the score *is* the point there, which makes it the one place the
-no-template rule yields — exactly as the ground census is the one fixed part of a
-read checkpoint. The reasoning written *around* a verdict follows every
-free-form-synthesis rule below, verbatim, and keeps the reproducible probe with it.
+run-mining ends in." A **case-mining** run ends as a **case catalog**: a
+free-form coverage lead (the axes the space was mapped onto, the honest count,
+the attested/derived split, which families are thin, what the dedup pass
+collapsed) followed by one card per case — situation → recognition → handling
+path → tools → pitfalls & cost → lesson → evidence — `references/case-mining.md`
+→ "What case-mining ends in." Those two structures — a run-mine's score table
+and a case-mine's per-card fields — are the only places the no-template rule
+yields, and only deliberately: there the comparison *is* the point, here the
+individually browsable, actionable entry *is* the point — exactly as the ground
+census is the one fixed part of a read checkpoint. The reasoning written
+*around* a verdict or a catalog follows every free-form-synthesis rule below,
+verbatim, and keeps the reproducible probe (run) or the source→case mapping and
+coverage map (case) with it.
 
 This is the actual deliverable, and it is deliberately **not a template.**
 Do not organize it by source-by-source sections, and do not organize it

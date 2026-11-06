@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="backdrop-gradient-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--backdrop)"/><stop offset="1" style="stop-color:var(--backdrop-shade)"/></linearGradient></defs>
+<g data-layer="backdrop">
+<rect width="600" height="600" fill="url(#backdrop-gradient-fill)"/>
+</g>
+</svg>
