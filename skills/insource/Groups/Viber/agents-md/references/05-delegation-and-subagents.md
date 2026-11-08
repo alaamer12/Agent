@@ -110,8 +110,8 @@ inside the prompt**. Two disciplines make it safe:
 1. **It is a projection, not a second source.** Every clause maps to a section (context→2, skills→1, shell/
    tooling→6, env→7, debug→8, units→4, report→10). The body wins on any disagreement.
 2. **Regenerate on change.** State that in the file: *"editing sections 1-5 requires regenerating this block."*
-   `scripts/agents_lint.py` compares clause topics against the sections and flags a block clause with no
-   corresponding section (and vice versa), which is how drift gets caught before it mis-informs every
+   When you regenerate, compare clause topics against the sections: a block clause with no corresponding section
+   (or a section with no clause) is drift, and catching it here is what stops it from mis-informing every
    subagent.
 
 Three slots the parent fills per delegation, and they belong in the block so they are never forgotten:

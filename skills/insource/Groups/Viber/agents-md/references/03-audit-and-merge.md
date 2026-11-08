@@ -7,7 +7,7 @@ wrote those rules, often after being burned. Deleting one because it did not fit
 ## The pass
 
 1. Read the file in full. Note line count and where it is bloated.
-2. Classify every rule, block, and table into one of the twenty-three sections - or into one of three exits:
+2. Classify every rule, block, and table into one of the nineteen sections - or into one of three exits:
    **move out**, **merge with** (duplicate rule elsewhere in the file), **drop only with the user's ok**.
 3. Build the map table and show it before writing anything.
 4. Ask the user about the moves that change meaning (see "conflicts" below).

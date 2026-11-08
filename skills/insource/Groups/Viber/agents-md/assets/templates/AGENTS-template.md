@@ -15,9 +15,13 @@ the system - the files it points to do that.
      template is one writer's shape, not a mandate - a sub-part explained under a bold line is just
      as findable). What is never flexible: all sections exist, in order, with their duties.
      Flexibility is about the ink, never about erasing identity or content. -->
-<!-- Budgets: ~500 lines for the file, ~50 lines per section. A section past ~50 lines is a doc with a
-pointer missing: move its detail to a file under docs/ (project convention), keep 2-4 obligation lines plus
-"Read: <path>" here. agents_lint.py flags it. -->
+<!-- SIZE + PLACEMENT (convention, not a rule): ~500 lines for the file and ~50 per section are
+     advisory heuristics for the referenced style. Routed how-to docs conventionally live under a
+     "rules/" folder beside AGENTS.md (rules/development.md, rules/debugging/ui.md), or under the
+     project's docs root. The user may instead keep the procedure/policy inline here - that is a
+     valid choice, and length alone is not a violation. Inline rules are guaranteed to reach the
+     agent every message; referenced docs cost less context but risk being skipped or forgotten.
+     Ask which the user prefers. -->
 
 ---
 
@@ -104,25 +108,30 @@ Shared/base context reads apply in every active context:
 
 ## 3. How To
 
-<!-- PROCEDURES LIVE IN HOW-TO DOCS, ROUTED BY TASK CLASS. This is where Development Workflow and
-     Debugging used to sit: the branch model, promotion mechanics, and the debug playbook are
-     PROCEDURES, and procedures belong in docs the agent opens per task - not in chapters bound to
-     the rulebook every session (token efficiency: read only what the task needs). Two duties bind
-     the router: (1) every how-to doc is REGISTERED once in the section 2 table - paths have one
-     owner; this section maps task class to doc NAME, never repeats a path; (2) a topic that grows
-     past one file becomes a folder (debugging.md -> debugging/db.md + debugging/web.md) - split
-     early, routing gains a line, the rulebook stays thin. The operational-meaning discipline
-     travels INTO the development doc: a bare branch label without its mechanics (folder, naming
-     pattern, [build flag], what ships) is still a mystery wherever it is written. -->
+<!-- PROCEDURES USUALLY LIVE IN HOW-TO DOCS, ROUTED BY TASK CLASS - BUT INLINE IS VALID. This is
+     where Development Workflow and Debugging used to sit: the branch model, promotion mechanics, and
+     the debug playbook are PROCEDURES, and by convention they live in docs the agent opens per task
+     (conventionally under rules/: rules/development.md, rules/debugging/ui.md), not in chapters
+     bound to the rulebook every session. The user may instead keep a procedure/policy inline in
+     this section - then there is no Read pointer and no routed doc to update. Ask which they
+     prefer: inline is guaranteed to reach the agent every message (never forgotten) but is paid
+     every turn; referenced docs cost less context but the agent may skip the read or forget a rule
+     it did not load. Two duties bind the router when referenced: (1) every how-to doc is REGISTERED
+     once in the section 2 table - paths have one owner; this section maps task class to doc NAME,
+     never repeats a path; (2) a topic that grows past one file becomes a folder
+     (rules/debugging.md -> rules/debugging/ui.md + rules/debugging/backend.md) - split early,
+     routing gains a line, the rulebook stays thin. The operational-meaning discipline travels INTO
+     the development doc: a bare branch label without its mechanics (folder, naming pattern,
+     [build flag], what ships) is still a mystery wherever it is written. -->
 
 | Task class | Read first (each doc registered in section 2) |
 |---|---|
-| <!-- Development: branch flow, promotion, CI effects --> | <!-- development.md --> |
-| <!-- Debugging: reproduce, escalate, verify, clean up --> | <!-- debugging.md --> |
-| <!-- <a deeper layer of one procedure> --> | <!-- debugging/<layer>.md - the folder split --> |
-| <!-- Running commands, shell, package manager --> | <!-- execution.md --> |
-| <!-- Environment, configuration, secrets --> | <!-- environment.md --> |
-| <!-- Version naming, bumps, releases --> | <!-- version.md - a per-track topic can be a folder: version/[main].md, version/[canary].md --> |
+| <!-- Development: branch flow, promotion, CI effects --> | <!-- rules/development.md --> |
+| <!-- Debugging: reproduce, escalate, verify, clean up --> | <!-- rules/debugging.md --> |
+| <!-- <a deeper layer of one procedure> --> | <!-- rules/debugging/<layer>.md - the folder split --> |
+| <!-- Running commands, shell, package manager --> | <!-- rules/execution.md --> |
+| <!-- Environment, configuration, secrets --> | <!-- rules/environment.md --> |
+| <!-- Version naming, bumps, releases --> | <!-- rules/version.md - a per-track topic can be a folder: rules/version/[main].md, rules/version/[canary].md --> |
 
 - **Routed docs own POLICY, not only steps** (the names below are illustrative pairings - which classes a project routes and what its docs are called is the project's own) - a [version doc] may carry the scheme (shape + cited spec,
   never a live value in AGENTS.md), the WRITTEN bump rule + who may bump per component, declaration-site
@@ -352,8 +361,8 @@ same change — not in a follow-up, not next sprint.
 
 **This section is not a changelog.** The product's release history belongs to section 3 and the CHANGELOG;
 this table is an *update-routing map*: when a decision changes, which section must be edited in the same
-commit. Every section carries a trigger row here - `agents_lint.py` fails the file when one is missing,
-because a section no decision routes to is the section that silently rots.
+commit. Every section carries a trigger row here, because a section no decision routes to is the section that
+silently rots.
 
 - **Last reviewed:** <!-- YYYY-MM-DD -->
 
@@ -402,11 +411,8 @@ A rulebook that stops being updated is worse than none, because agents trust it.
 `canary` shipped, a pointer to a file renamed three months ago, a "current version is V1" line while V2 is in
 development — each one is a wrong instruction that reads like an authoritative one.
 
-Run the check after editing:
-
-```bash
-python scripts/agents_lint.py AGENTS.md      # sections, dead links, scope fence, block sync, review date
-```
+Re-read the trigger map after editing: every section still has a row, and every row still names a section that
+exists.
 
 ## 12. <!-- Version Control / Git / Unity VCS / Perforce: the interview is neutral, the FILE is
      not. Once the project's VCS is known, the heading IS the tool's name ("## 15. Git") and every

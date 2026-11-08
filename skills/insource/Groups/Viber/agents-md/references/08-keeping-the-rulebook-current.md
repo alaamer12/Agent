@@ -12,7 +12,7 @@ This is the difference between the rulebook and the docs. Technical detail goes 
 > Every session that changes a project rule updates this file in the same change. Not a follow-up, not next
 > sprint, not "I'll do it after the release".
 
-Pair it with a review marker the linter can check:
+Pair it with a review marker a later agent can check:
 
 ```markdown
 ## 15. Rulebook Maintenance
@@ -79,11 +79,11 @@ changes how the system works, it belongs in a doc and this file keeps the pointe
 |---|---|---|
 | Stale active scope | the file says V1 while V2 is in development | review date + verify section 2 first each session |
 | Missing dimension | a channel exists in practice, not in the file | the decision→section table above |
-| Dead references | agents stop honoring mandatory reading | `agents_lint.py` link check; report, do not stub |
-| Block/body divergence | subagents follow rules the repo abandoned | regenerate 10.4 whenever 1–9, 11, or 16 change; the linter traces clauses |
-| Rulebook creep | the file absorbs technical docs and passes 500 lines | the "does it change what the agent must do?" test; move out, keep a pointer |
+| Dead references | agents stop honoring mandatory reading | read the links back at review time; report, do not stub |
+| Block/body divergence | subagents follow rules the repo abandoned | regenerate 10.4 whenever 1-9, 11, or 16 change; compare clause topics against the sections |
+| Rulebook creep | the file absorbs technical docs and gets hard to scan | the "does it change what the agent must do?" test; propose a split (conventionally `rules/...`) or keep it inline if that is the user's choice - size is advisory |
 | Unowned updates | everyone assumes someone else keeps it current | make the duty explicit in section 11, and in the delegation contract for subagents |
-| Ignored-in-name privacy | section 7 declares paths private while they stay committed or still tracked | a privacy edit updates `.gitignore` in the same change; the linter checks both duties in the section; the already-tracked case raises the ask-before-cache-clear question |
+| Ignored-in-name privacy | section 7 declares paths private while they stay committed or still tracked | a privacy edit updates `.gitignore` in the same change; re-check both duties in the section; the already-tracked case raises the ask-before-cache-clear question |
 
 ## Subagents and maintenance
 

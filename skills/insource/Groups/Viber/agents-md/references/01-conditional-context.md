@@ -95,7 +95,7 @@ category of mistake this section can prevent.
 ## Dead references
 
 A rulebook that points at a file that does not exist trains the agent to ignore the rulebook. After writing,
-resolve every relative path (the linter does this). When a path is missing, report it with an owner:
+resolve every relative path by hand. When a path is missing, report it with an owner:
 
 ```text
 DEAD REFERENCE: docs/UNITS.md does not exist.

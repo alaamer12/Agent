@@ -71,33 +71,45 @@ Bad (what it becomes after three months): twenty named review tasks with per-tas
 `AGENTS.md` - fifty lines of procedure the agent carries into every session to run in a few. Good: the
 always-first rule stays ("hunt rulebook violations, code and docs, before any named task"); the task bodies
 live in `<docs>/review.md`; AGENTS.md keeps one index line per task plus `Read: <docs>/review.md`. Growth is
-the failure mode - sections that start as obligations end as documents unless the budget is enforced on them
-*as they grow*, not at next year's audit.
+the failure mode - sections that start as obligations end as documents unless they are watched *as they grow*,
+not at next year's audit. Extracting to a referenced doc is one valid answer; inlining is another, chosen by the
+user.
 
-## Why ~500 lines, and what the limit is really protecting
+## Size guidance, and where the rules live
 
-The file is loaded every session. A 1,200-line rulebook costs context permanently and, worse, **dilutes
-compliance**: when everything is mandatory, nothing is. The limit is not vanity; it is attention budget.
+`AGENTS.md` is loaded every session. A very long rulebook costs context permanently and, worse, **dilutes
+compliance**: when everything is mandatory, nothing is. But length alone is not a defect, and the skill does not
+enforce a ceiling.
 
-Two budgets, both enforced by `scripts/agents_lint.py`:
+**Placement is the user's choice.** Two valid shapes:
 
-| Budget | Rule |
-|---|---|
-| Whole file | ~500 lines maximum (soft warning at 420) |
-| **One section** | **~50 lines maximum** - past that, the section is a doc with a pointer missing |
+- **Inline in `AGENTS.md`** - guaranteed to be in front of the agent on every message; nothing is forgotten or
+  skipped. Costs context and attention, and every line is paid on every turn.
+- **Referenced from `AGENTS.md`** - the agent opens the doc only for the task that needs it. Keeps the rulebook
+  cheap, but relies on the agent actually reading it; a skipped read means missing rules, and pressure invites
+  invention.
+
+By convention the referenced files live under a `rules/` folder beside `AGENTS.md` - `rules/development.md`,
+`rules/debugging.md`, or a folder split `rules/debugging/ui.md`, `rules/debugging/backend.md`,
+`rules/version/main.md` - or under the project's declared docs root. These are examples, not a required layout;
+use what the project already has and ask when neither is evident.
+
+**~500 lines for the whole file and ~50 lines for one section are guidance, not rules.** They are heuristics for
+the referenced style. A file that is longer because the user chose to inline is not a violation; length alone is
+never a finding.
 
 Practical consequences:
 
-- Prefer one line per rule, with the reason in a clause ("because X hangs"), not a paragraph.
+- One line per rule, with the reason in a clause ("because X hangs"), not a paragraph.
 - Tables beat prose for routing (file → purpose, task → skill, location → scope).
-- When a section passes ~50 lines, do not "trim it down" - **extract**: move the detail into a doc at the
-  project's docs location, leave the obligations plus one pointer line. Trimming loses information; extracting
-  keeps it one `Read` away.
-- Cut in this order when over budget: (1) duplicated content from referenced docs, (2) explanatory prose,
-  (3) examples that the referenced file already carries, (4) rarely-triggered conditional rules → move behind
-  a conditional pointer, (5) never the scope fence or the delegation contract.
+- When a section becomes unwieldy and the user agrees to reference it, **extract**: move the detail into a doc
+  at the project's docs root (conventionally `rules/...`), leave the obligations plus one pointer line.
+  Trimming loses information; extracting keeps it one `Read` away.
+- Cut in this order when shrinking for clarity: (1) duplicated content from referenced docs, (2) explanatory
+  prose, (3) examples that the referenced file already carries, (4) rarely-triggered conditional rules → move
+  behind a conditional pointer, (5) never the scope fence or the delegation contract.
 
-The section split, bad and good:
+The inline/referenced split, bad and good:
 
 Bad - section 3 grows to 70 lines: the env-validation library's rationale, a table of every variable, three
 examples of the generation script's output, and the fallback behavior, all inline. Every session pays for the
@@ -109,7 +121,7 @@ Good - section 3 is 8 lines:
 ## 7. Environment and Secrets
 - Strategy: build-time generation from `.env.example` - never edit `.env` by hand.
 - Validation: typed schema at startup; a missing var fails boot, no silent defaults.
-- Read: `docs/environment-strategy.md` (variable table, generator, fallbacks).
+- Read: `rules/environment.md` (variable table, generator, fallbacks).
 ```
 
 The agent obeys the three obligation lines every session and opens the doc only when the task touches
@@ -131,7 +143,7 @@ the gap with a plausible default. Two reasons:
    same confidence.
 2. A visible pending item invites the answer. An invented default quietly blocks it forever.
 
-`scripts/agents_lint.py --strict` counts pending markers so a file can never look finished while it is not.
+Count the pending markers before declaring the file finished - it can never look done while one is still open.
 
 ## What "good" looks like when reading it back
 

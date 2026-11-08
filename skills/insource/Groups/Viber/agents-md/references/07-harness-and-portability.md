@@ -54,8 +54,8 @@ faces a silent contradiction between the two files, which is the one shape neith
   defines commands (e.g. a `.cursor/commands/` file), reference it by path; do not transcribe its syntax.
 - Marker formats owned by other tools. If a managed block exists, preserve it verbatim and say who owns it -
   do not document how it is generated.
-- Line-count or token budgets of the harness's context. `AGENTS.md`'s own ~500-line budget is a project choice
-  that happens to align with attention, not a platform limit.
+- Line-count or token budgets of the harness's context. `AGENTS.md`'s ~500-line guidance is a project choice
+  that happens to align with attention, not a platform limit, and agents-md never enforces it.
 
 ## Skills that touch the same file
 
@@ -75,7 +75,6 @@ claim to own the same rule.
 ## Portability check before finishing
 
 1. Every relative path resolves from the repository root, and no absolute or foreign-project path appears.
-   (`scripts/agents_lint.py` enforces both.)
 2. Nothing depends on a tool-specific loader to make the rules work - each rule is written as an obligation the
    agent performs, so it survives switching harnesses.
 3. Machine-specific quirks are scoped as such.

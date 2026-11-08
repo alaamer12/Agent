@@ -84,5 +84,5 @@ from the agenda and ask whether to take it. The agenda is the user's to reorder.
 ## In the lifecycle
 
 This is phase 2 of `like-a-pro`: idea → **detailsup** → app-boundary confirmation → standards
-(`language-handling`, `sql-handling`, `error-handling`, `ui-handling`) and `system-md`. It also runs alone, on any
+(`architecture`) and `system-md`. It also runs alone, on any
 project, with no lifecycle around it.
