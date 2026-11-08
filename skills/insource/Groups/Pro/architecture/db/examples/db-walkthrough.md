@@ -1,17 +1,17 @@
-# Walkthrough: Executing sql-architecture across an Application
+# Walkthrough: Executing Database Architecture (db) across an Application
 
-This walkthrough demonstrates the end-to-end two-phase execution of `sql-architecture`.
+This walkthrough demonstrates the end-to-end two-phase execution of the `db` pillar.
 
 ---
 
-## Phase 1: Establishing SQL Conventions
+## Phase 1: Establishing Database Conventions
 
 An application (e.g. order management service) requires database standards.
 The agent evaluates the storage invariants:
 1. **Dumb Store:** Prohibits database triggers for order totals or status notifications.
 2. **Types & Dates:** All timestamps are typed as ISO8601 UTC strings or native timestamp with timezone, formatted by the application layer.
 3. **Naming & Keys:** Surrogate `order_id` (UUIDv7 or BigInt), `orders` plural table name.
-4. **Output Artifact:** Writes `<docs>/sql-architecture.md` (or `<docs>/sql-conventions.md`).
+4. **Output Artifact:** Writes `<docs>/db-architecture.md` (or `<docs>/db-conventions.md`).
 
 ---
 

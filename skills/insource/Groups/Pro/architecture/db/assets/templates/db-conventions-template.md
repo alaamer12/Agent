@@ -1,9 +1,9 @@
-# Universal SQL Conventions Template
+# Universal Database Architecture Conventions Template
 
-Use this universal template when establishing Phase 1 SQL storage conventions for any application. Fill in or adapt the choices (<...>) based on the application's engine, requirements, and domain.
+Use this universal template when establishing Phase 1 database storage conventions for any application. Fill in or adapt the choices (<...>) based on the application's engine, requirements, and domain.
 
 ```markdown
-# SQL Conventions & Storage Architecture — <Application Name>
+# Database Conventions & Storage Architecture — <Application Name>
 
 > **Scope:** Relational schema conventions, DDL standards, queries, and transactions for `<Application Name>`.
 > **Philosophy:** Database as a Dumb Store. Portability and explicit application-layer control.
