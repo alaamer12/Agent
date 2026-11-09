@@ -66,5 +66,19 @@ check("?filled round-trips in the URL", toQuery(parse("?filled=17", FUNDS_SPEC).
 const r1 = rng("17"), r2 = rng("17"), r3 = rng("42");
 check("seeded rng is reproducible and seed-sensitive", r1() === r2() && r1() !== r3());
 
+// --- story isolation resolution contract -----------------------------------
+import { normalizeStoryId, parseStoryIds } from "./_app.js";
+
+check("story isolation: normalization trims quotes, case, and -component",
+      normalizeStoryId(' "Navbar-Component" ') === "navbar" &&
+      normalizeStoryId("TopBar") === "topbar" &&
+      normalizeStoryId("modal") === "modal");
+
+check("story isolation: repeated params and comma lists preserve order, drop duplicates",
+      JSON.stringify(parseStoryIds("?story_id=topbar,tabs&story_id=topbar&story_id=modal-component")) === JSON.stringify(["topbar", "tabs", "modal"]));
+
+check("story isolation: empty or whitespace story_id drops quietly",
+      JSON.stringify(parseStoryIds("?story_id=&story_id=  ,button")) === JSON.stringify(["button"]));
+
 console.log(failed ? `\n${failed} FAILURE(S)` : "\nALL PASS");
 process.exit(failed ? 1 : 0);

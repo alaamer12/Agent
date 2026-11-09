@@ -11,7 +11,7 @@ description: >-
   runtime values as dynamic tokens, inline only for calculated numbers; composition helpers
   (joiner, merge-on-conflict, variant registry). Use when styling structure is yours, when it
   sprawls into inline dumps or built class strings, or asked how to organize CSS/XAML/QML. Not
-  for retrofitting projects into tokens (styleup), redesign (accessible), or component galleries
+  for retrofitting projects into tokens (styleup), redesign (denoise), or component galleries
   (components).
 ---
 
@@ -161,7 +161,7 @@ work: this skill. Retrofit of existing mess: styleup.
 | Situation | Skill |
 |---|---|
 | Existing project hardcoded/duplicated, migrate into tokens with parity evidence | `styleup` |
-| Redesigning an existing UI for calm/readability | `accessible` |
+| Redesigning an existing UI for calm/readability | `denoise` |
 | Reviewing component x state coverage | `components` |
 | Deriving which states a screen must handle at all | `stateful` |
 | Choosing a styling library/framework from scratch | `techstack` / `thebest` |

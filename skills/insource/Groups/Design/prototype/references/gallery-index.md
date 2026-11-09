@@ -23,20 +23,24 @@ screen is noise, and that screen's own states are already reachable by URL.
 Four parts, in this order:
 
 1. **Header** — what the set is, who it's for, and a link to the spec it implements (a docs
-   file, a design system, a ticket). One badge stating fidelity/source if that matters to the
-   reviewer ("built to Material 3 density", "pixel-matched to staging").
-2. **One card per screen.** Each card, top to bottom:
-   - a **live iframe preview** of the actual screen file (not a screenshot — a screenshot goes
-     stale the moment you edit the screen);
-   - a **tag** — where the screen sits in the product (`Tab 2 • /tabs/search`, `Sub-screen •
-     /more/settings`, `Pre-tab • first launch only`);
-   - **title**;
-   - **notes** — 2–4 sentences on what this screen *decides*, in the product's real vocabulary;
-   - an **Open Screen** link (full size, new tab);
-   - a **state strip** — one chip per declared state preview, driving the preview's URL.
+   file, a design system, a ticket). In a **Multi-App Suite**, the header states the suite's purpose
+   and lists the participating applications (e.g. `Admin Portal`, `Operator Console`, `Mobile Web App`).
+   One badge stating fidelity/source if that matters to the reviewer ("built to Material 3 density", "pixel-matched to staging").
+2. **App Sections & Screen Cards.**
+   - In a **Single App**: one scrollable list of cards, one card per screen.
+   - In a **Multi-App Suite**: cards are grouped under clear section headers per application (`### Admin Portal (/admin)`, `### Operator Console (/operator)`). Each app section showcases its screens, viewport aspect ratio (desktop vs native mobile), and persona notes.
+   - Each card, top to bottom:
+     - a **live iframe preview** of the actual screen file (not a screenshot — a screenshot goes
+       stale the moment you edit the screen);
+     - a **tag** — where the screen sits in the product (`Tab 2 • /tabs/search`, `Sub-screen •
+       /more/settings`, `Pre-tab • first launch only`, or `Admin • /admin/overview`);
+     - **title**;
+     - **notes** — 2–4 sentences on what this screen *decides*, in the product's real vocabulary;
+     - an **Open Screen** link (full size, new tab);
+     - a **state strip** — one chip per declared state preview, driving the preview's URL.
 3. **A set-level notes panel** at the bottom — the rules that bind all the screens (tokens,
-   laws, constraints), each with its source. This is where "offline is never advertised" lives,
-   not repeated inside six card notes.
+   laws, constraints), each with its source. In a multi-app suite, this explicitly details the
+   shared design system tokens in `/shared/css/theme.css` and the theme differences between apps.
 4. Nothing else. No nav, no sidebar, no filter UI on the gallery itself.
 
 ## The three rules that make it work
@@ -85,9 +89,11 @@ the gallery should listen and route them, or the protocol is dead code.
 
 ### 3. Screens stay chrome-free; the gallery carries the controls
 
-Never put a state switcher, a debug bar, or a "STATE: error" ribbon inside a screen file. The
+Never put a state switcher, a debug bar, or a "STATE: error" ribbon inside a screen file. In
+multi-app suites, **never put cross-app navigation buttons in the page's main layout**. The
 screen must screenshot clean, because screenshots of these files get pasted into specs and PRs.
-The gallery is the only place with UI about UI. The one exception is the `Open Screen` link,
+The gallery is the primary place with UI about UI, while live cross-app switching is handled by
+the floating bottom-right menu (`?apps_toolbar=hide`). The one exception in the gallery is the `Open Screen` link,
 which lives in the card and simply carries the currently-selected state through:
 
 ```js

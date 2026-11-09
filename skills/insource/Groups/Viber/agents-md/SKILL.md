@@ -263,7 +263,7 @@ The file is only worth what it is worth today. Section 15 is the duty, and the d
   with a generic env story because the repo has no config layer yet; that is a fabrication the agent will
   enforce.
 - **No silent deletion** during merge, and another tool's managed block passes through untouched.
-- **The `# Glossary` section is `glossary`'s content.** agents-md may add the section as an obligation +
+- **The `# Glossary` section is `glossary-md`'s content.** agents-md may add the section as an obligation +
   pointer when writing the rulebook and keeps it through audits, but never edits term entries itself, and
   never treats an outgrown glossary as its own move-out decision - that skill owns when the list becomes a
   `GLOSSARY.md`.

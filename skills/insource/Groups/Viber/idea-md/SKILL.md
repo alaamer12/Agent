@@ -113,7 +113,7 @@ The inspiration line is re-checked at that moment too: a project that started "s
 | Tech stack or architecture choices | `techstack`, `thebest`, `dtb` |
 | Task lists, sequencing, delivery plans | `planner` |
 | Persona development, user research | `persona`, `deep-research` |
-| AGENTS.md, UNITS.md, glossary | `agents-md`, `units-md`, `glossary` - sibling standing documents |
+| AGENTS.md, UNITS.md, glossary | `agents-md`, `units-md`, `glossary-md` - sibling standing documents |
 | Polished long-form prose about the idea | `document` |
 
 ## Files

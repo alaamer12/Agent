@@ -94,7 +94,7 @@ function sheetMarkup(state) {
       <button class="btn-ghost close-sheet">Dismiss</button></div>`;
   }
   return `<div class="backdrop sheet-backdrop"></div>
-    <div class="sheet" role="dialog" aria-modal="true"><div class="sheet-handle"></div>
+    <div class="sheet" role="dialog" aria-modal="true" data-story="bottom-sheet" data-testid="bottom-sheet"><div class="sheet-handle"></div>
       <button class="x close-sheet" aria-label="close">${icon("close")}</button>${body}
     </div>`;
 }
@@ -106,32 +106,32 @@ function render(state) {
   if (!app.isConnected) document.body.appendChild(app);
   app.className = "app";
   app.innerHTML = `
-    <header class="topbar">
+    <header class="topbar" data-story="topbar" data-testid="topbar">
       <div class="brand">${icon("menu")} NAV Intelligence</div>
       <div class="tools">${icon("search")}<input class="q" placeholder="Search funds" value="${esc(state.q)}" aria-label="search"/>${icon("bell")}</div>
       <a class="navlink" href="/dashboard">Dashboard</a>
     </header>
-    <nav class="tabs">
+    <nav class="tabs" data-story="tabs" data-testid="tabs">
       ${FUNDS_SPEC.tab.values.map(t => `<button class="tab ${state.tab === t ? "active" : ""}" data-tab="${t}">${t}</button>`).join("")}
     </nav>
-    ${state.tab === "overview" ? `<section class="panel">
-      <div class="filters">${["pending", "failed", "settled"].map(s =>
+    ${state.tab === "overview" ? `<section class="panel" data-story="funds-panel" data-testid="funds-panel">
+      <div class="filters" data-story="filters" data-testid="filters">${["pending", "failed", "settled"].map(s =>
         `<button class="chip ${state.status === s ? "on" : ""}" data-status="${s}">${s}</button>`).join("")}
         <span class="spacer"></span>
         <select class="sort">${FUNDS_SPEC.sort.values.map(s => `<option ${state.sort === s ? "selected" : ""}>${s}</option>`).join("")}</select>
         <button class="dir">${state.direction === "asc" ? icon("up") : icon("down")}</button>
       </div>
-      <table class="funds-table"><thead><tr><th>Fund</th><th>NAV</th><th>Δ</th><th>Status</th><th>7d</th><th></th></tr></thead>
+      <table class="funds-table" data-story="funds-table" data-testid="funds-table"><thead><tr><th>Fund</th><th>NAV</th><th>Δ</th><th>Status</th><th>7d</th><th></th></tr></thead>
       <tbody>${fundRows(state)}</tbody></table>
     </section>`
-      : state.tab === "transactions" ? `<section class="panel"><h2>Transactions</h2>
+      : state.tab === "transactions" ? `<section class="panel" data-story="transactions-panel" data-testid="transactions-panel"><h2>Transactions</h2>
         <p class="muted">${allFunds(state).filter(f => f.status === "pending").length} pending · ${allFunds(state).filter(f => f.status === "failed").length} failed today (placeholder dataset).</p></section>`
-      : `<section class="panel"><h2>Performance</h2>${allFunds(state).slice(0, state.filled ? 200 : NAV.length).map(f => `<div class="perf">${esc(f.name)} ${sparkline(f.series, { color: f.chg >= 0 ? "var(--up)" : "var(--down)" })}</div>`).join("")}</section>`}
-    ${state.modal === "transaction-details" ? `<div class="backdrop modal-backdrop"><div class="modal">
+      : `<section class="panel" data-story="performance-panel" data-testid="performance-panel"><h2>Performance</h2>${allFunds(state).slice(0, state.filled ? 200 : NAV.length).map(f => `<div class="perf">${esc(f.name)} ${sparkline(f.series, { color: f.chg >= 0 ? "var(--up)" : "var(--down)" })}</div>`).join("")}</section>`}
+    ${state.modal === "transaction-details" ? `<div class="backdrop modal-backdrop"><div class="modal" data-story="modal" data-testid="modal">
       <header>Transaction ${esc(state.transactionId || "—")}<button class="x close-modal">${icon("close")}</button></header>
       <p class="muted">Settlement detail for #${esc(state.transactionId || "—")} (placeholder content, real shape).</p></div></div>` : ""}
     ${sheetMarkup(state)}
-    ${state.toast ? `<div class="toast ${state.toast}">${esc(state.toast)} notice (previewed via URL)</div>` : ""}
+    ${state.toast ? `<div class="toast ${state.toast}" data-story="toast" data-testid="toast">${esc(state.toast)} notice (previewed via URL)</div>` : ""}
   `;
   app.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => api.sync({ tab: b.dataset.tab }, { key: "tab" }));
   app.querySelectorAll("[data-status]").forEach(b => b.onclick = () =>

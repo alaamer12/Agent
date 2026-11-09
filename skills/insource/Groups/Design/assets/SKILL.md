@@ -129,7 +129,7 @@ restructure code. Reference styles per stack and the rename protocol: `reference
 | Not this | Go instead |
 |---|---|
 | Asset pipelines, upload processing, storage services, CDN infrastructure | those are application/infrastructure work - `dtb` for the how, the relevant engineering skill for the build |
-| Designing a design system or component library | `components`, `accessible`, `impeccable` |
+| Designing a design system or component library | `components`, `denoise`, `impeccable` |
 | Writing application features that display assets | the implementation skills |
 | Deciding a stack for media tooling | `techstack`, `thebest` |
 | Generating brand-new artwork from a description | an image-generation tool/skill, not this one |

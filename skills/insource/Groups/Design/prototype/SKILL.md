@@ -1,6 +1,6 @@
 ---
 name: prototype
-description: 'Build interactive design prototypes as small JS-rendered web projects. HTML pages are thin entries (meta/links/data-page; JS builds the UI); js/ and css/ split shared layers (_app.js, specs.js, theme tokens) from per-page modules; a zero-dep dev server routes each page a clean direct URL working on entry, refresh, and query. State model: PER-COMPONENT STATE TREES — every component exposes modes + sub-states as params (?open=…, ?loading=header|all, ?error=kind); init via the same render path clicks use, write back preserving unrelated params, invalid values fall to defaults, push/replace history. ?filled[=seed] swaps sparse placeholders for a FULL seeded-random dataset, reproducible by URL. Clean code, not chaos: ~300-line files preferred; respect the project''s package manager per lockfile. Keeps: honest states (no fake skeletons), never-lorem copy, frameless viewports, specs-generated gallery chips, opt-in dead-control audit. Triggers: prototype this app/idea, make this a prototype, design review links.'
+description: 'Build interactive design prototypes as small JS-rendered web projects. Scales from single apps to multi-app system suites and multi-surface variations (e.g. desktop web, mobile viewports, operator/admin consoles) sharing a unified design system. HTML pages are thin entries (meta/links/data-page; JS builds the UI); js/ and css/ split shared layers (_app.js, specs.js, theme tokens) from per-page modules; a zero-dep dev server routes each page a clean direct URL working on entry, refresh, and query. State model: PER-COMPONENT STATE TREES — every component exposes modes + sub-states as params (?open=…, ?loading=header|all, ?error=kind); init via the same render path clicks use, write back preserving unrelated params, invalid values fall to defaults, push/replace history. ?filled[=seed] swaps sparse placeholders for a FULL seeded-random dataset, reproducible by URL. Clean code, not chaos: ~300-line files preferred; respect the project''s package manager per lockfile. Keeps: honest states (no fake skeletons), never-lorem copy, frameless viewports, specs-generated gallery chips, opt-in dead-control audit. Triggers: prototype this app/idea, make this a prototype, design review links.'
 ---
 
 # prototype — JS-rendered, modular, URL-driven design prototypes
@@ -30,14 +30,13 @@ behavior" as the failure mode this step exists to avoid.
 
 ## Architecture (the non-negotiables)
 
-Illustrative layout — the file *roles* are the contract; names follow the
-prototype's actual subject (the starter happens to demo a funds/NAV app —
-renaming its pages, data, and copy to your subject is part of scaffolding):
+The architecture scales from a **Single App** to a **Multi-App System Suite** (e.g. admin dashboard + operator console + consumer web app, or multi-surface variations like mobile viewport vs desktop web) sharing a cohesive design system.
 
+### Topology A: Single-App Layout (Default for standalone products)
 ```text
 prototype/
 ├── package.json          # scripts + (minimal, justified) dependencies
-├── serve.mjs             # zero-dep dev server: clean-URL routing
+├── serve.mjs             # zero-dep dev server: clean-URL routing (/ -> index.html, /<page>)
 ├── index.html            # entry/landing — usually the gallery
 ├── pages/
 │   └── <page>.html       # THIN entry: meta, links, body[data-page], scripts
@@ -53,39 +52,66 @@ prototype/
 └── assets/               # fonts and system assets
 ```
 
+### Topology B: Multi-App System Suite Layout (For suites & multi-role portals)
+```text
+prototype/
+├── package.json          # scripts to run and test the complete suite
+├── serve.mjs             # zero-dep multi-app clean routing (/<app>/<page>)
+├── index.html            # Unified System Gallery (all apps, screens, state chips)
+├── shared/               # Design System & Common Foundation
+│   ├── css/
+│   │   ├── theme.css     # Global brand tokens (palette, typography, radii)
+│   │   └── _base.css     # Base resets, typography, shared utility classes
+│   └── js/
+│       ├── _app_core.js  # Pure state helper (mountState, parse, patch, toQuery)
+│       ├── glyphs.js     # Shared icon set / SVG glyphs
+│       └── utils.js      # Seeded PRNG for ?filled, formatting helpers
+└── apps/
+    ├── <app-1>/          # e.g., admin (desktop, wide tables, governance)
+    │   ├── pages/
+    │   │   └── <page>.html
+    │   ├── js/
+    │   │   ├── _app.js   # Imports _app_core.js, wraps admin shell & nav
+    │   │   ├── specs.js  # Component state trees for this app's pages
+    │   │   └── <page>.js # Page DOM builder
+    │   └── css/
+    │       ├── _app.css  # Admin shell layout + theme overrides
+    │       └── <page>.css
+    └── <app-2>/          # e.g., operator (high-density dark) or client surface (mobile/responsive)
+        ├── pages/
+        ├── js/
+        └── css/
+```
+
 1. **Minimal HTML pages.** Each page HTML holds only document metadata,
    stylesheet references, `<body data-page="…">`, a `<noscript>`, and the
    script tags that initialize it. **No screen markup in HTML** — the DOM,
    layout, and UI states are generated and controlled by the page's JS
    module. Example file names are illustrative; adapt names and load
    strategy per project, the principle is fixed.
-2. **Shared vs page code.** `_`-prefixed files (`_app.js`, `_app.css`) are
-   the application layer shared across pages (a convention identifying
-   app-level files — name shared modules by role, the prefix isn't a
-   mandate on all of them). Page modules own their DOM generation,
-   interactions, rendering, and state behavior. Reusable functionality
-   (charts, glyphs) gets its own module the moment it would otherwise be
-   duplicated — prefer explicit imports/exports (ES modules) over accidental
-   globals or script-load-order tricks.
-3. **CSS layers, deliberate order:** `theme.css` (tokens) → `_app.css`
-   (shared) → `<page>.css` (scoped, never leaking into other pages). No
-   duplicated rules, no unnecessary specificity.
-4. **`package.json` + dev server** (§Routing). Simplest suitable tooling —
-   no framework, bundler, or dependency unless the project actually needs
-   it; the starter's zero-dep server is the default.
-5. **`index.html`** is the landing/gallery entry consistent with the
-   project's navigation design — never a mandatory gate in front of other
-   pages.
+2. **Shared vs page code.** In single-app, `_`-prefixed files (`_app.js`, `_app.css`)
+   are the application layer. In multi-app suites, `shared/` owns the common design
+   system tokens, glyphs, and the core state engine; each app owns its specific
+   shell, specs, and page modules. Reusable functionality gets its own module
+   the moment it would otherwise be duplicated — prefer explicit ES module imports/exports.
+3. **CSS layers, deliberate order:**
+   - Single-app: `theme.css` (tokens) → `_app.css` (shared) → `<page>.css` (scoped).
+   - Multi-app: `/shared/css/theme.css` (base tokens) → `/shared/css/_base.css` → `/apps/<app>/css/_app.css` (app shell & theme overrides) → `<page>.css`.
+4. **`package.json` + dev server** (§Routing). Zero-dep local server routing direct
+   clean URLs for both single and multi-app setups.
+5. **`index.html`** is the landing/gallery entry. In a multi-app system, it acts
+   as the **System Suite Gallery**, grouping screens by app and displaying
+   each app's viewport aspect ratio and state chips.
 
 ## Routing — clean, direct URLs
 
-Every page answers a clean URL: `/funds` → Funds, `/dashboard` → Dashboard.
-Direct entry, browser refresh, and query parameters must all work. Naming a
-file `funds.html` does **not** make `/funds` work — wire routes/rewrites
-(`/<name>` → `/pages/<name>.html`, query string preserved) in the dev
-server (starter `serve.mjs` does exactly this). Cross-page links are real
-`<a href="/funds">` navigation, not click-driven JS routing — except where
-a flow genuinely lives inside one page's states.
+Every page answers a clean URL:
+- Single-app: `/funds` → Funds, `/dashboard` → Dashboard.
+- Multi-app: `/admin/overview` → `apps/admin/pages/overview.html`, `/operator/queue` → `apps/operator/pages/queue.html`.
+- Dual-realm & subdomains: support clean namespace paths (`/app/overview`, `/marketing/pricing`) and simulated subdomains via query parameter (`?subdomain=app|marketing|enterprise`).
+Direct entry, browser refresh, and query parameters must all work. Wire routes/rewrites in the dev server (`serve.mjs`). Cross-page links are real `<a href="/admin/overview">` navigation, not click-driven JS routing — except where a flow genuinely lives inside one page's states.
+
+**Cross-App Navigation Invariant**: Never put cross-app switcher buttons into the page's main content, header, or navigation bar (which must remain 100% authentic to that specific product). In multi-app prototypes, cross-app and variant switching is handled exclusively by a **floating button on the bottom right with an upward dropdown menu**, hideable via **`?apps_toolbar=hide`**. Read [`references/multi-app-scope.md`](references/multi-app-scope.md).
 
 ## URL-driven state — the core contract
 
@@ -147,36 +173,53 @@ loading; a state with no real trigger doesn't get a mockup) are owned by
 [`references/query-param-states.md`](references/query-param-states.md) —
 read it before writing state code.
 
+## Story Isolation — Rendering Single Components by URL
+
+**Every testable or interactive UI component MUST carry a `data-story="<id>"` attribute and a matching `data-testid="<id>"`**. Story isolation allows URL parameters to swap the entire page shell for one named component, or several, displayed alone on a neutral stage (`#stage`, `data-testid="story-root"`).
+
+- **`?story_id=<id>`** renders only that component, centered on the stage.
+- **Multiple components** can be requested via repeated params (`?story_id=topbar&story_id=modal`) or comma lists (`?story_id=topbar,modal`), stacked vertically in URL order.
+- **`?story_id=`** (empty) lists all available stories on the page.
+- **`?story_id=missing`** displays a helpful not-found box with the list of valid IDs.
+- **State composition**: Story isolation composes with the component-state contract (`?story_id=bottom-sheet&open=loading&loading=header` renders *only the bottom sheet* in its partial header-shimmer state).
+- **Resolution**: Normalization is case-insensitive, trims surrounding quotes (`"..."`, `'...'`), and strips any trailing `-component`.
+- **Story Toolbox (`sy_*`)**: Staging tools are controlled via URL params: `sy_bg=checker|light|dark|<hex>`, `sy_grid=1|<px>`, `sy_outline=1`, `sy_inspect=1`, `sy_toolbar=open|hide`. Read [`references/story-isolation.md`](references/story-isolation.md).
+
 ## Workflow
 
-1. **Understand** — what screens/flows/states, from the request and any
-   reference material. One-line restatement back, not interrogation; ask
-   only when *what the screen is or does* is genuinely ambiguous. Ground
-   every label in real subject matter: plausible data, product vocabulary —
-   **never Lorem ipsum or "Item 1 / Item 2"**.
-2. **Pin viewports** — default desktop; frameless always (dimensions and
-   affordance rules: [`references/viewport-frames.md`](references/viewport-frames.md)).
-   The screens-vs-states test survives the redesign: if two "states" have
-   different headers and different primary content structure, they are
-   distinct **pages** — own page module + own URL — not one page with a
-   `?tab=` router in disguise.
-3. **Scaffold** — copy the structure from `assets/starter/` (verified
-   working: thin pages, modules, CSS layers, clean-URL server, tested state
-   helper); fill `package.json` scripts and routes for every page.
+1. **Scope Alignment (Never-rush law)** — Before writing code or scaffolding,
+   determine whether the project is a **Single App**, a **Multi-App System Suite**
+   (e.g., admin + operator + consumer portals), or an **App Variation / Multi-Surface Experience**
+   (e.g., mobile-device viewport preview alongside a desktop web layout). Read
+   [`references/multi-app-scope.md`](references/multi-app-scope.md).
+   - If multi-app or multi-surface: align with the user on the participating apps/roles,
+     how the design system and tokens are shared, and whether viewports differ.
+   - Ground every label in real subject matter: plausible data, product vocabulary —
+     **never Lorem ipsum or "Item 1 / Item 2"**.
+2. **Pin viewports & topologies** — Single-app uses Topology A; multi-app uses
+   Topology B (`shared/` + `apps/<app>/`). Select viewports per app/surface:
+   desktop (1280×800) for backoffice/dashboards, mobile (390×844) for native/PWA
+   flows; frameless always ([`references/viewport-frames.md`](references/viewport-frames.md)).
+   The screens-vs-states test: if two "states" have different headers and different
+   primary content structure, they are distinct **pages** — own page module + own URL —
+   not one page with a `?tab=` router in disguise.
+3. **Scaffold** — copy from `assets/starter/` (or the multi-app layout in
+   `multi-app-scope.md`); wire `package.json` scripts and route rewrites in `serve.mjs`.
 4. **Build pages** — thin HTML entry + page module owning DOM and
-   interactions; extract shared code on first duplication; style through the
-   CSS layers. **A prototype licenses fake data, not chaos code** — write it
+   interactions; extract shared code to `shared/` on first duplication; style through
+   the CSS layers. **A prototype licenses fake data, not chaos code** — write it
    as if it will be maintained: small functions, clear names, pure helpers,
    IIFEs and structuring tricks welcome where they clarify; keep files
    **under ~300 lines as a strong preference**, splitting by responsibility
    (section renderer, data module, state wiring) when one outgrows that.
    (A CDN utility framework remains an option where it genuinely
-   helps — not a default; own tokens live in `theme.css`.)
+   helps — not a default; own tokens live in `theme.css`).
 5. **Wire URL state** — §URL-driven state, through the central helper.
 6. **Gallery** — 2+ screens ⇒ root `index.html` shows every screen live and
    every state as chips driving iframe URLs
    ([`references/gallery-index.md`](references/gallery-index.md), adapted
-   to clean URLs here). Skip for a single screen.
+   to clean URLs). In multi-app suites, group cards by application section with
+   proper device aspect ratios. Skip for a single screen.
 7. **Verify, then deliver** — checklist below; save under
    `design/<project-slug>/` unless a path is named; use whatever
    file-presentation mechanism the environment actually offers (check,
@@ -231,6 +274,8 @@ needs reading up front.
 
 | File | Owns | Read when |
 |---|---|---|
+| [`references/multi-app-scope.md`](references/multi-app-scope.md) | Multi-app scope discovery, topology selection (single app, suite, multi-surface variations, dual-realm/subdomain branching ?subdomain=), shared design system contracts | Step 1, before any code or scaffolding |
+| [`references/story-isolation.md`](references/story-isolation.md) | Story isolation: rendering one or more components by URL (?story_id=), data-story attributes, staging, toolbox (sy_*) | Building any component or page module |
 | [`references/query-param-states.md`](references/query-param-states.md) | The URL-state contract: per-component state trees + sub-states, naming, central helper spec, sync/history/validation, honest-state rules | Before writing any state code |
 | [`references/project-architecture.md`](references/project-architecture.md) | Thin-HTML page shape, module boundaries, CSS layering, server/routing options, package.json | Setting up or restructuring a project |
 | [`references/viewport-frames.md`](references/viewport-frames.md) | Viewport dimensions, frameless rules, native affordances | Writing the page shell/renderer |

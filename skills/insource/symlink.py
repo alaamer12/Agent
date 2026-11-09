@@ -7,11 +7,17 @@ Default mode links the skills you name into every supported agent:
     python symlink.py avatar mine
     python symlink.py avatar --agents opencode,gemini
     python symlink.py avatar --agents all --force
+    python symlink.py avatar --lock
 
-Refresh mode rewrites only the entries that already exist in an agent
-directory and whose names exist in this registry. Anything the registry does
-not know about is left untouched, and no new skills are added:
+Locking:
+    When --lock is passed with skill names or --all, those skills are recorded
+    in skills-lock.json for the targeted agents.
+    On subsequent refresh (`python symlink.py --refresh`), any locked skill that
+    is missing, corrupted, pointing to the wrong target, or has mismatched file
+    names will be automatically restored/fixed.
 
+Refresh mode:
+    python symlink.py --refresh
     python symlink.py --refresh --agents qoder,gemini
 
 Supported agents and their global skill directories (Windows home):
@@ -25,6 +31,7 @@ Supported agents and their global skill directories (Windows home):
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import stat
@@ -61,6 +68,42 @@ ALIASES = {
 SKIP_NAMES = {"Archive", "__pycache__", "node_modules", ".git", ".venv", "venv"}
 
 REGISTRY = Path(__file__).resolve().parent
+LOCKFILE_NAME = "skills-lock.json"
+
+
+# --------------------------------------------------------------------------
+# lockfile management
+# --------------------------------------------------------------------------
+
+def load_lockfile(registry_root: Path) -> dict:
+    lock_path = registry_root / LOCKFILE_NAME
+    if not lock_path.exists():
+        return {"version": 1, "locked": {}}
+    try:
+        data = json.loads(lock_path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            return {"version": 1, "locked": {}}
+        data.setdefault("version", 1)
+        data.setdefault("locked", {})
+        return data
+    except (json.JSONDecodeError, OSError):
+        return {"version": 1, "locked": {}}
+
+
+def save_lockfile(registry_root: Path, data: dict) -> None:
+    lock_path = registry_root / LOCKFILE_NAME
+    lock_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def record_locks(registry_root: Path, names: list[str], agents: list[str]) -> None:
+    data = load_lockfile(registry_root)
+    locked = data.setdefault("locked", {})
+    now = datetime.now().isoformat(timespec="seconds")
+    for name in names:
+        skill_entry = locked.setdefault(name, {})
+        for agent in agents:
+            skill_entry[agent] = now
+    save_lockfile(registry_root, data)
 
 
 # --------------------------------------------------------------------------
@@ -88,13 +131,64 @@ def same_path(a: Path, b: Path) -> bool:
         return False
 
 
+def get_relative_files(directory: Path) -> set[str] | None:
+    """Return relative file paths within directory using forward slashes.
+
+    Returns None if directory is not accessible or not a directory.
+    """
+    if not directory.exists() or not directory.is_dir():
+        return None
+    files: set[str] = set()
+    try:
+        for root, dirs, filenames in os.walk(directory):
+            # Do not follow internal symlinks/junctions
+            dirs[:] = [d for d in dirs if not is_link_like(Path(root) / d)]
+            rel_dir = Path(root).relative_to(directory)
+            for f in filenames:
+                rel_f = (rel_dir / f).as_posix() if rel_dir != Path(".") else f
+                files.add(rel_f)
+    except OSError:
+        return None
+    return files
+
+
+def check_file_sync(source: Path, dest: Path) -> tuple[bool, str]:
+    """Check if destination has the exact same file paths as source.
+
+    Returns (is_synced, detail_reason).
+    """
+    src_files = get_relative_files(source)
+    if src_files is None:
+        return False, "source directory unreadable"
+    dest_files = get_relative_files(dest)
+    if dest_files is None:
+        return False, "destination files unreadable or corrupted"
+
+    missing_in_dest = src_files - dest_files
+    extra_in_dest = dest_files - src_files
+
+    if not missing_in_dest and not extra_in_dest:
+        return True, "in sync"
+
+    diffs = []
+    if missing_in_dest:
+        sample = sorted(missing_in_dest)[:3]
+        suffix = "..." if len(missing_in_dest) > 3 else ""
+        diffs.append(f"missing {len(missing_in_dest)} files ({', '.join(sample)}{suffix})")
+    if extra_in_dest:
+        sample = sorted(extra_in_dest)[:3]
+        suffix = "..." if len(extra_in_dest) > 3 else ""
+        diffs.append(f"{len(extra_in_dest)} extra files ({', '.join(sample)}{suffix})")
+
+    return False, "; ".join(diffs)
+
+
 def remove_entry(path: Path) -> str:
     """Remove a link, junction or real directory. Returns the kind removed."""
     if path.is_symlink():
         path.unlink()
         return "symlink"
     if is_reparse(path):
-        # A junction/directory reparse point: os.rmdir removes the link only.
         os.rmdir(path)
         return "junction"
     if path.is_dir():
@@ -266,10 +360,19 @@ def backup_dirs(dirs: list[Path], label: str = "skill-sync-backup") -> Path | No
 def link_one(source: Path, dest: Path, *, force: bool, agent: str, dry_run: bool) -> tuple[str, str]:
     """Link source at dest. Returns (status, detail)."""
     src = source.resolve()
-    name = dest.name
 
-    if same_path(dest, src) and is_link_like(dest):
-        return "unchanged", f"already -> {src}"
+    if is_link_like(dest) and same_path(dest, src):
+        is_synced, diff_detail = check_file_sync(src, dest)
+        if is_synced:
+            return "unchanged", f"already -> {src}"
+        # If target matches but files are not in sync or corrupted, relink
+        if not dry_run:
+            remove_entry(dest)
+            try:
+                make_link(src, dest)
+            except OSError as exc:
+                return "failed", str(exc)
+        return "repaired", f"{diff_detail} -> relinked {src}"
 
     if dest.exists() or is_link_like(dest):
         if dest.is_symlink() or is_reparse(dest):
@@ -312,9 +415,12 @@ def run_link(
     registry_root: Path,
     force: bool,
     dry_run: bool,
+    lock: bool,
 ) -> int:
     sources = [resolve_skill(name, cwd, registry_root) for name in names]
     failures = 0
+    successful_names: list[str] = []
+
     for agent in agents:
         target = AGENTS[agent]
         print(f"\n[{agent}] {target}")
@@ -330,7 +436,15 @@ def run_link(
             )
             if status == "failed":
                 failures += 1
+            else:
+                if source.name not in successful_names:
+                    successful_names.append(source.name)
             print(f"  {status:<10} {source.name:<24} {detail}")
+
+    if lock and not dry_run and successful_names:
+        record_locks(registry_root, successful_names, agents)
+        print(f"\n[lock] recorded {len(successful_names)} skill(s) into {LOCKFILE_NAME}")
+
     return 1 if failures else 0
 
 
@@ -382,6 +496,9 @@ def run_refresh(
         print(f"error: no skills found in registry {registry_root}", file=sys.stderr)
         return 1
 
+    lockdata = load_lockfile(registry_root)
+    locked_map = lockdata.get("locked", {})
+
     selected_dirs = [AGENTS[a] for a in agents if AGENTS[a].exists()]
     if do_backup and selected_dirs and not dry_run:
         archive = backup_dirs(selected_dirs)
@@ -397,27 +514,64 @@ def run_refresh(
             continue
 
         matches = scan_existing(target, set(known))
-        if not matches:
-            print("  no registry-owned entries found")
+
+        # Include locked skills for this agent even if currently missing or broken
+        all_candidate_names = set(matches.keys())
+        for l_name, l_agents in locked_map.items():
+            if l_name in known and agent in l_agents:
+                all_candidate_names.add(l_name)
+
+        if not all_candidate_names:
+            print("  no registry-owned or locked entries found")
             continue
 
-        for name in sorted(matches):
+        for name in sorted(all_candidate_names):
             source = known[name]
-            places = matches[name]
+            places = matches.get(name, [])
             direct = target / name
-            was = ", ".join(str(p.relative_to(target)) for p in places)
-            already = (
-                len(places) == 1
-                and places[0] == direct
-                and is_link_like(direct)
-                and same_path(direct, source)
-            )
-            if already:
-                print(f"  {'unchanged':<10} {name:<24} {was} -> {source}")
+            is_locked = (agent in locked_map.get(name, {}))
+            lock_label = " [locked]" if is_locked else ""
+
+            # Case 1: Skill is missing at destination (only restored if locked)
+            if not direct.exists() and not is_link_like(direct) and not places:
+                if is_locked:
+                    state = "would restore" if dry_run else "restored"
+                    if not dry_run:
+                        try:
+                            make_link(source, direct)
+                        except OSError as exc:
+                            print(f"  failed     {name:<24} {exc}")
+                            failures += 1
+                            continue
+                    print(f"  {state:<10} {name:<24} missing -> {source}{lock_label}")
                 continue
 
+            was = ", ".join(str(p.relative_to(target)) for p in places) if places else str(name)
+            is_direct_link = (
+                (len(places) == 1 and places[0] == direct) or (not places and direct.exists())
+            ) and is_link_like(direct)
+
+            if is_direct_link and same_path(direct, source):
+                is_synced, diff_reason = check_file_sync(source, direct)
+                if is_synced:
+                    print(f"  {'unchanged':<10} {name:<24} {was} -> {source}{lock_label}")
+                    continue
+                # Not in sync or corrupted files: repair
+                state = "would repair" if dry_run else "repaired"
+                if not dry_run:
+                    try:
+                        remove_entry(direct)
+                        make_link(source, direct)
+                    except OSError as exc:
+                        print(f"  failed     {name:<24} {exc}")
+                        failures += 1
+                        continue
+                print(f"  {state:<10} {name:<24} {diff_reason} -> {source}{lock_label}")
+                continue
+
+            # Case 3: Destination entry exists but is pointing elsewhere, nested, or a real dir
             if not dry_run:
-                if direct not in places and direct.exists() and not is_link_like(direct):
+                if direct not in places and direct.exists() and not is_link_like(direct) and not force and not is_locked and agent not in MIGRATION_AGENTS:
                     print(f"  skipped    {name:<24} real directory not recognized as a skill")
                     continue
                 try:
@@ -433,7 +587,8 @@ def run_refresh(
                     continue
 
             state = "would relink" if dry_run else "relinked"
-            print(f"  {state:<10} {name:<24} {was} -> {source}")
+            print(f"  {state:<10} {name:<24} {was} -> {source}{lock_label}")
+
     return 1 if failures else 0
 
 
@@ -449,10 +604,11 @@ def main(argv: list[str] | None = None) -> int:
         epilog=(
             "examples:\n"
             "  python symlink.py avatar\n"
+            "  python symlink.py avatar --lock\n"
             "  python symlink.py avatar --agents opencode,gemini\n"
             "  python symlink.py avatar mine --agents all --force\n"
             "  python symlink.py --refresh --agents qoder,gemini\n"
-            "  python symlink.py --all --agents opencode\n"
+            "  python symlink.py --all --agents opencode --lock\n"
         ),
     )
     parser.add_argument("skills", nargs="*", help="skill name(s) or a path to a skill directory")
@@ -461,8 +617,9 @@ def main(argv: list[str] | None = None) -> int:
         default="all",
         help=f"comma-separated agents or 'all' (default: all). Choices: {', '.join(DEFAULT_AGENTS)}",
     )
-    parser.add_argument("--refresh", action="store_true", help="relink only entries that already exist and are in the registry")
+    parser.add_argument("--refresh", action="store_true", help="relink existing and locked registry entries")
     parser.add_argument("--all", action="store_true", help="link every skill in the registry")
+    parser.add_argument("--lock", action="store_true", help="record linked skills into skills-lock.json so refresh auto-restores them")
     parser.add_argument("--force", action="store_true", help="replace real directories/files at any agent")
     parser.add_argument("--dry-run", action="store_true", help="show what would happen without changing anything")
     parser.add_argument("--no-backup", action="store_true", help="skip the backup before --refresh")
@@ -512,6 +669,7 @@ def main(argv: list[str] | None = None) -> int:
         registry_root=registry_root,
         force=args.force,
         dry_run=args.dry_run,
+        lock=args.lock,
     )
 
 

@@ -1,12 +1,68 @@
 # Project architecture — thin pages, owned modules, layered CSS, real routes
 
 > **What this owns:** the concrete shape of the files and boundaries in
-> §Architecture of SKILL.md — the page-entry HTML template, page-module
-> conventions, the shared-module split, CSS layer rules, and the
-> server/routing options. The URL-state semantics are
-> [`query-param-states.md`](query-param-states.md)'s; viewport mechanics are
-> [`viewport-frames.md`](viewport-frames.md)'s. The runnable truth is
-> `assets/starter/` — read this with it open.
+> §Architecture of SKILL.md — single-app vs multi-app suite layouts,
+> the page-entry HTML template, page-module conventions, the shared-module
+> split, CSS layer rules, and server/routing options. The URL-state
+> semantics are [`query-param-states.md`](query-param-states.md)'s;
+> multi-app discovery is [`multi-app-scope.md`](multi-app-scope.md)'s;
+> viewport mechanics are [`viewport-frames.md`](viewport-frames.md)'s.
+> The runnable truth is `assets/starter/` — read this with it open.
+
+## Single-App vs Multi-App System Topologies
+
+The skill scales cleanly from a focused standalone prototype to an enterprise multi-application ecosystem sharing a unified design system:
+
+### 1. Single-App Topology (Default for standalone products)
+```text
+prototype/
+├── package.json
+├── serve.mjs             # Routes: / -> index.html, /<page> -> pages/<page>.html
+├── index.html            # Screen gallery
+├── pages/
+│   └── <page>.html       # Thin entry
+├── js/
+│   ├── _app.js           # Central state helper + app bootstrap
+│   ├── specs.js          # Component state specs + gallery previews
+│   └── <page>.js         # Page DOM builder
+└── css/
+    ├── theme.css         # Tokens (colors, typography, spacing)
+    ├── _app.css          # Shared primitives & app layout
+    └── <page>.css        # Page-scoped styles
+```
+
+### 2. Multi-App System Suite Topology (For suites, admin/operator/consumer portals, or multi-surface hybrid apps)
+```text
+prototype/
+├── package.json          # Runs and tests the complete suite
+├── serve.mjs             # Routes: / -> index.html, /<app>/<page> -> apps/<app>/pages/<page>.html
+├── index.html            # Multi-App System Gallery (all apps, screens, & chips)
+├── shared/               # Unified Design System & Common Primitives
+│   ├── css/
+│   │   ├── theme.css     # Base system tokens (brand palette, typography, radii, z-index)
+│   │   └── _base.css     # Base resets, typography, global utilities
+│   └── js/
+│       ├── _app_core.js  # Pure state helper (mountState, parse, patch, toQuery)
+│       ├── glyphs.js     # Shared SVG icon library
+│       └── utils.js      # Seeded PRNG for ?filled, formatting helpers
+└── apps/
+    ├── <app-1>/          # e.g., admin-dashboard
+    │   ├── pages/
+    │   │   └── <page>.html
+    │   ├── js/
+    │   │   ├── _app.js   # Imports _app_core.js, wraps admin shell & nav
+    │   │   ├── specs.js  # Admin component state specs
+    │   │   └── <page>.js # Admin page DOM builder
+    │   └── css/
+    │       ├── _app.css  # Admin shell layout + optional theme overrides
+    │       └── <page>.css
+    └── <app-2>/          # e.g., operator-console (e.g. high-density dark mode) or mobile
+        ├── pages/
+        ├── js/
+        └── css/
+```
+
+Both topologies honor the same immutable laws: thin HTML pages, DOM owned by JS, URL-driven component state, and zero-dependency clean routing.
 
 ## The thin page entry
 
@@ -82,14 +138,19 @@ Rules of ownership:
 
 ## CSS layers
 
-Load order per page: `theme.css` → `_app.css` → `<page>.css`.
+Load order per page:
+- **Single-App:** `theme.css` → `_app.css` → `<page>.css`.
+- **Multi-App:** `/shared/css/theme.css` → `/shared/css/_base.css` → `/apps/<app>/css/_app.css` → `/apps/<app>/css/<page>.css`.
 
 - `theme.css`: custom properties only — colors, type scale, spacing,
   radii, shadows, z-layers. Nothing with selectors beyond `:root` (and
-  media-query variants of tokens).
+  media-query variants of tokens). In multi-app suites, `shared/css/theme.css`
+  defines the baseline brand tokens, while an app's `_app.css` or an
+  app-specific theme sheet overrides tokens if that app has a distinct persona
+  (e.g., operator console running high-density dark mode).
 - `_app.css`: app-wide layout primitives and shared components (shell,
   header, buttons, cards, tables) — styles that genuinely belong to the
-  global interface.
+  application interface.
 - `<page>.css`: page-scoped. Scope by the page root (`.page-funds …` — the
   class `mountState`/shell sets from `data-page`) so nothing leaks into
   other pages. No `!important` escalation, no redefining another layer's
@@ -103,7 +164,7 @@ direct-URL + refresh correctness. Simplest-suitable wins:
 
 | Setup | When |
 |---|---|
-| **Starter `serve.mjs`** (zero deps, Node ≥ 18) | Default. Route map + statics + query-preserving rewrites in ~100 lines; `npm start` runs it. |
+| **Starter `serve.mjs`** (zero deps, Node ≥ 18) | Default. Route map + statics + query-preserving rewrites in ~100 lines; `npm start` runs it. Automatically maps `/funds` → `pages/funds.html` (single app) or `/<app>/<page>` → `apps/<app>/pages/<page>.html` (multi-app). |
 | Vite (dev server + build) | Only if the project genuinely needs HMR, TS, or a bundler — an added dependency must be justified, not assumed. |
 | Any host with rewrite rules (Netlify/nginx/`_redirects`) | When deploying; mirror the starter's route table — `/funds /pages/funds.html 200` style. |
 

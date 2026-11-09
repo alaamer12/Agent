@@ -33,7 +33,7 @@ Agents translate natively - no method file, nothing to load. When a request is "
 
 - the source's Markdown skeleton survives exactly as job E preserves it: same headings, lists, blocks, order, and sentence boundaries where the target language allows them;
 - code, commands, paths, numbers, ids and quoted literals stay **verbatim** - they are not prose;
-- a term the project's glossary defines translates **as that term** consistently (see `glossary`); an undefined contested term is asked once, not improvised per occurrence;
+- a term the project's glossary defines translates **as that term** consistently (see `glossary-md`); an undefined contested term is asked once, not improvised per occurrence;
 - the output is the translated text alone - same discipline as E: no preface, no commentary, no change log.
 
 ## Load exactly one job
