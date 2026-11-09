@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="/css/_app.css">
   <style>
     /* gallery-only chrome (the gallery is the only place with UI about UI) */
-    .gallery { display: grid; gap: var(--space-5); }
+    /* max 3 columns — minmax(320px,1fr) keeps cards wide enough to breathe */
+    .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-5); }
     .screen-card .preview-box { aspect-ratio: 1280 / 800; overflow: hidden; border: 1px solid var(--line);
       border-radius: var(--radius); background: var(--surface); position: relative; }
     .screen-card iframe { width: 1280px; height: 800px; border: 0; transform: scale(.55);

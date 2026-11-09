@@ -52,7 +52,8 @@ if (!target) {
   process.exit(2);
 }
 
-const url = /^https?:\/\//.test(target) ? target : 'file://' + path.resolve(target);
+import { pathToFileURL } from 'node:url';
+const url = /^https?:\/\//.test(target) ? target : pathToFileURL(path.resolve(target)).href;
 const width = Number(flag('width', 1440));
 const height = Number(flag('height', 1000));
 const shotPath = flag('shot', null);

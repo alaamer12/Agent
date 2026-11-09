@@ -43,7 +43,7 @@ prototype/
 ├── js/
 │   ├── _app.js           # shared bootstrap + CENTRAL state helper
 │   ├── specs.js          # per-page state trees + gallery previews (pure data)
-│   ├── <shared>.js       # feature modules: glyphs, charts, tables…
+│   ├── <shared>.js       # feature modules: CDN library wrappers, tables, charts init…
 │   └── <page>.js         # page module: builds + owns its screen
 ├── css/
 │   ├── theme.css         # tokens: colors, type, spacing — loaded first
@@ -64,7 +64,7 @@ prototype/
 │   │   └── _base.css     # Base resets, typography, shared utility classes
 │   └── js/
 │       ├── _app_core.js  # Pure state helper (mountState, parse, patch, toQuery)
-│       ├── glyphs.js     # Shared icon set / SVG glyphs
+│       ├── glyphs.js     # Fallback icons — only when CDN is banned; see references/libraries.md
 │       └── utils.js      # Seeded PRNG for ?filled, formatting helpers
 └── apps/
     ├── <app-1>/          # e.g., admin (desktop, wide tables, governance)
@@ -187,15 +187,59 @@ read it before writing state code.
 
 ## Workflow
 
-1. **Scope Alignment (Never-rush law)** — Before writing code or scaffolding,
-   determine whether the project is a **Single App**, a **Multi-App System Suite**
-   (e.g., admin + operator + consumer portals), or an **App Variation / Multi-Surface Experience**
-   (e.g., mobile-device viewport preview alongside a desktop web layout). Read
-   [`references/multi-app-scope.md`](references/multi-app-scope.md).
-   - If multi-app or multi-surface: align with the user on the participating apps/roles,
-     how the design system and tokens are shared, and whether viewports differ.
-   - Ground every label in real subject matter: plausible data, product vocabulary —
-     **never Lorem ipsum or "Item 1 / Item 2"**.
+1. **Pre-build questionnaire (Never-rush law)** — Ask every question below
+   before writing a single file. Group them into one message; do not drip
+   them one at a time. Skip a question only when the user's prompt already
+   answers it unambiguously.
+
+   **A. Screen inventory**
+   - Which screens / pages should the prototype include? (If the user has not
+     listed them, propose a complete set based on the product idea and ask
+     for confirmation or additions before continuing.)
+   - For each screen: what is its primary purpose and who is the persona?
+
+   **B. Viewport & responsiveness**
+   - Which viewport(s) are in scope?
+     - Desktop only (default for dashboards / backoffice)
+     - Mobile only (390 px, for native-app or PWA flows)
+     - Tablet only (~768 px)
+     - Multiple viewports — if so, should they share one responsive file or
+       be separate surface variants (Topology B)?
+   - If multiple viewports: does the product behave differently per surface
+     (different nav patterns, density, layout) — or is it one responsive
+     design scaling up?
+
+   **C. App scope**
+   - Is this a single standalone app, or a multi-role suite (e.g. admin +
+     operator + consumer portals)? Read
+     [`references/multi-app-scope.md`](references/multi-app-scope.md) for
+     the full topology decision.
+
+   **D. Libraries & dependencies**
+   - Any restriction on external libraries or CDN? The default is **CDN
+     libraries for everything** — icons, charts, date formatting, animation,
+     grids, drag-and-drop, whatever the design needs. Hand-rolling any of
+     these is not the default; it requires an explicit reason. See
+     [`references/libraries.md`](references/libraries.md) for the catalog.
+   - Are there specific libraries the product already uses, or that the
+     user prefers (e.g. a particular icon set, a specific chart library)?
+
+   **E. Design language**
+   - Is there an existing design system, brand guide, or color palette to
+     follow? If so, share it or describe its tokens.
+   - Dark mode, light mode, or both?
+
+   **F. Data & content**
+   - What is the product's real vocabulary? (domain terms, entity names —
+     never Lorem ipsum)
+   - Any real data samples or schemas to seed placeholder content from?
+
+   Once answers are in hand, state the architectural plan (topology,
+   viewport list, screen list, library choices) in one concise paragraph and
+   ask for a go/no-go before scaffolding.
+
+   Ground every label in real subject matter — **never Lorem ipsum or
+   "Item 1 / Item 2"**.
 2. **Pin viewports & topologies** — Single-app uses Topology A; multi-app uses
    Topology B (`shared/` + `apps/<app>/`). Select viewports per app/surface:
    desktop (1280×800) for backoffice/dashboards, mobile (390×844) for native/PWA
@@ -205,49 +249,106 @@ read it before writing state code.
    not one page with a `?tab=` router in disguise.
 3. **Scaffold** — copy from `assets/starter/` (or the multi-app layout in
    `multi-app-scope.md`); wire `package.json` scripts and route rewrites in `serve.mjs`.
-4. **Build pages** — thin HTML entry + page module owning DOM and
+4. **Derive states before building** — for every screen, walk each interactive
+   component through its condition axes (data, provider, in-flight, viewer, time) and
+   enumerate its **complete state tree**: default/sparse state, `?filled` state, loading
+   sub-states, every error kind, empty, stale, partial, and permission variants. Write
+   the full `specs.js` entries — including `filled: { default: null }` on every page
+   spec and `?filled` gallery chips — **before** writing any screen DOM code.
+   A `?filled` param without a seeded generator that produces a full realistic dataset
+   (long tables, crowded charts, wrapped long names, adversarial rows) is not done.
+   The same seeded generator must reproduce bit-for-bit identical output on every
+   refresh and share.
+5. **Build pages** — thin HTML entry + page module owning DOM and
    interactions; extract shared code to `shared/` on first duplication; style through
    the CSS layers. **A prototype licenses fake data, not chaos code** — write it
    as if it will be maintained: small functions, clear names, pure helpers,
    IIFEs and structuring tricks welcome where they clarify; keep files
    **under ~300 lines as a strong preference**, splitting by responsibility
    (section renderer, data module, state wiring) when one outgrows that.
-   (A CDN utility framework remains an option where it genuinely
-   helps — not a default; own tokens live in `theme.css`).
-5. **Wire URL state** — §URL-driven state, through the central helper.
-6. **Gallery** — 2+ screens ⇒ root `index.html` shows every screen live and
+   **Use real libraries for everything** — icons, charts, dates, animation,
+   grids, drag-and-drop, any UI utility the design needs. Load them via CDN
+   (`<script src="https://cdn.jsdelivr.net/...">` or importmap). Do not
+   hand-roll what a library does better; a prototype that uses hand-drawn
+   SVG icons or bespoke chart renderers looks immediately cheap. The rule
+   inverts only when the user explicitly bans external dependencies — see
+   [`references/libraries.md`](references/libraries.md). Own design tokens
+   live in `theme.css` regardless of which libraries are loaded.
+   Every screen must suppress its own scrollbar in the gallery preview context:
+   the screen's `body` / scroll container must not display scrollbars inside
+   the gallery iframe (`scrollbar-width: none; &::-webkit-scrollbar { display:none; }`
+   on the scrolling element, or `overflow: hidden` when the content is not
+   expected to scroll at preview scale).
+6. **Wire URL state** — §URL-driven state, through the central helper.
+7. **Gallery** — 2+ screens ⇒ root `index.html` shows every screen live and
    every state as chips driving iframe URLs
    ([`references/gallery-index.md`](references/gallery-index.md), adapted
    to clean URLs). In multi-app suites, group cards by application section with
    proper device aspect ratios. Skip for a single screen.
-7. **Verify, then deliver** — checklist below; save under
+
+   **Gallery layout rules (non-negotiable):**
+   - Use **at most 3 columns** for the screen grid (use `repeat(auto-fit, minmax(320px, 1fr))`
+     with a `max-width` cap on the grid; never `minmax(240px, 1fr)` or narrower, which
+     forces 4+ columns and crowds cards).
+   - Each card must have enough breathing room — `gap` of at least 24px and card
+     padding of at least 20px.
+   - Every screen card's state strip must include a chip for **each state** derived in
+     step 4, including the `Filled` chip (linked to `?filled=1`). The strip is the
+     visible state coverage matrix — if a state isn't chippped, it wasn't built.
+
+8. **Verify, then deliver** — mandatory checklist below (not a suggestion); save under
    `design/<project-slug>/` unless a path is named; use whatever
    file-presentation mechanism the environment actually offers (check,
    don't assume).
 
-## Verification (before claiming done)
+## Verification (mandatory — do not mark done until every item passes)
 
-- The configured dev command starts cleanly (run it).
+This is not a wishlist. Run every check; report any failure before delivering.
+
+**Structural checks**
+- The configured dev command starts cleanly (run it; show the terminal output).
 - Every page URL works **directly**, with a query string, and on refresh
   (`curl -o /dev/null -w "%{http_code}"` per route at minimum).
 - HTML entries stay thin: meta/links/`data-page`/scripts only.
 - Boundaries respected: no page-specific rule in `_app.css`; no chart/glyph
   logic outside its module.
-- Each meaningful state: URL-only load renders it; the equivalent click
-  writes the URL; composed params work; removing one preserves others;
-  invalid values fall back without breaking render; back/forward restores
-  state. `?filled` and `?filled=<seed>` render full datasets, and the same
-  seed reproduces the same rows on refresh.
-- **Force every gallery chip and look at the render** (browser or
-  screenshot) — a state is verified when *seen*, not when coded. Feed
-  hostile input too: an unknown param value, a 90-character name, a missing
-  field — it must render as unknown, never crash and never fabricate a
-  normal-looking row.
-- Tests run through the project's package manager (`bun test` / `pnpm test`
-  / `npm test` per lockfile); if the starter's state helper was modified:
-  its tests still pass (defaults, validation, preservation, history
-  policy — reuse them as the harness for project copies).
-- Migration jobs: spot-check the design against what it modeled —
+
+**State checks — test every state by URL, not by assumption**
+- Open each screen's URL cold (no prior navigation). It renders without clicks.
+- For every state chip in the gallery strip: click it, confirm the iframe URL
+  updates, and **visually confirm the render changed** — a chip is verified when
+  the state is *seen*, not when the code path exists.
+- `?filled` and `?filled=<seed>`: opening either produces a **full** dataset —
+  long tables, crowded content, wrapped long names. The same seed reproduces
+  identical output on refresh and in a fresh browser tab. Bare `?filled` uses
+  the project-default seed and also reproduces.
+- Composed params work: set two independent component states simultaneously
+  (`?tab=transactions&open=loading`); removing one preserves the other.
+- Invalid/unknown param values fall back to declared defaults without breaking
+  the render, throwing errors, or producing a blank page.
+- Back/forward navigation restores the expected UI state.
+- Feed hostile input: a 90-character name, a missing field, an unknown
+  category value — it renders as unknown (em-dash, "Unknown", or the declared
+  fallback), never crashes, never fabricates a normal-looking row.
+
+**Gallery checks**
+- The gallery has at most 3 columns; cards have visible breathing room (gap ≥ 24px).
+- No scrollbar is visible inside any preview iframe (the scroll container inside
+  the screen suppresses its scrollbar via `scrollbar-width: none` /
+  `::-webkit-scrollbar { display:none }`).
+- Every screen card's state strip has a chip for every state derived in step 4,
+  including an `Empty` chip (default/sparse state) and a `Filled` chip
+  (`?filled=1` or the project seed).
+- The `Open Screen` link in each card carries the currently-selected state's
+  query string, not just the base URL.
+
+**Tests**
+- Run the project's package manager test command (`bun test` / `pnpm test` /
+  `npm test`); all pass. If the starter's state helper was modified, its tests
+  still pass (defaults, validation, preservation, history policy).
+
+**Migration jobs**
+- Spot-check the design against what it modeled —
   *preserved* is the requirement, reinterpreted is the failure.
 
 ## Quick defaults reference
@@ -261,11 +362,15 @@ read it before writing state code.
 | URLs | `/` gallery/landing; `/<page>` direct; states via query params |
 | Viewport | desktop; frameless always |
 | Screen vs state | distinct screen ⇒ own page+URL; component state ⇒ param |
-| Data fill | sparse realistic placeholders by default; `?filled[=seed]` renders a FULL seeded-random dataset (reproducible by URL) |
+| Data fill | sparse realistic placeholders by default; `?filled[=seed]` renders a FULL seeded-random dataset (reproducible by URL); **`filled: { default: null }` declared in every page spec; gallery carries a `Filled` chip** |
+| `?filled` generator | seeded PRNG (never `Math.random()`); same seed = same rows always; includes adversarial rows (90-char names, missing fields, unknown categories) |
 | Tooling commands | respect the project's package manager — detect from the lockfile (`bun.lockb`→bun, `pnpm-lock.yaml`→pnpm, `yarn.lock`→yarn, else npm); starter scripts are PM-agnostic |
-| Component states | EVERY mode + sub-state of every interactive component queryable (`?open=loading&loading=header`) |
+| **Libraries** | **CDN by default for everything — icons (Lucide), charts (Chart.js), dates (Day.js), animation, grids, etc. Hand-rolling any of these requires an explicit user opt-out. See `references/libraries.md`.** |
+| Component states | EVERY mode + sub-state of every interactive component queryable (`?open=loading&loading=header`); derived BEFORE screen DOM code is written |
 | Output location | `design/<slug>/` — the default; an explicit user path always wins |
 | Placeholder content | realistic, subject-grounded — never Lorem |
+| Gallery columns | **max 3** (`repeat(auto-fit, minmax(320px, 1fr))`); never minmax < 300px which forces 4+ columns |
+| Scrollbars in preview | suppressed on the screen's scroll container (`scrollbar-width:none; ::-webkit-scrollbar{display:none}`) — never visible inside gallery iframes |
 
 ## References & assets
 
@@ -275,6 +380,7 @@ needs reading up front.
 | File | Owns | Read when |
 |---|---|---|
 | [`references/multi-app-scope.md`](references/multi-app-scope.md) | Multi-app scope discovery, topology selection (single app, suite, multi-surface variations, dual-realm/subdomain branching ?subdomain=), shared design system contracts | Step 1, before any code or scaffolding |
+| [`references/libraries.md`](references/libraries.md) | CDN-first library rule, catalog of recommended picks by category (icons, charts, dates, animation, grids…), loading patterns, fallback rules when deps are banned | Step 1 questionnaire (D) and step 5 (Build pages) |
 | [`references/story-isolation.md`](references/story-isolation.md) | Story isolation: rendering one or more components by URL (?story_id=), data-story attributes, staging, toolbox (sy_*) | Building any component or page module |
 | [`references/query-param-states.md`](references/query-param-states.md) | The URL-state contract: per-component state trees + sub-states, naming, central helper spec, sync/history/validation, honest-state rules | Before writing any state code |
 | [`references/project-architecture.md`](references/project-architecture.md) | Thin-HTML page shape, module boundaries, CSS layering, server/routing options, package.json | Setting up or restructuring a project |

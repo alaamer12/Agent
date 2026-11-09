@@ -3,6 +3,11 @@
 html, body { margin: 0; background: var(--bg); color: var(--ink); font: var(--fs-md)/1.5 var(--font); }
 body { overscroll-behavior-y: none; }
 
+/* Suppress scrollbars on the page scroll root so gallery iframes look clean.
+   The gallery's .preview-box also sets overflow:hidden as a safety net. */
+body::-webkit-scrollbar { display: none; }
+body { scrollbar-width: none; }
+
 .app { max-width: 1200px; margin: 0 auto; padding: var(--space-4); }
 .icon { width: 18px; height: 18px; vertical-align: -4px; }
 

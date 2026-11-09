@@ -1,25 +1,28 @@
 # doctrine
 
-> This document defines the `doctrine` steering folder: guidelines, and mandated behavior, for one specific part or task. It is one of six folders; see the [index](index.md) for the set.
-> **Terminology reminder.** The steering folder whose directory name is `function` is always called the **steering function folder**, never just "function". Full rule: [function.md](function.md).
-> Structure: holds, shape, does not hold, the test, how to write it, then two examples.
+> This document defines the `doctrine` steering folder: engineering guidelines and mandated technical behavior for a specific technical part or task. It lives exclusively in the **tech tier** (`tech/`); see [`index.md`](index.md) for the taxonomy overview.
 
-**Holds.** Guidelines for one specific part or task: how to write high-quality tests, how data deletion is handled, the error format of the API, and similar. A part is a specific component, layer or activity (the API, tests, data deletion), as opposed to the system in general. It covers code, tests, and whatever else should be done a certain way. Where a part has mandated behavior (a fact with nothing to argue), that is written here too, in the same folder and the same plain-text style. Think of the folder as the project's jurisprudence: accumulated, reasoned guidance that people apply to new cases.
+**Holds.** Technical guidelines and non-negotiable engineering mandates for one specific component, layer, or activity (e.g., test quality invariants, API error payload wire shapes, database transaction isolation levels, concurrency locks). Think of it as the project's technical jurisprudence: reasoned engineering standards applied consistently when writing or refactoring code.
 
-**Shape.** One flat folder of topic-named files (`test-quality.md`, `data-deletion.md`). There are no subfolders for kinds of content and no marker separating guidelines from mandates.
+**Shape.** Flat folder of topic-named Markdown files (e.g., `test-quality.md`, `balance-concurrency.md`, `api-error-contracts.md`).
 
-**Does not hold.** Tool lists (`stack`), how the platform works as a whole, or a concern that applies to the system in general such as accessibility (the steering function folder), step-by-step recipes (`playbook`), or general project-wide procedures, how documentation itself is written, and decision records (the last three are outside this taxonomy; see [placement.md](placement.md)). Doctrine holds guidelines for specific parts and tasks, never the decision records themselves.
+**Does not hold.**
+- Business rules, user entitlements, or policy decisions (which belong in [`policy.md`](policy.md)).
+- Platform-wide runtime mechanisms (the steering function folder, [`function.md`](function.md)).
+- Technology rosters stated as "We use X" ([`stack.md`](stack.md)).
+- Step-by-step operational runbooks ([`playbook.md`](playbook.md)).
+- Architectural decision records (ADRs) explaining past decision history (which live outside the taxonomy).
 
-**The test.** Is it a guideline, or mandated behavior, for one specific part or task? Then it is doctrine. For the tests that separate doctrine from the neighboring folders, see the boundary tests in [placement.md](placement.md).
+**The test.** Is it an engineering guideline or mandated implementation behavior for a specific technical part?
+- *Doctrine vs. Policy*: "A wallet balance cannot be negative" is a business rule (`perception/policy`). "Debits must execute within a serializable database transaction and reject any operation where balance minus amount is less than zero" is an engineering doctrine (`tech/doctrine`).
+- *Doctrine vs. Playbook*: How to write robust tests is `doctrine`. The command-line steps to run the test suite in CI is `playbook`.
 
-**How to write it.** The general writing principles are in [documentation-conventions.md](documentation-conventions.md). Applied to doctrine: do not use SQL-like syntax (`ON DELETE CASCADE`) or per-table lookup lists. If the enforcement mechanism (database constraints versus application code) is worth recording, it is a separate lower-level fact and belongs in `stack` or `structure`.
+**Writing Guidance.**
+- **Describe behavior, not fragile mechanism**: State the technical invariant that must hold rather than hardcoding SQL-specific keywords (e.g., avoid writing `ON DELETE CASCADE` or database dialect syntax directly in prose unless the standard explicitly mandates that mechanism).
+- State rationale clearly next to the mandate.
 
-**Example (`doctrine/test-quality`).** "Do not write tests that only check for null or undefined. Test critical functions for their invariants: properties that must hold across all valid inputs. A pagination function's invariant is not that it returns something, but that pages never overlap and that concatenating all pages recovers the full set exactly once."
+**Example (`tech/shared/doctrine/concurrency-invariants`).**
+"Ledger mutations on a user wallet must be executed under atomic row locking or serialized transactions. Parallel mutation attempts on the same wallet ID must wait or abort with a concurrency conflict rather than risking balance desynchronization."
 
-**Example (`doctrine/data-deletion`).**
-
-> Every table that holds data owned by a user (content items, replies, sessions, and anything else scoped to that user's account) must cascade on delete when the user is deleted. If a user deletes their account, nothing that belonged exclusively to them should be left behind as an orphaned row.
->
-> Attached files are the one deliberate exception. Deleting a content item must not cascade into deleting its attached files, because files live in storage, not just the database. Files must be explicitly detached before the content item they belong to can be deleted, and the system should refuse the deletion rather than silently drop the files.
->
-> The general standard: ownership relationships cascade, storage-backed relationships do not. When in doubt about a new table, decide which side of that line it falls on before choosing its deletion behavior.
+**Example (`tech/shared/doctrine/test-invariants`).**
+"Unit and integration tests must verify mathematical invariants and state transitions across edge boundaries rather than asserting simple non-null returns. Tests for ledger arithmetic must verify that total debits plus final balance strictly equal initial balance."

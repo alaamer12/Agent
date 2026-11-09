@@ -100,6 +100,10 @@ meaningful state of every component, nothing beyond*.
 
 ## Data fidelity: `?filled`
 
+**Non-optional.** Every page spec declares `filled: { default: null }`. Every gallery
+strip carries a `Filled` chip linked to `?filled=1` (or the project's default seed).
+An agent that ships a prototype without working `?filled` has shipped an incomplete prototype.
+
 One cross-page param every project declares in each spec:
 `filled: { default: null }`.
 
@@ -117,6 +121,9 @@ One cross-page param every project declares in each spec:
 - Generation is pure data code (`seededFunds(seed)` in a page's data
   section), never side-effectful; the same render path paints sparse and
   filled alike, and the gallery carries a filled chip.
+- The generator deliberately includes **adversarial rows**: a 90-character
+  name, a missing/null field, an unrecognized category value — so that
+  edge-case handling is forceable and reviewable, not hidden in the happy path.
 
 ## Deriving the states — how to find them all
 

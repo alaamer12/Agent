@@ -43,7 +43,7 @@ prototype/
 │   │   └── _base.css     # Base resets, typography, global utilities
 │   └── js/
 │       ├── _app_core.js  # Pure state helper (mountState, parse, patch, toQuery)
-│       ├── glyphs.js     # Shared SVG icon library
+│       ├── glyphs.js     # Fallback SVG icons — only used when CDN is banned (see libraries.md)
 │       └── utils.js      # Seeded PRNG for ?filled, formatting helpers
 └── apps/
     ├── <app-1>/          # e.g., admin-dashboard

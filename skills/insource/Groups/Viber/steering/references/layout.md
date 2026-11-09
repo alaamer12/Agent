@@ -1,45 +1,99 @@
-# Layout, indexes, areas, and agents
+# Layout, Indexes, Areas, and Tiers
 
-> This document describes how the steering tree is laid out and entered: the `index.md` convention, the shared-plus-area pattern, how agents start, and a sample layout. It does not define the folders themselves; see the [index](index.md) for the set.
-> **Terminology reminder.** The steering folder whose directory name is `function` is always called the **steering function folder**, never just "function". Full rule: [function.md](function.md).
+> This document describes how the steering tree is laid out, indexed, and split into areas across the Two-Tier Steering Taxonomy. See [`index.md`](index.md) for the master map.
 
-## index.md
+## 1. Top-Level Two-Tier Structure
 
-Every folder, including the top level, has an `index.md`. It is a plain list of names with one line each. The name `README.md` is intentionally **not** used for navigation and stays free for another purpose later. Indexes are updated in the same change as the files they list.
+The `.steering/` directory is split into two primary branches:
 
-## Shared content and areas
-
-A project may have one or several areas, such as separate apps or other distinct parts. This taxonomy does not say how many there are or what they are called. When there are several, the steering folders follow a shared-plus-area pattern:
-
-- A shared directory holds what is common to all areas. The name is each project's choice.
-- Each area repeats only the folders it needs, and adds its own files.
-- **Nothing is overridden.** Shared content must not be overloadable. An area adds files, it never replaces a shared file with a same-named one.
-- Consequence: the shared directory may contain only what is true for **every** area. A fact that is true for only one area belongs in that area.
-
-Example: the shared stack facts live in the shared directory, and one area adds a single extra stack file for the part that is specific to it.
-
-## Agents
-
-How agents navigate the wiki is not governed here. In general, an agent first reads the `AGENTS.md` file, which points it onward.
-
-## A sample layout (illustrative)
-
-Layout is not prescribed: how many areas there are, what they are called, and where the shared directory lives are left to each project. The exact placement is each project's choice. This shows the shape.
-
-```
+```text
 .steering/
   index.md
-  shared/
+  perception/            Business understanding, stable across technical rewrites
     index.md
-    doctrine/   index.md  test-quality.md  data-deletion.md
-    stack/      index.md  frontend.md  backend.md
-    structure/  index.md  styles.md
-    product/    index.md
-    function/   index.md  error-ux.md  client-lifecycle.md
-    playbook/   index.md  run-in-containers.md  db-tables.md  seed-test-data.md  release-new-version.md
-  <area>/                  (repeated for each area the project has, if any)
-    index.md
-    stack/      index.md  area-only-libraries.md
+    shared/              What is true across every area
+    <area>/              What is true for one specific area
+  tech/                  Technical architecture, engineering standards, and execution
+    index.md             (Optionally versioned as tech/v1/, tech/v2/ for major architectural rewrites)
+    shared/
+    <area>/
 ```
 
-Feature documentation and other documentation folders, such as decision records, sit alongside and are outside this taxonomy (see [placement.md](placement.md)).
+---
+
+## 2. Folders per Tier
+
+No folder is mirrored across both tiers. Each tier has its own dedicated concerns:
+
+### Perception Tier (4 Folders)
+- **`product/`**: Why the product exists, for whom, and high-level objectives.
+- **`domain/`**: Nouns, entities, roles, lifecycle states, and structural relationships.
+- **`capabilities/`**: What the platform provides or does across features.
+- **`policy/`**: What is allowed, forbidden, and who holds decision authority.
+
+### Tech Tier (5 Folders)
+- **`stack/`**: What tools the project is built with ("We use X").
+- **`structure/`**: Static repository organization, package boundaries, directory trees, file naming.
+- **`function/`** (**steering function folder**): System-wide technical runtime mechanisms across features.
+- **`doctrine/`**: Engineering guidelines and non-negotiable technical mandates for a specific part.
+- **`playbook/`**: Step-by-step operational recipes to run or configure tasks.
+
+---
+
+## 3. index.md Convention
+
+Every directory in `.steering/` (including the root, tier roots, shared directories, area directories, and individual concern folders) must contain an `index.md`.
+- It is a clean list of files with a one-line description per entry.
+- The name `README.md` is **never** used inside `.steering/`.
+- Indexes are updated in the same change as the files they list.
+- In the `tech/` tier, every index file covering `function/` includes the mandatory **steering function folder** terminology reminder.
+
+---
+
+## 4. Shared Content and Areas
+
+When a project encompasses multiple applications or surfaces (e.g., `web`, `mobile`, `admin`, `api`), steering files follow the **shared-plus-area** pattern within each tier:
+
+- **`shared/`**: Contains only what is universally true for **every** area.
+- **`<area>/`**: Adds files specific to that area.
+- **Nothing is overridden**: An area directory adds files; it never replaces or overrides a same-named file in `shared/`.
+
+---
+
+## 5. Sample Two-Tier Layout (Illustrative)
+
+```text
+.steering/
+  index.md
+  perception/
+    index.md
+    shared/
+      index.md
+      product/        index.md  overview.md
+      domain/         index.md  user-tiers.md  group-competitions.md
+      capabilities/   index.md  virtual-trading.md  periodic-sync.md
+      policy/         index.md  non-negative-balance.md  org-creation-policy.md
+    web/
+      index.md
+      capabilities/   index.md  responsive-experience.md
+    admin/
+      index.md
+      capabilities/   index.md  cms-controls.md
+  tech/
+    index.md
+    shared/
+      index.md
+      stack/          index.md  platform.md
+      structure/      index.md  repo-layout.md
+      function/       index.md  external-feed-sync.md
+      doctrine/       index.md  concurrency-invariants.md  test-invariants.md
+      playbook/       index.md  seed-demo-data.md  rotate-api-keys.md
+    web/
+      index.md
+      stack/          index.md  client-framework.md
+      structure/      index.md  client-tree.md
+    admin/
+      index.md
+      stack/          index.md  admin-framework.md
+      structure/      index.md  admin-tree.md
+```

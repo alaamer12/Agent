@@ -7,5 +7,14 @@
       "skillPath": "plugins/python-development/skills/python-anti-patterns/SKILL.md",
       "computedHash": "6aad22ecbc1546927f2d2c6cac7ac793aa8256a6b47ded75d8c628c5fe491259"
     }
+  },
+  "locked": {
+    "main-pages": {
+      "qoder": "2026-11-09T14:29:42",
+      "junie": "2026-11-09T14:29:42",
+      "gemini": "2026-11-09T14:29:42",
+      "opencode": "2026-11-09T14:29:42",
+      "claude": "2026-11-09T14:29:42"
+    }
   }
 }

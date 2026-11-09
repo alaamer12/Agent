@@ -1,17 +1,23 @@
 # stack
 
-> This document defines the `stack` steering folder: what the project is built with, stated as "we use X". It is one of six folders; see the [index](index.md) for the set.
-> **Terminology reminder.** The steering folder whose directory name is `function` is always called the **steering function folder**, never just "function". Full rule: [function.md](function.md).
-> Structure: holds, does not hold, the test, why it has its own folder, why a folder and not a file, then an example.
+> This document defines the `stack` steering folder: what the project is built with, stated as "we use X". It lives exclusively in the **tech tier** (`tech/stack/`); see [`index.md`](index.md) for the taxonomy overview.
 
-**Holds.** What the project is built with: languages, frameworks, libraries, databases, hosting, infrastructure choices, external services. For each item, one line saying what it is for, and the version if it matters.
+**Holds.** What the project is built with: programming languages, runtimes, UI frameworks, libraries, databases, hosting environments, and external infrastructure services. For each item, a clean statement saying what tool is in use, what purpose it serves, and version constraints if significant.
 
-**Does not hold.** How to use the tools (`playbook` for a specific task), mandated usage for a specific part (`doctrine`), or how a feature behaves with the tool (the feature's own documentation or the steering function folder). A stack file states what is in use; it does not carry the reasoning for the choice. That reasoning is a decision record, which lives outside this taxonomy (see [placement.md](placement.md)).
+**Does not hold.**
+- Business decisions stated as technical facts (see below and [`placement.md`](placement.md)).
+- Operational commands or how-to-use guides (which belong in [`playbook.md`](playbook.md) or project-wide developer guides).
+- Technical guidelines or constraints for a component ([`doctrine.md`](doctrine.md)).
+- Historical justifications or benchmark evaluations for why a technology was chosen (which belong in Architectural Decision Records outside the taxonomy).
 
-**The test.** If a line says "we use X", it is stack. If it says "do this with X" or "never do that with X", it belongs elsewhere. For the tests that separate stack from the other folders, see the boundary tests in [placement.md](placement.md).
+**The test.** Does the line say *"we use X"*?
+- *"We use TypeScript 5.6 and Vue 3 for the web client"* -> `tech/web/stack/frontend.md`
+- *"Never use `any` in TypeScript"* -> `tech/shared/doctrine/type-standards.md`
+- *"How to install dependencies and run the build"* -> `tech/playbook/build-app.md` (or outside developer guide)
 
-**Why it has its own folder.** "What we use" is a different question from every other folder, it changes at its own pace (a dependency swap), and it is the first thing a newcomer or agent needs.
+**Business Decisions Expressed as Technical Facts (Section 5.4 Rule).**
+Statements that sound technical but represent business independence, governance, or strategic decisions must be moved to the perception tier.
+- *Example*: *"We maintain an isolated database and distinct domain from the partner company"* is a strategic business boundary (`perception/shared/policy/` or `perception/shared/product/`), not a stack entry. `stack` records only the concrete database engine used (*"We use PostgreSQL 16"*).
 
-**Why a folder and not a file.** "What we use" is several topics that each grow on their own: frontend, backend, database, infrastructure, external services. One file would become a long list. A small project may start with a single `stack` file and split it once it has three or four distinct sections.
-
-**Example (`stack/frontend`).** "We use a cross-platform client framework with a component library on top. The component library provides the native UI components. Versions are listed in the package manifest." No usage guide: that is a `playbook` pointer.
+**Example (`tech/shared/stack/platform`).**
+"We use PostgreSQL 16 as our primary relational database, deployed as a managed cloud instance. We use Redis 7 for distributed rate limiting and temporary session caching."

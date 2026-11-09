@@ -1,12 +1,19 @@
 # playbook
 
-> This document defines the `playbook` steering folder: step-by-step recipes for operating one specific subject or task. It is one of six folders; see the [index](index.md) for the set.
-> **Terminology reminder.** The steering folder whose directory name is `function` is always called the **steering function folder**, never just "function". Full rule: [function.md](function.md).
+> This document defines the `playbook` steering folder: step-by-step operational recipes for executing a specific task. It lives exclusively in the **tech tier** (`tech/playbook/`); see [`index.md`](index.md) for the taxonomy overview.
 
-**Holds.** Step-by-step recipes for operating one specific subject or task: how to check the database tables (`db-tables.md`), how to seed test data and verify it, how to run the containerized setup, how to release a new version. To operate means to run it, not to implement it: a playbook never describes how to build something. How to build or handle a part well is `doctrine`.
+**Holds.** Step-by-step recipes to **run, operate, or configure** a specific technical task (e.g., how to seed a local database, how to rotate API tokens, how to run a containerized environment, or how to execute a production release).
 
-**Does not hold.** General guidance on how to write commands, use the package manager, onboard newcomers, or work in this project in general (outside this taxonomy; see [placement.md](placement.md)). A playbook file does not restate any of that. It also does not hold descriptions of how the system behaves (the steering function folder) or guidelines for a part (`doctrine`). Incident-response content is not included by default, and the name leaves room to add situational procedures later.
+**Does not hold.**
+- Business policies or rules ([`policy.md`](policy.md)).
+- Business operational workflows (e.g. how customer support onboard clients; which belong in business documentation).
+- How to write or implement software well ([`doctrine.md`](doctrine.md)).
+- Platform runtime behavior (the steering function folder, [`function.md`](function.md)).
+- General, rarely updated project guidance that applies to every task (e.g., general git conventions or setup scripts, which belong in `AGENTS.md` or developer onboarding guides).
 
-**The test.** If the reader finishes the document having run something specific, it is a playbook. If they finish knowing something, it is another folder. If the document would read the same for any task in the project, it is general and belongs outside the steering folders. For the tests that separate playbook from `doctrine` and from general guidance, see the boundary tests in [placement.md](placement.md).
+**The test.** The completion test: Does the reader finish the document having **run** a specific procedure? If they finish knowing a rule, it is `doctrine` or `policy`. If they finish understanding a concept, it is `domain`. If it is a generic workflow that applies identically across all tasks, it is outside the taxonomy.
 
-**Why it exists.** This is the information that is easy to remember while a project is small and easy to lose once it grows. Putting it in one predictable place prevents the "I have to re-read everything" cost.
+**Example (`tech/shared/playbook/seed-demo-data`).**
+"1. Connect to the local database instance using the developer connection string.
+2. Execute the seeding script: `bun run seed:fixtures`.
+3. Verify that 10 mock assets and 5 demo portfolios are populated in the database table."

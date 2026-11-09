@@ -45,6 +45,30 @@ Four parts, in this order:
 
 ## The three rules that make it work
 
+### 0. Layout — breathing room, no crowding
+
+The gallery grid uses **at most 3 columns**. Use `repeat(auto-fit, minmax(320px, 1fr))` on the
+grid container (never `minmax(240px, 1fr)` or narrower, which forces 4+ columns on wide viewports
+and crowds the cards). Set `gap` to at least 24px and card body padding to at least 20px so each
+card has genuine breathing room.
+
+**Preview iframes must not show scrollbars.** The fix lives on the *screen*, not the gallery:
+the screen's main scroll container applies `scrollbar-width: none` and `::-webkit-scrollbar { display: none; }`.
+The gallery preview box adds `overflow: hidden` as a safety net. Neither side alone is sufficient;
+both must be present.
+
+```css
+/* in the screen's own CSS */
+.scroll-container {
+  overflow-y: auto;
+  scrollbar-width: none;        /* Firefox */
+}
+.scroll-container::-webkit-scrollbar { display: none; }  /* Chrome/Safari */
+
+/* in the gallery CSS — safety net only */
+.preview-box { overflow: hidden; }
+```
+
 ### 1. The state list has exactly one owner
 
 The gallery must never hand-type a list of state ids. If it does, it drifts from the screens
@@ -128,10 +152,16 @@ skill. If the app has an i18n file, quote its actual strings rather than paraphr
 Before delivering a set with a gallery:
 
 1. Open `index.html`. Every screen renders at its true aspect ratio, nothing overlapping.
-2. Click each chip in each strip. The preview changes **and** the iframe's URL query changes to
+   The grid has **at most 3 columns**; cards have visible breathing room.
+2. **No scrollbar is visible inside any preview iframe.** If one appears, the screen's
+   scroll container is missing `scrollbar-width: none` / `::-webkit-scrollbar { display:none }`.
+3. Click each chip in each strip. The preview changes **and** the iframe's URL query changes to
    match — a chip that changes the DOM without changing the URL is not reachable by link, which
    breaks the skill's core contract. Deep component states (`?open=loading&loading=header`) must
    each have a chip: the strip is the visible state inventory.
-3. Copy a preview's URL into a fresh tab. It renders that state with no clicks.
-4. Delete a preview entry from `specs.js`. Its chip must disappear from the gallery on reload
+4. Click the **`Filled`** chip on every card. The preview must show a **full** dataset —
+   long tables, many rows, crowded content, wrapped names. If the preview looks almost
+   identical to the empty state, `?filled` was not implemented.
+5. Copy a preview's URL into a fresh tab. It renders that state with no clicks.
+6. Delete a preview entry from `specs.js`. Its chip must disappear from the gallery on reload
    with no gallery edit. If it doesn't, the inventory has two owners — fix that first.

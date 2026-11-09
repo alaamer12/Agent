@@ -1,30 +1,31 @@
-# Migrating the legacy docs
+# Migrating Legacy Documentation
 
-> This document sets the constraints and a starting map for the one-time move of the old tech / structure / product docs into the steering taxonomy. Where each destination folder is defined, see the [index](index.md); how to choose between two folders is in [placement.md](placement.md).
-> **Terminology reminder.** The steering folder whose directory name is `function` is always called the **steering function folder**, never just "function". Full rule: [function.md](function.md).
+> This document establishes constraints and a starting map for migrating legacy technical, structural, and product documentation into the **Two-Tier Steering Taxonomy**. See [`index.md`](index.md) for the master index.
 
-The old tech / structure / product docs get a **one-time full migration**. The method is left to the agent that performs it. These constraints apply:
+The migration of legacy documentation is conducted as a **one-time full migration** adhering to the following non-negotiable constraints:
 
-- **Keep the originals.** Never delete sources. Leave them in place or move them to an archive path, and say which.
-- **Move, do not rewrite.** Each passage lands in exactly one place. A legacy file that mixes roles is split by role first (see the golden rule in [placement.md](placement.md)). If a single passage serves two roles, keep it where it belongs most and link from the other.
-- **Handle conflicts openly.** If two sources disagree, keep both, label where each came from, and flag it. Do not pick silently.
-- **Keep a source-to-destination map** so nothing is lost, and verify at the end that every passage is accounted for with nothing duplicated by accident.
-- **Create only files with real content.** No placeholders.
+- **Keep the originals**: Never delete legacy source documents. Retain them in place or archive them to a dedicated archive directory (e.g. `docs/archive/legacy/`), stating the chosen location explicitly.
+- **Move, do not rewrite**: Migrate passages into their canonical homes without introducing unrequested textual edits.
+- **Passage-level evaluation**: A legacy document that mixes business concepts with technical mechanisms must be split by passage (using the Tier Test and Golden Rule in [`placement.md`](placement.md)) before placing.
+- **Handle conflicts openly**: If two legacy sources disagree, retain both, document the source of each, and flag the contradiction for maintainer resolution. Never pick one silently.
+- **Source-to-destination accounting**: Maintain an exhaustive mapping ledger during migration to guarantee that every passage is accounted for with zero accidental duplications.
+- **No empty placeholders**: Create files only when real, verified content exists to populate them.
 
-## Suggested starting map (to be confirmed during migration)
+---
 
-This is a starting suggestion, not a decided mapping. The migrating agent should confirm it against the actual legacy files.
+## Suggested Starting Map for Two-Tier Migration
 
-| Old location | Likely destination |
-|---|---|
-| tech: libraries, frameworks, tools | `stack` |
-| tech: code organization | `structure` |
-| tech: runtime behavior that spans features | steering function folder |
-| tech: behavior of one feature | that feature's own documentation |
-| tech: how to run or set up one specific thing | `playbook` |
-| tech: general how-to-work guidance (development flow, debugging, commands, environment, versions) | outside this taxonomy |
-| tech: guidelines for a specific part or task, with reasoning | `doctrine` |
-| tech: binding constraints on a specific part | `doctrine` |
-| structure | `structure` |
-| product: overall purpose and audience | `product` |
-| product: one feature's spec | that feature's own documentation |
+| Legacy Section / Content | Destination Tier & Folder | Why |
+| :--- | :--- | :--- |
+| Product purpose, audience summary, business goals | `perception/<area>/product/` | Core product-level overview |
+| Entity definitions, roles, lifecycles, structural vocabulary | `perception/<area>/domain/` | Nouns and relationships |
+| Business functional capabilities across features | `perception/<area>/capabilities/` | What the platform provides |
+| Business rules, entitlements, governance limits | `perception/<area>/policy/` | Allowed / forbidden constraints |
+| Single feature specifications | `docs/features/<feature>.md` | Outside taxonomy (single feature scope) |
+| Relational table schemas and API endpoint references | `docs/reference/` | Outside taxonomy (reference documentation) |
+| Tool rosters, languages, databases ("We use X") | `tech/<area>/stack/` | Tools in use |
+| Code layout, monorepo packages, directory trees | `tech/<area>/structure/` | Static project organization |
+| System-wide technical runtime mechanisms | `tech/<area>/function/` | Steering function folder |
+| Engineering guidelines and technical mandates | `tech/<area>/doctrine/` | Mandates for a specific technical part |
+| Step-by-step operational setup or run recipes | `tech/<area>/playbook/` | How to operate a task |
+| General developer setup and command guides | `AGENTS.md` / `CONTRIBUTING.md` | Outside taxonomy (general project guidance) |

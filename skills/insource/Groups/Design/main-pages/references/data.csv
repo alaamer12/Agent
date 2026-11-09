@@ -1,0 +1,493 @@
+discipline,category,page,route,kind,prevalence,tier,basis,confidence,aka,notes
+universal,auth,Login,/login,page,99,core,universal,high,sign in; log in,Entry point for returning users; almost every account product has one
+universal,auth,Signup,/signup,page,97,core,universal,high,register; create account,Self-serve account creation; invite-only products redirect to Accept Invitation
+universal,auth,Forgot Password,/forgot-password,page,93,core,universal,high,password reset request,Collects the identifier and sends a reset link or code
+universal,auth,Reset Password,/reset-password,page,72,common,universal,high,set new password,Often replaced by a magic link or a state inside the reset flow; do not assume a dedicated page
+universal,auth,Verify Email,/verify-email,page,86,core,universal,high,confirm email; activation,Sent-link landing; may be a state shown after signup
+universal,auth,MFA Challenge,/mfa,page,58,optional,universal,medium,two-factor; 2fa; otp,Second-factor entry for TOTP or SMS; passkey prompts are usually a state
+universal,auth,Magic Link Sent,/magic-link-sent,page,34,niche,universal,medium,check your email,Confirmation state after passwordless signup or login; often not routed
+universal,auth,Accept Invitation,/invite/:token,page,46,optional,universal,medium,join workspace; accept invite,Required for team or workspace products; token-scoped and often single-use
+universal,auth,SSO Login,/sso,page,33,niche,universal,medium,saml; oidc; enterprise login,Enterprise-only; may redirect straight to the identity provider
+universal,auth,Account Locked,/account-locked,page,41,optional,universal,medium,too many attempts,Rarely a page; usually a state of Login with a recovery route
+universal,auth,Logout Confirm,/logout,modal,55,optional,universal,medium,sign out,Usually a confirmation state; only a page when logout needs explanation
+universal,auth,Password Changed,/password-changed,page,38,optional,universal,medium,password updated,Confirmation state; can be a toast or inline panel
+universal,onboarding,Welcome,/welcome,page,74,common,universal,high,intro; start,First-run orientation; sometimes merged into the product tour
+universal,onboarding,Profile Setup,/onboarding/profile,page,68,common,universal,high,complete profile; tell us about you,Collects name; avatar; role; or preferences before first use
+universal,onboarding,Workspace Create,/onboarding/workspace,page,44,optional,universal,medium,create team; organization setup,Team products only; solo products skip it
+universal,onboarding,Invite Team,/onboarding/invite,page,46,optional,universal,medium,add teammates,Team products only; often skippable
+universal,onboarding,Plan Select,/onboarding/plan,page,52,optional,universal,medium,choose plan; trial start,Paid products; free products skip it
+universal,onboarding,Permission Primer,/onboarding/permissions,page,38,optional,universal,medium,enable notifications; allow camera,Mobile-only pre-permission explainer; web usually uses a browser prompt
+universal,onboarding,Product Tour,/onboarding/tour,page,56,optional,universal,medium,walkthrough; guided tour,Multi-step overlay; only a page when it must be linkable or resumable
+universal,onboarding,Onboarding Checklist,/getting-started,page,48,optional,universal,medium,setup checklist; next steps,Persistent checklist after signup; can live inside the dashboard
+universal,shell,Dashboard,/dashboard,page,95,core,universal,high,home; overview,Landing surface after login; content is role-specific
+universal,shell,Search Results,/search,page,78,common,universal,high,global search,Results surface; the command palette itself is a state
+universal,shell,Notifications,/notifications,page,70,common,universal,high,inbox; activity,Notification center; channel preferences belong in Settings
+universal,shell,Profile,/profile,page,88,core,universal,high,account profile; me,Public or private profile; editing usually lives in Settings
+universal,shell,Settings Hub,/settings,page,96,core,universal,high,preferences; account settings,Always a hub; split into sub-pages once it exceeds about six sections
+universal,shell,Help,/help,page,62,optional,universal,high,support; docs,May redirect to external documentation; distinguish from Contact
+universal,shell,404 Not Found,/404,page,92,core,universal,high,page not found,Catch-all for unknown routes
+universal,shell,403 Forbidden,/403,page,76,common,universal,high,permission denied; no access,For direct URL access by an unauthorized user
+universal,shell,500 Server Error,/500,page,90,core,universal,high,server error; something went wrong,Global failure boundary
+universal,shell,Maintenance,/maintenance,page,64,optional,universal,medium,down for maintenance; scheduled,Shown during planned downtime; often served by the edge
+universal,settings,Profile Settings,/settings/profile,subpage,94,core,universal,high,edit profile; personal info,Name; avatar; bio; public identifiers
+universal,settings,Account Settings,/settings/account,subpage,90,core,universal,high,email; username; account,Identity and login identifiers; keep separate from profile
+universal,settings,Security Settings,/settings/security,subpage,84,common,universal,high,password; mfa; two-factor,Password change and second factors
+universal,settings,Sessions & Devices,/settings/sessions,subpage,62,optional,universal,medium,active sessions; logged-in devices,Revoke individual sessions; high trust value
+universal,settings,Notification Settings,/settings/notifications,subpage,88,core,universal,high,email preferences; push preferences,Channel and event matrix; distinct from the notification center
+universal,settings,Privacy Settings,/settings/privacy,subpage,66,common,universal,medium,visibility; data sharing,Profile visibility and third-party sharing
+universal,settings,Appearance Settings,/settings/appearance,subpage,54,optional,universal,medium,theme; dark mode; density,Theme and density; often a section rather than a page
+universal,settings,Language & Region,/settings/language,subpage,58,optional,universal,medium,locale; timezone; date format,Commonly nested under Appearance or Account
+universal,settings,Billing Settings,/settings/billing,subpage,70,common,universal,high,plan; subscription,Paid products; plan state and renewal
+universal,settings,Payment Methods,/settings/payment-methods,subpage,66,common,universal,high,cards; payment details,Sensitive; may live inside Billing
+universal,settings,Invoice History,/settings/invoices,subpage,60,optional,universal,high,receipts; billing history,Downloadable invoices; often a tab of Billing
+universal,settings,Team Members,/settings/members,subpage,55,optional,universal,medium,people; users,Team products; list and remove members
+universal,settings,Roles & Permissions,/settings/roles,subpage,44,optional,universal,medium,access control; rbac,Team products with more than one role
+universal,settings,Integrations,/settings/integrations,subpage,48,optional,universal,medium,connected apps; apps,Only when the product has integrations
+universal,settings,API Keys,/settings/api-keys,subpage,34,niche,universal,medium,personal access tokens,Developer-facing products
+universal,settings,Danger Zone,/settings/danger,subpage,70,common,universal,high,delete account; destructive actions,Separate page or clearly separated section; never inline with normal settings
+universal,settings,Data Export,/settings/export,subpage,56,optional,universal,medium,download my data,Privacy-law and trust feature; may be a request flow
+universal,settings,Delete Account,/account/delete,page,72,common,universal,high,close account; deactivate,Some app stores require an in-app route
+universal,settings,Invite Members,/settings/invite,subpage,44,optional,universal,medium,add people,Team products
+universal,billing,Pricing,/pricing,page,74,common,universal,high,plans; pricing page,Marketing surface; not the in-app upgrade screen
+universal,billing,Checkout,/checkout,page,80,common,universal,high,payment; purchase,Paid products; guest checkout may exist
+universal,billing,Payment Success,/billing/success,page,78,common,universal,high,thank you; receipt,Post-payment confirmation; must be idempotent
+universal,billing,Payment Failed,/billing/failed,page,62,optional,universal,medium,declined card,Retry path; often a state of Checkout
+universal,billing,Upgrade Plan,/upgrade,page,64,optional,universal,high,change plan; upgrade,In-app plan change; may be a modal for simple upgrades
+universal,billing,Usage & Limits,/settings/usage,subpage,40,optional,universal,medium,quota; metered usage,Only for metered or quota-based products
+universal,state,Empty State,-,state,95,core,universal,high,no data; zero state,First-run or zero-data list state; never a standalone route
+universal,state,Loading State,-,state,97,core,universal,high,skeleton; spinner,Every async screen needs one; never a standalone route
+universal,state,Error State,-,state,92,core,universal,high,retry; failure,Inline retryable failure; distinct from the 500 page
+universal,state,Filtered Empty,-,state,78,common,universal,high,no results,Search or filters returned nothing; state not page
+universal,state,Success State,-,state,88,core,universal,high,confirmation; saved,Post-action confirmation; often a toast or inline panel
+universal,state,Unsaved Changes,-,state,72,common,universal,high,dirty form guard,Modal on navigation; not a page
+universal,state,Delete Confirmation,-,state,86,core,universal,high,are you sure; confirm delete,Modal before a destructive action
+universal,state,Session Expired,-,state,64,optional,universal,high,re-auth,Modal or inline banner; redirect to login on submit
+universal,state,Upgrade Prompt,-,state,58,optional,universal,high,paywall; locked feature,Inline gate; page only when a full plan comparison is needed
+universal,state,Offline State,-,state,40,optional,universal,medium,no connection,Mobile or PWA; cache-aware
+universal,state,Permission Denied,-,state,66,common,universal,high,not allowed,Inline message; the 403 page is for direct URL access
+saas-b2b,workspace,Workspace Home,/app,page,92,core,product-tour,high,workspace; organization home,Landing surface scoped to the current workspace
+saas-b2b,workspace,Projects,/projects,page,88,core,product-tour,high,workspaces; initiatives,List of the workspace containers users create
+saas-b2b,workspace,Project Detail,/projects/:id,page,85,core,product-tour,high,project overview,Overview plus members; activity; and settings tabs
+saas-b2b,workspace,Members,/settings/members,page,86,core,product-tour,high,team; people,Invite and remove members; status and last active
+saas-b2b,workspace,Roles & Permissions,/settings/roles,page,62,optional,product-tour,high,rbac; access control,Custom roles appear once the product has more than admin and member
+saas-b2b,workspace,Audit Log,/settings/audit,page,48,optional,product-tour,high,activity log; security log,Enterprise trust feature; filterable event history
+saas-b2b,workspace,SSO Configuration,/settings/sso,page,34,niche,product-tour,medium,saml; oidc; identity provider,Enterprise-only; metadata upload or discovery URL
+saas-b2b,workspace,Domains,/settings/domains,page,40,optional,product-tour,medium,custom domain; vanity domain,Only when the product serves a customer-branded surface
+saas-b2b,workspace,Webhooks,/settings/webhooks,page,38,optional,product-tour,medium,event subscriptions,Developer-facing; endpoint and secret management
+saas-b2b,workspace,API Keys,/settings/api-keys,page,44,optional,product-tour,high,personal access token,Developer-facing; scoped keys and last-used metadata
+saas-b2b,workspace,Integrations,/settings/integrations,page,58,optional,product-tour,high,connected apps; marketplace,App directory and connection state
+saas-b2b,workspace,Usage & Billing,/settings/billing,page,72,common,product-tour,high,subscription; invoices,Seats; plan; invoices; payment method
+saas-b2b,workspace,Data Retention,/settings/retention,page,32,niche,regulation,medium,retention policy,Enterprise and regulated buyers; legal or compliance driven
+saas-b2b,workspace,Custom Fields,/settings/fields,page,36,optional,product-tour,medium,properties; metadata,When the domain model is user-extensible
+saas-b2b,workspace,Onboarding Checklist,/getting-started,page,52,optional,product-tour,high,setup guide; next steps,Activation checklist; often inside the workspace home
+saas-b2b,workspace,Changelog,/changelog,page,56,optional,product-tour,high,release notes; what's new,Public or in-app release feed
+saas-b2b,workspace,Status,/status,page,50,optional,product-tour,high,uptime; incidents,Usually an external status page linked from Help
+crm,sales,Contacts,/contacts,page,98,core,product-tour,high,people; leads,Index of person records with saved views
+crm,sales,Contact Detail,/contacts/:id,page,98,core,product-tour,high,person record,Timeline; properties; associations; and activities
+crm,sales,Companies,/companies,page,95,core,product-tour,high,accounts; organizations,Index of company records
+crm,sales,Company Detail,/companies/:id,page,95,core,product-tour,high,account record,Timeline; associated contacts; deals; and tickets
+crm,sales,Deals Pipeline,/deals,page,96,core,product-tour,high,opportunities; pipeline,Kanban by stage; the core revenue surface
+crm,sales,Deal Detail,/deals/:id,page,94,core,product-tour,high,opportunity record,Amount; stage; contacts; and activity history
+crm,sales,Tickets,/tickets,page,86,core,product-tour,high,support tickets; cases,Support-oriented CRMs only; often a separate helpdesk product
+crm,sales,Ticket Detail,/tickets/:id,page,84,common,product-tour,high,case record,Conversation; status; SLA; and requester
+crm,sales,Activities & Tasks,/activities,page,82,common,product-tour,high,tasks; calls; meetings,Cross-record work queue
+crm,sales,Reports,/reports,page,88,core,product-tour,high,analytics; report library,Prebuilt and saved reports
+crm,sales,Report Builder,/reports/new,page,66,common,product-tour,high,custom report; query builder,Multi-object reports; usually a separate builder surface
+crm,sales,Dashboards,/dashboards,page,84,common,product-tour,high,overview; metrics,Collections of reports; often the CRM home
+crm,sales,Imports,/imports,page,64,optional,product-tour,high,csv import; data import,Field mapping and dedupe preview
+crm,sales,Duplicates,/duplicates,page,44,optional,product-tour,medium,merge records,Only when records are user-created and duplicated
+crm,sales,Workflows & Automation,/workflows,page,72,common,product-tour,high,automations; rules,Trigger; condition; and action builder
+crm,sales,Campaigns,/campaigns,page,68,common,product-tour,high,marketing campaigns,Marketing suite only
+crm,sales,Products & Quotes,/products,page,62,optional,product-tour,high,catalog; quote; line items,When the CRM closes deals with priced line items
+crm,sales,Forecast,/forecast,page,54,optional,product-tour,medium,revenue forecast,Manager surface; depends on committed pipeline stages
+project-management,work,Inbox,/inbox,page,84,common,product-tour,high,notifications; updates,Personal notification triage surface
+project-management,work,My Work,/my-issues,page,92,core,product-tour,high,my issues; my tasks,Everything assigned to the current user
+project-management,work,Issues List,/issues,page,95,core,product-tour,high,tasks; tickets,Filterable list of work items
+project-management,work,Issue Detail,/issues/:id,page,95,core,product-tour,high,task detail; ticket detail,Description; comments; relations; and activity
+project-management,work,Board,/board,page,88,core,product-tour,high,kanban; columns,View over the same issue set; not a separate entity
+project-management,work,Backlog,/backlog,page,82,common,product-tour,high,unscheduled work,Unplanned work awaiting a cycle or iteration
+project-management,work,Cycles & Sprints,/cycles,page,78,common,product-tour,high,sprints; iterations,Time-boxed planning; optional for continuous-flow teams
+project-management,work,Projects,/projects,page,90,core,product-tour,high,initiatives; epics,Containers that group issues toward an outcome
+project-management,work,Project Detail,/projects/:id,page,90,core,product-tour,high,project overview,Progress; issues; documents; and milestones
+project-management,work,Roadmap,/roadmap,page,62,optional,product-tour,high,timeline; gantt,Planning view across projects
+project-management,work,Initiatives,/initiatives,page,44,optional,product-tour,medium,goals; themes,Higher-level grouping above projects
+project-management,work,Saved Views,/views,page,72,common,product-tour,high,filters; custom views,Saved filter combinations
+project-management,work,Teams,/teams,page,66,common,product-tour,high,workspaces; groups,When work is partitioned by team with separate settings
+project-management,work,Triage,/triage,page,46,optional,product-tour,medium,intake,Incoming unplanned work before it enters the backlog
+project-management,work,Docs & Notes,/docs,page,54,optional,product-tour,medium,wiki; notes,Product documents attached to projects or teams
+project-management,work,Reports & Insights,/reports,page,58,optional,product-tour,high,velocity; burndown,Delivery metrics and workload
+helpdesk,support,Agent Inbox,/inbox,page,94,core,product-tour,high,ticket queue; conversations,Unified queue of incoming conversations and tickets
+helpdesk,support,Ticket Detail,/tickets/:id,page,94,core,product-tour,high,conversation; case,Requester context; thread; status; and internal notes
+helpdesk,support,Customers,/customers,page,84,common,product-tour,high,contacts; users,Index of people who have contacted support
+helpdesk,support,Customer Detail,/customers/:id,page,82,common,product-tour,high,contact record,History across tickets and channels
+helpdesk,support,Knowledge Base,/kb,page,76,common,product-tour,high,help center; docs,Public or internal articles for deflection
+helpdesk,support,Article Detail,/kb/:slug,page,74,common,product-tour,high,help article,Article reader with feedback and related links
+helpdesk,support,Macros & Canned Replies,/macros,page,66,common,product-tour,high,saved replies; templates,Only when agents answer repetitive questions
+helpdesk,support,SLA Policies,/settings/sla,page,48,optional,product-tour,medium,service levels,Response and resolution targets
+helpdesk,support,Reports & CSAT,/reports,page,72,common,product-tour,high,analytics; satisfaction,Volume; response time; and satisfaction
+helpdesk,support,Channels,/settings/channels,page,58,optional,product-tour,high,email; chat; social,Connected inbound channels
+helpdesk,support,Team Settings,/settings/team,page,62,optional,product-tour,high,agents; routing,Groups; assignment rules; and business hours
+hr-recruiting,hiring,Jobs,/jobs,page,96,core,product-tour,high,requisitions; openings,Index of open roles
+hr-recruiting,hiring,Job Detail,/jobs/:id,page,94,core,product-tour,high,requisition detail,Description; pipeline; and hiring team
+hr-recruiting,hiring,Candidates,/candidates,page,94,core,product-tour,high,applicants; people,Index of applicants and prospects
+hr-recruiting,hiring,Candidate Detail,/candidates/:id,page,94,core,product-tour,high,applicant profile,Resume; applications; scorecards; and activity
+hr-recruiting,hiring,Pipeline Board,/jobs/:id/pipeline,page,92,core,product-tour,high,stages; kanban,Stage-by-stage candidate movement for one job
+hr-recruiting,hiring,Interviews,/interviews,page,80,common,product-tour,high,schedule; interview plan,Scheduled interviews across jobs
+hr-recruiting,hiring,Scorecards,/scorecards,page,72,common,product-tour,high,feedback; evaluation,Structured interview feedback
+hr-recruiting,hiring,Offers,/offers,page,68,common,product-tour,high,offer letters,Offer draft; approval; and send status
+hr-recruiting,hiring,Referrals,/referrals,page,52,optional,product-tour,medium,employee referrals,Only when referral programs exist
+hr-recruiting,hiring,Talent Pool,/talent-pool,page,58,optional,product-tour,high,prospects; silver medalists,Previously seen candidates kept for future roles
+hr-recruiting,hiring,Requisitions,/requisitions,page,50,optional,product-tour,medium,headcount requests,Enterprise approval chain; often owned by HRIS
+hr-recruiting,hiring,Career Site,/careers,page,78,common,product-tour,high,jobs page; job board,Public listing of open roles
+hr-recruiting,hiring,Application Form,/jobs/:id/apply,page,88,core,product-tour,high,apply; application,Public candidate submission form
+hr-recruiting,hiring,Interview Kits,/interview-kits,page,46,optional,product-tour,medium,question sets,Reusable structured interview content
+hr-recruiting,hiring,Reports & Analytics,/reports,page,66,common,product-tour,high,time to hire; funnel,Recruiting funnel and source effectiveness
+docs-wiki,knowledge,Home,/home,page,86,core,product-tour,high,dashboard; start page,Recent and pinned documents
+docs-wiki,knowledge,Space,/spaces/:id,page,82,common,product-tour,high,workspace; section,Container grouping related pages
+docs-wiki,knowledge,Page Viewer,/pages/:id,page,96,core,product-tour,high,article; document,Read view with nested child pages
+docs-wiki,knowledge,Page Editor,/pages/:id/edit,page,94,core,product-tour,high,compose; write,Block editor; often the same route in edit mode
+docs-wiki,knowledge,Search,/search,page,88,core,product-tour,high,find; quick find,Content search across spaces
+docs-wiki,knowledge,Templates,/templates,page,62,optional,product-tour,high,blueprints,Reusable page structures
+docs-wiki,knowledge,Comments & Mentions,/comments,page,64,optional,product-tour,high,discussion,Inline discussion; often a panel not a page
+docs-wiki,knowledge,Version History,/pages/:id/history,page,58,optional,product-tour,high,revisions; history,Diff and restore
+docs-wiki,knowledge,Permissions,/settings/permissions,page,56,optional,product-tour,high,access; sharing,Space and page-level access
+docs-wiki,knowledge,Trash,/trash,page,44,optional,product-tour,medium,deleted pages,Restore or permanently delete
+docs-wiki,knowledge,Import,/import,page,38,optional,product-tour,medium,import docs,Only when migrating from another tool
+community,engagement,Home Feed,/home,page,92,core,product-tour,high,activity feed; timeline,Recent posts and activity in joined spaces
+community,engagement,Spaces,/spaces,page,90,core,product-tour,high,channels; groups,Directory of spaces or channels
+community,engagement,Space Detail,/spaces/:id,page,90,core,product-tour,high,channel; group,Posts inside one space
+community,engagement,Post Detail,/posts/:id,page,92,core,product-tour,high,thread; discussion,Post body; comments; and reactions
+community,engagement,Create Post,/posts/new,page,84,common,product-tour,high,new discussion; compose,May be a modal for short posts
+community,engagement,Members,/members,page,82,common,product-tour,high,people directory,Searchable member list
+community,engagement,Member Profile,/members/:id,page,82,common,product-tour,high,user profile,Activity; bio; and follow or message actions
+community,engagement,Direct Messages,/messages,page,74,common,product-tour,high,dm; chat,Only when private messaging is enabled
+community,engagement,Moderation Queue,/moderation,page,64,optional,product-tour,high,reports; flagged content,Admin and moderator surface
+community,engagement,Reports,/reports,page,56,optional,product-tour,high,flagged posts,User-submitted reports awaiting review
+community,engagement,Roles & Badges,/settings/roles,page,48,optional,product-tour,medium,permissions; reputation,Role assignment and community badges
+community,engagement,Invites,/invites,page,54,optional,product-tour,high,invite links,Invite-only or growth-oriented communities
+community,engagement,Events,/events,page,52,optional,product-tour,high,meetups; calendar,Only when the community runs live events
+community,engagement,Leaderboard,/leaderboard,page,38,optional,product-tour,medium,top members,Gamified communities only
+community,engagement,Guidelines,/guidelines,page,74,common,regulation,high,rules; code of conduct,Often a secondary-pages document linked from onboarding
+community,engagement,Admin Settings,/settings,page,72,common,product-tour,high,community settings,Space; moderation; and branding configuration
+social,engagement,Feed,/feed,page,96,core,product-tour,high,timeline; home,Chronological or ranked stream of posts
+social,engagement,Explore,/explore,page,84,common,product-tour,high,discover; trending,Recommendation and discovery surface
+social,engagement,Post Detail,/p/:id,page,95,core,product-tour,high,post; thread,Single post with replies
+social,engagement,Create Post,/compose,page,90,core,product-tour,high,new post; compose,Often a modal on mobile
+social,engagement,Profile,/u/:handle,page,94,core,product-tour,high,user page; timeline,Posts; followers; and following for one account
+social,engagement,Followers & Following,/u/:handle/followers,page,78,common,product-tour,high,connections,Social graph lists
+social,engagement,Messages,/messages,page,82,common,product-tour,high,dm; chat,Private conversations
+social,engagement,Notifications,/notifications,page,86,core,product-tour,high,activity; alerts,Engagement events
+social,engagement,Search,/search,page,80,common,product-tour,high,find people and posts,People; posts; and tags
+social,engagement,Bookmarks,/bookmarks,page,62,optional,product-tour,high,saved posts,Private saved content
+social,engagement,Topic,/t/:tag,page,66,common,product-tour,high,hashtag; community,Posts grouped by topic or hashtag
+social,engagement,Stories,/stories,page,52,optional,product-tour,medium,ephemeral content,Only for image-first social products
+social,engagement,Live,/live,page,34,niche,product-tour,low,livestream,Only when live video is a core feature
+social,engagement,Blocked Accounts,/settings/blocked,page,48,optional,product-tour,medium,blocked; muted,Safety control surface
+social,engagement,Report Content,/report,page,56,optional,product-tour,high,flag; abuse,Usually a modal flow not a page
+marketplace,commerce,Search Results,/search,page,96,core,product-tour,high,browse; listings,Query-driven listing index
+marketplace,commerce,Category,/c/:category,page,88,core,product-tour,high,browse category; collection,Curated or taxonomy-driven listing group
+marketplace,commerce,Listing Detail,/listing/:id,page,98,core,product-tour,high,item detail; product page,Seller; price; availability; and buy action
+marketplace,commerce,Seller Storefront,/store/:handle,page,84,common,product-tour,high,seller page; shop,All listings from one seller
+marketplace,commerce,Seller Profile,/u/:handle,page,78,common,product-tour,high,member profile,Reviews; bio; and policies
+marketplace,commerce,Cart,/cart,page,88,core,product-tour,high,basket,Multi-seller carts may split at checkout
+marketplace,commerce,Checkout,/checkout,page,92,core,product-tour,high,payment; purchase,Address; shipping; and payment
+marketplace,commerce,Order Confirmation,/orders/:id/confirmation,page,90,core,product-tour,high,thank you; receipt,Post-purchase state
+marketplace,commerce,Orders,/orders,page,88,core,product-tour,high,purchases; my orders,Buyer order history
+marketplace,commerce,Order Detail,/orders/:id,page,88,core,product-tour,high,order status,Tracking; items; and seller messages
+marketplace,commerce,Messages,/messages,page,72,common,product-tour,high,buyer seller chat,Only when buyers and sellers negotiate
+marketplace,commerce,Reviews,/reviews,page,76,common,product-tour,high,ratings; feedback,Reviews written and received
+marketplace,commerce,Favorites,/favorites,page,70,common,product-tour,high,wishlist; saved,Save listings for later
+marketplace,commerce,Sell Listing,/sell,page,80,common,product-tour,high,create listing; post ad,Only for peer-to-peer or seller-enabled marketplaces
+marketplace,commerce,Seller Dashboard,/seller,page,74,common,product-tour,high,seller hub; my shop,Sales; listings; and performance
+marketplace,commerce,Payouts,/seller/payouts,page,58,optional,product-tour,high,earnings; transfers,Only when the platform pays sellers
+marketplace,commerce,Disputes,/disputes,page,46,optional,product-tour,medium,claims; resolutions,Only when transactions can go wrong at scale
+ecommerce,commerce,Home,/,page,94,core,product-tour,high,storefront home,Merchandising and entry into catalog
+ecommerce,commerce,Catalog,/c/:category,page,92,core,product-tour,high,collection; category page,Filterable product grid
+ecommerce,commerce,Product Detail,/p/:slug,page,98,core,product-tour,high,product page; PDP,Gallery; variants; price; and add to cart
+ecommerce,commerce,Search,/search,page,88,core,product-tour,high,product search,Query and faceted results
+ecommerce,commerce,Cart,/cart,page,94,core,product-tour,high,basket,Line items and totals
+ecommerce,commerce,Checkout,/checkout,page,94,core,product-tour,high,payment; shipping,Address; delivery; and payment
+ecommerce,commerce,Order Confirmation,/orders/:id/confirmation,page,90,core,product-tour,high,thank you,Post-purchase receipt
+ecommerce,commerce,Account,/account,page,84,common,product-tour,high,my account,Profile and preferences hub
+ecommerce,commerce,Orders,/account/orders,page,88,core,product-tour,high,order history,Past and active orders
+ecommerce,commerce,Order Detail,/account/orders/:id,page,86,core,product-tour,high,order status,Tracking; items; and returns entry
+ecommerce,commerce,Addresses,/account/addresses,page,74,common,product-tour,high,shipping addresses,Saved delivery addresses
+ecommerce,commerce,Wishlist,/wishlist,page,66,common,product-tour,high,saved items; favorites,Save for later
+ecommerce,commerce,Returns,/returns,page,62,optional,product-tour,high,refunds; exchanges,Only when physical goods can be returned
+ecommerce,commerce,Track Order,/track,page,70,common,product-tour,high,order tracking,Guest-friendly tracking by number
+ecommerce,commerce,Reviews,/p/:slug/reviews,page,72,common,product-tour,high,ratings; feedback,Product reviews and Q&A
+ecommerce,commerce,Store Locator,/stores,page,40,optional,product-tour,medium,find a store,Only for omnichannel retailers
+ecommerce,commerce,Gift Cards,/gift-cards,page,38,optional,product-tour,medium,gift certificates,Only when gift cards are sold
+ecommerce,commerce,Subscriptions,/account/subscriptions,page,44,optional,product-tour,medium,recurring orders,Only for replenishable or membership products
+banking,accounts,Accounts Overview,/accounts,page,98,core,product-tour,high,my accounts; dashboard,All balances and quick actions
+banking,accounts,Account Detail,/accounts/:id,page,96,core,product-tour,high,checking; savings; account transactions,Balance; transactions; and statements for one account
+banking,accounts,Transactions,/transactions,page,92,core,product-tour,high,activity; history,Filterable transaction ledger
+banking,payments,Transfer,/transfer,page,94,core,product-tour,high,move money; send money,Between own accounts or to another person
+banking,payments,Payees,/payees,page,82,common,product-tour,high,recipients; beneficiaries,Saved transfer recipients
+banking,payments,Bill Pay,/bill-pay,page,78,common,product-tour,high,pay bills; scheduled payments,One-off and recurring bill payments
+banking,accounts,Statements,/statements,page,76,common,product-tour,high,document; e-statements,Downloadable monthly statements
+banking,cards,Cards,/cards,page,84,common,product-tour,high,debit; credit,Card list and status
+banking,cards,Card Controls,/cards/:id/controls,page,66,common,product-tour,high,freeze card; limits,Freeze; limits; and merchant controls
+banking,lending,Loans,/loans,page,64,optional,product-tour,high,mortgage; credit,Only for banks that lend
+banking,accounts,Deposits,/deposits,page,54,optional,product-tour,medium,checks; mobile deposit,Remote deposit capture
+banking,service,Appointments,/appointments,page,48,optional,product-tour,medium,schedule a visit,Branch or advisor appointments
+banking,service,Messages,/messages,page,68,common,product-tour,high,secure messages; support,Secure bank messaging
+banking,trust,Security Center,/security,page,58,optional,product-tour,high,fraud; alerts,Password; devices; and fraud reporting
+banking,service,Branch & ATM Locator,/locations,page,62,optional,product-tour,high,find a branch; ATM,Location search
+banking,service,Support,/support,page,70,common,product-tour,high,help; contact,Contact and FAQ entry
+fintech,money,Portfolio,/portfolio,page,86,core,product-tour,high,overview; balances,Combined view of accounts and holdings
+fintech,money,Transactions,/transactions,page,92,core,product-tour,high,activity; history,Unified money movement ledger
+fintech,payments,Send Money,/send,page,84,common,product-tour,high,transfer; pay,Recipient selection; amount; and confirmation
+fintech,payments,Receive Money,/receive,page,72,common,product-tour,high,request; deposit,Account details; QR; or request link
+fintech,cards,Cards,/cards,page,74,common,product-tour,high,virtual card; debit card,Card issuance and controls
+fintech,money,Budgets,/budgets,page,58,optional,product-tour,high,spending limits,Category budgets and alerts
+fintech,money,Goals,/goals,page,48,optional,product-tour,medium,savings goals,Only for savings-oriented products
+fintech,money,Bills,/bills,page,56,optional,product-tour,high,upcoming payments; subscriptions,Bill tracking and reminders
+fintech,money,Insights,/insights,page,62,optional,product-tour,high,analytics; spending trends,Category breakdowns and trends
+fintech,compliance,KYC Verification,/verify-identity,page,68,common,regulation,high,identity verification; onboarding,Regulated products; document and selfie capture
+fintech,accounts,Linked Accounts,/accounts/linked,page,64,optional,product-tour,high,connected banks; aggregator,Only for aggregation-based products
+fintech,accounts,Statements,/statements,page,54,optional,product-tour,high,document; export,Downloadable records
+fintech,service,Support,/support,page,66,common,product-tour,high,help; disputes,Dispute and contact flows
+healthcare,care,Portal Home,/home,page,92,core,product-tour,high,patient portal; dashboard,Upcoming appointments; results; and messages
+healthcare,care,Appointments,/appointments,page,96,core,product-tour,high,visits; schedule,Upcoming and past appointments
+healthcare,care,Book Appointment,/appointments/new,page,90,core,product-tour,high,schedule; request visit,Provider; reason; and slot selection
+healthcare,care,Appointment Detail,/appointments/:id,page,88,core,product-tour,high,visit detail,Instructions; location; and reschedule or cancel
+healthcare,records,Prescriptions,/prescriptions,page,90,core,product-tour,high,medications; Rx,Active and past medications
+healthcare,records,Refill Request,/prescriptions/:id/refill,page,76,common,product-tour,high,renew prescription,Pharmacy and pickup selection
+healthcare,records,Test Results,/results,page,88,core,product-tour,high,lab results; reports,Result list with release status
+healthcare,records,Result Detail,/results/:id,page,86,core,product-tour,high,lab report; imaging,Values; ranges; and provider notes
+healthcare,care,Messages,/messages,page,90,core,product-tour,high,secure messaging; inbox,Asynchronous communication with care team
+healthcare,care,Care Team,/care-team,page,72,common,product-tour,high,providers; doctors,Assigned clinicians and contact routes
+healthcare,records,Medical Records,/records,page,82,common,product-tour,high,health record; documents,Visits; diagnoses; and documents
+healthcare,records,Immunizations,/immunizations,page,62,optional,product-tour,high,vaccines; shots,Immunization history
+healthcare,billing,Billing,/billing,page,78,common,product-tour,high,statements; balances,Outstanding balances and statements
+healthcare,billing,Pay Bill,/billing/pay,page,74,common,product-tour,high,payment; copay,Payment flow
+healthcare,coverage,Insurance,/insurance,page,70,common,product-tour,high,coverage; policy,Insurance plan on file
+healthcare,care,Referrals,/referrals,page,56,optional,product-tour,high,specialist referral,Referral status and specialist booking
+healthcare,records,Documents,/documents,page,60,optional,product-tour,high,forms; letters,Clinical and administrative documents
+healthcare,care,Consent Forms,/consents,page,64,optional,regulation,high,forms; e-signature,Intake and consent completion
+healthcare,care,Dependents,/dependents,page,58,optional,product-tour,high,family accounts; proxy,Proxy access for children or dependents
+education,learning,Dashboard,/dashboard,page,92,core,product-tour,high,home; my learning,Enrolled courses; due work; and announcements
+education,learning,Courses,/courses,page,94,core,product-tour,high,classes; subjects,Enrolled or catalog course list
+education,learning,Course Detail,/courses/:id,page,94,core,product-tour,high,class home; syllabus,Modules; announcements; and grades for one course
+education,learning,Modules & Lessons,/courses/:id/modules,page,90,core,product-tour,high,units; content,Structured course content
+education,learning,Lesson Viewer,/courses/:id/lessons/:lesson,page,90,core,product-tour,high,content viewer; lecture,Video; reading; and embedded activities
+education,learning,Assignments,/assignments,page,94,core,product-tour,high,homework; tasks,Upcoming and past assignments
+education,learning,Assignment Detail,/assignments/:id,page,92,core,product-tour,high,instructions; rubric,Brief; attachments; and submission state
+education,learning,Submission,/assignments/:id/submit,page,88,core,product-tour,high,upload; turn in,File or text submission
+education,learning,Grades,/grades,page,90,core,product-tour,high,marks; results,Per-course and overall grades
+education,learning,Quizzes & Exams,/quizzes,page,78,common,product-tour,high,tests; assessments,Timed assessment list and entry
+education,learning,Discussions,/discussions,page,82,common,product-tour,high,forums; threads,Course discussion boards
+education,learning,Calendar,/calendar,page,84,common,product-tour,high,schedule; due dates,Assignment and class schedule
+education,learning,Announcements,/announcements,page,80,common,product-tour,high,news; notices,Course or institution announcements
+education,learning,Inbox,/messages,page,74,common,product-tour,high,messages; mail,Direct messages between learners and instructors
+education,learning,Files,/files,page,68,common,product-tour,high,resources; documents,Course and personal files
+education,learning,Groups,/groups,page,58,optional,product-tour,high,teams; cohorts,Group work and cohort spaces
+education,learning,People,/people,page,66,common,product-tour,high,roster; participants,Class roster and roles
+education,learning,Certificates,/certificates,page,48,optional,product-tour,high,credentials; completion,Completion certificates
+travel,booking,Search,/search,page,96,core,product-tour,high,find a flight; find a hotel,Origin; destination; dates; and guests
+travel,booking,Search Results,/search/results,page,96,core,product-tour,high,availability; offers,Ranked availability with filters
+travel,booking,Filters,/search/results?filters=1,state,88,core,product-tour,high,refine results,Usually a panel or drawer not a page
+travel,booking,Property Detail,/hotels/:id,page,88,core,product-tour,high,hotel page; flight detail,Photos; amenities; rooms; and policies
+travel,booking,Room & Rate Selection,/hotels/:id/rooms,page,80,common,product-tour,high,rates; fare classes,Inventory and rate selection
+travel,booking,Booking Form,/booking/details,page,90,core,product-tour,high,guest details; passenger details,Traveller information and extras
+travel,booking,Payment,/booking/payment,page,90,core,product-tour,high,checkout,Paying for the booking
+travel,booking,Confirmation,/booking/confirmation,page,88,core,product-tour,high,itinerary; receipt,Post-booking state with references
+travel,booking,Manage Booking,/trips/:id,page,86,core,product-tour,high,my trip; reservation,View; change; or cancel a booking
+travel,booking,Check-in,/check-in,page,66,common,product-tour,high,online check-in,Airline or hotel check-in
+travel,booking,Itinerary,/trips,page,80,common,product-tour,high,trips; bookings,Upcoming and past travel
+travel,booking,Cancellations & Refunds,/trips/:id/cancel,page,68,common,product-tour,high,cancel booking,Refund and credit handling
+travel,booking,Loyalty,/loyalty,page,54,optional,product-tour,high,points; rewards,Only for brands with a loyalty program
+travel,booking,Reviews,/reviews,page,74,common,product-tour,high,ratings; traveller reviews,Property or trip reviews
+travel,booking,Destinations,/destinations,page,62,optional,product-tour,high,inspiration; places,Editorial discovery content
+travel,booking,Help,/help,page,68,common,product-tour,high,support; FAQ,Cancellation and travel support
+food-delivery,ordering,Home,/,page,94,core,product-tour,high,restaurants; discover,Address-aware restaurant discovery
+food-delivery,ordering,Restaurants,/restaurants,page,92,core,product-tour,high,stores; vendors,List and filters by cuisine or rating
+food-delivery,ordering,Restaurant Detail,/restaurants/:id,page,96,core,product-tour,high,menu; store page,Menu; fees; delivery time; and ratings
+food-delivery,ordering,Menu Item,/restaurants/:id/items/:item,page,70,common,product-tour,high,dish detail; customization,Often a modal with modifiers
+food-delivery,ordering,Cart,/cart,page,94,core,product-tour,high,basket,Items; modifiers; and totals
+food-delivery,ordering,Checkout,/checkout,page,94,core,product-tour,high,payment; delivery details,Address; tip; and payment
+food-delivery,ordering,Order Tracking,/orders/:id/track,page,92,core,product-tour,high,live tracking; ETA,Preparation and courier status
+food-delivery,ordering,Orders,/orders,page,90,core,product-tour,high,order history,Past and active orders
+food-delivery,ordering,Order Detail,/orders/:id,page,88,core,product-tour,high,receipt; order status,Items; totals; and support actions
+food-delivery,ordering,Favorites,/favorites,page,68,common,product-tour,high,saved restaurants,Reordering and saved vendors
+food-delivery,ordering,Addresses,/addresses,page,76,common,product-tour,high,delivery addresses,Delivery location management
+food-delivery,ordering,Payment Methods,/payment-methods,page,72,common,product-tour,high,cards; wallets,Stored payment instruments
+food-delivery,ordering,Promos,/promos,page,58,optional,product-tour,high,offers; coupons,Promotion discovery and redemption
+food-delivery,service,Support,/support,page,64,optional,product-tour,high,help; order issue,Refunds and missing items
+media-streaming,watch,Home,/home,page,96,core,product-tour,high,browse; discover,Personalized rows and continue watching
+media-streaming,watch,Browse,/browse,page,88,core,product-tour,high,categories; genres,Genre and collection browsing
+media-streaming,watch,Title Detail,/title/:id,page,98,core,product-tour,high,movie page; show page,Synopsis; episodes; and play action
+media-streaming,watch,Player,/watch/:id,page,96,core,product-tour,high,video player,Playback surface with controls
+media-streaming,watch,Search,/search,page,90,core,product-tour,high,find a title,Title and people search
+media-streaming,watch,Watchlist,/watchlist,page,80,common,product-tour,high,my list; saved,Save titles for later
+media-streaming,watch,Continue Watching,/continue-watching,page,78,common,product-tour,high,resume; recently played,Resume queue; often a row not a page
+media-streaming,watch,Downloads,/downloads,page,56,optional,product-tour,high,offline,Offline viewing on mobile or desktop
+media-streaming,account,Profiles,/profiles,page,72,common,product-tour,high,who's watching; kids profile,Multiple viewers per account
+media-streaming,account,Account,/account,page,74,common,product-tour,high,membership,Plan; profile; and preferences
+media-streaming,account,Plans & Billing,/account/billing,page,68,common,product-tour,high,subscription; payment,Plan changes and payment
+media-streaming,account,Devices,/account/devices,page,48,optional,product-tour,medium,manage devices,Device limits and sign-out
+media-streaming,account,Notifications,/account/notifications,page,52,optional,product-tour,medium,new releases; email,Release and account alerts
+real-estate,search,Search,/search,page,94,core,product-tour,high,find a home; property search,Location; price; and beds filters
+real-estate,search,Map Search,/search/map,page,90,core,product-tour,high,map view; draw area,Spatial search with draw and school layers
+real-estate,search,Listing Detail,/homes/:id,page,98,core,product-tour,high,property page; home detail,Photos; facts; mortgage estimate; and agent
+real-estate,saved,Saved Homes,/saved,page,82,common,product-tour,high,favorites; hearts,Shortlisted properties
+real-estate,saved,Saved Searches,/saved-searches,page,76,common,product-tour,high,alerts; search alerts,Named filters with alert frequency
+real-estate,tools,Mortgage Calculator,/mortgage-calculator,page,70,common,product-tour,high,affordability; payment estimate,Payment and affordability estimate
+real-estate,agent,Agent Profile,/agents/:id,page,78,common,product-tour,high,realtor profile; listing agent,Contact and active listings
+real-estate,agent,Schedule Tour,/homes/:id/tour,page,72,common,product-tour,high,book showing; request tour,In-person or virtual showing request
+real-estate,agent,Contact Agent,/homes/:id/contact,page,68,common,product-tour,high,ask a question,Often a modal form
+real-estate,seller,Home Value,/home-value,page,62,optional,product-tour,high,what's my home worth; valuation,Estimate and request an agent opinion
+real-estate,seller,Seller Dashboard,/seller,page,54,optional,product-tour,high,list my home; seller hub,Only for seller-enabled products
+real-estate,transaction,Documents,/documents,page,48,optional,product-tour,high,disclosures; contracts,Transaction documents
+real-estate,transaction,Offers,/offers,page,44,optional,product-tour,medium,make offer; offer status,Offer submission and tracking
+real-estate,agent,My Agent,/my-agent,page,58,optional,product-tour,high,your agent; contact,Client-side agent relationship surface
+insurance,quote,Get a Quote,/quote,page,88,core,product-tour,high,quote start; apply,Product and applicant details
+insurance,quote,Quote Results,/quote/results,page,82,common,product-tour,high,plans; prices,Ranked quotes with coverage differences
+insurance,quote,Quote Detail,/quote/:id,page,78,common,product-tour,high,plan detail; coverage,Detailed coverage and price breakdown
+insurance,policy,Policy Dashboard,/policies,page,90,core,product-tour,high,my policies; account,All active policies and quick actions
+insurance,policy,Policy Detail,/policies/:id,page,88,core,product-tour,high,policy overview,Coverage; deductibles; and documents
+insurance,policy,Coverage,/policies/:id/coverage,page,74,common,product-tour,high,what is covered; limits,Coverage breakdown
+insurance,claims,Claims,/claims,page,86,core,product-tour,high,my claims; claim history,Open and closed claims
+insurance,claims,Claim Detail,/claims/:id,page,86,core,product-tour,high,claim status,Status; adjuster; and documents
+insurance,claims,File a Claim,/claims/new,page,84,common,product-tour,high,report a claim; FNOL,First notice of loss
+insurance,documents,Documents,/documents,page,78,common,product-tour,high,policy documents; ID cards,Policy and claim documents
+insurance,billing,Payments,/payments,page,74,common,product-tour,high,billing; pay premium,Premium payment and history
+insurance,policy,Beneficiaries,/beneficiaries,page,44,optional,product-tour,medium,named insureds; dependents,Life and coverage-specific
+insurance,policy,Renewals,/renewals,page,58,optional,product-tour,high,renew policy,Only when policies renew on a cycle
+insurance,service,Agent Contact,/agent,page,56,optional,product-tour,high,find an agent; contact,Assigned agent or broker
+logistics,ops,Dashboard,/dashboard,page,90,core,product-tour,high,control tower; overview,Exceptions; on-time rate; and fleet status
+logistics,ops,Shipments,/shipments,page,94,core,product-tour,high,loads; consignments,Shipment index with status filters
+logistics,ops,Shipment Detail,/shipments/:id,page,92,core,product-tour,high,load detail; consignment detail,Stops; documents; and tracking
+logistics,ops,Tracking,/track/:id,page,82,common,product-tour,high,where is my shipment; track,Public or customer-facing tracking
+logistics,ops,Routes,/routes,page,86,core,product-tour,high,trips; route planning,Planned routes and stops
+logistics,ops,Route Detail,/routes/:id,page,84,common,product-tour,high,trip detail,Stops; timings; and proof of delivery
+logistics,ops,Drivers,/drivers,page,82,common,product-tour,high,operators; workforce,Driver records and availability
+logistics,ops,Vehicles,/vehicles,page,82,common,product-tour,high,trucks; assets,Fleet assets and status
+logistics,ops,Maintenance,/maintenance,page,66,common,product-tour,high,service; work orders,Preventive and corrective maintenance
+logistics,ops,Fuel & Costs,/costs,page,60,optional,product-tour,high,fuel logs; cost per km,Operating cost tracking
+logistics,ops,Documents,/documents,page,62,optional,product-tour,high,CMR; permits; compliance,Expiring licenses and transport documents
+logistics,ops,Invoices,/invoices,page,64,optional,product-tour,high,freight billing; settlements,Customer invoices and carrier pay
+logistics,ops,Reports,/reports,page,70,common,product-tour,high,KPIs; performance,On-time; utilisation; and cost reports
+logistics,ops,Geofences & Alerts,/geofences,page,52,optional,product-tour,medium,zones; exceptions,Map zones and alert rules
+logistics,ops,Dispatch,/dispatch,page,68,common,product-tour,high,assign loads; work assignments,Assign shipments to drivers and vehicles
+government,citizen,Services Catalog,/services,page,92,core,product-tour,high,what do you want to do; services,Entry list of online government services
+government,citizen,Service Detail,/services/:slug,page,90,core,product-tour,high,service page,Requirements; fees; and start action
+government,citizen,Application Form,/apply/:service,page,88,core,regulation,high,submit application; form,Multi-step statutory form
+government,citizen,Application Status,/applications,page,86,core,product-tour,high,my applications; case status,Submitted applications and status
+government,citizen,Appointments,/appointments,page,70,common,product-tour,high,book an appointment; inspections,Office visits and inspections
+government,citizen,Payments,/payments,page,78,common,product-tour,high,fees; cart; receipts,Fees and payment history
+government,citizen,Permits,/permits,page,76,common,product-tour,high,licenses; applications,Permit search and management
+government,citizen,Licenses,/licenses,page,68,common,product-tour,high,business license; renewals,License applications and renewals
+government,citizen,Documents,/documents,page,64,optional,product-tour,high,upload; attachments,Supporting document repository
+government,citizen,Benefits,/benefits,page,54,optional,product-tour,high,assistance; claims,Only for benefit-administering agencies
+government,citizen,Report an Issue,/report,page,72,common,product-tour,high,311; complaint,Non-emergency issue reporting
+government,citizen,Alerts,/alerts,page,58,optional,product-tour,high,notifications; emergency,Service and emergency alerts
+government,citizen,Account,/account,page,74,common,product-tour,high,profile; sign in,Identity and contact details
+government,citizen,Accessibility,/accessibility,page,66,common,regulation,high,a11y statement,Often a secondary-pages document
+fitness,training,Dashboard,/dashboard,page,78,common,product-tour,high,today; home,Today's workout; activity; and streaks
+fitness,training,Workouts,/workouts,page,84,common,product-tour,high,exercises; sessions,Workout library or log
+fitness,training,Workout Detail,/workouts/:id,page,82,common,product-tour,high,session detail,Exercise list; sets; and timer
+fitness,training,Programs,/programs,page,72,common,product-tour,high,plans; courses,Multi-week training plans
+fitness,training,Activity Log,/activity,page,70,common,product-tour,high,log workout; history,Manual or device-synced activity
+fitness,training,Progress,/progress,page,72,common,product-tour,high,stats; charts; PRs,Charts and personal records
+fitness,training,Nutrition,/nutrition,page,54,optional,product-tour,high,meals; calories,Only for products combining training and food
+fitness,training,Goals,/goals,page,58,optional,product-tour,high,targets; challenges,Goal setting and streaks
+fitness,classes,Classes,/classes,page,62,optional,product-tour,high,live classes; schedule,Only when live or studio classes exist
+fitness,classes,Class Booking,/classes/:id/book,page,58,optional,product-tour,high,reserve a spot,Capacity and waitlist
+fitness,people,Trainers,/trainers,page,48,optional,product-tour,high,coaches; instructors,Only for coached products
+fitness,social,Community,/community,page,52,optional,product-tour,high,feed; challenges,Social feed and challenges
+fitness,account,Devices & Sync,/devices,page,56,optional,product-tour,high,wearables; connected apps,Health platform integrations
+fitness,account,Subscription,/subscription,page,64,optional,product-tour,high,membership; premium,Only for paid fitness products
+news-publishing,content,Home,/,page,94,core,product-tour,high,front page; homepage,Top stories and editor picks
+news-publishing,content,Section,/section/:slug,page,90,core,product-tour,high,category; desk,World; business; sports; and similar
+news-publishing,content,Article,/article/:slug,page,98,core,product-tour,high,story; post,Full article with byline and related content
+news-publishing,content,Author,/author/:id,page,66,common,product-tour,high,byline; journalist,Author archive and bio
+news-publishing,content,Search,/search,page,82,common,product-tour,high,find; archive,Article search
+news-publishing,content,Topic,/topic/:slug,page,70,common,product-tour,high,tag; subject,Followable topic hub
+news-publishing,engagement,Newsletter,/newsletters,page,62,optional,product-tour,high,subscribe; email editions,Newsletter signup and archive
+news-publishing,engagement,Saved,/saved,page,56,optional,product-tour,high,bookmarks; read later,Save articles
+news-publishing,engagement,Comments,/article/:slug/comments,page,48,optional,product-tour,medium,discussion,Only when comments are enabled
+news-publishing,account,Account,/account,page,60,optional,product-tour,high,profile; sign in,Account and preferences
+news-publishing,account,Subscription,/subscribe,page,58,optional,product-tour,high,paywall; membership,Only for paid or metered content
+news-publishing,content,Live Blog,/live/:slug,page,38,optional,product-tour,medium,live updates; breaking news,Only for live-event publishers
+news-publishing,content,Most Read,/most-read,page,52,optional,product-tour,high,trending; popular,Ranking surface; often a module not a page
+developer-tools,build,Dashboard,/dashboard,page,86,core,product-tour,high,overview; home,Projects; recent activity; and usage
+developer-tools,build,Projects,/projects,page,88,core,product-tour,high,repositories; apps,Project or repository index
+developer-tools,build,Project Detail,/projects/:id,page,88,core,product-tour,high,repository overview,Deployments; domains; and settings summaries
+developer-tools,build,Code Browser,/projects/:id/code,page,72,common,product-tour,high,source; files,Repository tree and file viewer
+developer-tools,build,Issues,/projects/:id/issues,page,76,common,product-tour,high,bugs; tasks,Issue tracker
+developer-tools,build,Pull Request,/projects/:id/pulls/:n,page,70,common,product-tour,high,PR; merge request,Diff; review; and checks
+developer-tools,build,Actions & Runs,/projects/:id/actions,page,64,optional,product-tour,high,CI; pipelines,Workflow runs and logs
+developer-tools,build,Deployments,/projects/:id/deployments,page,74,common,product-tour,high,releases; environments,Deployment history and status
+developer-tools,build,Logs,/projects/:id/logs,page,68,common,product-tour,high,runtime logs; build logs,Log viewer with filters
+developer-tools,build,Domains,/projects/:id/domains,page,60,optional,product-tour,high,custom domains; DNS,Domain and certificate management
+developer-tools,build,Environment Variables,/projects/:id/env,page,58,optional,product-tour,high,secrets; config,Encrypted environment configuration
+developer-tools,account,Team Settings,/settings/team,page,62,optional,product-tour,high,members; permissions,Team and role management
+developer-tools,account,API Keys,/settings/api-keys,page,72,common,product-tour,high,tokens; credentials,Scoped API credentials
+developer-tools,account,Usage & Billing,/settings/billing,page,64,optional,product-tour,high,quotas; invoices,Metered usage and plan
+developer-tools,reference,Docs,/docs,page,78,common,product-tour,high,documentation; API reference,External docs often live on a subdomain
+developer-tools,reference,Status,/status,page,56,optional,product-tour,high,uptime; incidents,Linked from the product footer
+analytics-bi,analysis,Dashboards,/dashboards,page,94,core,product-tour,high,reports; overview,Saved dashboards
+analytics-bi,analysis,Dashboard Detail,/dashboards/:id,page,92,core,product-tour,high,report view; board,Charts and filters
+analytics-bi,analysis,Explore,/explore,page,86,core,product-tour,high,query; analyze,Ad-hoc exploration surface
+analytics-bi,analysis,Query Editor,/query,page,66,common,product-tour,high,SQL; query builder,Only for analyst-facing products
+analytics-bi,data,Data Sources,/data-sources,page,76,common,product-tour,high,connections; integrations,Connected warehouses and apps
+analytics-bi,data,Datasets,/datasets,page,70,common,product-tour,high,models; tables,Curated data models
+analytics-bi,monitoring,Alerts,/alerts,page,58,optional,product-tour,high,thresholds; notifications,Threshold and anomaly alerts
+analytics-bi,audience,Segments,/segments,page,52,optional,product-tour,high,cohorts; audiences,Only for customer-analytics products
+analytics-bi,audience,Users,/users,page,48,optional,product-tour,high,people; accounts,User-level analytics
+analytics-bi,sharing,Share & Embed,/share,page,62,optional,product-tour,high,public link; embed,Public dashboards and embeds
+analytics-bi,account,Settings,/settings,page,66,common,product-tour,high,workspace settings,Workspace; billing; and access
+booking-services,schedule,Services,/services,page,86,core,product-tour,high,treatments; menu,Bookable services and prices
+booking-services,schedule,Service Detail,/services/:id,page,80,common,product-tour,high,service page,Duration; price; and staff
+booking-services,schedule,Staff,/staff,page,64,optional,product-tour,high,providers; practitioners,Staff selection or profiles
+booking-services,schedule,Date & Time,/book/time,page,88,core,product-tour,high,availability; slots,Calendar and slot picker
+booking-services,schedule,Booking Details,/book/details,page,86,core,product-tour,high,your details; intake,Customer details and notes
+booking-services,schedule,Payment,/book/payment,page,72,common,product-tour,high,deposit; checkout,Only when prepayment or deposit is required
+booking-services,schedule,Confirmation,/book/confirmation,page,84,common,product-tour,high,booked; receipt,Post-booking state
+booking-services,schedule,Manage Booking,/bookings/:id,page,78,common,product-tour,high,reschedule; cancel,View and change a booking
+booking-services,schedule,My Bookings,/bookings,page,82,common,product-tour,high,appointments; my bookings,Customer booking history
+booking-services,schedule,Cancel & Reschedule,/bookings/:id/cancel,page,68,common,product-tour,high,cancel appointment,Policy-aware cancellation
+booking-services,trust,Reviews,/reviews,page,58,optional,product-tour,high,ratings; testimonials,Only when reviews are collected
+booking-services,schedule,Waitlist,/waitlist,page,36,optional,product-tour,medium,waiting list,High-demand services only
+gaming,play,Store,/store,page,82,common,product-tour,high,shop; marketplace,Game or item storefront
+gaming,play,Game Detail,/games/:id,page,84,common,product-tour,high,game page; title,Description; media; and install or buy
+gaming,play,Library,/library,page,84,common,product-tour,high,my games; collection,Owned titles
+gaming,play,Download & Install,/download,page,66,common,product-tour,high,install; patch,Launcher or install flow
+gaming,play,Matchmaking,/play,page,62,optional,product-tour,high,find match; queue,Only for multiplayer games
+gaming,play,Lobby,/lobby/:id,page,58,optional,product-tour,high,party; room,Pre-match player group
+gaming,player,Profile,/profile/:id,page,82,common,product-tour,high,player card; stats,Identity and progression
+gaming,player,Achievements,/achievements,page,68,common,product-tour,high,trophies; badges,Progression records
+gaming,player,Leaderboard,/leaderboard,page,60,optional,product-tour,high,rankings; ladder,Competitive ranking
+gaming,player,Friends,/friends,page,64,optional,product-tour,high,social graph,Friends and party invites
+gaming,player,Inventory,/inventory,page,54,optional,product-tour,high,items; skins,Only when items are owned or traded
+gaming,play,Shop,/shop,page,58,optional,product-tour,high,in-game store; cosmetics,Only for free-to-play or live-service games
+gaming,community,News,/news,page,50,optional,product-tour,high,updates; patch notes,Game news and announcements
+gaming,account,Settings,/settings,page,64,optional,product-tour,high,options; controls,Audio; video; controls; and account
+crypto,wallet,Portfolio,/portfolio,page,90,core,product-tour,high,balances; holdings,Assets and total value
+crypto,wallet,Asset Detail,/assets/:id,page,86,core,product-tour,high,coin detail; token page,Price; chart; and actions
+crypto,trade,Buy,/buy,page,86,core,product-tour,high,purchase; on-ramp,Fiat to crypto
+crypto,trade,Sell,/sell,page,82,common,product-tour,high,off-ramp,Crypto to fiat
+crypto,wallet,Send,/send,page,86,core,product-tour,high,withdraw; transfer,Address and network selection
+crypto,wallet,Receive,/receive,page,84,common,product-tour,high,deposit; address,Address and QR
+crypto,wallet,Transactions,/transactions,page,88,core,product-tour,high,activity; history,On-chain and internal transfers
+crypto,wallet,Wallets,/wallets,page,62,optional,product-tour,high,accounts; addresses,Only for multi-wallet products
+crypto,earn,Staking,/staking,page,48,optional,product-tour,high,earn; validators,Only where staking is offered
+crypto,earn,Earn,/earn,page,46,optional,product-tour,high,yield; interest,Only for yield products
+crypto,compliance,KYC Verification,/verify,page,66,common,regulation,high,identity; onboarding,Regulated exchanges
+crypto,security,Security,/security,page,58,optional,product-tour,high,2fa; withdrawal locks,Critical for custodial products
+crypto,account,Fees,/fees,page,44,optional,product-tour,medium,fee schedule,Transparency surface
+crypto,account,Settings,/settings,page,60,optional,product-tour,high,profile; preferences,Account and display settings
+email-calendar,mail,Inbox,/mail,page,96,core,product-tour,high,mail; messages,Message list with folders and filters
+email-calendar,mail,Compose,/mail/compose,page,94,core,product-tour,high,new message; draft,Composer; often a modal or panel
+email-calendar,mail,Message Detail,/mail/:id,page,92,core,product-tour,high,email view; thread,Message thread and attachments
+email-calendar,mail,Labels & Folders,/mail/labels,page,74,common,product-tour,high,tags; folders,Organisation rules
+email-calendar,mail,Contacts,/contacts,page,70,common,product-tour,high,address book; people,Contact records
+email-calendar,calendar,Calendar Month,/calendar,page,90,core,product-tour,high,month view; schedule,Month grid
+email-calendar,calendar,Calendar Week,/calendar/week,page,66,common,product-tour,high,week view,View variant; may be a toggle not a route
+email-calendar,calendar,Event Detail,/calendar/:id,page,82,common,product-tour,high,meeting; event,Event details and attendees
+email-calendar,calendar,Create Event,/calendar/new,page,84,common,product-tour,high,new meeting; schedule,Event composer
+email-calendar,work,Tasks,/tasks,page,62,optional,product-tour,high,to-do; reminders,Only when tasks are part of the product
+email-calendar,shell,Search,/search,page,78,common,product-tour,high,find mail and events,Unified search
+email-calendar,account,Settings,/settings,page,72,common,product-tour,high,preferences; signatures,Accounts; signatures; and notifications

@@ -1,15 +1,27 @@
-# steering function folder
+# steering function folder (`function`)
 
-> **Terminology rule (read first).** The steering folder whose directory name is `function` is always called the **steering function folder** in prose, headings, index files, commit messages, and agent output. Never write just "function" or "the function folder" for it, because in code "function" means a single function. The bare directory name `function/` appears only in file paths and layouts. Anyone, human or AI, reading or writing these docs must use this exact term.
+> **Terminology rule (mandatory).** The directory name `function/` in the technical tier (`tech/<area>/function/`) is always referred to as the **steering function folder** in prose, headings, index files, commit messages, and agent output. Never write just "function" or "the function folder", because in code "function" denotes a single code subroutine. The bare directory name `function/` appears only in file paths and layouts.
+> Note: The business-tier counterpart to this folder is [`capabilities.md`](capabilities.md), which carries no naming ambiguity.
 
-This document defines the steering function folder: system-wide functionality that belongs to the whole application, not to one feature or one part. It is one of six folders; see the [index](index.md) for the set. This file owns the terminology rule above; every other document in the set carries a one-line reminder that points here.
+This document defines the steering function folder: system-wide technical functionality and runtime mechanisms that span features across the entire application or area.
 
-**Holds.** System-wide functionality: how the platform works as a whole, and the concerns that apply across the system in general, not owned by a single feature or a single part. Examples: `error-ux` (errors in general), `accessibility-standards` (accessibility in general), `client-lifecycle`, and shared integrations. A core capability that the whole application is built around, such as media playback or media processing in a media platform, is the system itself and not a feature of it.
+**Holds.** Technical system-wide mechanisms and infrastructure-level runtime behaviors:
+- System-wide error handling and user feedback patterns (`error-ux`).
+- Cross-cutting authentication and session synchronization lifecycles.
+- System-wide caching, polling, or state propagation mechanisms.
+- Shared upstream partner integrations that serve the platform as a whole (e.g. data ingestion pipelines).
 
-**Does not hold.** The behavior of one feature, or guidelines for one specific part or task (`doctrine`), such as the error format of the API, which is one part. A feature's own mechanics and behavior belong with that feature's documentation (see [placement.md](placement.md)).
+**Does not hold.**
+- Business-level functional descriptions of what the platform provides ([`capabilities.md`](capabilities.md)).
+- Engineering guidelines and quality mandates for a specific component ([`doctrine.md`](doctrine.md)).
+- Static directory layout and module architecture ([`structure.md`](structure.md)).
+- Technology selections stated as "We use X" ([`stack.md`](stack.md)).
+- Single-feature technical implementation (which belongs in feature documentation outside the taxonomy).
 
-**The test.** If you deleted feature X, would this document still be true? If yes, it belongs in the steering function folder. If no, it belongs to the feature. A document that represents the whole application's way of handling something (how video playback works across the system) passes this test even if it sounds like a feature; a document that exists for one feature (a transcoding integration used only by that feature) does not. A second test is scope: if the concern is the system in general (errors in general, accessibility in general), it belongs here; if it is one specific part (the error format of the API), it is `doctrine`. For the tests that separate this folder from `doctrine` and `structure`, see the boundary tests in [placement.md](placement.md).
+**The test.** Scope and feature-independence:
+1. *Feature Deletion Test*: If feature X were deleted, would this document still be true? If yes, it belongs in the steering function folder.
+2. *System Capability*: A technical capability that the entire platform is built around (e.g., media streaming in a video app, or asynchronous price sync in a simulator) represents the system itself and belongs here.
+3. *System vs. Component*: System-wide error handling lives here; the specific HTTP wire error format of an API endpoint lives in `doctrine.md`.
 
-**Why it exists.** Per-feature behavior lives with the feature, so behavior that spans features needs its own home. Keeping the two apart makes it clear which scope a file describes.
-
-**Naming note.** In code, "function" usually means a single function, so this folder is always called the **steering function folder**. Its `index.md` should also define it in one line, for example: "System-wide functionality shared across features and parts." If misfiling still shows up in practice, revisit the name.
+**Example (`tech/shared/function/external-feed-sync`).**
+"The application maintains an asynchronous synchronization pipeline that ingests external provider pricing updates, validates wire envelopes against schema contracts, and pushes updated valuation snapshots to the internal caching layer on a scheduled interval."
