@@ -21,7 +21,7 @@ shortens or rewords a document — the user rarely names the job.
 | "rephrase this", "word these sentences better", "fix the awkward phrasing" — same length, same structure, better sentences | **E — rephrase** | `references/rephrase.md` |
 | "split this doc up", no subject named | One question: **which subject must stand alone?** Named → C. Only "it's too big / unfocused" → B. | |
 | Both restructuring complaints at once | **C first, then B** — reorganizing first moves content around a seam you then cut again | both |
-| Removing AI-flavored writing specifically | **E** only when the fix is per-sentence within the source's voice; otherwise `humanizer` does the de-AI job | — |
+| Removing AI-flavored writing specifically | **E** with the Anti-AI Gate (`references/anti-ai-gate.md`) applied to strip tells, em-dashes, and filler while keeping sentence boundaries | `references/rephrase.md` + `references/anti-ai-gate.md` |
 
 The line between B and C: in **B you find the boundaries** by reading the whole set; in **C the user has already named the boundary** and your work is to cut exactly there. Inventing a seam in C is a failure even when the result is tidier.
 
@@ -64,7 +64,7 @@ Reduces a longer source without losing the meaning the reader needs: read for th
 
 ### E — rephrase · `references/rephrase.md`
 
-Improves the saying, never the said: sentence-by-sentence work on grammar, naturalness, word choice, flow and concision, with structure, sentence boundaries, claims, certainty and the author's voice preserved, and a final skeleton pass that restores any drift back toward the source. Output is the rephrased text and nothing else.
+Improves the saying, never the said: sentence-by-sentence work on grammar, naturalness, word choice, flow and concision, with structure, sentence boundaries, claims, certainty and the author's voice preserved. Passes through the Anti-AI Gate (`references/anti-ai-gate.md`) whenever the audience is external or human-facing (stripping em-dashes, filler, buzzwords, and synthetic cadence), followed by a final skeleton pass that restores any drift back toward the source. Output is the rephrased text and nothing else.
 
 ## What this skill is not
 
@@ -95,6 +95,7 @@ document/
 │   ├── example-readme.md                 job B worked README and opening contract
 │   ├── summarize.md                      job D procedure + reference/template index
 │   ├── rephrase.md                       job E procedure + preserve list + skeleton check
+│   ├── anti-ai-gate.md                   job E anti-AI gate: 20 rules against synthetic style, tells & filler
 │   └── 01-…07-*.md                       job D detail, loaded from summarize.md
 ├── templates/                            B: plan + self-check; D: tldr, executive summary, digest, recap, extreme, conversation
 ├── examples/                             B: concern-mixing cases; D: normal-vs-extreme, reserved-vs-custom

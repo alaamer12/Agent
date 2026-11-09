@@ -17,7 +17,14 @@ Works in any source language; the output stays in the source's language unless t
    between sentences - sentence 3's content stays in sentence 3.
 3. **Do not add fluff.** No new claims, explanations, examples, transitions, headings, or context. An
    improvement that adds information is a violation, not a style.
-4. **Final pass - the skeleton check.** Compare the result against the source's structural skeleton:
+4. **Anti-AI Gate (when audience is external or human-facing).** Check if the prose will be read by
+   someone other than the author, or if the user asked to de-AI/humanize the text. Apply the rules from
+   `references/anti-ai-gate.md`:
+   - Strip em-dashes (`—`) completely (replace with period, comma, colon, or parentheses).
+   - Strip AI filler, negation-pivot antithesis ("not just X, but Y"), and stock buzzwords (*delve, leverage, seamless, robust*).
+   - Eliminate mid-sentence bolding (`**critically**`, `**the key insight**`).
+   - Ground abstract vagueness into plain verbs and concrete terms while protecting genuine factual caveats.
+5. **Final pass - the skeleton check.** Compare the result against the source's structural skeleton:
    paragraph and line grouping, heading set, list membership, sentence count and boundaries, sentence
    order, each sentence's claim and its weight. Anything drifted that the sentence-level work did not
    require - a merged pair, a softened claim, a re-ordered argument - is **restored toward the source**,
@@ -57,6 +64,6 @@ Say so in one line and hand it off, rather than quietly becoming a different job
 |---|---|---|
 | "rephrase and make it shorter" | rephrase + summarize | this job, then job D (`references/summarize.md`) |
 | "rephrase it formally" (register change requested) | rephrase with an explicit override of the tone-preservation rule | this job, register per user |
-| "remove the AI-sounding bits" | de-AI-ing, not rephrasing | `humanizer` |
+| "remove the AI-sounding bits" / "de-AI this" | rephrase with anti-AI gate | this job (`references/rephrase.md` + `references/anti-ai-gate.md`) |
 | "reorganize these paragraphs" | not rephrasing at all | job B territory (`references/reorganize.md`) |
 | "translate this" | translation - no job needed, agents do it natively | SKILL.md §"Translation is not a job": skeleton preserved, code/paths/numbers verbatim, glossary terms consistent |
