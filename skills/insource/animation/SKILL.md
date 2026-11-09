@@ -36,7 +36,7 @@ feels interesting; name the other sub-skill in a line only if the user might gen
 | The request is really about | Go instead |
 |---|---|
 | a layout, spacing, hierarchy or contrast problem with nothing moving | UI-quality skills (e.g. `denoise`, `anti-slop`) |
-| which states a component should have and seeing them side by side | `components` |
+| which states a component should have and seeing them side by side | `prototype` (stories/components catalog) |
 | an implementation matching a mockup or a reference recording | `parity`, `visual-parity-testing` |
 | producing an actual video, GIF, or demo reel | `create-video` |
 | 3D scenes, games, WebGL engines beyond UI-level motion | none of these sub-skills |
