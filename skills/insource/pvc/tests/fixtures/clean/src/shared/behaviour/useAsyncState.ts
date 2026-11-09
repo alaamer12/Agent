@@ -1,1 +1,0 @@
-export function useAsyncState<T>(fetcher: () => Promise<T>) { const [state, setState] = useState("loading"); useEffect(() => { const c = new AbortController(); fetcher().then(() => setState("success")).catch(() => setState("error")); return () => c.abort(); }, []); return { state }; }
