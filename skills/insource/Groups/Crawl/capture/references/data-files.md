@@ -2,6 +2,12 @@
 
 Vocabularies that describe the outside world live in `scripts/data/`, not in code, because they go stale: new frameworks, new trackers, other languages. They can be extended without touching a script. Standards vocabularies (HTML elements, CSS units and properties) stay in code because a spec defines them.
 
+## Fast path
+1. Find the vocabulary in "The files" below.
+2. Edit the JSON/TXT file directly; no code change is needed.
+3. Use the format section for that file (signatures are the only structured one).
+4. A missing entry degrades gracefully; add only what you can verify.
+
 ## Contents
 - The files
 - Technology signatures

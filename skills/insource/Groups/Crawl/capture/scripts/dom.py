@@ -29,6 +29,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _cli import (add_device_args, add_json_args, add_output_args, add_session_args,  # noqa: E402
+                  add_theme_args, add_view_args, begin, check_file, emit, list_devices,
+                  resolve_device, resolve_viewport, seed_theme, apply_theme)
 from _common import default_user_agent, ensure_parent, resolve_output  # noqa: E402
 from _data import load_json  # noqa: E402
 from screenshots import folder_name, normalize_url  # noqa: E402
@@ -216,12 +219,23 @@ def include_iframes(page, fopts) -> int:
     return n
 
 
-def snapshot(browser, url: str, a, out: Path) -> dict:
-    ctx_args = {"user_agent": a.user_agent or default_user_agent(browser.version), "viewport": {"width": a.width, "height": a.height}}
+def snapshot(browser, url: str, a, out: Path, dev: dict | None = None) -> dict:
+    if dev:
+        ctx_args = dict(dev)
+        if a.user_agent:
+            ctx_args["user_agent"] = a.user_agent
+    else:
+        w, h = resolve_viewport(a, (1366, 900))
+        ctx_args = {"user_agent": a.user_agent or default_user_agent(browser.version),
+                    "viewport": {"width": w, "height": h},
+                    "device_scale_factor": a.scale}
+    if a.theme:
+        ctx_args["color_scheme"] = a.theme
     if a.storage_state:
         ctx_args["storage_state"] = a.storage_state
     ctx = browser.new_context(**ctx_args)
     page = ctx.new_page()
+    seed_theme(page, a.theme, a.theme_key)
     api: list[dict] = []
 
     if a.api:
@@ -245,6 +259,7 @@ def snapshot(browser, url: str, a, out: Path) -> dict:
         resp = page.goto(url, wait_until=a.wait_until, timeout=a.timeout)
     except Exception as e:                      # keep going with whatever rendered
         print(f"    navigation notice: {str(e).splitlines()[0]}")
+    apply_theme(page, a.theme)
     ctype = (resp.headers.get("content-type", "") if resp else "").lower()
     if ctype and not any(k in ctype for k in ("html", "xml")):
         print(f"    warning: the response is {ctype!r}, not HTML; the saved DOM is only the browser's rendering of that file")
@@ -301,8 +316,12 @@ def snapshot(browser, url: str, a, out: Path) -> dict:
 def add_args(p):
     p.add_argument("urls_pos", nargs="*", metavar="URL", help="Pages to snapshot (URL, bare domain, or local HTML path)")
     p.add_argument("--url", "--urls", dest="url", nargs="+", default=[], metavar="URL", help="Same as positionals")
-    p.add_argument("-o", "--output", help="Output .html for a single page; {n} = next unused number")
-    p.add_argument("--output-dir", default=".capture/dom", help="Folder for several pages: <dir>/<name>.html (default .capture/dom)")
+    add_output_args(
+        p,
+        dir_help="Folder for several pages: <dir>/<name>.html (default .capture/dom)",
+        default_dir=".capture/dom",
+    )
+    add_json_args(p)
     g = p.add_argument_group("forcing content to load (on by default)")
     g.add_argument("--no-force", action="store_true", help="Plain snapshot: no scrolling/clicking loop")
     g.add_argument("--max-rounds", type=int, default=20, help="Cap on scroll/click rounds (default 20)")
@@ -329,43 +348,57 @@ def add_args(p):
     s.add_argument("--wait-until", choices=["networkidle", "load", "domcontentloaded"], default="networkidle")
     s.add_argument("--wait-ms", type=int, default=2000, help="Final settle time before saving (default 2000)")
     s.add_argument("--timeout", type=int, default=60000, help="Navigation timeout ms (default 60000)")
-    s.add_argument("--width", type=int, default=1366)
-    s.add_argument("--height", type=int, default=900)
+    add_view_args(s)
+    s.add_argument("--scale", type=float, default=1.0, help="Device pixel ratio, e.g. 2 for retina (default 1)")
     s.add_argument("--user-agent", help="Override the browser user agent")
-    s.add_argument("--storage-state", metavar="FILE", help="Playwright storage-state JSON (cookies/login) to reuse")
+    add_device_args(s)
+    add_theme_args(s)
+    add_session_args(s)
     s.add_argument("--headed", action="store_true", help="Show the browser window (debugging)")
 
 
 def run(args):
+    if list_devices(args, "dom"):
+        return
     from playwright.sync_api import sync_playwright
 
     urls = list(dict.fromkeys(normalize_url(u) for u in args.urls_pos + args.url))
     if not urls:
         sys.exit("Give at least one URL.")
-    if args.storage_state and not Path(args.storage_state).is_file():
-        sys.exit(f"--storage-state file not found: {args.storage_state}")
+    check_file(args.storage_state, "--storage-state")
     if args.max_rounds < 0 or args.stable_rounds < 1 or args.scroll_pause_ms < 0 or args.wait_ms < 0 or args.timeout <= 0:
         sys.exit("--max-rounds, --scroll-pause-ms and --wait-ms cannot be negative; --stable-rounds must be at least 1 and --timeout positive")
-    if not (0 < args.width <= 16384 and 0 < args.height <= 16384):
+    vw, vh = resolve_viewport(args, (1366, 900))
+    if not (0 < vw <= 16384 and 0 < vh <= 16384):
         sys.exit("--width and --height must be between 1 and 16384")
+    if not 0 < args.scale <= 8:
+        sys.exit("--scale must be between 0 and 8")
     if args.output and len(urls) > 1:
         sys.exit("--output is for a single page; use --output-dir for several.")
 
     failures = []
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=not args.headed)
-        try:
-            for url in urls:
-                out = Path(resolve_output(args.output)) if args.output else Path(args.output_dir) / f"{folder_name(url)}.html"
-                try:
-                    snapshot(browser, url, args, out)
-                except Exception as e:
-                    failures.append(url)
-                    print(f"FAILED {url}: {e}", file=sys.stderr)
-        finally:
-            browser.close()
+    saved = []
+    payload = {"command": "dom", "files": saved, "failed": failures}
+    with begin(args) as real:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=not args.headed)
+            dev = resolve_device(p, args.device) if args.device else None
+            try:
+                for url in urls:
+                    out = Path(resolve_output(args.output)) if args.output else Path(args.output_dir) / f"{folder_name(url)}.html"
+                    try:
+                        res = snapshot(browser, url, args, out, dev)
+                        if res.get("file"):
+                            saved.append(res["file"])
+                    except Exception as e:
+                        failures.append({"url": url, "error": str(e)})
+                        print(f"FAILED {url}: {e}", file=sys.stderr)
+            finally:
+                browser.close()
+    emit(args, payload, real)
     if failures:
-        sys.exit(f"{len(failures)} of {len(urls)} page(s) failed: {', '.join(failures)}")
+        sys.exit(f"{len(failures)} of {len(urls)} page(s) failed: "
+                 + ", ".join(f["url"] for f in failures))
 
 
 if __name__ == "__main__":

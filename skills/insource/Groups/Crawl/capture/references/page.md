@@ -2,6 +2,13 @@
 
 Captures a running **Windows** desktop app window and crops the OS title bar so it lines up with chromeless HTML mockups. Uses the bundled `scripts/winshot.py` (Win32 `PrintWindow`), so the window can be covered or in the background.
 
+## Fast path
+1. `capture.py page --list` to find the window (`--name`, `--pid`, or `--title`).
+2. `capture.py page --name MyApp.exe -o shot.png`.
+3. Use `--output-dir` for an auto-named `<title>_<pid>.png`.
+4. `-o ..._v{n}.png` keeps a numbered history.
+5. Add `--json` for paths/counts; `--quiet` for silent runs.
+
 ## Contents
 - Requirements
 - Finding the window
@@ -34,7 +41,7 @@ Give any of `--pid`, `--name` (process/exe name, case-insensitive, e.g. `notepad
 - `--target-size WxH` pads/crops to a fixed canvas after cropping (content centered horizontally, top-aligned). `--pad-color` fills the rest (default `#FFFFFF`; use the mockup's page background for cleaner diffs). Both options are validated before capturing, so a typo fails immediately.
 
 ## Numbered history
-`--output .capture/home/app_v{n}.png` writes `app_v1.png`, then `app_v2.png`, ... so iterations are kept side by side.
+`-o .capture/home/app_v{n}.png` writes `app_v1.png`, then `app_v2.png`, ... so iterations are kept side by side. Without `-o`, `--output-dir` writes `<dir>/<window title>_<pid>.png`.
 
 ## Limits
 - Windows only; one window per run (no region/full-screen mode).

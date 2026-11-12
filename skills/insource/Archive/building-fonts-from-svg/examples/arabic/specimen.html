@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>ArabicSans — specimen</title>
+<style>
+  @font-face {
+    font-family: "ArabicSans";
+    src: url("ArabicSans.woff2") format("woff2"),
+         url("ArabicSans.woff")  format("woff");
+    font-weight: normal;
+    font-style: normal;
+  }
+  body { margin: 0; padding: 2rem 3rem; background: #fafafa; color: #111;
+         font-family: system-ui, sans-serif; }
+  h1, h2 { font-family: system-ui, sans-serif; font-weight: 600; }
+  .font { font-family: "ArabicSans", "Segoe UI", sans-serif; direction: rtl; }
+  .row { background: #fff; border: 1px solid #e2e2e2; border-radius: 10px;
+         padding: 1.2rem 1.6rem; margin: 0 0 1rem; }
+  .words  { font-size: 64px; line-height: 1.9; }
+  .sizes  { line-height: 1.6; }
+  .alpha  { font-size: 44px; line-height: 2.1; word-spacing: .55em; }
+  .edit   { font-size: 56px; min-height: 1.4em; outline: none; border-style: dashed; }
+  .edit:focus { border-color: #7aa2ff; background: #f4f8ff; }
+  .label { font-family: system-ui, sans-serif; font-size: 12px; color: #888;
+           text-transform: uppercase; letter-spacing: .08em; margin: 0 0 .4rem; }
+  .latin { direction: ltr; font-size: 40px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <h1>ArabicSans <small style="color:#888;font-weight:400">— built from SVG with the building-fonts-from-svg skill</small></h1>
+
+  <p class="label">Sample words (click the dashed box to type your own Arabic)</p>
+  <div class="row words font">
+    سلام عليكم<br>
+    الحمد لله<br>
+    العربية<br>
+    مرحبا بكم في عالم الخط<br>
+    لا حول ولا قوة إلا بالله
+  </div>
+
+  <div class="row words font edit" contenteditable="true" spellcheck="false">اكتب هنا</div>
+
+  <p class="label">Isolated alphabet (right to left)</p>
+  <div class="row alpha font">ا ب ة ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ى ي</div>
+
+  <p class="label">Sizes 128 / 72 / 40 / 24 / 14</p>
+  <div class="row sizes font">
+    <div style="font-size:128px">سلام</div>
+    <div style="font-size:72px">سلام عليكم</div>
+    <div style="font-size:40px">الحمد لله</div>
+    <div style="font-size:24px">مع السلامة يا صديقي</div>
+    <div style="font-size:14px">بسم الله الرحمن الرحيم — 14px small text test</div>
+  </div>
+
+  <p class="label">Latin fallback (this font has no Latin — should show system font)</p>
+  <div class="row latin" style="direction:rtl">ArabicSans — 1234 — the digits/letters above are NOT this font.</div>
+</body>
+</html>

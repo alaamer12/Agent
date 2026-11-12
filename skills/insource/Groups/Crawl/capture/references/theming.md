@@ -1,6 +1,12 @@
 # Theming (light/dark)
 
-`--theme light|dark` on `screenshots`, and `--themes` on `designs`, apply three signals so most mockups switch correctly:
+## Fast path
+1. Add `--theme dark` to any browser command (`designs` also accepts `--themes dark`, or several themes).
+2. If the page reads `localStorage`, add `--theme-key <key>`.
+3. View the first dark image before reporting; a "dark" run can still render light.
+4. If a body class/custom toggle drives the theme, use a URL param instead (last section).
+
+`--theme light|dark` on `designs`, `screenshots`, `website`, `dom` and `images` (plus `--themes` on `designs`) applies three signals so most mockups switch correctly:
 
 1. Emulate `prefers-color-scheme` (covers `@media (prefers-color-scheme: dark)`).
 2. Toggle the `dark` class on `<html>` (Tailwind `darkMode: 'class'`, many hand-written mockups).

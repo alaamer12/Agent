@@ -1,0 +1,6 @@
+<!-- Hand-drawn 'A' with a counter (hole) cut by fill-rule="evenodd".
+     Grid: y=0 cap-height, y=700 baseline. File name = codepoint U+0041. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700">
+  <path fill-rule="evenodd" d="M 300 0 L 600 700 L 480 700 L 425 560 L 175 560 L 120 700 L 0 700 Z
+                               M 220 440 L 380 440 L 300 220 Z"/>
+</svg>

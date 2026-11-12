@@ -9,7 +9,7 @@ Modes (at most one; default is a single viewport-sized image):
 Usage:
   python screenshots.py https://example.com --full-page
   python screenshots.py a.com b.com --view mobile --scroll
-  python screenshots.py design/home.html --output .capture/home.png --theme dark
+  python screenshots.py design/home.html -o .capture/home.png --theme dark
   python screenshots.py --url http://localhost:3000 --slices 4 --output-dir shots
 
 Targets may be http(s) URLs, file:// URLs, local paths, or bare domains (https:// is added;
@@ -18,7 +18,6 @@ localhost gets http://). Requires: pip install playwright && playwright install 
 from __future__ import annotations
 
 import argparse
-import difflib
 import hashlib
 import os
 import sys
@@ -27,14 +26,11 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _cli import (add_browser_args, add_device_args, add_json_args, add_output_args,  # noqa: E402
+                  add_session_args, add_view_args, begin, check_file, emit,
+                  list_devices, resolve_device, resolve_viewport)
 from _common import ensure_parent, resolve_output  # noqa: E402
 
-VIEWPORTS = {
-    "desktop": (1280, 800),
-    "wide": (1920, 1080),
-    "tablet": (768, 1024),
-    "mobile": (375, 812),
-}
 # Limits and safety parameters (named so they are visible and tunable in one place).
 MIN_ZOOM_PCT, MAX_ZOOM_PCT = 10, 500       # below ~10% the emulated CSS viewport becomes absurdly large
 MAX_DIMENSION_PX = 16384                   # Chromium's practical texture limit
@@ -127,6 +123,9 @@ class Opts:
     theme_key: str | None = None
     device_cfg: dict | None = None      # Playwright device descriptor (--device)
     lazy: bool = False
+    user_agent: str | None = None
+    timeout: int | None = None
+    storage_state: str | None = None
 
     # Zoom is emulated like real browser zoom: a larger/smaller CSS viewport rendered at a
     # compensating pixel ratio. Output pixel size stays width*scale x height*scale.
@@ -173,11 +172,18 @@ def open_page(browser, url: str, o: Opts):
                 "device_scale_factor": o.scale * o.zoom / 100}
     if o.theme:
         args["color_scheme"] = o.theme
+    if o.user_agent:
+        args["user_agent"] = o.user_agent
+    if o.storage_state:
+        args["storage_state"] = o.storage_state
     page = browser.new_page(**args)
     if o.theme and o.theme_key:
         # Seed before first paint so pages that read storage in <head> are deterministic.
         page.add_init_script("try{localStorage.setItem(%r,%r)}catch(e){}" % (o.theme_key, o.theme))
-    page.goto(normalize_url(url), wait_until=o.wait_until)
+    goto = {"wait_until": o.wait_until}
+    if o.timeout:
+        goto["timeout"] = o.timeout
+    page.goto(normalize_url(url), **goto)
     if o.theme:
         page.evaluate("t=>{const r=document.documentElement;"
                       "r.classList.toggle('dark',t==='dark');r.setAttribute('data-theme',t)}", o.theme)
@@ -237,17 +243,23 @@ def shoot_series(page, out_dir: Path, o: Opts, mode: str, slices=None, overlap=1
 
 
 def capture_batch(jobs, width=1280, height=800, full_page=False, wait_ms=300,
-                  theme_key=None, selector=None, **extra):
+                  theme_key=None, selector=None, scale=1.0, timeout=30000,
+                  headed=False, user_agent=None, device=None,
+                  wait_until="networkidle", storage_state=None, **extra):
     """jobs: iterable of {url, output, theme}. One browser, one PNG per job (used by `designs`)."""
     from playwright.sync_api import sync_playwright
 
     saved = []
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        device_cfg = resolve_device(p, device) if device else None
+        if device_cfg:
+            width, height = device_cfg["viewport"]["width"], device_cfg["viewport"]["height"]
+        browser = p.chromium.launch(headless=not headed)
         try:
             for job in jobs:
-                o = Opts(width=width, height=height, wait_ms=wait_ms, theme=job.get("theme"),
-                         theme_key=theme_key, **extra)
+                o = Opts(width=width, height=height, scale=scale, wait_ms=wait_ms, theme=job.get("theme"),
+                         theme_key=theme_key, timeout=timeout, user_agent=user_agent,
+                         device_cfg=device_cfg, wait_until=wait_until, storage_state=storage_state, **extra)
                 page = open_page(browser, job["url"], o)
                 try:
                     shoot_single(page, job["output"], o, full_page, selector)
@@ -265,18 +277,15 @@ def add_args(p):
     p.add_argument("urls_pos", nargs="*", metavar="URL", help="Targets (URL, file path, or bare domain)")
     p.add_argument("--url", "--urls", dest="url", nargs="+", default=[], metavar="URL",
                    help="Targets, same as positionals")
-    p.add_argument("--output", help="Output PNG for a single target in a single-image mode; "
-                                    "{n} = next unused number (shot_v{n}.png)")
-    p.add_argument("--output-dir", default=".capture/screenshots",
-                   help="Root for per-target folders <dir>/<name>/<i>.png (default .capture/screenshots)")
-    p.add_argument("--view", choices=list(VIEWPORTS), default="desktop",
-                   help="Viewport preset: " + ", ".join(f"{k} {w}x{h}" for k, (w, h) in VIEWPORTS.items()))
-    p.add_argument("--width", type=int, help="Override preset width")
-    p.add_argument("--height", type=int, help="Override preset height")
+    add_output_args(
+        p,
+        dir_help="Root for per-target folders <dir>/<name>/<i>.png (default .capture/screenshots)",
+        default_dir=".capture/screenshots",
+    )
+    add_view_args(p, default="desktop")
     p.add_argument("--scale", type=float, default=1.0, help="Device pixel ratio, e.g. 2 for retina (default 1)")
-    p.add_argument("--device", metavar="NAME", help="Emulate a real device with Playwright's maintained profile "
-                                                    "(viewport, user agent, pixel ratio, touch), e.g. \"iPhone 13\"; see --list-devices")
-    p.add_argument("--list-devices", action="store_true", help="Print the device names Playwright knows and exit")
+    add_device_args(p)
+    add_session_args(p)
     p.add_argument("--max-shots", type=int, default=DEFAULT_MAX_SHOTS, metavar="N", help=f"Cap on images from --scroll/--slices (default {DEFAULT_MAX_SHOTS})")
     p.add_argument("--zoom", type=parse_zoom, default=100,
                    help="Browser-style zoom: 90, 90%%, or 0.9. Below 100 fits more page into the same image size")
@@ -295,19 +304,19 @@ def add_args(p):
     p.add_argument("--theme", choices=["light", "dark"], default=None,
                    help="Emulate color scheme and toggle .dark / data-theme (default: untouched)")
     p.add_argument("--theme-key", default=None, help="localStorage key the page reads its theme from")
+    add_browser_args(p)
+    add_json_args(p)
 
 
 def run(args):
-    if args.list_devices:
-        from playwright.sync_api import sync_playwright
-        with sync_playwright() as p:
-            print("\n".join(sorted(p.devices)))
+    if list_devices(args, "screenshots"):
         return
 
     urls = list(dict.fromkeys(args.urls_pos + args.url))
     if not urls:
         sys.exit("Give at least one target (positional or --url).")
     # Validate every option before any browser starts (fast, offline, and no runaway jobs).
+    check_file(args.storage_state, "--storage-state")
     if args.slices is not None and args.slices <= 0:
         sys.exit("--slices must be a positive integer")
     for name, val in (("--width", args.width), ("--height", args.height)):
@@ -328,49 +337,52 @@ def run(args):
         sys.exit("--output is for one target in a single-image mode. "
                  "Use --output-dir for several targets, --scroll or --slices.")
 
-    vw, vh = VIEWPORTS[args.view]
-    o = Opts(width=args.width or vw, height=args.height or vh, scale=args.scale, zoom=args.zoom,
+    vw, vh = resolve_viewport(args)
+    o = Opts(width=vw, height=vh, scale=args.scale, zoom=args.zoom,
              wait_ms=args.wait_ms, wait_until=args.wait_until, theme=args.theme,
-             theme_key=args.theme_key, lazy=args.lazy)
+             theme_key=args.theme_key, lazy=args.lazy, timeout=args.timeout,
+             user_agent=args.user_agent, storage_state=args.storage_state)
     suffix = f"_{args.theme}" if args.theme else ""
     failures = []
+    saved = []
+    payload = {"command": "screenshots", "mode": mode, "files": saved, "failed": failures}
 
-    with sync_playwright() as p:
-        if args.device:
-            dev = p.devices.get(args.device)
-            if dev is None:
-                close = difflib.get_close_matches(args.device, list(p.devices), n=4)
-                sys.exit(f"Unknown device {args.device!r}." + (f" Did you mean: {', '.join(close)}?" if close else "") + " Use --list-devices.")
-            dev = {k: v for k, v in dev.items() if k != "default_browser_type"}
-            o.width, o.height, o.device_cfg = dev["viewport"]["width"], dev["viewport"]["height"], dev
-        if mode == "scroll" and not 0 <= args.overlap < o.css_height:
-            sys.exit(f"--overlap ({args.overlap}px) must be smaller than the viewport height ({o.css_height}px), "
-                     "otherwise every step would barely move")
-        browser = p.chromium.launch()
-        try:
-            for url in urls:
-                try:
-                    page = open_page(browser, url, o)
+    with begin(args) as real:
+        with sync_playwright() as p:
+            if args.device:
+                dev = resolve_device(p, args.device)
+                o.width, o.height, o.device_cfg = dev["viewport"]["width"], dev["viewport"]["height"], dev
+            if mode == "scroll" and not 0 <= args.overlap < o.css_height:
+                sys.exit(f"--overlap ({args.overlap}px) must be smaller than the viewport height ({o.css_height}px), "
+                         "otherwise every step would barely move")
+            browser = p.chromium.launch(headless=not args.headed)
+            try:
+                for url in urls:
                     try:
-                        name = folder_name(normalize_url(url))
-                        if series:
-                            paths = shoot_series(page, Path(args.output_dir) / name, o, mode,
-                                                 args.slices, args.overlap, suffix, args.max_shots)
-                        else:
-                            out = resolve_output(args.output) if args.output else \
-                                str(Path(args.output_dir) / name / f"1{suffix}.png")
-                            paths = [shoot_single(page, out, o, mode == "full", args.selector)]
-                    finally:
-                        page.close()
-                    for path in paths:
-                        print(f"Saved: {path}")
-                except Exception as e:
-                    failures.append(url)
-                    print(f"FAILED {url}: {e}", file=sys.stderr)
-        finally:
-            browser.close()
+                        page = open_page(browser, url, o)
+                        try:
+                            name = folder_name(normalize_url(url))
+                            if series:
+                                paths = shoot_series(page, Path(args.output_dir) / name, o, mode,
+                                                     args.slices, args.overlap, suffix, args.max_shots)
+                            else:
+                                out = resolve_output(args.output) if args.output else \
+                                    str(Path(args.output_dir) / name / f"1{suffix}.png")
+                                paths = [shoot_single(page, out, o, mode == "full", args.selector)]
+                        finally:
+                            page.close()
+                        for path in paths:
+                            print(f"Saved: {path}")
+                            saved.append(path)
+                    except Exception as e:
+                        failures.append({"url": url, "error": str(e)})
+                        print(f"FAILED {url}: {e}", file=sys.stderr)
+            finally:
+                browser.close()
+    emit(args, payload, real)
     if failures:
-        sys.exit(f"{len(failures)} of {len(urls)} target(s) failed: {', '.join(failures)}")
+        sys.exit(f"{len(failures)} of {len(urls)} target(s) failed: "
+                 + ", ".join(f["url"] for f in failures))
 
 
 if __name__ == "__main__":

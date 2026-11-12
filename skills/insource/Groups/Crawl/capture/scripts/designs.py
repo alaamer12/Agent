@@ -22,6 +22,9 @@ import threading
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _cli import (add_browser_args, add_device_args, add_json_args, add_output_args,  # noqa: E402
+                  add_session_args, add_view_args, begin, check_file, emit, list_devices,
+                  resolve_viewport)
 from screenshots import capture_batch  # noqa: E402
 
 NAMES = ["designs", "design", "mockups", "mockup", "wireframes"]
@@ -72,15 +75,25 @@ def add_args(p):
     p.add_argument("--pages", nargs="*", help="Page names relative to folder (default: all .html)")
     p.add_argument("--list", action="store_true", help="Only list detected folder and pages; capture nothing")
     p.add_argument("--themes", nargs="*", default=["light"], choices=["light", "dark"])
+    p.add_argument("--theme", action="append", choices=["light", "dark"], default=[],
+                   help="One theme (repeatable); same as --themes, for symmetry with `screenshots`")
     p.add_argument("--theme-key", help="localStorage key the pages read their theme from")
-    p.add_argument("--out", default=".capture", help="Output root (default .capture)")
-    p.add_argument("--width", type=int, default=1280)
-    p.add_argument("--height", type=int, default=800)
+    add_output_args(p, single=False, default_dir=".capture", dir_help="Output root (default .capture)")
+    add_view_args(p)
     p.add_argument("--full-page", action="store_true")
     p.add_argument("--wait-ms", type=int, default=500)
+    p.add_argument("--wait-until", choices=["networkidle", "load", "domcontentloaded"], default="networkidle",
+                   help="Navigation readiness (default networkidle)")
+    add_device_args(p)
+    add_session_args(p)
+    add_browser_args(p, scale=True)
+    add_json_args(p)
 
 
 def run(args):
+    if list_devices(args, "designs"):
+        return
+    check_file(args.storage_state, "--storage-state")
     folder = Path(args.dir).resolve() if args.dir else find_design_dir(Path.cwd(), [n.lower() for n in args.folder_names] if args.folder_names else NAMES)
     if not folder or not folder.is_dir():
         sys.exit("No designs folder found. Pass --dir <folder> (expected HTML files).")
@@ -91,25 +104,42 @@ def run(args):
         sys.exit(f"Unknown page(s): {unknown}. Available: {available}")
     if not pages:
         sys.exit(f"No .html files in {folder}")
+    if not 0 < args.scale <= 8:
+        sys.exit("--scale must be between 0 and 8")
+    vw, vh = resolve_viewport(args)
+    if not (0 < vw <= 16384 and 0 < vh <= 16384):
+        sys.exit("--width and --height must be between 1 and 16384")
     if args.list:
-        print(f"Folder: {folder}")
-        print("\n".join(f"  {pg}.html" for pg in pages))
+        payload = {"command": "designs", "folder": str(folder), "pages": pages}
+        with begin(args) as real:
+            print(f"Folder: {folder}")
+            print("\n".join(f"  {pg}.html" for pg in pages))
+        emit(args, payload, real)
         return
 
-    srv = None
-    base = args.base_url
-    if not base:
-        srv, base = serve(folder)
-    print(f"Folder: {folder}\nServing: {base}\nPages: {pages}")
-    try:
-        jobs = [{"url": f"{base.rstrip('/')}/{pg}.html",
-                 "output": os.path.join(args.out, pg, f"design_{th}.png"),
-                 "theme": th}
-                for pg in pages for th in args.themes]
-        capture_batch(jobs, args.width, args.height, args.full_page, args.wait_ms, args.theme_key)
-    finally:
-        if srv:
-            srv.shutdown()
+    themes = args.theme or args.themes
+    width, height = vw, vh
+    payload = {"command": "designs", "folder": str(folder), "pages": pages, "themes": themes,
+               "output_dir": args.output_dir, "files": []}
+    with begin(args) as real:
+        srv = None
+        base = args.base_url
+        if not base:
+            srv, base = serve(folder)
+        print(f"Folder: {folder}\nServing: {base}\nPages: {pages}\nThemes: {themes}")
+        try:
+            jobs = [{"url": f"{base.rstrip('/')}/{pg}.html",
+                     "output": os.path.join(args.output_dir, pg, f"design_{th}.png"),
+                     "theme": th}
+                    for pg in pages for th in themes]
+            payload["files"] = capture_batch(
+                jobs, width, height, args.full_page, args.wait_ms, args.theme_key,
+                scale=args.scale, timeout=args.timeout, headed=args.headed, user_agent=args.user_agent,
+                device=args.device, wait_until=args.wait_until, storage_state=args.storage_state)
+        finally:
+            if srv:
+                srv.shutdown()
+    emit(args, payload, real)
 
 
 if __name__ == "__main__":

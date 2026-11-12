@@ -10,7 +10,7 @@ Report the page count and the output folder; view one dark image to confirm the 
 ## 2. Just one screen
 User: "screenshot projects.html"
 ```
-python scripts/capture.py screenshots --url design/projects.html --output .capture/projects/design_light.png
+python scripts/capture.py screenshots --url design/projects.html -o .capture/projects/design_light.png
 ```
 
 ## 3. Design vs running app (parity loop)
@@ -19,7 +19,7 @@ Same viewport on both sides so images align 1:1.
 python scripts/capture.py designs --pages projects --width 1280 --height 800
 python scripts/capture.py page --list                    # find the window/PID first (Windows)
 python scripts/capture.py page --name MyApp.exe --target-size 1280x800 \
-    --output .capture/projects/app_v{n}.png
+    -o .capture/projects/app_v{n}.png
 ```
 Compare `design_light.png` against the newest `app_vN.png`; after each fix, re-run only the `page` line.
 
@@ -30,7 +30,7 @@ python scripts/capture.py designs --list
 
 ## 5. Component only
 ```
-python scripts/capture.py screenshots --url mockups/dashboard.html --selector ".sidebar" --output .capture/sidebar.png
+python scripts/capture.py screenshots --url mockups/dashboard.html --selector ".sidebar" -o .capture/sidebar.png
 ```
 
 ## 6. Using a dev server
@@ -53,7 +53,7 @@ python scripts/capture.py screenshots https://example.com/docs --scroll --overla
 
 ## 9. Fit more page into one image
 ```
-python scripts/capture.py screenshots design/home.html --zoom 50% --full-page --output .capture/home_overview.png
+python scripts/capture.py screenshots design/home.html --zoom 50% --full-page -o .capture/home_overview.png
 ```
 
 ## 10. Mirror a site for offline use
@@ -92,14 +92,14 @@ python scripts/capture.py dom https://a.com/x https://b.com/y --output-dir .capt
 ## 15. Extract a site's design system
 User: "get the colors and typography of example.com"
 ```
-python scripts/capture.py design tokens https://example.com
+python scripts/capture.py design tokens https://example.com -o colors.md
 ```
-Read `.capture/design/example.com/design-system.md`; quote palette, body/code fonts, type scale, spacing grid, breakpoints. Raw CSS: `css.dump`.
+Read `colors.md` (or `.capture/design/example.com/design-system.md`); quote palette, body/code fonts, type scale, spacing grid, breakpoints. Raw CSS: `css.dump`.
 
 ## 16. HTML patterns for a clone (mode unclear? ask first)
 User: "capture this site's design so I can recreate it" -> ask: tokens, patterns, or both?
 ```
-python scripts/capture.py design both https://example.com
+python scripts/capture.py design both https://example.com -o design.md --format both
 ```
 Then build from `design-system.md` (tokens) and `design-patterns.md` (skeleton, components + CSS, checklist).
 
@@ -111,7 +111,7 @@ python scripts/capture.py design patterns https://spa.example.com --html-file .c
 
 ## 18. Re-analyse without the network
 ```
-python scripts/capture.py design tokens --reuse --out .capture/design/example.com
+python scripts/capture.py design tokens --reuse --output-dir .capture/design/example.com
 ```
 
 ## 19. Download a page's images, biggest versions only

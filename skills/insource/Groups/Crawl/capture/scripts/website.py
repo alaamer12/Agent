@@ -32,6 +32,9 @@ from urllib import robotparser
 from urllib.parse import unquote, urldefrag, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _cli import (add_browser_args, add_device_args, add_json_args, add_output_args,  # noqa: E402
+                  add_session_args, add_theme_args, add_view_args, begin, check_file, emit,
+                  list_devices, resolve_device, resolve_viewport, seed_theme, apply_theme)
 from _data import host_listed, load_lines  # noqa: E402
 
 VIEW = (1920, 1080)
@@ -154,6 +157,23 @@ def gradual_scroll(page, steps: int) -> None:
     page.wait_for_timeout(300)
 
 
+def _context_args(args, p=None) -> dict:
+    """Browser-context options shared by the download and verify passes."""
+    if args.device:
+        kw = dict(resolve_device(p, args.device))
+    else:
+        width, height = resolve_viewport(args, VIEW)
+        kw = {"viewport": {"width": width, "height": height},
+              "device_scale_factor": args.scale}
+    if args.user_agent:
+        kw["user_agent"] = args.user_agent
+    if args.theme:
+        kw["color_scheme"] = args.theme
+    if args.storage_state:
+        kw["storage_state"] = args.storage_state
+    return kw
+
+
 def download(args, start: str, root: Path) -> dict:
     from playwright.sync_api import sync_playwright
 
@@ -175,8 +195,8 @@ def download(args, start: str, root: Path) -> dict:
         robots = None
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        ctx = browser.new_context(viewport={"width": args.width, "height": args.height})
+        browser = p.chromium.launch(headless=not args.headed)
+        ctx = browser.new_context(**_context_args(args, p))
 
         def on_response(resp):
             try:
@@ -219,10 +239,12 @@ def download(args, start: str, root: Path) -> dict:
             print(f"[+] ({len(pages) + 1}) {url}")
             page = ctx.new_page()
             try:
+                seed_theme(page, args.theme, args.theme_key)
                 try:
-                    page.goto(url, wait_until="domcontentloaded", timeout=args.timeout)
+                    page.goto(url, wait_until=args.wait_until, timeout=args.timeout)
                 except Exception as e:
                     print(f"[-] navigation notice: {e}")
+                apply_theme(page, args.theme)
                 page.wait_for_timeout(args.wait_ms)
                 gradual_scroll(page, args.scroll_steps)
                 try:
@@ -246,7 +268,9 @@ def download(args, start: str, root: Path) -> dict:
         # Static references the page never requested while running (icons, manifests)
         try:
             page = ctx.new_page()
-            page.goto(start, wait_until="domcontentloaded", timeout=args.timeout)
+            seed_theme(page, args.theme, args.theme_key)
+            page.goto(start, wait_until=args.wait_until, timeout=args.timeout)
+            apply_theme(page, args.theme)
             extra = page.eval_on_selector_all("link[href], img[src]", "els=>els.map(e=>e.href||e.src).filter(Boolean)")
             page.close()
             for url in extra:
@@ -305,8 +329,10 @@ def verify(root: Path, start: str, args) -> dict:
     missing, external = [], set()
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_context(viewport={"width": args.width, "height": args.height}).new_page()
+            browser = p.chromium.launch(headless=not args.headed)
+            ctx = browser.new_context(**_context_args(args, p))
+            page = ctx.new_page()
+            seed_theme(page, args.theme, args.theme_key)
 
             def on_resp(r):
                 if urlparse(r.url).netloc == local_host and r.status >= 400:
@@ -323,9 +349,10 @@ def verify(root: Path, start: str, args) -> dict:
             u0 = urlparse(start)
             try:
                 page.goto(base + (u0.path or "/") + (f"?{u0.query}" if u0.query else ""),
-                          wait_until="domcontentloaded", timeout=args.timeout)
+                          wait_until=args.wait_until, timeout=args.timeout)
             except Exception as e:
                 missing.append(f"navigation: {e}")
+            apply_theme(page, args.theme)
             page.wait_for_timeout(args.wait_ms)
             gradual_scroll(page, args.scroll_steps)
             browser.close()
@@ -337,7 +364,9 @@ def verify(root: Path, start: str, args) -> dict:
 # ---------- CLI ----------
 def add_args(p):
     p.add_argument("url", nargs="?", help="Site entry URL (https:// added if missing)")
-    p.add_argument("--output-dir", help="Destination (default .capture/website/<host>)")
+    p.add_argument("--url", dest="url_opt", help="Site entry URL, same as the positional")
+    add_output_args(p, single=False, default_dir=None,
+                    dir_help="Destination folder (default .capture/website/<host>)")
     p.add_argument("--depth", type=int, default=0, help="Follow same-site links this many levels (default 0 = entry page only)")
     p.add_argument("--max-pages", type=int, default=50, help="Page cap when crawling (default 50)")
     p.add_argument("--delay-ms", type=int, default=0, help="Pause between crawled pages")
@@ -348,11 +377,17 @@ def add_args(p):
                         "No hosts = all except the tracker blocklist (data/trackers.txt; see --block)")
     p.add_argument("--block", action="append", metavar="HOST", help="Never save assets from this host (repeatable; subdomains included)")
     p.add_argument("--no-default-blocklist", action="store_true", help="Ignore data/trackers.txt; only --block hosts are blocked")
-    p.add_argument("--width", type=int, default=VIEW[0])
-    p.add_argument("--height", type=int, default=VIEW[1])
+    add_view_args(p, default="wide")
     p.add_argument("--wait-ms", type=int, default=2000, help="Wait after load before scrolling (2000)")
+    p.add_argument("--wait-until", choices=["networkidle", "load", "domcontentloaded"], default="domcontentloaded",
+                   help="Navigation readiness for each page (default domcontentloaded)")
     p.add_argument("--scroll-steps", type=int, default=10, help="Gradual scroll steps to trigger lazy loading; 0 = off")
     p.add_argument("--timeout", type=int, default=30000, help="Navigation timeout in ms")
+    add_device_args(p)
+    add_session_args(p)
+    add_theme_args(p)
+    add_browser_args(p, with_timeout=False, scale=True)
+    add_json_args(p)
     p.add_argument("--no-verify", action="store_true", help="Skip the post-download check of the local copy")
     p.add_argument("--serve", action="store_true", help="Serve the copy locally after download (blocks until Ctrl+C)")
     p.add_argument("--serve-only", metavar="DIR", help="Serve an existing copy and do nothing else")
@@ -377,47 +412,64 @@ def serve_forever(root: Path, args):
 
 
 def run(args):
+    if list_devices(args, "website"):
+        return
+    check_file(args.storage_state, "--storage-state")
     if args.serve_only:
         root = Path(args.serve_only)
         if not root.is_dir():
             sys.exit(f"No such folder: {root}")
         return serve_forever(root, args)
-    if not args.url:
+    url = args.url_opt or args.url
+    if not url:
         sys.exit("Give the site URL (or --serve-only DIR).")
     if args.depth < 0 or args.max_pages < 1 or args.delay_ms < 0 or args.scroll_steps < 0 or args.wait_ms < 0:
         sys.exit("--depth, --delay-ms, --scroll-steps and --wait-ms cannot be negative, and --max-pages must be at least 1")
+    if not 0 < args.scale <= 8:
+        sys.exit("--scale must be between 0 and 8")
+    vw, vh = resolve_viewport(args, VIEW)
+    if not (0 < vw <= 16384 and 0 < vh <= 16384):
+        sys.exit("--width and --height must be between 1 and 16384")
 
-    start = normalize(args.url)
+    start = normalize(url)
     root = Path(args.output_dir) if args.output_dir else Path(".capture/website") / safe_netloc(urlparse(start).netloc)
     root.mkdir(parents=True, exist_ok=True)
-    print(f"[+] Mirroring {start} -> {root}")
+    payload = {"command": "website", "source": start, "output_dir": str(root)}
 
-    res = download(args, start, root)
-    if res["files"] == 0:
-        sys.exit("Nothing was downloaded. Check the URL, your connection, or raise --timeout.")
-    print(f"[+] Saved {res['files']} file(s) from {len(res['pages'])} page(s) to {root}")
-    if res["external_hosts"]:
-        print(f"[+] External hosts saved under _external/: {', '.join(res['external_hosts'])}")
-    for e in res["errors"][:10]:
-        print(f"[-] save error: {e}", file=sys.stderr)
+    with begin(args) as real:
+        print(f"[+] Mirroring {start} -> {root}")
 
-    ver = None
-    if not args.no_verify:
-        ver = verify(root, start, args)
-        if ver["missing"]:
-            print(f"[!] VERIFY: {len(ver['missing'])} request(s) failed against the local copy:")
-            for m in ver["missing"][:20]:
-                print(f"      {m}")
-        else:
-            print("[+] VERIFY: local copy loaded with no failed requests")
-        if ver["external"]:
-            print("[!] VERIFY: still contacts external hosts (needs internet; rerun with --external to save them): "
-                  + ", ".join(ver["external"]))
+        res = download(args, start, root)
+        if res["files"] == 0:
+            sys.exit("Nothing was downloaded. Check the URL, your connection, or raise --timeout.")
+        print(f"[+] Saved {res['files']} file(s) from {len(res['pages'])} page(s) to {root}")
+        if res["external_hosts"]:
+            print(f"[+] External hosts saved under _external/: {', '.join(res['external_hosts'])}")
+        for e in res["errors"][:10]:
+            print(f"[-] save error: {e}", file=sys.stderr)
 
-    (root / ".capture-manifest.json").write_text(json.dumps({
-        "source": start, "captured_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "pages": res["pages"],
-        "files": res["files"], "external_hosts": res["external_hosts"], "verify": ver}, indent=2), encoding="utf-8")
-    print(f"[+] Done. View it: python capture.py website --serve-only {root}")
+        ver = None
+        if not args.no_verify:
+            ver = verify(root, start, args)
+            if ver["missing"]:
+                print(f"[!] VERIFY: {len(ver['missing'])} request(s) failed against the local copy:")
+                for m in ver["missing"][:20]:
+                    print(f"      {m}")
+            else:
+                print("[+] VERIFY: local copy loaded with no failed requests")
+            if ver["external"]:
+                print("[!] VERIFY: still contacts external hosts (needs internet; rerun with --external to save them): "
+                      + ", ".join(ver["external"]))
+
+        (root / ".capture-manifest.json").write_text(json.dumps({
+            "source": start, "captured_at": time.strftime("%Y-%m-%dT%H:%M:%S"), "pages": res["pages"],
+            "files": res["files"], "external_hosts": res["external_hosts"], "verify": ver}, indent=2), encoding="utf-8")
+        payload.update({"pages": res["pages"], "files": res["files"],
+                        "external_hosts": res["external_hosts"],
+                        "manifest": str(root / ".capture-manifest.json"),
+                        "verify": ver})
+        print(f"[+] Done. View it: python capture.py website --serve-only {root}")
+    emit(args, payload, real)
     if args.serve:
         serve_forever(root, args)
 

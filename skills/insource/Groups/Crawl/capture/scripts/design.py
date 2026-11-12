@@ -14,7 +14,7 @@ and analyses the dumps into:
 Usage:
   python design.py tokens   https://example.com
   python design.py patterns https://example.com --keep-text
-  python design.py both     http://localhost:8000 --out .capture/design/local
+  python design.py both     http://localhost:8000 --output-dir .capture/design/local
   python design.py patterns https://spa.example.com --html-file .capture/dom/spa.example.com.html
   python design.py tokens   https://example.com --reuse        # re-analyse existing dumps, no network
 
@@ -38,6 +38,7 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _cli import add_json_args, add_output_args, begin, emit  # noqa: E402
 from _common import default_user_agent, ensure_parent  # noqa: E402
 from _cssparse import Sheet, parse_css  # noqa: E402
 from _htmlpatterns import analyze_patterns, extract_inline_css, parse_html, render_patterns_md  # noqa: E402
@@ -219,12 +220,61 @@ def out_name(url: str) -> str:
     return f"{name}_{hashlib.md5(q.encode()).hexdigest()[:6]}" if q else name
 
 
+def _output_format(path: str | None, requested: str | None, mode: str) -> str:
+    """Pick md/json/both: an explicit --format wins, otherwise the -o extension, otherwise md."""
+    if requested:
+        return requested
+    ext = Path(path).suffix.lower() if path else ""
+    if ext == ".json":
+        return "json"
+    if ext == ".md":
+        return "md"
+    return "both" if mode == "both" else "md"
+
+
+def _write_single(output: str, fmt: str, tokens, pat, meta: dict) -> list[Path]:
+    """Write the consolidated report(s) requested with -o. Returns the paths actually written."""
+    target = Path(output)
+    written: list[Path] = []
+    formats = ["md", "json"] if fmt == "both" else [fmt]
+    for one in formats:
+        suffix = ".md" if one == "md" else ".json"
+        path = target if target.suffix.lower() == suffix else target.with_suffix(suffix) \
+            if target.suffix else Path(str(target) + suffix)
+        ensure_parent(str(path))
+        if one == "json":
+            doc = {"meta": meta}
+            if tokens is not None:
+                doc["tokens"] = tokens
+            if pat is not None:
+                doc["patterns"] = pat
+            path.write_text(json.dumps(doc, indent=2, ensure_ascii=False), encoding="utf-8")
+        else:
+            parts = []
+            if tokens is not None:
+                parts.append(render_tokens_md(tokens, meta))
+            if pat is not None:
+                parts.append(render_patterns_md(pat, tokens, meta))
+            path.write_text("\n\n---\n\n".join(parts), encoding="utf-8")
+        written.append(path)
+    return written
+
+
 # ---------- CLI ----------
 def add_args(p):
     p.add_argument("items", nargs="*", metavar="MODE URL",
                    help="tokens | patterns | both, then the page URL (ask the user which mode if unclear)")
-    p.add_argument("--out", help="Output folder (default .capture/design/<name>; name = host + path, plus a short hash if the URL has a query)")
-    p.add_argument("--reuse", action="store_true", help="Skip fetching; analyse existing html.dump/css.dump in --out")
+    p.add_argument("--mode", metavar="MODE", help="Mode, same as the first positional (tokens|patterns|both and aliases)")
+    p.add_argument("--url", help="Page URL, same as the second positional")
+    add_output_args(
+        p,
+        dir_help="Output folder for dumps and reports (default .capture/design/<name>; name = host + path, "
+                 "plus a short hash if the URL has a query)",
+    )
+    p.add_argument("--format", choices=["md", "json", "both"],
+                   help="Format for -o/--output (default: infer from the extension, else md; both in both mode)")
+    add_json_args(p)
+    p.add_argument("--reuse", action="store_true", help="Skip fetching; analyse existing html.dump/css.dump in --output-dir")
     p.add_argument("--html-file", help="Analyse this HTML (e.g. output of `dom`) instead of fetching the page; URL is used as base")
     p.add_argument("--max-css", type=int, default=40, help="Cap on stylesheets fetched (default 40)")
     p.add_argument("--no-external-css", action="store_true", help="Skip stylesheets on other hosts (e.g. Google Fonts CSS)")
@@ -243,7 +293,11 @@ def run(args):
     mode = None
     if items and items[0].lower() in MODES:
         mode = MODES[items.pop(0).lower()]
-    url = items[0] if items else None
+    if args.mode:
+        if args.mode.lower() not in MODES:
+            sys.exit(f"Unknown --mode {args.mode!r}. Use tokens, patterns or both.")
+        mode = MODES[args.mode.lower()]
+    url = args.url or (items[0] if items else None)
     if not mode:
         print("MODE REQUIRED: ask the user which design capture they want:\n"
               "  tokens   - design system: colors, typography, spacing, radius, shadows, motion, breakpoints\n"
@@ -259,53 +313,74 @@ def run(args):
             sys.exit(str(e))
 
     name = out_name(url) if url else "site"
-    out = Path(args.out) if args.out else Path(".capture/design") / name
+    out = Path(args.output_dir) if args.output_dir else Path(".capture/design") / name
     out.mkdir(parents=True, exist_ok=True)
+    payload = {"command": "design", "mode": mode, "url": url or "", "output_dir": str(out)}
 
-    if args.reuse:
-        if not (out / "html.dump").exists() or not (out / "css.dump").exists():
-            sys.exit(f"--reuse needs {out}/html.dump and css.dump")
-        m = re.match(r"<!-- capture:design source=(\S+)", (out / "html.dump").read_text(encoding="utf-8")[:300])
-        final = m.group(1) if m else (url or "")
-        print(f"[+] reusing dumps in {out}")
-    else:
-        final = fetch_all(url, args, out)["final"]
+    with begin(args) as real:
+        if args.reuse:
+            if not (out / "html.dump").exists() or not (out / "css.dump").exists():
+                sys.exit(f"--reuse needs {out}/html.dump and css.dump")
+            m = re.match(r"<!-- capture:design source=(\S+)", (out / "html.dump").read_text(encoding="utf-8")[:300])
+            final = m.group(1) if m else (url or "")
+            print(f"[+] reusing dumps in {out}")
+        else:
+            final = fetch_all(url, args, out)["final"]
 
-    # analyse FROM the dumps (single source of truth)
-    html_text = re.sub(r"^<!-- capture:design[^>]*-->\n", "", (out / "html.dump").read_text(encoding="utf-8"), count=1)
-    sheet = Sheet()
-    srcs = read_css_dump(out / "css.dump")
-    for label, _info, text in srcs:
-        parse_css(text, label, sheet)
-    meta = {"url": final, "host": urlparse(final).netloc or name, "css_sources": len(srcs)}
-    written = [out / "html.dump", out / "css.dump", out / "sources.json"]
-    tokens = None
+        # analyse FROM the dumps (single source of truth)
+        html_text = re.sub(r"^<!-- capture:design[^>]*-->\n", "", (out / "html.dump").read_text(encoding="utf-8"), count=1)
+        sheet = Sheet()
+        srcs = read_css_dump(out / "css.dump")
+        for label, _info, text in srcs:
+            parse_css(text, label, sheet)
+        meta = {"url": final, "host": urlparse(final).netloc or name, "css_sources": len(srcs)}
+        written = [out / "html.dump", out / "css.dump", out / "sources.json"]
+        tokens = None
+        pat = None
 
-    if mode in ("tokens", "both"):
-        tokens = analyze_tokens(sheet, top=args.top)
-        (out / "design-tokens.json").write_text(json.dumps(tokens, indent=2, ensure_ascii=False), encoding="utf-8")
-        (out / "design-system.md").write_text(render_tokens_md(tokens, meta), encoding="utf-8")
-        written += [out / "design-system.md", out / "design-tokens.json"]
-        s = tokens["stats"]
-        sizes = [x["px"] for x in tokens["typography"]["sizes"]]
-        print(f"[+] tokens: {s['unique_colors']} colors, {s['variables']} variables ({len(tokens['variables']['scales'])} scales, "
-              f"{sum(len(d) for d in tokens['colors']['ramps'].values())} color ramps), {len(tokens['typography']['fonts'])} font faces, "
-              f"{len(sizes)} font sizes, spacing: {tokens['spacing']['scale_guess']}, {len(tokens['breakpoints'])} breakpoint queries")
+        if mode in ("tokens", "both"):
+            tokens = analyze_tokens(sheet, top=args.top)
+            (out / "design-tokens.json").write_text(json.dumps(tokens, indent=2, ensure_ascii=False), encoding="utf-8")
+            (out / "design-system.md").write_text(render_tokens_md(tokens, meta), encoding="utf-8")
+            written += [out / "design-system.md", out / "design-tokens.json"]
+            s = tokens["stats"]
+            sizes = [x["px"] for x in tokens["typography"]["sizes"]]
+            print(f"[+] tokens: {s['unique_colors']} colors, {s['variables']} variables ({len(tokens['variables']['scales'])} scales, "
+                  f"{sum(len(d) for d in tokens['colors']['ramps'].values())} color ramps), {len(tokens['typography']['fonts'])} font faces, "
+                  f"{len(sizes)} font sizes, spacing: {tokens['spacing']['scale_guess']}, {len(tokens['breakpoints'])} breakpoint queries")
 
-    if mode in ("patterns", "both"):
-        headers = parse_header_block((out / "headers.dump").read_text(encoding="utf-8")) if (out / "headers.dump").exists() else {}
-        pat = analyze_patterns(html_text, sheet.rules, final, keep_text=args.keep_text, top=args.top, headers=headers,
-                               css_text="\n".join(t for _l, _i, t in srcs), css_banners=css_banner_list([(l, t) for l, _i, t in srcs]),
-                               signatures_file=args.signatures)
-        (out / "design-patterns.json").write_text(json.dumps(pat, indent=2, ensure_ascii=False), encoding="utf-8")
-        (out / "design-patterns.md").write_text(render_patterns_md(pat, tokens, meta), encoding="utf-8")
-        written += [out / "design-patterns.md", out / "design-patterns.json"]
-        print(f"[+] patterns: {pat['document']['elements']} elements, {len(pat['sections'])} top-level sections, "
-              f"{len(pat['components'])} repeated components, {len(pat['custom_elements'])} custom elements, naming: {pat['classes']['verdict']}")
+        if mode in ("patterns", "both"):
+            headers = parse_header_block((out / "headers.dump").read_text(encoding="utf-8")) if (out / "headers.dump").exists() else {}
+            pat = analyze_patterns(html_text, sheet.rules, final, keep_text=args.keep_text, top=args.top, headers=headers,
+                                   css_text="\n".join(t for _l, _i, t in srcs), css_banners=css_banner_list([(l, t) for l, _i, t in srcs]),
+                                   signatures_file=args.signatures)
+            (out / "design-patterns.json").write_text(json.dumps(pat, indent=2, ensure_ascii=False), encoding="utf-8")
+            (out / "design-patterns.md").write_text(render_patterns_md(pat, tokens, meta), encoding="utf-8")
+            written += [out / "design-patterns.md", out / "design-patterns.json"]
+            print(f"[+] patterns: {pat['document']['elements']} elements, {len(pat['sections'])} top-level sections, "
+                  f"{len(pat['components'])} repeated components, {len(pat['custom_elements'])} custom elements, naming: {pat['classes']['verdict']}")
 
-    print("Saved:")
-    for w in written:
-        print(f"  {w}  ({w.stat().st_size:,} bytes)")
+        if args.output:
+            fmt = _output_format(args.output, args.format, mode)
+            single = _write_single(args.output, fmt, tokens, pat, meta)
+            written += single
+            payload["output"] = [str(p) for p in single]
+
+        print("Saved:")
+        for w in written:
+            print(f"  {w}  ({w.stat().st_size:,} bytes)")
+        payload["files"] = [str(w) for w in written]
+        payload["url"] = final
+        if tokens is not None:
+            payload["tokens"] = tokens.get("stats", {})
+        if pat is not None:
+            payload["patterns"] = {
+                "sections": len(pat["sections"]),
+                "components": len(pat["components"]),
+                "custom_elements": len(pat["custom_elements"]),
+                "naming": pat["classes"]["verdict"],
+            }
+    emit(args, payload, real)
 
 
 if __name__ == "__main__":

@@ -7,9 +7,9 @@ Requires Windows + `pip install pywin32 psutil pillow`.
 Usage:
   python page.py --list                                   # visible windows, largest first
   python page.py --name MyApp.exe --list --include-hidden # why can't it find my window?
-  python page.py --pid 12345 --output .capture/home/app_v{n}.png
-  python page.py --name MyApp.exe --output out.png --target-size 1280x800 --pad-color "#F1F5F9"
-  python page.py --title "My App" --include-frame --output framed.png    # keep the real title bar
+  python page.py --pid 12345 -o .capture/home/app_v{n}.png
+  python page.py --name MyApp.exe -o out.png --target-size 1280x800 --pad-color "#F1F5F9"
+  python page.py --title "My App" --include-frame -o framed.png    # keep the real title bar
 """
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _cli import add_json_args, add_output_args, begin, emit  # noqa: E402
 from _common import ensure_parent, resolve_output  # noqa: E402
 
 
@@ -76,13 +77,23 @@ def parse_target_size(s):
     return int(m.group(1)), int(m.group(2))
 
 
+def _safe_name(text: str) -> str:
+    """Filename-safe stem for --output-dir defaults."""
+    name = re.sub(r"[^\w.-]+", "_", text).strip("._") or "window"
+    return name[:80]
+
+
 def add_args(p):
     p.add_argument("--pid", type=int, help="Exact process ID")
     p.add_argument("--name", help="Process/executable name, e.g. notepad.exe (root process preferred over helpers)")
     p.add_argument("--title", help="Window title substring")
     p.add_argument("--list", action="store_true", help="List matching windows instead of capturing (no filter = all visible)")
     p.add_argument("--include-hidden", action="store_true", help="Also consider hidden/untitled top-level windows")
-    p.add_argument("--output", help="Output PNG (required unless --list); use {n} for an auto-incrementing number, e.g. app_v{n}.png")
+    add_output_args(
+        p,
+        dir_help="Folder for an auto-named PNG (<dir>/<title>_<pid>.png) when --output is omitted",
+    )
+    add_json_args(p)
     p.add_argument("--include-frame", action="store_true",
                    help="Capture real screen pixels including the OS title bar/caption buttons (window is brought to the "
                         "foreground and must not be covered); disables auto-cropping unless --crop-top is given")
@@ -104,63 +115,73 @@ def run(args):
     import winshot
 
     winshot.setup_logging(debug=args.debug)
-    try:
-        if args.wait > 0:
-            time.sleep(args.wait)
-        has_target = args.pid is not None or args.name or args.title
-        if not has_target and not args.list:
-            sys.exit("Give --pid, --name or --title to pick a window (use --list to see what is open).")
-        if not args.list and not args.output:
-            sys.exit("--output is required when capturing.")
-        size, pad = parse_target_size(args.target_size), parse_color(args.pad_color)   # fail fast, before capturing
-        if args.crop_client and (args.include_frame or args.crop_top >= 0 or args.no_crop):
-            sys.exit("--crop-client cannot be combined with --include-frame, --crop-top or --no-crop")
+    payload = {"command": "page"}
+    with begin(args) as real:
+        try:
+            if args.wait > 0:
+                time.sleep(args.wait)
+            has_target = args.pid is not None or args.name or args.title
+            if not has_target and not args.list:
+                sys.exit("Give --pid, --name or --title to pick a window (use --list to see what is open).")
+            if not args.list and not args.output and not args.output_dir:
+                sys.exit("--output is required when capturing (or --output-dir for an auto-named file).")
+            size, pad = parse_target_size(args.target_size), parse_color(args.pad_color)   # fail fast, before capturing
+            if args.crop_client and (args.include_frame or args.crop_top >= 0 or args.no_crop):
+                sys.exit("--crop-client cannot be combined with --include-frame, --crop-top or --no-crop")
 
-        cands = winshot.find_target_windows(name=args.name, pid=args.pid, title=args.title,
-                                            include_hidden=args.include_hidden)
-        if args.list:
-            winshot.print_candidates(cands)
-            return
-        if not cands:
-            winshot.report_no_match(name=args.name, pid=args.pid, title=args.title)
-            sys.exit(1)
-        chosen = cands[0]
-        if len(cands) > 1:
-            print(f"{len(cands)} windows matched; using the largest (PID {chosen['pid']}, \"{chosen['title']}\"). "
-                  "Use --list to see them all.")
+            cands = winshot.find_target_windows(name=args.name, pid=args.pid, title=args.title,
+                                                include_hidden=args.include_hidden)
+            if args.list:
+                winshot.print_candidates(cands)
+                payload["windows"] = cands
+            else:
+                if not cands:
+                    winshot.report_no_match(name=args.name, pid=args.pid, title=args.title)
+                    sys.exit(1)
+                chosen = cands[0]
+                if len(cands) > 1:
+                    print(f"{len(cands)} windows matched; using the largest (PID {chosen['pid']}, \"{chosen['title']}\"). "
+                          "Use --list to see them all.")
 
-        insets = None
-        flip = True if args.flip_horizontal else (False if args.no_flip_fix else None)
-        img = (winshot.capture_window_with_frame(chosen["hwnd"]) if args.include_frame
-               else winshot.capture_window(chosen["hwnd"], flip_override=flip))
-        if args.crop_client:
-            insets = winshot.client_insets(chosen["hwnd"])
-    except RuntimeError as e:
-        sys.exit(str(e))
-    original = img.size
+                insets = None
+                flip = True if args.flip_horizontal else (False if args.no_flip_fix else None)
+                img = (winshot.capture_window_with_frame(chosen["hwnd"]) if args.include_frame
+                       else winshot.capture_window(chosen["hwnd"], flip_override=flip))
+                if args.crop_client:
+                    insets = winshot.client_insets(chosen["hwnd"])
+                original = img.size
 
-    crop_px = 0
-    if insets:
-        left, top, right, bottom = insets
-        img = img.crop((left, top, max(left + 1, img.width - right), max(top + 1, img.height - bottom)))
-        crop_px = top
-    elif not args.no_crop:
-        if args.crop_top >= 0:
-            crop_px = args.crop_top
-        elif not args.include_frame:
-            crop_px = detect_top_chrome_height(img)
-        img = crop_top(img, crop_px)
+                crop_px = 0
+                if insets:
+                    left, top, right, bottom = insets
+                    img = img.crop((left, top, max(left + 1, img.width - right), max(top + 1, img.height - bottom)))
+                    crop_px = top
+                elif not args.no_crop:
+                    if args.crop_top >= 0:
+                        crop_px = args.crop_top
+                    elif not args.include_frame:
+                        crop_px = detect_top_chrome_height(img)
+                    img = crop_top(img, crop_px)
 
-    if size and img.size != size:
-        from PIL import Image
-        canvas = Image.new("RGB", size, color=pad)
-        canvas.paste(img, (max(0, (size[0] - img.width) // 2), 0))   # top-aligned, centered
-        img = canvas
+                if size and img.size != size:
+                    from PIL import Image
+                    canvas = Image.new("RGB", size, color=pad)
+                    canvas.paste(img, (max(0, (size[0] - img.width) // 2), 0))   # top-aligned, centered
+                    img = canvas
 
-    out = resolve_output(args.output)
-    ensure_parent(out)
-    img.save(out)
-    print(f"Saved: {out} ({img.width}x{img.height}) crop_top={crop_px} original={original[0]}x{original[1]}")
+                if args.output:
+                    out = resolve_output(args.output)
+                else:
+                    stem = _safe_name(args.title or chosen["title"] or args.name or "window")
+                    out = os.path.join(args.output_dir, f"{stem}_{chosen['pid']}.png")
+                ensure_parent(out)
+                img.save(out)
+                print(f"Saved: {out} ({img.width}x{img.height}) crop_top={crop_px} original={original[0]}x{original[1]}")
+                payload.update({"file": out, "width": img.width, "height": img.height,
+                                "crop_top": crop_px, "source": {"pid": chosen["pid"], "title": chosen["title"]}})
+        except RuntimeError as e:
+            sys.exit(str(e))
+    emit(args, payload, real)
 
 
 if __name__ == "__main__":

@@ -3,6 +3,12 @@
 Read this only when the command itself is unclear, or the user asked for two things at once. A single command's
 flags and behaviour live in its own reference file.
 
+## Fast path
+1. Match the user's sentence to one "Answers" row in the side-by-side table.
+2. If exactly one column fits, run that command and stop reading here.
+3. If two still fit, read "The pairs people mix up".
+4. If the user asked for two outputs, combine the commands (last section).
+
 ## Contents
 - Side-by-side
 - The pairs people mix up

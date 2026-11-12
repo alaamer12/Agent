@@ -1,0 +1,6 @@
+<!-- Smooth 'O' from cubic Beziers (C commands) plus an inner counter.
+     The builder converts cubics to TrueType quadratics automatically. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700">
+  <path fill-rule="evenodd" d="M 300 0 C 460 0 590 157 590 350 C 590 543 460 700 300 700 C 140 700 10 543 10 350 C 10 157 140 0 300 0 Z
+                               M 300 100 C 190 100 110 207 110 350 C 110 493 190 600 300 600 C 410 600 490 493 490 350 C 490 207 410 100 300 100 Z"/>
+</svg>

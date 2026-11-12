@@ -5,6 +5,13 @@ Extracts how a site is designed. Two angles, one pipeline:
 - **tokens**: the design system (colors, typography, spacing, ...)
 - **patterns**: HTML usage patterns with their CSS, for a high-fidelity clone
 
+## Fast path
+1. Pick the mode: colors/fonts/spacing -> `tokens`; structure/components/markup/clone -> `patterns`.
+2. `capture.py design tokens https://example.com -o colors.md`.
+3. Reports also land in `--output-dir` (default `.capture/design/<name>`): `design-system.md/.json` and/or `design-patterns.md/.json`.
+4. `-o report.json` or `--format both` chooses a single consolidated artifact.
+5. Add `--json` for a summary; `--quiet` for silent runs.
+
 ## Contents
 - Choosing a mode
 - Pipeline and dumps
@@ -80,8 +87,11 @@ Rules the report follows:
 ## Options
 | Option | Default | Notes |
 |---|---|---|
-| `MODE URL` | required | URL can be a bare domain (`https://` added; `localhost` gets `http://`) or a local file path |
-| `--out` | `.capture/design/<name>` | `<name>` = host + path slug (`example.com_pricing`), plus a short hash when the URL has a query, so different pages never overwrite each other. Names are capped (long URLs get a hash) and Windows-reserved names are avoided |
+| `MODE URL` (or `--mode`, `--url`) | required | Mode aliases: `colors`/`typography`/`system` -> tokens, `clone`/`html` -> patterns, `all` -> both. URL can be a bare domain (`https://` added; `localhost` gets `http://`) or a local file path |
+| `--output-dir`, `--out` | `.capture/design/<name>` | `<name>` = host + path slug (`example.com_pricing`), plus a short hash when the URL has a query, so different pages never overwrite each other. Names are capped (long URLs get a hash) and Windows-reserved names are avoided |
+| `-o, --output FILE` | none | Also write one consolidated report; `.md`/`.json` chooses the format |
+| `--format` | inferred | `md`, `json`, or `both` for `-o` (extension wins unless `--format` is given) |
+| `--json`, `--quiet` | off | Machine-readable summary / no progress |
 | `--reuse` | off | Re-analyse existing `html.dump`/`css.dump`; no network |
 | `--html-file F` | none | Use this HTML (e.g. from `dom`) instead of fetching the page; URL is the base for CSS |
 | `--max-css` | 40 | Stylesheet cap |

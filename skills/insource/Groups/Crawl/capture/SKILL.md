@@ -15,17 +15,34 @@ reference file, and you read only the one for the command you picked.
 python <skill-dir>/scripts/capture.py <command> [options]      # command names are case-insensitive
 ```
 
+## Canonical flags (same names wherever they apply)
+
+| Flag | Meaning |
+|---|---|
+| `-o, --output FILE` | One artifact (`.png/.html/.md/.json`). On folder-only commands (`designs`, `website`, `images`) it names the destination folder. |
+| `--output-dir DIR` | Root folder for multi-file runs; `--out` is an alias. |
+| `--json`, `--quiet` | Machine-readable summary on stdout / no progress. |
+| `--url URL` | Same as the positional URL (`screenshots`, `website`, `dom`, `design`, `images`); `design` also takes `--mode`. |
+| `--view`, `--width`, `--height`, `--scale` | Viewport: a preset (`desktop`, `wide`, `tablet`, `mobile`), overridden per dimension, plus device pixel ratio. |
+| `--device`, `--list-devices` | Playwright device profile (viewport, UA, pixel ratio, touch) and the list of available names. |
+| `--timeout`, `--headed`, `--user-agent`, `--wait-ms`, `--wait-until`, `--theme`, `--theme-key`, `--storage-state` | Browser behavior, identical on every browser command. |
+| `--themes` | `designs` only: batch several themes in one run (other commands take one `--theme`). |
+
+Browser commands are `designs`, `screenshots`, `website`, `dom`, `images`. `page` is Win32 (no browser flags); `design` is curl-based (no browser flags, and its `--timeout` is seconds). `images` keeps `--timeout` as its overall wall-clock deadline; its navigation timeout is `--nav-timeout`.
+
+`<command> --help` is authoritative; this table is the contract it follows.
+
 ## Pick a command, then read one file
 
 | Command | Produces | Minimal run | Reference |
 |---|---|---|---|
-| `designs` | PNG per HTML design per theme | `... capture.py designs` | [references/designs.md](references/designs.md) |
-| `screenshots` | PNG(s) of any URL or HTML file: viewport, full-page, scroll steps, slices, one element | `... capture.py screenshots example.com --view mobile --full-page` | [references/screenshots.md](references/screenshots.md) |
-| `page` | PNG of a running Windows app window, OS chrome cropped | `... capture.py page --pid 1234 --output .capture/home/app_v{n}.png` | [references/page.md](references/page.md) |
-| `website` | A browsable offline copy: HTML, JS, CSS, fonts, images, data, verified | `... capture.py website https://example.com --depth 1` | [references/website.md](references/website.md) |
-| `dom` | One parse-ready `.html` of the fully expanded DOM (+ `.txt`, `.responses.json`) | `... capture.py dom https://example.com/products --text --api` | [references/dom.md](references/dom.md) |
-| `design` | `html.dump`, `css.dump`, `headers.dump`, plus `design-system.md/.json` and/or `design-patterns.md/.json` | `... capture.py design tokens https://example.com` | [references/design.md](references/design.md) |
-| `images` | Every image the page can show, largest original kept, duplicates dropped, + `report.json` | `... capture.py images --url https://example.com --scroll to-end --exclude "small|medium"` | [references/images.md](references/images.md) |
+| `designs` | PNG per HTML design per theme | `... capture.py designs --output-dir shots` | [references/designs.md](references/designs.md) |
+| `screenshots` | PNG(s) of any URL or HTML file: viewport, full-page, scroll steps, slices, one element | `... capture.py screenshots example.com --view mobile --full-page -o home.png` | [references/screenshots.md](references/screenshots.md) |
+| `page` | PNG of a running Windows app window, OS chrome cropped | `... capture.py page --pid 1234 -o .capture/home/app_v{n}.png` | [references/page.md](references/page.md) |
+| `website` | A browsable offline copy: HTML, JS, CSS, fonts, images, data, verified | `... capture.py website https://example.com --depth 1 -o mirror` | [references/website.md](references/website.md) |
+| `dom` | One parse-ready `.html` of the fully expanded DOM (+ `.txt`, `.responses.json`) | `... capture.py dom https://example.com/products --text --api -o product.html` | [references/dom.md](references/dom.md) |
+| `design` | `html.dump`, `css.dump`, `headers.dump`, plus `design-system.md/.json` and/or `design-patterns.md/.json` | `... capture.py design tokens https://example.com -o colors.md` | [references/design.md](references/design.md) |
+| `images` | Every image the page can show, largest original kept, duplicates dropped, + `report.json` | `... capture.py images https://example.com --scroll to-end --exclude "small\|medium" -o images` | [references/images.md](references/images.md) |
 
 ## Loading contract
 
@@ -39,7 +56,9 @@ python <skill-dir>/scripts/capture.py <command> [options]      # command names a
 | Several commands must be chained | [examples/workflows.md](examples/workflows.md) |
 
 Do not read a reference for a command you are not running, and do not read two for one command. Each reference
-is self-contained: flags, output naming, limits, caveats.
+is self-contained: flags, output naming, limits, caveats. Start with `<command> --help`; open the reference only
+when you need strategy, defaults, or caveats that `--help` does not explain. Every reference begins with a short
+Fast path, so you can stop reading as soon as your case is covered.
 
 ## The pairs that get mixed up
 
@@ -55,12 +74,16 @@ is self-contained: flags, output naming, limits, caveats.
   system means tokens; structure/components/markup/clone means patterns. Running without a mode exits 2 and
   prints the question to ask.
 - **`page` vs `screenshots`** — a native app window (Windows, Win32 API) vs a web page rendered in a headless
-  browser. Use identical `--width`/`--height` on both when comparing a design against the app.
+  browser. Use `page --target-size` and matching `--width`/`--height` on `screenshots` when comparing a design
+  against the app.
+- **`--theme` vs `--themes`** — `--theme dark` on every browser command renders one theme. `--themes light dark`
+  is a `designs` batch shorthand (it also accepts repeatable `--theme`).
 
 ## Every run
 
 1. Run the command. `designs --list` first when the folder or page set is uncertain; `page --list` to find the
-   window before capturing it.
+   window before capturing it. Add `--quiet` when only the saved paths matter, or `--json` when a later step must
+   consume counts or paths without parsing prose.
 2. If anything fails to import or launch, run `python <skill-dir>/scripts/check_env.py` once and apply the exact
    fix it prints (`--smoke` renders the bundled examples end to end).
 3. Read the evidence before reporting: `website` prints `VERIFY` lines, `dom` prints per-round growth,

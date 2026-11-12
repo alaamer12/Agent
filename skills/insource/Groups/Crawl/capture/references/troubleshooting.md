@@ -2,6 +2,12 @@
 
 Run `python scripts/check_env.py` first; it prints the exact fix for missing pieces.
 
+## Fast path
+1. Run `python scripts/check_env.py` once; apply the fix it prints.
+2. Find the symptom in the table below.
+3. If the row's fix does not resolve it, open that command's reference only.
+4. Add `--json` when you need to re-check paths/counts without parsing prose.
+
 | Symptom | Cause / fix |
 |---|---|
 | `ModuleNotFoundError: playwright` | `pip install playwright` |
@@ -38,11 +44,11 @@ Run `python scripts/check_env.py` first; it prints the exact fix for missing pie
 | `design`: "No CSS found" / tiny css.dump | CSS injected by JS or page is a shell: run `dom`, then `design ... --html-file`; or check `sources.json` for failed fetches |
 | `design`: stylesheet skipped `HTTP 403/404` | Hotlink/auth protection or bad path: inspect `sources.json`; `--header` only if you're permitted |
 | `design`: self-signed HTTPS fails | `--insecure` |
-| `design`: want to re-analyse without refetching | `--reuse` (optionally `--out <folder>`) |
+| `design`: want to re-analyse without refetching | `--reuse` (optionally `--output-dir <folder>`) |
 | `design patterns`: no repeated components | Small/unique page, or markup built by JS: use `--html-file` from `dom`, lower expectations |
 | `screenshots`: `--selector ... matched no element` | Wrong selector, or the element renders later: check the selector, raise `--wait-ms` |
 | `design`: text looks garbled | Check `encoding=` on the first line of `html.dump`; the page declared a different charset than its real one. Dumps are always UTF-8 |
-| `design`: two runs for different pages overwrote each other | They no longer do (folder = host + path); pass `--out` to choose a folder yourself |
+| `design`: two runs for different pages overwrote each other | They no longer do (folder = host + path); pass `--output-dir` to choose a folder yourself |
 | `page`: "The window is minimized" | Restore the window, then capture again |
 | `page`: `--target-size must look like 1280x800` / `--pad-color must be` | Fix the value; both are checked before capturing |
 | `design patterns`: "No signature matched" but the site clearly uses something | Expected for unlisted or server-side tech: read **Raw evidence** (generator, headers, packages, attribute prefixes), then add a signature with `--signatures FILE` (`references/data-files.md`) |

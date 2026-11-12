@@ -15,7 +15,7 @@ and the original-resolution asset URLs) without an external bridge or subprocess
 Run it through the dispatcher:
   python capture.py images --url https://example.com --scroll to-end --exclude "small|medium"
 Directly (same flags):
-  python images.py --url https://example.com --out .capture/images
+  python images.py --url https://example.com --output-dir .capture/images
 """
 
 from __future__ import annotations
@@ -32,6 +32,11 @@ import re
 import sys
 import time
 from urllib.parse import urlparse, urljoin
+
+from _cli import (add_device_args, add_json_args, add_output_args, add_session_args,  # noqa: E402
+                  add_theme_args, add_view_args, begin, check_file, emit, list_devices,
+                  resolve_device, resolve_viewport)
+from _common import default_user_agent
 
 # Third-party modules are imported by load_deps() at run time, so that `capture.py`
 # can import this command on a machine without them (same convention as the browser
@@ -382,10 +387,11 @@ async def find_text_position(page, query: str):
 
 def add_args(parser):
     """Register the `images` flags on a parser (dispatcher subparser or standalone)."""
-    parser.add_argument('--url', required=True, help="Page to visit")
-    parser.add_argument('--out', default='.capture/images',
-                        help="Download directory (default: .capture/images)")
-    parser.add_argument('--report', default=None, help="Report JSON path (default: <out>/report.json)")
+    parser.add_argument('url_pos', nargs='?', metavar='URL', help="Page to visit")
+    parser.add_argument('--url', dest='url_opt', help="Page to visit, same as the positional")
+    add_output_args(parser, single=False, default_dir='.capture/images',
+                    dir_help="Download directory (default .capture/images)")
+    parser.add_argument('--report', default=None, help="Report JSON path (default: <output-dir>/report.json)")
     parser.add_argument('--scroll', default='0', help='Total px to scroll, "to-end" for whole page, or matching text to scroll to (default: 0)')
     parser.add_argument('--scroll-step', type=int, default=800, help="Px per scroll step (default: 800)")
     parser.add_argument('--scroll-wait', type=int, default=700, help="Wait after each scroll step (ms, default: 700)")
@@ -394,24 +400,44 @@ def add_args(parser):
     parser.add_argument('--idle-timeout', type=int, default=10000, help="networkidle wait timeout in ms (default: 10000)")
     parser.add_argument('--timeout', type=int, default=120000, help="Overall hard timeout in ms (default: 120000)")
     parser.add_argument('--nav-timeout', type=int, default=30000, help="Initial navigation timeout in ms (default: 30000)")
+    parser.add_argument('--wait-until', choices=["networkidle", "load", "domcontentloaded"], default="domcontentloaded",
+                        help="Initial navigation readiness (default: domcontentloaded)")
+    parser.add_argument('--wait-ms', type=int, default=0, help="Extra settle time after navigation, ms (default: 0)")
     parser.add_argument('--concurrency', type=int, default=5, help="Accepted for compatibility (unused)")
     parser.add_argument('--min-bytes', type=int, default=0, help="Skip images smaller than this many bytes (default: 0)")
+    add_view_args(parser)
+    parser.add_argument('--scale', type=float, default=1.0, help="Device pixel ratio, e.g. 2 for retina (default 1)")
+    parser.add_argument('--user-agent', default=None,
+                        help="User agent (default: browser-like; env CAPTURE_USER_AGENT overrides)")
+    add_device_args(parser)
+    add_session_args(parser)
+    add_theme_args(parser)
     parser.add_argument('--headed', action='store_true', help="Run browser headed")
     parser.add_argument('--no-pretty', action='store_true', help="Emit compact JSON report")
+    add_json_args(parser)
     return parser
 
 
 def prepare(args):
     """Validate and normalise before any browser starts. Returns the exclude rules."""
+    args.url = args.url_opt or args.url_pos
+    if not args.url:
+        raise SystemExit("Give the page URL (positional or --url).")
+    check_file(args.storage_state, "--storage-state")
     bad = []
     for name in ("timeout", "nav_timeout", "idle_timeout", "scroll_step",
-                 "scroll_wait", "min_bytes", "concurrency"):
+                 "scroll_wait", "wait_ms", "min_bytes", "concurrency"):
         value = getattr(args, name)
         if value < 0:
             bad.append("--" + name.replace("_", "-") + " cannot be negative (got " + str(value) + ")")
     for name in ("timeout", "nav_timeout"):
         if getattr(args, name) == 0:
             bad.append("--" + name.replace("_", "-") + " must be greater than 0")
+    vw, vh = resolve_viewport(args)
+    if not (0 < vw <= 16384 and 0 < vh <= 16384):
+        bad.append("--width and --height must be between 1 and 16384")
+    if not 0 < args.scale <= 8:
+        bad.append("--scale must be between 0 and 8 (got " + str(args.scale) + ")")
     if bad:
         raise SystemExit("INVALID OPTION(S): " + "; ".join(bad))
     exclude_rules = []
@@ -421,7 +447,7 @@ def prepare(args):
         except Exception as e:
             raise SystemExit(f"Invalid --exclude: {e}")
     if not args.report:
-        args.report = os.path.join(args.out, 'report.json')
+        args.report = os.path.join(args.output_dir, 'report.json')
     return exclude_rules
 
 
@@ -433,7 +459,7 @@ async def run_async(args, exclude_rules):
         if time.time() > deadline:
             raise TimeoutError(f"Overall --timeout ({args.timeout}ms) exceeded during: {label}")
 
-    os.makedirs(args.out, exist_ok=True)
+    os.makedirs(args.output_dir, exist_ok=True)
 
     cffi_session = cffi_requests.Session(impersonate="chrome120")
 
@@ -460,11 +486,25 @@ async def run_async(args, exclude_rules):
             headless=not args.headed,
             args=['--disable-blink-features=AutomationControlled'],
         )
-        context = await browser.new_context(
-            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
-            viewport={'width': 1280, 'height': 800},
-        )
+        if args.device:
+            ctx_kwargs = dict(resolve_device(pw, args.device))
+            if args.user_agent:
+                ctx_kwargs['user_agent'] = args.user_agent
+        else:
+            vw, vh = resolve_viewport(args)
+            ctx_kwargs = {
+                'user_agent': args.user_agent or default_user_agent(),
+                'viewport': {'width': vw, 'height': vh},
+                'device_scale_factor': args.scale,
+            }
+        if args.theme:
+            ctx_kwargs['color_scheme'] = args.theme
+        if args.storage_state:
+            ctx_kwargs['storage_state'] = args.storage_state
+        context = await browser.new_context(**ctx_kwargs)
         page = await context.new_page()
+        if args.theme and args.theme_key:
+            await page.add_init_script("try{localStorage.setItem(%r,%r)}catch(e){}" % (args.theme_key, args.theme))
 
         # Handle Cloudflare-protected API calls like Medium's GraphQL via curl_cffi directly in Python
         async def handle_route(route):
@@ -541,11 +581,16 @@ async def run_async(args, exclude_rules):
 
         nav_error = None
         try:
-            await page.goto(args.url, wait_until='domcontentloaded', timeout=args.nav_timeout)
+            await page.goto(args.url, wait_until=args.wait_until, timeout=args.nav_timeout)
             await page.wait_for_load_state('networkidle', timeout=args.idle_timeout)
         except Exception as err:
             nav_error = str(err)
             print(f"Warning: initial load/idle wait had an issue: {nav_error}", file=sys.stderr)
+        if args.theme:
+            await page.evaluate("t=>{const r=document.documentElement;"
+                                "r.classList.toggle('dark',t==='dark');r.setAttribute('data-theme',t)}", args.theme)
+        if args.wait_ms:
+            await page.wait_for_timeout(args.wait_ms)
 
         check_timeout('initial page load')
 
@@ -898,12 +943,12 @@ async def run_async(args, exclude_rules):
         fname = filename_from_url(u, buf)
 
         # Ensure no accidental overwriting if two completely different images had the same name
-        dest_path = os.path.join(args.out, fname)
+        dest_path = os.path.join(args.output_dir, fname)
         if dest_path in written_files or os.path.exists(dest_path):
             root, ext = os.path.splitext(fname)
             n = 1
             while dest_path in written_files or os.path.exists(dest_path):
-                dest_path = os.path.join(args.out, f"{root}_{n}{ext}")
+                dest_path = os.path.join(args.output_dir, f"{root}_{n}{ext}")
                 n += 1
 
         if len(buf) < args.min_bytes:
@@ -980,13 +1025,23 @@ async def run_async(args, exclude_rules):
           f"{len(dedup_skipped)} duplicates removed, {len(excluded_by_condition)} excluded by condition, "
           f"{len(auth_blocked)} auth-blocked, {len(failed)} failed, {len(skipped_small)} skipped, "
           f"{len(excluded_by_between)} excluded by --between.")
+    return report
 
 
 def run(args):
     """Entry point used by the `capture` dispatcher."""
+    if list_devices(args, "images"):
+        return
     exclude_rules = prepare(args)
     load_deps()
-    asyncio.run(run_async(args, exclude_rules))
+    payload = {"command": "images", "url": args.url, "output_dir": args.output_dir, "report": args.report}
+    with begin(args) as real:
+        report = asyncio.run(run_async(args, exclude_rules))
+    if report:
+        payload.update(report.get("summary", {}))
+        payload["report"] = args.report
+        payload["downloaded"] = [d.get("savedAs") for d in report.get("downloaded", [])]
+    emit(args, payload, real)
 
 
 if __name__ == '__main__':

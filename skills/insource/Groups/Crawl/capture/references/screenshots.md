@@ -2,6 +2,13 @@
 
 Capture one or many URLs / local HTML files with Playwright/Chromium. Read this when choosing a mode, a viewport, or when output naming matters.
 
+## Fast path
+1. `capture.py screenshots https://example.com -o home.png` (default: viewport-sized).
+2. Add `--full-page`, `--scroll`, `--slices N`, or `--selector CSS` for another shape.
+3. `--view mobile` / `--device "iPhone 13"` / `--width`/`--height` / `--scale 2` control the render.
+4. Several targets or a series need `--output-dir`, not `-o`.
+5. Add `--json` for paths/counts; `--quiet` for silent runs.
+
 ## Contents
 - Targets
 - Modes
@@ -43,7 +50,9 @@ At most one. Default is a single viewport-sized image.
 - `--view`: `desktop` 1280x800 (default), `wide` 1920x1080, `tablet` 768x1024, `mobile` 375x812. `--width` / `--height` override either dimension.
 - `--zoom 50` (also `50%`, `0.5`): browser-style zoom. The CSS viewport is resized and the pixel ratio compensates, so layout, media queries and page height are correct and image size stays `width x height`. Below 100 fits more page into the same image; above 100 magnifies.
 - `--scale 2`: device pixel ratio for sharper images (output is 2x pixels).
+- `--timeout` (navigation ms), `--headed`, `--user-agent`: shared browser knobs; `--device` also sets its own user agent, and an explicit `--user-agent` wins.
 - The `--view` presets are generic sizes, not specific devices, and set only the viewport (no touch or user-agent emulation). For a real device use `--device "iPhone 13"`: Playwright's maintained profile (viewport, user agent, pixel ratio, touch). `--list-devices` prints the available names, and a near-miss name gets suggestions. `--device` cannot be combined with `--zoom`.
+- `--storage-state session.json` reuses cookies/localStorage from a saved Playwright session; useful for logged-in pages without scripting a login.
 
 ## Limits and validation
 Options are validated before any browser starts, so mistakes fail instantly and offline. The limits are named constants at the top of `screenshots.py`; `--help` shows the defaults.
@@ -52,10 +61,10 @@ Options are validated before any browser starts, so mistakes fail instantly and 
 - `--scroll` and `--slices` are capped by `--max-shots` so a mistake cannot write thousands of images; `--slices` also refuses slices thinner than a minimum height and more slices than the page has pixels.
 
 ## Output naming
-- `--output file.png`: one target, single-image mode. `{n}` becomes the next unused integer (`shot_v{n}.png`).
-- Otherwise: `<output-dir>/<name>/<i>.png`, default dir `.capture/screenshots`. `<name>` is derived from the target: `example.com/a/b` -> `example.com_a_b`, `designs/home.html` -> `home`.
+- `-o/--output file.png`: one target, single-image mode. `{n}` becomes the next unused integer (`shot_v{n}.png`).
+- Otherwise: `<output-dir>/<name>/<i>.png`, default dir `.capture/screenshots` (`-o`/`--out` name the dir too). `<name>` is derived from the target: `example.com/a/b` -> `example.com_a_b`, `designs/home.html` -> `home`.
 - With `--theme dark` the series files get a suffix: `1_dark.png`.
-- `--output` with several targets, `--scroll` or `--slices` is an error that says to use `--output-dir`.
+- `-o/--output` with several targets, `--scroll` or `--slices` is an error that says to use `--output-dir`.
 
 ## Waiting and lazy content
 - Default readiness is `networkidle`. Use `--wait-until load` for pages with websockets/polling that never go idle.

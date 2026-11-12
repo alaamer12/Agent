@@ -2,6 +2,13 @@
 
 Batch-captures every HTML design in a designs folder. Read this when the defaults don't fit (unusual layout, custom server, partial pages).
 
+## Fast path
+1. `capture.py designs --list` to confirm the folder and pages.
+2. `capture.py designs --themes light dark --output-dir shots`.
+3. PNGs land at `<output-dir>/<page>/design_<theme>.png` (default `.capture`).
+4. Add `--json` for a machine-readable summary; `--quiet` for silent runs.
+5. Only read the sections below when the folder or server is unusual.
+
 ## Contents
 - Folder detection
 - Page discovery and naming
@@ -30,13 +37,19 @@ If several candidates exist, run `--list` with each `--dir` and ask the user whi
 | `--folder-names NAME...` | defaults above | Folder names to look for when auto-detecting |
 | `--list` | off | Print folder and pages, capture nothing |
 | `--pages a b` | all | Names as above; `.html` suffix optional; unknown names error with the valid list |
-| `--themes` | `light` | `light`, `dark`, or both |
+| `--themes` | `light` | `light`, `dark`, or both (`--theme dark` = one theme) |
 | `--theme-key` | none | localStorage key; see `theming.md` |
-| `--out` | `.capture` | Output root |
-| `--width/--height` | 1280x800 | Keep identical across runs and across design/app |
+| `--output-dir`, `--out` | `.capture` | Output root (`-o` also names this folder) |
+| `--view` | `desktop` | `desktop` 1280x800, `wide` 1920x1080, `tablet` 768x1024, `mobile` 375x812; `--width`/`--height` override either dimension |
+| `--device NAME` | none | Playwright device profile (viewport, UA, pixel ratio, touch); overrides `--view`; `--list-devices` prints names |
+| `--scale` | 1 | Device pixel ratio (retina = 2) |
 | `--full-page` | off | Capture full scroll height (changes image height per page) |
 | `--wait-ms` | 500 | Extra settle time after network idle |
+| `--wait-until` | `networkidle` | `load` for pages with long-lived connections |
+| `--storage-state FILE` | none | Playwright storage-state JSON (cookies/login) |
+| `--timeout`, `--headed`, `--user-agent` | 30000 / off / browser default | Browser knobs shared by every browser command |
 | `--base-url` | none | Skip the built-in server |
+| `--json`, `--quiet` | off | Machine-readable summary / no progress |
 
 ## Using an existing dev server
 Pass `--base-url http://localhost:5173` when the designs need a build step or a framework dev server. `--dir` is still used to enumerate page names; URLs become `<base-url>/<page>.html`.

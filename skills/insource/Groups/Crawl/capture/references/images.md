@@ -2,6 +2,13 @@
 
 Download every image a page can show, at its highest resolution, deduplicated, with a JSON report that explains each keep and drop. Read this file only when the chosen command is `images`.
 
+## Fast path
+1. `capture.py images https://example.com --scroll to-end`.
+2. Files land in `.capture/images`; the report is `<output-dir>/report.json`.
+3. Filter with `--between`, `--exclude`, or `--min-bytes`.
+4. Add `--json` for the summary on stdout; `--quiet` for silent runs.
+5. The report, not stdout, is the source of truth for every keep and drop.
+
 ## Contents
 - Is this the right command
 - What it writes
@@ -27,19 +34,20 @@ Download every image a page can show, at its highest resolution, deduplicated, w
 
 ## What it writes
 
-- Image files in `--out` (default `.capture/images`), named from the original URL with the extension corrected by magic bytes, so a `.jpg` that is really a PNG is saved as PNG. Collisions become `name_1.ext`, `name_2.ext`.
-- One JSON report at `--report` (default `<out>/report.json`). It is written even when the run partially fails, and it is the source of truth for what was kept and why.
+- Image files in `--output-dir` (`--out`, `-o`; default `.capture/images`), named from the original URL with the extension corrected by magic bytes, so a `.jpg` that is really a PNG is saved as PNG. Collisions become `name_1.ext`, `name_2.ext`.
+- One JSON report at `--report` (default `<output-dir>/report.json`). It is written even when the run partially fails, and it is the source of truth for what was kept and why.
 
 ## Flags
 
-`--url` is required; everything else has a default. Options are validated before the browser starts.
+`url`/`--url` is required; everything else has a default. Options are validated before the browser starts.
 
 | Group | Flag | Default | Notes |
 |---|---|---|---|
-| Target | `--url` | required | Fully-qualified HTTP(S) page URL. |
-| Output | `--out` | `.capture/images` | Created if missing. |
-| Output | `--report` | `<out>/report.json` | Explicit path allowed. |
+| Target | `url`, `--url` | required | Fully-qualified HTTP(S) page URL. |
+| Output | `--output-dir`, `--out`, `-o` | `.capture/images` | Created if missing. |
+| Output | `--report` | `<output-dir>/report.json` | Explicit path allowed. |
 | Output | `--no-pretty` | off | Compact single-line JSON. |
+| Output | `--json`, `--quiet` | off | Summary on stdout / no progress. |
 | Scroll | `--scroll` | `0` | Pixels, `to-end`/`to_end`/`end`, or literal text to reach. |
 | Scroll | `--scroll-step` | `800` | Px per step. |
 | Scroll | `--scroll-wait` | `700` | ms after each step, so lazy images fire. |
@@ -49,6 +57,15 @@ Download every image a page can show, at its highest resolution, deduplicated, w
 | Time | `--idle-timeout` | `10000` | ms `networkidle` wait after navigation. |
 | Time | `--nav-timeout` | `30000` | ms initial goto. |
 | Time | `--timeout` | `120000` | Hard wall-clock deadline for the whole run, checked at each stage. |
+| Time | `--wait-until` | `domcontentloaded` | Initial navigation readiness. |
+| Time | `--wait-ms` | `0` | Extra settle time after navigation. |
+| Browser | `--view` | `desktop` | `desktop` 1280x800, `wide` 1920x1080, `tablet` 768x1024, `mobile` 375x812. |
+| Browser | `--width`, `--height` | from `--view` | Override either dimension. |
+| Browser | `--device` | none | Playwright device profile (viewport, UA, pixel ratio, touch); `--list-devices` prints names. |
+| Browser | `--scale` | `1` | Device pixel ratio. |
+| Browser | `--theme`, `--theme-key` | none | Emulate dark/light and seed the page's theme storage. |
+| Browser | `--storage-state` | none | Playwright storage-state JSON (cookies/login). |
+| Browser | `--user-agent` | browser-like | UA override (env `CAPTURE_USER_AGENT` wins). |
 | Browser | `--headed` | off | Visible browser, for diagnosing why nothing loads. |
 | Browser | `--concurrency` | `5` | Accepted for compatibility; unused. |
 
@@ -107,7 +124,7 @@ After every run, relay the `summary` counts and the `feedDetection.reasoning`. I
 
 ```bash
 python <skill-dir>/scripts/capture.py images --url "https://medium.com/@author/some-article" \
-  --out .capture/medium --scroll to-end --exclude "small|medium"
+  --output-dir .capture/medium --scroll to-end --exclude "small|medium"
 
 # stop at a paragraph, drop anything up to 200x200
 python <skill-dir>/scripts/capture.py images --url "https://example.com/long-read" \

@@ -4,6 +4,13 @@ Downloads a site into a folder so it can be served and used offline. A real Chro
 
 > Need scrape-ready content (everything expanded, plain HTML) rather than a working copy? Use `dom`; see `choosing.md`.
 
+## Fast path
+1. `capture.py website https://example.com --output-dir mirror` (default `.capture/website/<host>`).
+2. `--depth 1` also follows same-site links; `--external` saves CDN/font hosts.
+3. Verification runs automatically; read the `VERIFY` lines before reporting.
+4. `--serve-only mirror` serves the copy locally; `--json` emits the manifest summary.
+5. `--depth 0` (default) is the fastest useful run.
+
 ## Contents
 - What it does, step by step
 - Options
@@ -14,7 +21,7 @@ Downloads a site into a folder so it can be served and used offline. A real Chro
 - Limits
 
 ## What it does, step by step
-1. Opens the entry URL (viewport 1920x1080), waits `--wait-ms`, then scrolls down in `--scroll-steps` steps so lazy content loads.
+1. Opens the entry URL (default view `wide`, 1920x1080), waits `--wait-ms`, then scrolls down in `--scroll-steps` steps so lazy content loads.
 2. Saves every successful `GET` response from the site's origin to disk, preserving URL paths. Extensionless HTML routes are saved as `route/index.html` so `/about` and `/about/team` can coexist.
 3. Fetches icons/manifests referenced in `<link>`/`<img>` that the page never requested at runtime.
 4. Rewrites text files (HTML, JS, CSS, JSON, SVG, XML) so absolute references to the site's origin become root-relative (`https://site.com/x.js` -> `/x.js`, also JSON-escaped forms), and removes `integrity="..."` attributes (hashes break once files are rewritten).
@@ -25,8 +32,9 @@ Default output: `.capture/website/<host>/`. Re-running into the same folder over
 ## Options
 | Option | Default | Notes |
 |---|---|---|
-| `url` | required | `https://` added if missing; `localhost` gets `http://` |
-| `--output-dir` | `.capture/website/<host>` | |
+| `url`, `--url` | required | `https://` added if missing; `localhost` gets `http://` |
+| `--output-dir`, `--out` | `.capture/website/<host>` | `-o` also names this folder |
+| `--json`, `--quiet` | off | Machine-readable manifest summary / no progress |
 | `--depth N` | 0 | Follow same-site links N levels. 0 = entry page + its assets |
 | `--max-pages` | 50 | Crawl cap |
 | `--delay-ms` | 0 | Pause between crawled pages; use for small or shared servers |
@@ -36,9 +44,14 @@ Default output: `.capture/website/<host>/`. Re-running into the same folder over
 | `--block HOST` | none | Never save assets from this host (repeatable); added to the default tracker blocklist |
 | `--no-default-blocklist` | off | Ignore `scripts/data/trackers.txt`; only `--block` hosts are blocked |
 | `--wait-ms` | 2000 | Settle time per page before scrolling |
+| `--wait-until` | `domcontentloaded` | `load`/`networkidle` for pages whose assets appear later |
 | `--scroll-steps` | 10 | 0 disables scrolling |
 | `--timeout` | 30000 | Navigation timeout (ms) |
-| `--width/--height` | 1920x1080 | Sites may serve different assets per viewport |
+| `--view` | `wide` | `desktop` 1280x800, `wide` 1920x1080, `tablet` 768x1024, `mobile` 375x812; `--width`/`--height` override |
+| `--device NAME` | none | Playwright device profile (viewport, UA, pixel ratio, touch); `--list-devices` prints names |
+| `--scale`, `--headed`, `--user-agent` | 1 / off / browser default | Browser knobs shared by every browser command |
+| `--theme`, `--theme-key` | none | Emulate dark/light and seed the page's theme storage; see `theming.md` |
+| `--storage-state FILE` | none | Playwright storage-state JSON (cookies/login) for the download and verify passes |
 | `--no-verify` | off | Skip the verification pass |
 | `--serve`, `--serve-only DIR`, `--port`, `--open`, `--spa` | | See "Serving" |
 

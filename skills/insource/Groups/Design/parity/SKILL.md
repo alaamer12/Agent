@@ -18,6 +18,36 @@ A single capture-compare-report cycle tells you a score is low. It doesn't fix a
 - **`references/debug-state-simulation.md`** — how to reach a specific deep UI state on demand: the ItC-component inventory method, instrumenting a static mockup with query-param-driven state forcing, hosting it correctly (not over `file://`), the dummy-data fixture plan, and bypassing obstacle screens — everything needed so the loop can capture any screen/state/theme/language combination unattended.
 - **`references/rendering-gotchas.md`** — a categorized catalog of *why* a pixel-accurate-looking implementation still scores low: native input decorations, spacing double-counting, font-metric divergence, chrome elements that don't auto-hide, asset-path resolution differences, dummy-data mismatches, and capture-reliability failures. Each category includes the general symptom pattern plus one concrete worked fix, from a real MAUI/Android project, to show what "root cause → fix" actually looks like end to end.
 - **`references/motion-parity.md`** — why a passing still-frame score doesn't mean parity: transitions, easing, and coupled state changes (a chevron that should flip, a drawer that should slide rather than snap) that only show up in motion, plus how to check for them separately from the main still-image loop.
+- **`references/scripts-reference.md`** — the working implementation of this pipeline: every script in `scripts/`, every flag, its defaults, which pipeline step it owns, its exit codes, and the import recipes for calling the capture/scoring functions from a project's own harness.
+- **`references/matrix-config.md`** — the JSON schemas that drive the toolkit: `run_suite.py` config (matrix, splash colours, thresholds), the ADB screens file, `parity_cut.py` region files, `pixel_regression.py` masks, plus the on-disk artifact layouts.
+
+## Ready-made toolkit
+
+`scripts/` is a complete, project-agnostic implementation of this document — eleven Python scripts, no product assumptions, everything driven by flags or JSON config:
+
+```bash
+python -m pip install -r scripts/requirements.txt
+python -m playwright install chromium
+```
+
+```bash
+# reference frames for the matrix
+python scripts/capture_batch.py --base-url http://localhost:8000 \
+    --design-root design --pages home settings --themes light dark
+
+# one state: launch -> capture -> normalize -> score -> align
+python scripts/parity_run.py --exe build/app.exe \
+    --launch-args "--page={page} --theme={theme}" \
+    --page home --theme dark --design-root parity_captures --threshold 0.92
+
+# the whole matrix, unattended
+python scripts/run_suite.py --config parity.json --all
+```
+
+Use it directly if it fits, or copy the folder into the project's own tooling — the scripts import each other by name, so they move as a unit. Two boundaries to keep in mind when adapting them:
+
+- `parity_run.py` and `run_suite.py` capture *Windows* windows via `PrintWindow`; `run_android_suite.py` covers ADB. Other platforms need their own screenshot step feeding the same `similarity.py` / `region_crop.py` / `pixel_regression.py` layer, which is cross-platform.
+- The toolkit measures and reports; it does not edit UI code. The fix in Step 4 is still yours — the scripts exist so the *measurement* side of the loop needs no human.
 
 ## The workflow
 
@@ -42,6 +72,7 @@ A single capture-compare-report cycle tells you a score is low. It doesn't fix a
 ### Step 2 — Score and diagnose (don't just get a number — localize it)
 
 - Run the full comparison suite from `references/pipeline.md`: an overall similarity score, a palette/color-fidelity score, and a **regional grid breakdown** (e.g. 4×4) — the regional grid is what turns "72%, not sure why" into "the bottom row is 30%, everything else is 90%+," which is what makes autonomous diagnosis possible at all. A single global number is not enough signal to act on without a human manually inspecting the image every time.
+- Separately track the **structure** score (the same pair blurred 1px on both sides, blending SSIM/histogram/hash) alongside the raw score. Structure high and raw low means a renderer difference — GDI vs Chromium glyph placement, font hinting — not a layout bug. Structure and raw both low means a real defect. Without this split, the loop spends iterations "fixing" sub-pixel text that is already correct.
 - If already at or above the agreed threshold for this screen/state: record it as done, move to the next screen/state in scope, don't keep iterating on something that's already passing.
 
 ### Step 3 — Form a root-cause hypothesis from the regional signal
@@ -49,6 +80,7 @@ A single capture-compare-report cycle tells you a score is low. It doesn't fix a
 - Map the lowest-scoring region(s) to the actual UI elements that live there (a bottom row failing usually means a bottom bar/CTA/nav chrome issue; a top row failing usually means a header/status-bar issue).
 - Check the failure pattern against `references/rendering-gotchas.md`'s categories first — most low-scoring regions turn out to be one of a small number of recurring causes (a native decoration bleeding through, a spacing/margin double-count, a chrome element that didn't auto-hide, a font-metric mismatch), not a novel one-off bug.
 - If the heatmap shows a **structural shift** (bright red/magenta — things in the wrong place) that's a different fix category than **texture/softness** (yellow — minor anti-aliasing or shadow softness, often not worth chasing below a certain point of diminishing returns).
+- Crop the offending region out of **both** images at the exact box the grid reported, and look at them side by side before editing code. Reading a crop pair is faster and more reliable than reasoning about a heatmap, and it prevents the classic error of fixing a component that lives *next to* the failing cell.
 
 ### Step 4 — Apply the fix, rebuild, recapture — without stopping to ask
 

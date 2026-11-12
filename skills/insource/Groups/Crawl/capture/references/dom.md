@@ -2,6 +2,13 @@
 
 Saves the fully rendered, fully expanded DOM of JavaScript-heavy pages as static `.html` for scraping. A real headless Chromium runs the page's JS, then the command forces hidden content to load and serializes the result. Compare with DevTools "copy outerHTML" after you've clicked and scrolled everything, automated.
 
+## Fast path
+1. `capture.py dom https://example.com/products -o product.html`.
+2. Add `--text` for visible text and `--api` for JSON responses seen on the wire.
+3. Several pages use `--output-dir`; each becomes `<dir>/<name>.html`.
+4. Add `--no-expand` where a click has side effects.
+5. Add `--json` for paths/counts; `--quiet` for silent runs.
+
 ## Contents
 - What "forcing content to load" does
 - Options
@@ -27,8 +34,9 @@ What gets clicked automatically (disable with `--no-expand`): `<button>`, `[role
 | Option | Default | Notes |
 |---|---|---|
 | `URL...` / `--url` / `--urls` | required | URLs, bare domains, local paths |
-| `-o/--output` | `.capture/dom/<name>.html` | Single page; `{n}` auto-numbers |
-| `--output-dir` | `.capture/dom` | Several pages: `<dir>/<name>.html`, name from the URL |
+| `-o/--output` | none | Single page; when omitted, `<output-dir>/<name>.html`; `{n}` auto-numbers |
+| `--output-dir`, `--out` | `.capture/dom` | Several pages: `<dir>/<name>.html`, name from the URL (`-o` names the dir too) |
+| `--json`, `--quiet` | off | Machine-readable summary / no progress |
 | `--no-force` | off | Plain rendered snapshot (still opens `<details>`, promotes lazy attrs, absolutizes links, flattens shadow DOM) |
 | `--max-rounds` | 20 | Raise for very long feeds; the log warns when the cap is hit |
 | `--stable-rounds` | 2 | Rounds without growth before stopping |
@@ -47,8 +55,12 @@ What gets clicked automatically (disable with `--no-expand`): `<button>`, `[role
 | `--text` | off | Also write visible text to `<name>.txt` |
 | `--api` | off | Also write JSON responses seen on the network to `<name>.responses.json` |
 | `--wait-ms` | 2000 | Final settle before serializing |
+| `--wait-until` | `networkidle` | Navigation readiness; `load` for long-lived connections |
 | `--timeout` | 60000 | Navigation timeout (ms) |
-| `--width/--height` | 1366x900 | Viewport (affects responsive markup) |
+| `--view` | `desktop` | `desktop` 1280x800, `wide` 1920x1080, `tablet` 768x1024, `mobile` 375x812; `--width`/`--height` override |
+| `--device NAME` | none | Playwright device profile (viewport, UA, pixel ratio, touch); `--list-devices` prints names |
+| `--scale` | 1 | Device pixel ratio |
+| `--theme`, `--theme-key` | none | Emulate dark/light and seed the page's theme storage; see `theming.md` |
 | `--storage-state FILE` | none | Playwright storage-state JSON (cookies/login) for pages behind a session; only for accounts you're allowed to use |
 | `--user-agent`, `--headed` | browser-like UA | Override UA (env `CAPTURE_USER_AGENT` changes the default); show the browser for debugging |
 
