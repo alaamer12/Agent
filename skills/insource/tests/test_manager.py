@@ -82,6 +82,24 @@ class ManagerTest(unittest.TestCase):
         self.assertTrue((self.home / ".qoder" / "skills" / "beta").exists())
         self.assertFalse((self.home / ".junie" / "skills" / "beta").exists())
 
+    def test_multiple_skill_names(self) -> None:
+        code, out, err = self.run_manager("skill", "alpha", "gamma", "-A", "qoder")
+        self.assertEqual(code, 0, err)
+        self.assertTrue((self.home / ".qoder" / "skills" / "alpha").exists())
+        self.assertTrue((self.home / ".qoder" / "skills" / "gamma").exists())
+        self.assertFalse((self.home / ".qoder" / "skills" / "beta").exists())
+
+        into = self.tmp / "multi" / "skills"
+        code, out, err = self.run_manager("alpha", "gamma", "--into", str(into))
+        self.assertEqual(code, 0, err)
+        self.assertTrue((into / "alpha" / "SKILL.md").is_file())
+        self.assertTrue((into / "gamma" / "SKILL.md").is_file())
+
+        code, out, err = self.run_manager("skill", "alpha", "gamma", "-A", "qoder", "-c")
+        self.assertEqual(code, 0, err)
+        self.assertFalse(is_link(self.home / ".qoder" / "skills" / "alpha"))
+        self.assertFalse(is_link(self.home / ".qoder" / "skills" / "gamma"))
+
     def test_hard_copy_manifest_and_sync_report(self) -> None:
         code, out, err = self.run_manager("skill", "beta", "-A", "qoder", "-c")
         self.assertEqual(code, 0, err)
