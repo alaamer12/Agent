@@ -19,10 +19,10 @@ flowchart TD
 
     subgraph P2["Phase 2: Vision"]
         D["Settle the open AGENTS.md questions<br/>versioning, app list, ...<br/>rules/ and part of steering/tech/"]
-        E["Main pages<br/>main-pages + grill-me<br/>PAGE-MAP.md"]
+        E["Main pages<br/>pages main + grill-me<br/>PAGES.md"]
         subgraph PAR["In parallel"]
             F["First prototype draft<br/>prototype"]
-            G["Secondary pages<br/>secondary-pages (planned)"]
+            G["Secondary pages<br/>pages secondary"]
             H["Tech direction, then architecture<br/>steering (tech tier) + grill-me + research<br/>then architecture"]
         end
         I["Prototype refinement round<br/>prototype"]
@@ -60,9 +60,9 @@ flowchart TD
 | 1 | Preparation | Perception | [`steering`](steering/SKILL.md) (perception tier) + `grill-me` | `steering/perception/` |
 | 1 | Preparation | Agent rulebook | [`agents-md`](agents-md/SKILL.md) + `grill-me` | `AGENTS.md`, a first draft that enables parallel work |
 | 2 | Vision | Settle open rulebook questions | `grill-me` | answers go to `rules/`; some go to `steering/tech/` |
-| 2 | Vision | Main pages | `main-pages` + `grill-me` | `PAGE-MAP.md` |
+| 2 | Vision | Main pages | `pages main` + `grill-me` | `PAGES.md` |
 | 2 | Vision | First prototype draft *(parallel)* | `prototype` | incomplete draft, which is expected |
-| 2 | Vision | Secondary pages *(parallel)* | `secondary-pages` *(planned)* | the complete page map |
+| 2 | Vision | Secondary pages *(parallel)* | `pages secondary` | the complete page map |
 | 2 | Vision | Tech direction, then architecture *(parallel)* | [`steering`](steering/SKILL.md) (tech tier) + `grill-me` + research, then [`architecture`](architecture/SKILL.md) | `steering/tech/` and the architecture documents |
 | 2 | Vision | Prototype refinement | `prototype` | prototype that includes the newly documented features |
 | 2 | Vision | Declare | none | first vision baseline |
@@ -89,10 +89,10 @@ Preparation turns a vague idea into a shared understanding that agents can work 
 Vision decides exactly what will be built, at the level of pages, prototypes, and technical direction.
 
 1. **Settle open rulebook questions.** The questions left open in `AGENTS.md` are answered now, for example whether each app is versioned independently and which apps exist. Most answers go to `rules/`; some belong in `steering/tech/`.
-2. **Main pages.** `main-pages` grills the user to identify the screens, producing `PAGE-MAP.md`.
+2. **Main pages.** `pages main` grills the user to identify the screens, producing `PAGES.md`.
 3. **Three parallel tracks**, which can start once the main pages are known:
    - **Prototype draft.** `prototype` builds a first draft of the planned apps.
-   - **Secondary pages.** A secondary-pages Skill completes the page map with the screens the main-pages pass did not surface.
+   - **Secondary pages.** The `pages secondary` mode completes the page map with the screens the `/pages main` pass did not surface.
    - **Tech direction, then architecture.** The tech tier of [`steering`](steering/SKILL.md) is run with `grill-me` and live research to reach a general technical direction. [`architecture`](architecture/SKILL.md) then authors the binding specifications (see section 6).
 4. **Prototype refinement.** The first prototype draft is intentionally incomplete, because the features were not yet documented when it started. A second `prototype` round adds the features that have since been documented.
 5. **Declare.** When the refined prototype, the page map, perception, and tech steering agree, the first vision is declared.

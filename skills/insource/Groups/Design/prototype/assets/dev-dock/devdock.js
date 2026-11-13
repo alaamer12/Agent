@@ -6,7 +6,7 @@
  * cross-app navigation — lives here or in the URL. A page's own render
  * template must never emit meta-control UI (no in-page "toggle state" links,
  * no per-page toolbars, no duplicated app switchers). See
- * `references/prototype-dock.md` for the full rule and wiring contract.
+ * the `prototype` skill's `references/prototype-dock.md` for the full rule and wiring contract.
  *
  * Wiring contract:
  *   - The dock talks to the project ONLY through query parameters. Controls
@@ -19,10 +19,14 @@
  *     ?font= sets --font on <html>, ?theme= sets data-theme on <html>.
  *     sy_* and filled remain the project's mechanism (mountStory / specs);
  *     the dock only provides their UI.
- *   - Project extension: window.DevDockInit = { apps: [{name, url, current}],
- *     accent, edge } before this script loads. Extra tabs:
- *     DevDock.registerTab({ id, label, icon, render }) after it loads —
- *     page-specific state trees belong in such a tab, never in page content.
+ *   - Project extension: window.DevDockInit = { apps, states, stories, frames,
+ *     accent, edge } before this script loads, or after:
+ *     DevDock.declare({ states: [{key,label,values}], stories: [{id,states}],
+ *     frames: { mobile: 390 } }) from any page/specs module — declaring is the
+ *     standard channel; registerTab({ id, label, icon, render }) stays for
+ *     genuinely custom views. The dock accent is never hardcoded: it resolves
+ *     explicit config > the page's brand token (--brand/--accent/--primary…) >
+ *     meta theme-color > the most vivid color token > neutral slate.
  *   - ?dock=hide removes the dock entirely (screenshots, embedding, gallery).
  *
  * Self-contained: no dependencies, no build step, works over file:// and any
@@ -38,15 +42,20 @@
   const CONFIG = Object.assign({
     edge: 'bottom',                 // top | bottom | left | right
     pos: 0.5,                       // 0..1 position along that edge
-    accent: '#00dc82',
+    accent: null,                   // brand color: explicit > detected from the page's own tokens > neutral slate — never hardcoded per project
     leaveDelay: 250,                // ms the pill waits before collapsing after the pointer leaves
     storageKey: 'devdock:proto:v1',
     shortcut: (e) => e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'd',
     apps: [],                       // [{ name, url, current? }] — cross-app switcher entries
+    states: [],                     // [{ key, label?, values: ['pending', {v,l}], defaultLabel? }] — declared state controls
+    stories: [],                    // [{ id, states?: [{ l, q: {param: value} }] }] — component/story inventory
+    frames: {},                     // { mobile: 390, desktop: 1280 } — pinned viewport targets for the readout
   }, window.DevDockInit || {});
 
   /* ---------- URL helpers: the only channel between dock and project ---------- */
   const Q = {
+    /* Unicode-safe by construction: URLSearchParams percent-encodes Arabic (and
+       any non-ASCII) values automatically — never hand-concatenate raw text into a URL. */
     get: (k) => new URLSearchParams(location.search).get(k),
     has: (k) => new URLSearchParams(location.search).has(k),
     all: () => [...new URLSearchParams(location.search).entries()],
@@ -90,13 +99,51 @@
   };
   const ico = (n, s) => h('span', { class: 'i', html: icon(n, s) });
 
+  /* ---------- brand accent: adapt to the prototype's own palette ---------- */
+  const isColorish = (v) => /^(#|rgba?\(|hsla?\(|oklch|oklab|lab\(|color\()/i.test((v || '').trim());
+  const walkRules = (rules, out) => {
+    for (const r of rules) { if (r.cssRules) walkRules(r.cssRules, out); if (r.style) for (const p of r.style) if (p.startsWith('--')) out.add(p); }
+  };
+  function colorTokens() {
+    const names = new Set();
+    for (const sheet of document.styleSheets) { try { walkRules(sheet.cssRules, names); } catch { /* cross-origin sheet */ } }
+    const cs = getComputedStyle(document.documentElement);
+    const out = [];
+    for (const n of names) { const v = cs.getPropertyValue(n).trim(); if (isColorish(v)) out.push([n, v]); }
+    return out.sort((a, b) => a[0].localeCompare(b[0]));
+  }
+  function vividness(v) {                     // 0..1 — saturation weighted toward mid lightness
+    let r, g, b;
+    const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(v.trim());
+    if (hex) { let s = hex[1]; if (s.length === 3) s = s.split('').map((c) => c + c).join('');
+      [r, g, b] = [s.slice(0, 2), s.slice(2, 4), s.slice(4, 6)].map((x) => parseInt(x, 16) / 255); }
+    else { const rgb = /^rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/i.exec(v.trim()); if (!rgb) return 0;
+      [r, g, b] = [+rgb[1], +rgb[2], +rgb[3]].map((x) => x / 255); }
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
+    if (mx === mn || l <= 0 || l >= 1) return 0;
+    const sat = (mx - mn) / (1 - Math.abs(2 * l - 1));
+    return sat * (1 - Math.abs(l - 0.55));
+  }
+  const BRAND_CANDIDATES = ['--accent', '--brand', '--brand-color', '--color-brand', '--primary', '--color-primary', '--primary-color', '--c-accent', '--tone-brand'];
+  function resolveAccent(explicit) {
+    if (explicit) return explicit;
+    const cs = getComputedStyle(document.documentElement);
+    for (const n of BRAND_CANDIDATES) { const v = cs.getPropertyValue(n).trim(); if (isColorish(v)) return v; }
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta && isColorish(meta.content)) return meta.content.trim();
+    let best = null, score = 0;
+    for (const [, v] of colorTokens()) { const s = vividness(v); if (s > score) { score = s; best = v; } }
+    return score > 0.2 && best ? best : '#64748b';   // nothing brand-like found → neutral slate, not a foreign green
+  }
+  const ACCENT = resolveAccent(CONFIG.accent);
+
   /* ---------- styles ---------- */
   const css = `
     :host { all: initial; }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
     .dd {
-      --ac: ${CONFIG.accent}; --bg: #fff; --side: #f6f6f7; --tx: #1f2125; --mu: #6e737b; --ln: #e4e5e8; --hv: #efeff1;
+      --ac: ${ACCENT}; --bg: #fff; --side: #f6f6f7; --tx: #1f2125; --mu: #6e737b; --ln: #e4e5e8; --hv: #efeff1;
       position: fixed; inset: 0; pointer-events: none; z-index: 2147483646;
       font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--tx);
     }
@@ -201,6 +248,12 @@
     .card .n { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
     .card .l { color: var(--mu); font-size: 12px; }
     .empty { padding: 24px; text-align: center; color: var(--mu); }
+    .tks { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+    .tk { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--ln); border-radius: 8px; cursor: pointer; min-width: 0; }
+    .tk:hover { background: var(--hv); }
+    .tk:focus-visible { outline: 2px solid var(--ac); }
+    .tk .swat { flex: none; width: 18px; height: 18px; border-radius: 5px; border: 1px solid rgba(0,0,0,.15); }
+    .tk .nm { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--tx); }
     .tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .btn { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 1px solid var(--ln); border-radius: 8px; background: var(--bg); cursor: pointer; }
     .btn:hover { background: var(--hv); }
@@ -260,6 +313,20 @@
 
   const custom = [];
   let isOpen = false, inspecting = false, timer = null, toastT = null;
+
+  /* ---------- declared inventories (DevDockInit / DevDock.declare) + DOM discovery ---------- */
+  const declared = { states: [...(CONFIG.states || [])], stories: [...(CONFIG.stories || [])] };
+  const seenStories = new Set();
+  const discoverStories = () => {
+    document.querySelectorAll('[data-story]').forEach((e) =>
+      (e.getAttribute('data-story') || '').split(/\s+/).forEach((s) => s && seenStories.add(s)));
+  };
+  const storyInventory = () => {
+    discoverStories();
+    const byId = new Map(declared.stories.map((s) => [s.id, s]));
+    seenStories.forEach((id) => { if (!byId.has(id)) byId.set(id, { id }); });
+    return [...byId.values()];
+  };
 
   /* ---------- UI building blocks (reuse these in your tabs) ---------- */
   const sec = (t, ...k) => h('section', { class: 'sec' }, h('h3', 0, t), ...k);
@@ -334,16 +401,42 @@
   }
 
   const tabs = [
-    { id: 'states', label: 'States', icon: 'db', group: 0, sub: () => Q.get('filled') ? 'filled data' : 'sparse data', render: () => [
-      sec('Data fidelity', box(
-        tog('Filled (seeded) data', () => !!Q.get('filled'), (v) => Q.write({ filled: v ? '1' : null }), '?filled=1 · sparse by default'))),
+    { id: 'states', label: 'States', icon: 'db', group: 0, sub: () => declared.states.length ? `${declared.states.length} control(s)` : (Q.get('filled') ? 'filled data' : 'sparse data'), render: () => [
+      ...(declared.states.length ? declared.states.map((s) => seg(s.label || s.key,
+        [['', s.defaultLabel || 'default'], ...(s.values || []).map((o) => (typeof o === 'string' ? [o, o] : [o.v, o.l]))],
+        Q.get(s.key) || '', (v) => Q.write({ [s.key]: v || null })))
+        : [sec('Declared state controls', empty('Pages declare their state trees to the dock — DevDock.declare({ states: [{ key, label, values }] }) — and the dock renders the pickers. A page template never renders its own state switches.'))]),
+      ...(declared.states.some((s) => s.key === 'filled') ? [] : [sec('Data fidelity', box(
+        tog('Filled (seeded) data', () => !!Q.get('filled'), (v) => Q.write({ filled: v ? '1' : null }), '?filled=1 · sparse by default')))]),
       sec('This URL', box(
-        ...(Q.all().length ? Q.all().map(([k, v]) => kv(k, v)) : [kv('(no params)', 'default sparse state')]))),
+        ...(Q.all().length ? Q.all().map(([k, v]) => h('div', { class: 'row' },
+          h('span', { class: 'k' }, k), h('span', { class: 'v', title: v }, v),
+          btn('clear', () => { Q.write({ [k]: null }); })))
+          : [kv('(no params)', 'default state')]))),
       h('div', { class: 'tools' },
         btn('Copy URL', () => { try { navigator.clipboard.writeText(location.href).catch(() => {}); toast('URL copied'); } catch {} }, 'copy'),
-        btn('Reset to default', () => { history.replaceState(null, '', location.pathname); dispatchEvent(new PopStateEvent('popstate')); render(); })),
-      sec('State trees', empty('Register per-page state pickers with DevDock.registerTab — a page never renders its own state switches.')),
+        btn('Reset to default', () => { history.replaceState(null, '', location.pathname + location.hash); dispatchEvent(new PopStateEvent('popstate')); })),
     ] },
+
+    { id: 'stories', label: 'Stories', icon: 'box', group: 0, sub: () => Q.get('story_id') || 'full page', render: () => {
+      const list = storyInventory();
+      const cur = Q.get('story_id');
+      const entry = list.find((s) => s.id === cur);
+      return [
+        box(
+          act('Full page', 'no isolation — every component in place', () => Q.write({ story_id: null }), !cur),
+          ...list.map((s) => act(s.id, s.states && s.states.length ? `${s.states.length} story state(s)` : 'component', () => Q.write({ story_id: s.id }), cur === s.id))),
+        ...(entry && entry.states && entry.states.length ? [sec(`States · ${entry.id}`, box(
+          ...entry.states.map((st) => {
+            const q = st.q || {};
+            const on = cur === entry.id && Object.entries(q).every(([k, v]) => Q.get(k) === String(v));
+            return act(st.l || Object.entries(q).map(([k, v]) => `${k}=${v}`).join(' '),
+              Object.entries(q).map(([k, v]) => `${k}=${v}`).join(' · '),
+              () => Q.write(Object.assign({ story_id: entry.id }, q)), on);
+          }))) ] : []),
+        ...(list.length ? [] : [empty('No [data-story] components found on this page and none declared — stories come from pages; declare the suite inventory with DevDockInit.stories if this page has none.')]),
+      ];
+    } },
 
     { id: 'fonts', label: 'Fonts', icon: 'font', group: 0, sub: () => Q.get('font') || 'project default', render: () => [
       seg(`Family${isRtl() ? ' (Arabic set — RTL)' : ' (Latin set)'}`,
@@ -371,13 +464,33 @@
       sec('Gallery', box(act('Open root gallery', '/index.html', () => { location.href = '/index.html'; }))),
     ] },
 
-    { id: 'theme', label: 'Theme', icon: 'moon', group: 1, sub: () => Q.get('theme') || 'auto', render: () => [
-      seg('data-theme', [['', 'auto (system)'], ['light', 'light'], ['dark', 'dark']],
-        Q.get('theme') || '', (v) => {
-          Q.write({ theme: v || null });
-          v ? document.documentElement.dataset.theme = v : document.documentElement.removeAttribute('data-theme');
-        }),
-      sec('Note', empty('theme.css token blocks keyed off [data-theme] do the rest. Components must not carry light/dark literals — only tokens.')),
+    { id: 'theme', label: 'Theme', icon: 'moon', group: 1, sub: () => Q.get('theme') || 'auto', render: () => {
+      const toks = colorTokens();
+      return [
+        seg('data-theme', [['', 'auto (system)'], ['light', 'light'], ['dark', 'dark']],
+          Q.get('theme') || '', (v) => {
+            Q.write({ theme: v || null });
+            v ? document.documentElement.dataset.theme = v : document.documentElement.removeAttribute('data-theme');
+          }),
+        sec(`Project palette — ${toks.length} color token(s)`, toks.length
+          ? h('div', { class: 'tks' }, ...toks.map(([n, v]) =>
+              h('button', { class: 'tk', type: 'button', title: `${n} · ${v} — click copies var(${n})`,
+                onclick: () => { try { navigator.clipboard.writeText(`var(${n})`).catch(() => {}); } catch {} toast(`var(${n}) copied`); } },
+                h('i', { class: 'swat', style: `background:${v}` }), h('span', { class: 'nm' }, n.replace(/^--/, '')))))
+          : empty('No color custom properties resolve on <html> — the project must define its palette in theme.css BEFORE page work (zero-duplication: the Palette Law). The dock accent fell back to neutral slate.')),
+        sec('Note', empty('Swatches follow the active theme. Every color in pages and components must come from this list — the dock accent itself adapts to the detected brand token, which is why it is never hardcoded either.')),
+      ];
+    } },
+
+    { id: 'viewport', label: 'Viewport', icon: 'grid', group: 1, sub: () => `${innerWidth}×${innerHeight}`, live: true, render: () => [
+      sec('Live', box(kv('Window', `${innerWidth} × ${innerHeight}px`), kv('devicePixelRatio', String(devicePixelRatio)))),
+      ...(Object.keys(CONFIG.frames || {}).length ? [sec('Pinned targets', box(
+        ...Object.entries(CONFIG.frames).map(([name, w]) => {
+          const d = innerWidth - w;
+          return kv(name, `${w}px · ${Math.abs(d) <= 24 ? 'match' : d < 0 ? `${-d}px narrower` : `+${d}px wider`}`);
+        })))]
+        : [sec('Pinned targets', empty('Declare the questionnaire answer once: DevDockInit.frames = { mobile: 390, desktop: 1280 } — the tab then reports drift live.'))]),
+      sec('Framing', empty('Screens stay frameless. Device framing is presentation-layer: view mobile surfaces in a device-width gallery iframe or browser emulation — never a bezel inside the page DOM, and nobody is asked to resize their window.')),
     ] },
 
     { id: 'about', label: 'Dock', icon: 'gear', group: 9, sub: () => 'help', render: () => [
@@ -387,8 +500,9 @@
         kv('Dock position', 'localStorage (edge, pos, size, tab)'),
         kv('Prototype state', 'the URL — every control writes query params'))),
       sec('Extend', box(
+        kv('Declare controls', 'DevDock.declare({ states, stories, frames })'),
         kv('Project tab', 'DevDock.registerTab({ id, label, icon, render })'),
-        kv('App list', 'window.DevDockInit = { apps: [...] }'))),
+        kv('Config', 'window.DevDockInit = { apps, states, stories, frames, accent }'))),
     ] },
   ];
   const allTabs = () => [...tabs.filter((t) => t.group < 2), ...custom, ...tabs.filter((t) => t.group > 8)];
@@ -512,7 +626,13 @@
 
   /* ---------- public API ---------- */
   window.DevDock = {
-    open, close, toggle, refresh: render, go, toast, params: Q, applyFont,
+    open, close, toggle, refresh: render, go, toast, params: Q, applyFont, colorTokens,
+    declare(patch) {
+      if (Array.isArray(patch.states)) for (const s of patch.states) if (!declared.states.some((d) => d.key === s.key)) declared.states.push(s);
+      if (Array.isArray(patch.stories)) for (const s of patch.stories) { const i = declared.stories.findIndex((d) => d.id === s.id); if (i > -1) declared.stories[i] = Object.assign(declared.stories[i], s); else declared.stories.push(s); }
+      if (patch.frames) Object.assign(CONFIG.frames, patch.frames);
+      render();
+    },
     // your own tab: {id, label, icon?, sub?, render: () => Node | Node[] | string}
     registerTab(tab) { tab.group = 2; custom.push(tab); render(); return () => { custom.splice(custom.indexOf(tab), 1); render(); }; },
   };

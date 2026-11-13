@@ -113,7 +113,7 @@ This allows visual regression tools (Playwright, Puppeteer) or reviewers to capt
 
 ## 6. The Story Toolbox (`sy_*` URL Parameters)
 
-All staging tool configurations live entirely in URL query parameters, bookmarkable and test-controllable:
+All staging tool configurations live entirely in URL query parameters, bookmarkable and test-controllable. **These params are the contract; the interactive UI that writes them is the Dev Dock's Story tools tab** ([`prototype-dock.md`](prototype-dock.md)) — a page module never renders toolbox buttons itself. The `mountToolbox()` body-injected toolbar in `assets/starter/` predates the dock and remains a working fallback for its params.
 
 | Parameter | Values | Purpose |
 |---|---|---|
@@ -121,6 +121,6 @@ All staging tool configurations live entirely in URL query parameters, bookmarka
 | `sy_grid` | `1` (8px grid) or `<px>` (e.g. `16`) | SVG overlay grid (major lines every 5x) for alignment |
 | `sy_outline` | `1` | Outlines all DOM elements on the stage to debug layout/margins |
 | `sy_inspect` | `1` | Hover highlights element dimensions; click copies CSS selector |
-| `sy_toolbar` | `open`, `hide` (or `0`), default `closed` | Floating toolbar in bottom-left to toggle tools interactively |
+| `sy_toolbar` | legacy: `open`, `hide` (or `0`), default `closed` | Former bottom-left floating toolbar toggle — superseded by the dock; `?dock=hide` removes all prototype chrome for clean capture |
 
 Example: `http://localhost:5173/funds?story_id=topbar&sy_bg=dark&sy_grid=16`

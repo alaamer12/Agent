@@ -1,6 +1,6 @@
 ---
 name: agents-md
-description: 'Creates/audits AGENTS.md - agent rulebook: obligations+references not docs, size guidance advisory (inline is valid; rules/ is convention); one owner per fact (brief+pointer). 19 sections: instructions; context fence value+REACH+docs-root MUST-ASK; how-to router (also owns exec/env/version policy); startup; delegation; privacy - cascade/gitignore; resourceful - local-first; authority - ask-per-session, honest-if-blocked; version control - VCS tiers, parked-work, identity; ambiguity - Exact/Broad, weighty MANDATORY, 1-file records; golden rules - never-bend, violation-shaped; review - rulebook-violations lead, then named tasks; skills - per-skill rows; facts - corrections beat memory; before-between-after - per-phase rituals (read/dedup/type-check), current prompt overrides; voice - a register per surface (user, public, internal writing), user''s own; sync blocks - multi-home meanings, a per-block table (site+line), meaning not letters, same-change duty; sections never deleted; maintenance - same-change+date. Writes ONLY AGENTS.md.'
+description: 'Creates/audits AGENTS.md - agent rulebook: obligations+references not docs, rules/ per-topic referenced is the recommendation, inline stays valid; one owner per fact (brief+pointer). 19 sections: instructions; context fence value+REACH+docs-root MUST-ASK; how-to router (also owns exec/env/version policy); startup; delegation; privacy - cascade/gitignore; resourceful - local-first; authority - ask-per-session; version control - VCS tiers, parked-work, identity; ambiguity - Exact/Broad, weighty MANDATORY, 1-file records; golden rules - never-bend, violation-shaped; review - rulebook-violations lead, then named tasks; skills - per-skill rows; facts - corrections beat memory; before-between-after - per-phase rituals (read/dedup/type-check), current prompt overrides; voice - a register per surface user''s own; sync blocks - multi-home meanings, a per-block table (site+line), meaning not letters, same-change duty; sections never deleted; maintenance - same-change+date. Writes ONLY AGENTS.md.'
 when_to_use: The user asks to create, restructure, or audit AGENTS.md (or an equivalent agent instruction file), to define how the main agent delegates to subagents, or says "agents-md this project". Also /agents-md.
 argument-hint: "[project root, defaults to current repo]"
 
@@ -111,6 +111,11 @@ Round rules:
 
 - **Skip what the repo answers.** Any round whose answers are already visible in the repository is skipped
   with one line saying so - the interview asks decisions, not facts.
+- **Overlooking and overengineering are both failures.** Every settled concern gets the hidden-dimension
+  probe ([`02`](references/02-interview-guide.md)) before its round closes - a dimension nobody asked about
+  bites in a later session; a dimension invented to fill a table costs every session. The stop condition is
+  the same on both sides: **dig until you can record "confirmed absent", then stop.** Only dimensions with
+  repo evidence or a user decision enter the file; absences are stated, silence is not.
 - **One round at a time.** Present the round's questions, collect the answers, then **restate the decisions
   in a 3-6 line list** and wait for corrections before opening the next round. The restatement is where a
   misheard answer gets caught cheaply.
@@ -162,7 +167,11 @@ file that editing the rulebook means regenerating the block ([`05`](references/0
 anything the agent must never miss** - they cannot be forgotten, skipped, or half-read. It also makes them the
 most expensive: every line is paid for on every turn, and a long rulebook dilutes attention. Referenced docs
 solve the cost and add a risk: the agent may not open the file, may forget a rule it did not load, or may
-hallucinate a missing detail under pressure. **This is a user preference, not a default the skill imposes.**
+hallucinate a missing detail under pressure. **The skill's recommended shape is therefore one dedicated file
+per topic/type of content** (`rules/version.md`, `rules/debugging.md`, …) with `AGENTS.md` keeping only the
+routing line and the 2-4 never-miss obligation lines per section - the agent then reads exactly the file its
+task names and pays for nothing else. Inline stays the user's right and the correct home for the few lines
+that must reach every message; it is a valid choice, not a defect, when the user picks it.
 
 - **Inline.** The user may keep procedures and policy inside `AGENTS.md` - in section 3 or a dedicated section.
   That is a valid choice, not a defect. Keep it navigable; no extraction is required.

@@ -19,7 +19,7 @@ All of the following are true:
 
 ### 2. Technical options are exhausted and only outside-world help remains
 
-You may stop only when the remaining gap **cannot be closed by anything you can do**, and you have already pushed everything else as far as it can go. Typical examples: real API keys, production credentials, a paid account, a domain, a human decision about a business matter, physical hardware.
+You may stop only when the remaining gap **cannot be closed by anything you can do**, and you have already pushed everything else as far as it can go. Typical examples: real API keys, production credentials, a paid account, a domain, a human decision about a business matter, physical hardware. **"The one route I chose is closed" does not qualify** — that is a pivot trigger, see "The means died, not the goal."
 
 Before you declare this, you must have exhausted the technical alternatives: mocks, stubs, fakes, local emulators (e.g. Supabase Local, LocalStack, local Postgres, Stripe CLI fixtures), recorded fixtures, docker containers, in-memory substitutes, downloading tools, and writing your own shims.
 
@@ -33,7 +33,7 @@ If you are tempted to stop for any other reason, the goal is **not** complete. D
 - "I've implemented the main parts; the rest is straightforward." → Do the rest.
 - "Here's a summary of what I did so far, and what's left." → Do what's left.
 - "Should I proceed?" (when the authority was already granted or the action is clearly within scope) → Proceed.
-- A test fails, a build breaks, a dependency is missing, an approach hits a wall. → Debug it, try another approach, work around it.
+- A test fails, a build breaks, a dependency is missing, an approach hits a wall. → Debug it, try another approach, work around it. The wall means PIVOT (see "The means died, not the goal"), not stop.
 - You're unsure which of two reasonable approaches is better. → Pick one, note the decision, move on. Revisit only if it proves wrong.
 - The task is large or long. → Size is not a blocker. Work through it.
 - You feel "done enough". → Re-check against the requirements. Done enough is not done.
@@ -86,6 +86,30 @@ When you hit something that needs the outside world (missing keys, unreachable s
 
 Design so the swap is trivial: keep real-service config in one place (`.env`, a config module), keep mocks behind the same interface as the real client, and make the switch obvious and documented.
 
+## The means died, not the goal: pivot sweep
+
+The failure this section exists to kill: the agent aims at a thing through one route, discovers the route is not what it believed (a site is behind an anti-bot wall, the "public API" requires a partnership, the file "obviously there" does not exist), concludes *that thing is impossible*, and stops. **A discovered-false assumption about your means is never a stop condition — it is a signal to re-derive the goal.**
+
+When what you were aiming for turns out not to be true:
+
+1. **Restate the goal as an outcome, without the route.** Not "scrape site X" but "get this category of content/data so the user can do Y." The route was a guess; the outcome is the contract.
+2. **Sweep the alternative families in order — none may be skipped from memory:**
+   - **Same source, different door:** structured endpoints the page does not need (RSS/Atom, sitemap, JSON/LD-API routes, search endpoints, official mobile/web payloads), cached or syndicated copies, the site's own public exports.
+   - **Different source, equivalent content:** other sites publishing the same category of information, public datasets, government/open-data registries, archives, official documents the wall'd page itself summarizes.
+   - **Different method, same objective:** narrower/lower-volume collection that stays within the site's boundaries, asking the content of a different party, generating the deliverable from equivalent references already gathered.
+   - **Reduced but honest deliverable:** partial coverage from all obtainable sides, explicitly marked for what is missing and where it would have come from.
+3. **Reframe the blocker correctly in the report:** "site X is bot-protected, I stopped" is ILLEGITIMATE. The legitimate statement is: "X-via-route-Y is closed; here are the routes I swept (enumerated), what each yielded, and the closest equivalent content I could actually reach." Only when every family produced nothing, or the remaining door needs outside-world supply (an account, a paid feed, a human decision), reason 2 applies — **with the sweep list attached.**
+4. **Boundary:** pivoting to *other doors and other sources* is this skill's duty; actively defeating an access control is not — that crosses into user-asked territory (the `sly` skill exists for the user to invoke deliberately). When the only path left genuinely requires tearing the wall down, that is an outside-world blocker: run the sweep, take the best reduced deliverable, and report the wall honestly.
+
+```text
+Wrong:   "the scraper was blocked by anti-bot" → task failed → stop.
+Right:   blocked → outcome restated → RSS? sitemap? other provider publishing the same
+         list? public dataset? → three equivalents found, content assembled, the one
+         unreachable field marked with its would-have-been source → goal delivered.
+```
+
+Full worked case, including both reports side by side: `examples/bot-wall-pivot.md`.
+
 ## Anti-patterns to avoid
 
 - Stopping to report after each phase.
@@ -95,6 +119,7 @@ Design so the swap is trivial: keep real-service config in one place (`.env`, a 
 - Silently dropping a requirement because it was hard. If something truly cannot be done, it must be in the final report with the reason.
 - Asking permission for things already covered by granted authority.
 - Treating "I ran out of ideas" as "no technical options left". Try harder first: search the docs, read the error carefully, try a different library, write it yourself.
+- Treating "my chosen route is closed" as "the goal is impossible". The route was your assumption; the goal is the user's contract. Run the pivot sweep before any impossibility claim, and attach the sweep list to the claim.
 - Weakening or deleting tests to make them pass.
 - Faking results or claiming verification that did not happen. Honesty about the state of the work is non-negotiable.
 
@@ -116,6 +141,7 @@ Keep the report short. The work should speak for itself.
 Ask yourself:
 - Is *every* phase finished, not just the one I'm in?
 - Did I actually run and verify it?
+- If something turned out impossible or blocked: have I restated the goal without the dead route and swept all four alternative families (same source other door / different source / different method / reduced-but-honest deliverable)? Is the sweep list written down?
 - Is what remains something only the user or the outside world can supply, and have I already mocked, emulated, or isolated it as far as technically possible?
 
 If the answer to any is "no", **do not stop. Keep going.**

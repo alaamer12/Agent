@@ -11,9 +11,9 @@
  *   --top N         findings shown per check before "... and K more" (default 15)
  *   --selftest      run built-in fixtures and exit
  *
- * Findings are the `references/zero-duplication.md` rule expressed mechanically: any
- * visual pattern used twice must exist in exactly one place. Default mode reports the
- * baseline so a migration can drive numbers down; flip to --strict once clean.
+ * Findings are the `prototype` skill's `references/zero-duplication.md` rule expressed
+ * mechanically: any visual pattern used twice must exist in exactly one place. Default
+ * mode reports the baseline so a migration can drive numbers down; flip to --strict once clean.
  *
  * Zero dependencies; ESM; Node 18+. Output and exit codes follow the house style of
  * stories_check.mjs: 0 clean (or reporting), 1 findings under --strict, 2 usage error.

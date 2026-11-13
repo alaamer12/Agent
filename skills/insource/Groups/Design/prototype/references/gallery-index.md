@@ -117,7 +117,7 @@ Never put a state switcher, a debug bar, or a "STATE: error" ribbon inside a scr
 multi-app suites, **never put cross-app navigation buttons in the page's main layout**. The
 screen must screenshot clean, because screenshots of these files get pasted into specs and PRs.
 The gallery is the primary place with UI about UI, while live cross-app switching is handled by
-the floating bottom-right menu (`?apps_toolbar=hide`). The one exception in the gallery is the `Open Screen` link,
+the Dev Dock's Apps tab (`?dock=hide` removes it — see [`prototype-dock.md`](prototype-dock.md)). The one exception in the gallery is the `Open Screen` link,
 which lives in the card and simply carries the currently-selected state through:
 
 ```js

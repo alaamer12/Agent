@@ -27,6 +27,8 @@ against this list before showing it; most of it is a reading pass, not a tool.
 | **Harness leakage** | machine- or tool-specific quirks written as project rules | teammates on other setups get nonsense constraints | split project rules (shared file) from machine rules (local file) |
 | **Documentation of the agent's own tooling** | long explanations of how the CLI reads instruction files | the agent does not need the mechanism, and the facts change | a pointer, or drop it |
 | **Aspirational tooling** | "run the visual regression suite to verify" when no such suite exists | the agent tries to invoke a capability that isn't there and reports a false verification | record only what the project actually has |
+| **Unasked dimension (overlooking)** | one version rule, one path table - while the app actually ships per-user AND machine-wide editions, or schema migrations carry a lineage the app version never mentions | the rulebook is internally consistent and externally wrong; the failure surfaces mid-task, when the missing dimension's rules fight the written ones | run the hidden-dimensions probe per settled concern ([`02`](02-interview-guide.md)); record plausible-but-absent dimensions as "confirmed absent" |
+| **Speculative dimension (overengineering)** | a REACH row, sync table, or `rules/` file for a split the project does not have ("channels" configured for a product that ships one binary) | every session pays attention to a distinction that never fires, and the phantom structure invites agents to act as if the dimension is real | probe with evidence, write only what the repo or user confirms, delete the rest - an unasked real dimension and an invented one are the same defect, mirrored |
 
 ## The meta-failure
 

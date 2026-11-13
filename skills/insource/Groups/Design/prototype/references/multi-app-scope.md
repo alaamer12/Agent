@@ -158,20 +158,18 @@ In `apps/` multi-app mode, `serve.mjs` maps subdomain names to their app folders
 
 ---
 
-## 6. Multi-App Floating Navigation Toolbar (`?apps_toolbar=hide`)
+## 6. Cross-App Navigation — the Dev Dock's Apps tab
 
 **THE INVIOLABLE RULE: NEVER INJECT CROSS-APP NAVIGATION BUTTONS INTO THE PAGE'S MAIN CONTENT.**
 
 A page's header, sidebar, and body must strictly represent **the real product's authentic interface**. In a multi-app suite (e.g. `admin`, `operator`, `customer`), putting a button labeled "Go to Admin App" inside the customer portal's main navbar or card content corrupts the design and renders screenshots invalid.
 
-### The Standard Floating Apps Toolbar
-Cross-app and cross-variant navigation in multi-app suites is provided exclusively by a **standard bottom-right floating trigger with an upward dropdown menu**:
+The rule generalizes beyond cross-app nav: **every** control about the prototype — app switching, data-state toggles, inspection tools, pickers — is dock or URL content, never page content ([`prototype-dock.md`](prototype-dock.md)).
 
-1. **Fixed Placement**: Anchored to `bottom: 16px; right: 16px; z-index: 1000`. It floats quietly over the interface without intruding into page layout flow.
-2. **Top/Upward Menu Dropdown**:
-   - Displays the current app/surface badge (`Admin Portal`, `Operator Console`, `Client Web`).
-   - Clicking opens an upward-expanding menu (`bottom: 100%; margin-bottom: 8px; right: 0`) listing all participating apps, subdomains, and surface variants with direct clean links.
-3. **URL Control (`?apps_toolbar=hide`)**:
-   - `?apps_toolbar=hide` (or `0`, `false`, `off`): Completely removes the toolbar from the DOM for clean screenshot capture and video recording.
-   - When absent, the toolbar is rendered by the shared application layer.
-   - This pairs with the Story Isolation toolbox (`sy_toolbar`) on the bottom-left, keeping tools clearly separated (bottom-left = component inspection tools, bottom-right = cross-app switcher).
+### The dock as the single chrome, per suite
+
+1. **One `devdock.js`, shared.** It lives in `shared/js/`, every app's pages load it, and every page sets the same `window.DevDockInit = { apps: [...] }` list (name, url, `current: true` on the app being viewed) before the script tag. One configuration, N apps — never a per-app switcher implementation.
+2. **The Apps tab lists the suite.** Current-app badge at top; one row per app/subdomain/surface variant, direct clean links.
+3. **Removal for capture:** `?dock=hide` removes the dock entirely for screenshot capture and video recording — including the Apps tab, so gallery iframes and visual-regression runs see pure product UI.
+
+Legacy note: pre-dock projects carried a bottom-right floating trigger for this (`?apps_toolbar=hide`, implemented by `mountAppsToolbar()` in the shared layer) and a separate bottom-left story toolbox (`sy_toolbar`). Both are superseded by the dock; the `assets/starter/` helpers still work, and the old split placement (bottom-left tools vs. bottom-right switcher) is retired — do not build new chrome in that shape.

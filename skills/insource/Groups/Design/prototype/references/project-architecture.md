@@ -24,9 +24,12 @@ prototype/
 ├── js/
 │   ├── _app.js           # Central state helper + app bootstrap
 │   ├── specs.js          # Component state specs + gallery previews
+│   ├── ui.js             # Content builders: definePage, kpiCard, badge… (zero-duplication.md)
+│   ├── devdock.js        # Unified prototype chrome, plain <script> (prototype-dock.md)
 │   └── <page>.js         # Page DOM builder
 └── css/
     ├── theme.css         # Tokens (colors, typography, spacing)
+    ├── components.css    # Named component classes with custom-property variants
     ├── _app.css          # Shared primitives & app layout
     └── <page>.css        # Page-scoped styles
 ```
@@ -40,9 +43,12 @@ prototype/
 ├── shared/               # Unified Design System & Common Primitives
 │   ├── css/
 │   │   ├── theme.css     # Base system tokens (brand palette, typography, radii, z-index)
+│   │   ├── components.css # Shared component classes (`.badge` + `--tone`, `.btn` + `--variant`)
 │   │   └── _base.css     # Base resets, typography, global utilities
 │   └── js/
 │       ├── _app_core.js  # Pure state helper (mountState, parse, patch, toQuery)
+│       ├── ui.js         # Suite-wide content builders — one catalog for all apps (zero-duplication.md)
+│       ├── devdock.js    # The suite's single dock; shared DevDockInit.apps (prototype-dock.md)
 │       ├── glyphs.js     # Fallback SVG icons — only used when CDN is banned (see libraries.md)
 │       └── utils.js      # Seeded PRNG for ?filled, formatting helpers
 └── apps/
@@ -125,10 +131,14 @@ Rules of ownership:
   module**. `render(state)` is the single update path — the URL bootstrap
   and every click run through it (one code path ⇒ pixel-identical states).
 - A page never imports another page. Shared things move *out* to a feature
-  module (`charts.js`, `glyphs.js`, `table.js`…), created at **first
-  duplication**, not pre-emptively — a prototype is not a component library.
-  Reusable chart logic duplicated across page files is the named failure
-  this rule exists to kill.
+  module (`charts.js`, `glyphs.js`, `table.js`, the content builders in
+  `ui.js`…), created at **first duplication**, not pre-emptively — a
+  prototype is not a component library. Reusable chart logic duplicated
+  across page files is the named failure this rule exists to kill. The
+  second use of any class string, markup block, or hex is the extraction
+  moment: one token, one component class, or one `ui.js` builder — then
+  retrofit the first copy the same pass (`zero-duplication.md`;
+  `scripts/guards.mjs` measures it).
 - The underscore convention marks application-level shared files (`_app.js`,
   `_app.css`); other shared modules are plain feature names. Don't force
   every shared file to be `_`-prefixed — name by role.

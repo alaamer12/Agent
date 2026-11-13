@@ -141,6 +141,8 @@ Load from Google Fonts or Bunny Fonts (privacy-friendly alternative):
 ```
 Declare in `theme.css`: `--font: "Inter", system-ui, sans-serif;`
 
+`theme.css` sets the project *default* — it is not a constraint. Every prototype exposes the Dev Dock's Fonts tab, a curated 10-family picker (Arabic-capable set on RTL documents) that writes `?font=` and applies `--font` live, so the person can audition faces without an edit ([`prototype-dock.md`](prototype-dock.md)). Preload the candidates you list there; the dock only loads families from its curated set.
+
 ---
 
 ## Practical loading pattern

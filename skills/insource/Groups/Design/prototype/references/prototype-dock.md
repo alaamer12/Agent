@@ -50,11 +50,13 @@ The dock and the project never call each other's internals:
 
 | tab | writes | notes |
 |---|---|---|
-| **States** | `?filled=1` on/off; shows every current param; copy-URL; reset | per-page state trees go in project-registered tabs, never in page content |
+| **States** | declared state params, `?filled=1` on/off; shows every current param with per-param clear; copy-URL; reset | page state trees arrive via `DevDock.declare({ states: [{key, label, values}] })` — from `specs.js` or the page module; the dock renders the pickers, a page never does |
+| **Stories** | `?story_id=<id>` (+ that story's state params) | inventories components automatically from `[data-story]` on the page, enriched by `declare({ stories: [{id, states}] })` for per-state links; "Full page" clears isolation |
 | **Fonts** | `?font=<Family>`, plus `--font` on `<html>` live | ten curated options; RTL documents get the Arabic-capable set (Cairo, Tajawal, IBM Plex Sans Arabic, …); `?fonts=ar` forces it on an LTR page. Names are validated against the curated list before any network fetch. |
 | **Story tools** | `sy_bg`, `sy_grid`, `sy_outline`, `sy_inspect` | UI only — the stage mechanism stays in the project's story isolation code |
 | **Apps** | navigation to sibling apps | configure `window.DevDockInit = { apps: [{name, url, current}] }` before the script loads |
-| **Theme** | `?theme=light|dark`, plus `data-theme` on `<html>` live | pairs with the `[data-theme]` token blocks required by `zero-duplication.md` |
+| **Theme** | `?theme=light|dark`, plus `data-theme` on `<html>` live | pairs with the `[data-theme]` token blocks required by `zero-duplication.md`. Also hosts the **palette browser**: every color custom property that resolves on `<html>`, shown as a live swatch, click copies `var(--name)` — zero swatches found means the project failed the Palette Law and must define its palette before page work continues |
+| **Viewport** | reads only | live window size vs the pinned `frames` targets (drift in px), plus the framing law: screens stay frameless, device framing is presentation-layer |
 | **Dock** (bottom) | — | shortcuts, persistence notes, extension API |
 
 The font and theme tabs apply their values live because those are CSS-level side effects with no
@@ -77,22 +79,35 @@ N apps.
 
 ## Extending without duplicating
 
-A page with a rich state tree (the `?open=loading&loading=header` kind) registers a tab instead
-of rendering controls:
+The standard channel is **declaring**, not coding UI. `specs.js` (or a page module) hands the
+dock its own state trees and story inventory, and the dock renders the controls:
 
 ```js
-DevDock.registerTab({
-  id: 'users-states', label: 'Users states', icon: 'box',
-  sub: () => new URLSearchParams(location.search).get('status') || 'default',
-  render: () => /* rows/switches that call DevDock.params.write({ status: v || null }) */,
+DevDock.declare({
+  states:  [{ key: 'status', label: 'Status', values: ['pending', { v: 'failed', l: 'Failed' }] }],
+  stories: [{ id: 'funds-table', states: [{ l: 'loading', q: { status: 'loading' } }] }],
+  frames:  { mobile: 390, desktop: 1280 },
 });
 ```
+
+Declaring data is safe; the failure mode is a page building its own switcher markup instead.
+`registerTab({ id, label, icon, render })` remains for genuinely custom views — a tab whose
+controls work by writing query params through `DevDock.params.write(...)`:
 
 That is the entire sanctioned way to add prototype UI. If what you are about to render is a
 control *about the prototype* — toggle, switcher, picker, debug ribbon — it is dock content, or
 it is nothing (a bare URL param is a perfectly good interface). If it is part of the product's
 own surface (a real filter, a real settings control), it belongs in the page — the test is
 "would this control exist in the shipped product?"
+
+## The accent is never hardcoded
+
+The dock chrome adapts to the prototype's own brand, resolving in order: explicit
+`DevDockInit.accent` → the page's brand token (`--accent`, `--brand`, `--primary`, …) →
+`<meta name="theme-color">` → the most vivid color token on `<html>` → neutral slate. A dock
+copy-pasted from a template must never ship a foreign brand green — the Palette Law in
+`zero-duplication.md` makes the page's tokens the source, and the dock reads them like any
+other consumer.
 
 ## Persistence split
 

@@ -107,6 +107,17 @@ An agent that ships a prototype without working `?filled` has shipped an incompl
 One cross-page param every project declares in each spec:
 `filled: { default: null }`.
 
+**Unicode-safe serialization (Arabic and any non-Latin value).** Param *names* stay
+ASCII English (`status`, not `الحالة`) — they are code identifiers and appear in specs,
+gallery chips, and test URLs. Param *values* may be any language ("?q=مرحبا"), and then
+must travel exclusively through `URLSearchParams` (or the state helper's `toQuery`, which
+must use it): `searchParams.set('q', 'مرحبا')` percent-encodes automatically and `.get()`
+decodes back. Hand-concatenating raw text into a URL string is a defect — it breaks on
+Arabic, spaces, and `&`. Two places to verify with a real Arabic value, not just an
+English one: a search/filter state reached cold by URL, and RTL display of the decoded
+value in the UI (the state helper, not the page, owns the encode/decode; the dock writes
+through the same mechanism).
+
 - **Default (absent):** sparse, realistic placeholder data — a handful of
   rows, gaps, the shape of a nearly-empty product. Sparse by default is
   honest: a prototype that always renders 200 tidy rows hides the wrapping,
@@ -121,6 +132,11 @@ One cross-page param every project declares in each spec:
 - Generation is pure data code (`seededFunds(seed)` in a page's data
   section), never side-effectful; the same render path paints sparse and
   filled alike, and the gallery carries a filled chip.
+- The param's **UI** is the gallery chip or the Dev Dock's States tab —
+  never a toggle link or button inside a page's render template. A page
+  that emits `<a href="?filled=1">` has put prototype chrome into product
+  content (see `prototype-dock.md`; the measured failure: one such link
+  pasted into 8 page templates, already drifting apart).
 - The generator deliberately includes **adversarial rows**: a 90-character
   name, a missing/null field, an unrecognized category value — so that
   edge-case handling is forceable and reviewable, not hidden in the happy path.

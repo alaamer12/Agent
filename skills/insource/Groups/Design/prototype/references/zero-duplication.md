@@ -48,6 +48,17 @@ the layers decide *where a rule goes*:
    component rules; `?theme=` (the dock's Theme tab) flips them. **A theme in active use must be
    covered by the token set** — the 534-hex leak started exactly where tokens stopped matching
    the pages being built.
+
+   **The Palette Law.** No prototype writes page code before its full color design exists in
+   `theme.css`: a brand hue ramp, a neutral ramp, surface/ink pairs per theme, and semantic
+   tones (`--tone-success|warn|danger|info` — the feed `--tone` variants need), each present in
+   both `[data-theme]` blocks. If the person supplied a brand guide, encode it; if not, **design
+   one and state it before scaffolding** — "I picked a deep teal brand ramp with warm neutrals
+   because the domain is finance-meets-friendly" — as part of the build report, not silently.
+   Every color anywhere resolves through this list: components use `var(--…)`, the dock adapts
+   its own accent to the detected brand token, and a hex outside a token file is a `guards.mjs
+   tokens` finding. The dock's Theme tab renders the token set as live swatches — if that list
+   is empty, page work has started too early; stop and do the palette first.
 2. **Component classes** — repeated visual patterns as named plain-CSS classes with
    custom-property variants: `.badge` + `--tone`, `.btn` + `--variant`, `.card`, `.kpi`,
    `.table`, `.glow`. No `@apply`; plain rules over the variables. This is what kills the

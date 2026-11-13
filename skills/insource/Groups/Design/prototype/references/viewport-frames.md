@@ -39,3 +39,25 @@ For desktop, "frameless" mostly just means: don't wrap the page in anything. Bui
 ## Embedding a screen at a smaller size
 
 These dimensions describe the screen's *own* viewport, and they hold when a screen is embedded somewhere else — a gallery preview of a mobile file must still lay out at 412×850, never at the size of the box showing it. The scaling mechanics for that case belong to [`gallery-index.md`](gallery-index.md) §2.
+
+## Where the phone frame lives (the two tempting wrong answers)
+
+When asked to present mobile screens, the instinct offers two options — wrap the page in a CSS
+phone bezel, or ship it beside the web app and tell the person to "resize the browser window."
+**Both are wrong, and the skill has a third:**
+
+- The **screen itself stays frameless**, as the law above says: a bezel in the page DOM poisons
+  every screenshot, gallery preview, and `parity` diff of that screen, and adds markup no real
+  product has.
+- The **frame belongs to the presentation layer**: the gallery embeds mobile surfaces in
+  device-width iframes (a bezel there is a *property of the gallery*, and the embedded file
+  never knows), and the Dev Dock's Viewport tab shows live width against the pinned `frames`
+  targets so anyone can check they are actually looking at 390px.
+- **"Resize your window" is never an instruction to the person.** Every surface has a URL that
+  reproduces it at its pinned viewport; if width matters for review, the artifact is a preview
+  at that width, not a homework assignment.
+
+Forgetting responsiveness is a verification failure, not a layout-style one: the mandatory
+checklist in [`workflow.md`](workflow.md) requires each route screenshotted at the narrowest
+and widest pinned width — including the empty/error states, where CTAs and action rows break
+first.
