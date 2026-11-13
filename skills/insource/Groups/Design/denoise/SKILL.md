@@ -1,6 +1,6 @@
 ---
 name: denoise
-description: 'Transforms crowded, noisy, visually overwhelming UIs into calm, readable, professional interfaces that are easier to use, not just nicer to look at, at one of three intensities: lite (type/spacing in place), medium (redistributes content, designs forms and states), ultra (full re-theme, re-structure, re-derived information architecture and interaction layer). Use when someone shares an existing UI — HTML/CSS, React, Vue, a screenshot, a mockup, an admin panel, a dashboard — and asks to make it cleaner, more readable, less cluttered or noisy, more professional, easier on the eyes, or denoise/calm; or names a lite/medium/ultra pass. Also handles whole-codebase work: /denoise taste and /denoise snippet, rolling a pass across many pages with a generated map and an audited ledger, verifying nothing broke against a real pre-redesign build, and grading which mode was actually delivered so an Ultra request is never quietly answered with a re-skin. Refactor/redesign only, not from-scratch. Framework-agnostic.'
+description: 'Transforms crowded, noisy, visually overwhelming UIs into calm, readable, professional interfaces that are easier to use, not just nicer to look at, at one of three intensities: lite (type/spacing in place), medium (redistributes content, designs forms and states), ultra (full re-theme, re-structure, re-derived information architecture and interaction layer). Use when someone shares an existing UI — HTML/CSS, React, Vue, a screenshot, a mockup, an admin panel, a dashboard — and asks to make it cleaner, more readable, less cluttered or noisy, more professional, easier on the eyes, or denoise/calm; or names a lite/medium/ultra pass. Also handles whole-codebase work: rolling a pass across many pages with a generated map and an audited ledger, verifying nothing broke against a real pre-redesign build, and grading which mode was actually delivered so an Ultra request is never quietly answered with a re-skin. For variations before a rollout, use diverge. Refactor/redesign only, not from-scratch. Framework-agnostic.'
 ---
 
 # Denoise
@@ -14,11 +14,10 @@ job is comprehension, and only out loud.
 
 ## Read the right reference before you act
 
-This file is the decision procedure. The reasoning that makes each step correct lives in `references/` and loads on demand — a full pass should pull four or five of them, not all fourteen.
+This file is the decision procedure. The reasoning that makes each step correct lives in `references/` and loads on demand — a full pass should pull four or five of them, not all thirteen.
 
 | when | load |
 |---|---|
-| the person says `taste` or `snippet` | `references/commands.md` |
 | **before diagnosing anything, every mode** | `references/what-its-for.md` — what work happens on this surface and what it costs |
 | before diagnosing anything | `references/prior-pass.md` — is this already a pass, possibly your own? |
 | applying any move | `references/moves.md` — read the moves your mode includes, in full |
@@ -30,6 +29,12 @@ This file is the decision procedure. The reasoning that makes each step correct 
 | the input is dozens of pages | `references/rollout.md` + `references/subagent-prompts.md` |
 | before claiming a mode was delivered | `references/mode-audit.md` |
 | any script's flags, traps, or what a metric means | `references/tooling.md` |
+
+**Multi-direction previews are not this skill.** When the person wants several genuinely
+different directions side by side before committing a rollout, or a one-file mockup proof
+of a direction, that is the `diverge` skill (`/diverge taste`, `/diverge snippet`) — hand it
+over rather than improvising a preview here. Once a direction is picked, its judgment-call
+answers arrive as standing defaults and this skill applies them like any named mode.
 
 ## The one rule about how everything here is written
 
@@ -105,7 +110,7 @@ Full reasoning for each in `references/moves.md` — read yours, don't work from
 
 ## Verify by rendering — mandatory, every mode
 
-Reading the markup you wrote is not verification. **No pass is delivered until it has been rendered, measured, looked at, and re-checked** — and this applies to each `taste` direction individually, not just a single-file pass.
+Reading the markup you wrote is not verification. **No pass is delivered until it has been rendered, measured, looked at, and re-checked.**
 
 1. **Measure** — `node scripts/denoise-audit.mjs <file-or-url> --out report.json --shot render.png`. For measured rather than declared contrast, `scripts/denoise-contrast.mjs`. For one comparable number, `scripts/denoise-score.mjs`.
 2. **Look at `render.png`.** Do not skip this and trust the numbers. The script cannot see a chip whose text spills into the name beside it, a wrapped filter row, a sticky bar over the last row, a heading reading as decoration. Name what's wrong in your own words. **Then render the views that are not this one** — the empty state, the zero-result state, the failing state, the forbidden state, and the narrowest width the product supports — and look at each. A pass that verified only the fully-populated desktop screen has verified the least-visited case in the product. And **drive it with the keyboard, not only the mouse**: watch where focus lands on Tab. A screenshot of a successful pointer path cannot show a broken tab order, a lost label, or a dialog that traps someone outside it.
@@ -132,6 +137,6 @@ Reading the markup you wrote is not verification. **No pass is delivered until i
 
 ## Resources
 
-`references/` — the reasoning, loaded per the table above. `scripts/` — measurement, verification, and rollout tooling (see `references/tooling.md`). `assets/` — `taste-picker-template.html`, regenerated per `taste` run, and `stack-profiles/*.json`, starting points to copy and fix; none of them is your stack. `stack-profiles` now also carry the `interaction` block that identifies the app's writing surfaces; without it the mode grade reports that axis **NOT MEASURED** rather than passing it on a zero.
+`references/` — the reasoning, loaded per the table above. `scripts/` — measurement, verification, and rollout tooling (see `references/tooling.md`). `assets/` — `stack-profiles/*.json`, starting points to copy and fix; none of them is your stack. `stack-profiles` now also carry the `interaction` block that identifies the app's writing surfaces; without it the mode grade reports that axis **NOT MEASURED** rather than passing it on a zero.
 
 `examples/` — each file isolates one move, described by **structure and reasoning** rather than a markup shape to copy: `stat-encoding.md` (text stats → visual encoding) · `inline-warning.md` (cell-crammed warning → full-width callout) · `pill-vs-text.md` (scanned-across vs confirmed-within values) · `dwell-time-palette.md` (regional colour weighted by attention, incl. chrome position/colour) · `chart-ink.md` (chart-junk removal) · `one-job-per-row.md` (a unit doing one job vs many) · `rerun-detection.md` (recognising input that is already a pass, incl. your own, and re-approaching rather than patching). The three `mode-*-fullpass.md` files assemble several moves at whole-pass granularity, and `fitness-in-different-products.md` shows the same principle resolving four different ways — read it as evidence against copying one answer everywhere, not as four categories to pick from.

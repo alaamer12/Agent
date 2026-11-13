@@ -7,7 +7,7 @@ Every `capture` command follows the same contract:
   --json               machine-readable summary on stdout; progress moves to stderr.
   --quiet              no progress output.
 
-Browser commands (`designs`, `screenshots`, `website`, `dom`, `images`) share one flag group:
+Browser commands (`designs`, `screenshots`, `siteshots`, `website`, `dom`, `images`) share one flag group:
 
   --view, --width, --height, --scale, --device, --list-devices
   --timeout, --headed, --user-agent, --wait-ms, --wait-until

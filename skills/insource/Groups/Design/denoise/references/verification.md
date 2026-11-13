@@ -3,7 +3,7 @@
 Everything else in this skill is about making a UI better. This is about proving it didn't
 make a UI *wrong*, which is a different claim and needs different instruments.
 
-It matters most for the whole-project cases — `taste`, `snippet`, and any pass over an
+It matters most for the whole-project cases — any pass over an
 existing app with real data behind it — where "every data point preserved, all interactive
 affordances intact" is a promise about 40 screens you did not look at one at a time.
 

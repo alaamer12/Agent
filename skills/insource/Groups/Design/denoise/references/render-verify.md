@@ -4,7 +4,7 @@
 
 ## Verify by rendering — mandatory feedback loop, every mode
 
-Reading the markup you just wrote is not verification. Layout, clipping, and colour only resolve in a browser, and a design can satisfy every rule in this skill on paper while still rendering badly. So: **no pass is delivered until it has been rendered, measured, looked at, and re-checked.** This applies to every `taste` direction individually, not just to a single-file pass — an unrendered direction card shown to a person is an unverified claim.
+Reading the markup you just wrote is not verification. Layout, clipping, and colour only resolve in a browser, and a design can satisfy every rule in this skill on paper while still rendering badly. So: **no pass is delivered until it has been rendered, measured, looked at, and re-checked.**
 
 Run the loop, not a single check:
 

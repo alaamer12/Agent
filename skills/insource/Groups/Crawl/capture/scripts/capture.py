@@ -1,10 +1,10 @@
-"""Dispatcher: python capture.py designs|screenshots|page|website|dom|design|images [options]"""
+"""Dispatcher: python capture.py designs|screenshots|siteshots|page|website|dom|design|images [options]"""
 import argparse
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import design, designs, dom, images, page, screenshots, website  # noqa: E402
+import design, designs, dom, images, page, screenshots, siteshots, website  # noqa: E402
 from _common import utf8_console  # noqa: E402
 
 utf8_console()
@@ -12,6 +12,7 @@ utf8_console()
 COMMANDS = {
     "designs": (designs, "Batch-capture all HTML designs in a designs folder"),
     "screenshots": (screenshots, "Screenshot one URL / local HTML file"),
+    "siteshots": (siteshots, "Discover a site's routes and screenshot each one as a scroll series"),
     "page": (page, "Capture a running desktop app window (Windows)"),
     "design": (design, "Extract design tokens and/or HTML patterns via curl (css.dump, html.dump)"),
     "dom": (dom, "Save the fully rendered, fully expanded DOM for scraping"),

@@ -1,6 +1,6 @@
 # Prior-pass detection: recognizing already-accessible input, and re-approaching it
 
-**Note:** the constraint-derivation method in point 3 below (look at what's actually fixed about the input, ask what's plausible given it, reject options that don't fit rather than forcing them in) is also the method `/denoise taste` uses to generate its `n` directions from a fresh input — see that command's section in `SKILL.md`. This file's own before/after is framed around the re-approach-after-a-prior-pass case specifically, but the derivation method itself isn't specific to that case.
+**Note:** the constraint-derivation method in point 3 below (look at what's actually fixed about the input, ask what's plausible given it, reject options that don't fit rather than forcing them in) is also the method the sibling `diverge` skill uses to generate its `n` preview directions from a fresh input. This file's own before/after is framed around the re-approach-after-a-prior-pass case specifically, but the derivation method itself isn't specific to that case.
 
 ## The shape of the failure this guards against
 
