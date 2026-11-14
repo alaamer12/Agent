@@ -52,6 +52,49 @@ python scripts/transform.py --in art.png --crop 10,10,410,210 --out art-detail.p
 
 Order: rotate → flip → scale → resize → crop. Out-of-bounds crops are refused (exit 2).
 
+## sheet_probe.py
+
+```bash
+python scripts/sheet_probe.py raw/avatars.png --grid 5x2 --delivery "128x128 1:1 webp @1x,2x"
+python scripts/sheet_probe.py raw/avatars.png --json
+```
+
+Measures a generated sheet before it is cut: content bounds and margins, the number of subject
+bands per axis and the gap widths, per-cell subject boxes, empty cells, the largest square master
+the subjects can supply, and which delivery sizes at which DPRs that ceiling supports. Exit 0 even
+when the sheet is irregular - the notes are the finding. Needs pillow.
+
+## conform.py
+
+```bash
+python scripts/conform.py --bom bom/home.md --group avatar --in raw/avatars.png --out assets/avatars
+python scripts/conform.py --bom bom/home.md --slots avatar-01..10 --in raw.png --out out --dry-run
+python scripts/conform.py --in sheet.png --out out --grid 4x4 --gutter 24 --cell 512 \
+    --slots a,b --delivery "128x128 1:1 webp q82 @1x,2x"
+```
+
+Cuts the content box into the BOM's grid, trims each cell to its subject, pads to the delivery
+aspect without distorting, writes the DPR ladder with the slot's format and quality, then verifies
+each file and writes `conform-report.json`. `--key-bg auto` (default) keys out a flat
+border-connected background; `--no-trim`, `--pad-color`, `--allow-upscale`, `--allow-empty` and
+`--full-canvas` are the escape hatches. Exit 0 ok, 2 bad spec, 3 count/empty mismatch, 4 verify
+failure. Method, cut-line rule and failure modes: `08-conform.md`. Needs pillow for image work;
+`--dry-run` does not.
+
+## contact_sheet.py
+
+```bash
+python scripts/contact_sheet.py assets/avatars --out review/avatars.png --skip-density
+python scripts/contact_sheet.py --files a.webp a@2x.webp --out review/pair.png --columns 2
+python scripts/contact_sheet.py assets/avatars --json
+```
+
+Composites delivered slot files on a checkerboard and measures their edges: transparent share,
+corner alpha, opaque-border share, and a note when the border is mostly opaque (background not
+keyed, or a genuinely full-bleed subject) or a corner is opaque. `--skip-density` reviews the 1x
+step only, `--tile/--columns/--gap` set the layout, `--no-labels` drops filenames. Reads files and
+writes one PNG - it never edits the assets. Exit 0 ok, 2 unreadable input. Needs pillow.
+
 ## gen_icons.py
 
 ```bash

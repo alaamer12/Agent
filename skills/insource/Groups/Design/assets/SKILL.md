@@ -1,147 +1,92 @@
 ---
 name: assets
-description: 'Asset management for any platform: images, icons, fonts, audio, video, documents and color values - the resource files themselves, not the systems that serve them. Eleven tested tools: recolor (a color family or a picked pixel), convert/fix-extension, rotate/flip/scale/resize/crop, favicon and app-icon sets, OG images, legacy splash screens, optimization with before/after reporting, localization of CDN assets (browser-UA fonts, byte sniffing), an inventory (duplicates, unreferenced files, external URLs, sizes per category), color conversion across CSS Color 4 spaces with WCAG contrast, and a Bun.Image script for variants plus ThumbHash placeholders. Audio/video use ffmpeg directly; renames: shell moves + reference updates. Platform specs are sourced (Apple 1024 layered icons, Android adaptive/12 splash API, favicon sizes). Rules: names, brand-vs-content, formats by purpose, ask-first splash choices. Triggers: favicon, icons, splash, OG, recolor, convert, optimize, localize, color, rename, unused assets.'
-when_to_use: The user asks to create, convert, transform, recolor, organize, rename, localize or optimize project assets (images, icons, fonts, video, splash/loading screens, favicons, OG images), or to audit an asset folder for duplicates and unused files. Also /assets.
-argument-hint: "[the asset, folder or task - icons, favicon, splash, og, optimize, localize, inventory, rename, recolor, convert, transform]"
+description: >-
+  Pipeline contract for a project's imagery: plan the bill of materials, generate the masters,
+  conform them into delivery files. Routes the three steps to the skills that execute them -
+  collection dissects a page or reference into BOM.md, bom/<page>.md and bom/style.md and writes
+  the prompts; the generate skill produces masters; resources probes a sheet, splits it and fits
+  each slot to its delivery spec with a verification report. Fixes the order and the shared key:
+  one slot id across BOM row, prompt, raw render and delivered file, so nothing is re-derived by
+  hand. Pages marked no-images skip the pipeline. Use when asked what images a page needs, to plan
+  or run an image program end to end, to turn a generated sheet into project assets, or to decide
+  which skill handles a step. Triggers: assets, image pipeline, BOM, image plan, generated sheet,
+  conform, split a sheet. Not for one prompt (generate), pure file work (resources), or writing
+  illustration prompts and style canon (collection).
+when_to_use: The user asks what images a page needs, wants a project's imagery planned, generated and delivered end to end, needs a generated sheet turned into project asset files, or asks which skill owns a step. Also /assets.
+argument-hint: "[the page, image plan, sheet or pipeline step]"
 ---
 
-# assets - the project's resource files, managed once
+# assets - the image pipeline
 
-This skill owns **resource files and their references**: how they are named, where they live, how they
-are produced, converted, localized, optimized, and how the code points at them. It operates at the
-resource-file level - it is not a pipeline, storage layer, or delivery system.
+Three steps, three owners, one shared key. This skill owns the **order and the handoffs**, not the
+laws inside each step.
 
 ```
-project files ──► assets skill ──► correct file, correct name, correct place, correct reference
-                 (no application-level processing, no database design, no infrastructure)
+collection          generate (external)      resources
+BOM + prompts  ──►  masters  ──►  probe ──►  conform  ──►  delivery files + report
+bom/<page>.md       raw/*.png               assets/<slots>      conform-report.json
 ```
 
-## Ask before generating - the visual decisions are the user's
+## The pipeline
 
-When a generated asset carries a design choice, ask - briefly, with concrete options - instead of
-assuming. Ask only where the answer changes what the user sees:
+| Step | Owner | Artifact | Done when |
+|---|---|---|---|
+| 1. Plan | `collection` | `BOM.md`, `bom/<page>.md`, `bom/style.md` | every page listed (or `no-images`), every generated row has slot id, master, delivery and prompt |
+| 2. Generate | `generate` skill | raw masters, `usage.jsonl` | the master exists at the BOM's size and grid |
+| 3. Conform | `resources` (`sheet_probe.py`, `conform.py`, `contact_sheet.py`) | slot-named DPR files, `conform-report.json`, review sheet | `ok: true`, expected file count, no empty cells, edges reviewed on a checkerboard |
 
-- **Web loading screen:** logo, a specific image, or nothing?
-- **Mobile splash screen:** logo or plain background? What color/image?
-- **Icons:** is there an existing logo/icon to derive from, and does the platform need it flattened
-  onto a color (no alpha)?
-- **Brand colors / OG template:** which colors and title text?
-- **Where new assets live,** if the project has no convention yet.
+Order is the contract. A prompt written before the BOM drifts from the delivery spec; conforming
+before the master size is validated produces upscaled files. Steps 2 and 3 are skipped entirely for
+pages marked `no-images`.
 
-One batch of these questions, not an interrogation; a project with an established convention answers
-them by looking at the folder.
+## Routing
 
-## The capability map
-
-| Need | Script | Shape |
-|---|---|---|
-| Recolor a whole color family, or replace a picked pixel color | `scripts/recolor.py` | `--in img --to #HEX [--from #HEX \| --pick X,Y] [--mode family\|replace]` |
-| Convert format, or fix a lying extension | `scripts/convert.py` | `--in a.png --to webp --out b.webp` · `--fix --in dir --recursive` |
-| Rotate, flip, scale, resize, crop | `scripts/transform.py` | `--rotate 90 --flip h --scale 2 --resize 1600x --crop L,T,R,B` |
-| Favicon set, or app icons (iOS/Android) | `scripts/gen_icons.py` | `--favicon --out-dir web/` · `--app-icons --platform both` |
-| Open Graph share image | `scripts/og_image.py` | `--title ... --subtitle ... --bg color\|image --logo logo.png --font font.ttf` |
-| Splash screens per platform | `scripts/splash.py` | `--logo logo.png --bg color\|image --preset both --sizes 1080x1920` |
-| Optimize / variants / thumbnails | `scripts/optimize.py` | `--variants 320,640,1280 --format webp --quality 80` · `--thumbs` · `--max-width 1600` |
-| Localize CDN assets | `scripts/localize.py` | `--manifest vendor.txt --out assets/vendor` |
-| Audit assets: duplicates, unused, external URLs | `scripts/inventory.py` | `--root . --assets assets public` |
-| Convert/compare colors across CSS Color 4 spaces | `scripts/color.py` | `"#3366FF" --to oklch` · `--contrast A B` · `--mix A B --space oklch` |
-| Bun projects: variants + ThumbHash placeholders (built-in, zero deps) | `scripts/bun-image.ts` | `bun run bun-image.ts in.png --out-dir out --variants 320,640 --placeholder` |
-
-Full flags, exit codes and examples: `references/07-scripts.md`. Dependencies, installed **in the
-project's own environment** - never globally: `pillow` (image scripts), `numpy` (recolor), `coloraide`
-(color); `bun-image.ts` needs Bun >= 1.3.14 and no packages at all. Audio and video are handled with
-**ffmpeg directly** (probe, transcode, poster) - no wrapper script; `inventory` and `localize` are
-standard library only.
-
-## Naming and organization - the part that outlives the task
-
-- **Descriptive, not serial.** `hero-banner-launch.webp`, never `one.png`, `IMG_2041.png` or
-  `final-v2-final.png`. The name answers "what is this and where is it used".
-- **kebab-case by default**, matching the project's existing convention when it has one.
-- **Brand apart from content.** Logos, app icons, splash and OG images are brand assets; images a
-  feature ships (gallery photos, sample data artwork) are product content. Different folders, and
-  content assets never edited to fit a brand.
-- **One kind per home.** `icons/`, `brand/`, `images/`, `fonts/`, `media/` - or the project's existing
-  structure; do not mix SVG icons with content raster images.
-- **SVG and PNG stay distinct.** The vector source and its raster exports are different assets with
-  different purposes, not duplicates to delete.
-
-Detail and folder examples: `references/01-naming-and-organization.md`.
-
-## Formats - by purpose, not by habit
-
-| Purpose | Prefer | Why |
-|---|---|---|
-| Icons, logos, anything needing clean scaling | `SVG` | resolution-independent, editable, small |
-| Raster with transparency | `PNG` | lossless alpha |
-| Website favicon | `ICO` (+ PNG fallbacks) | the browser's expected format |
-| Production photos / heavy imagery | `WebP`, then `JPEG` for compatibility | far smaller at equal quality |
-| Animation, video | `WebM`/`MP4` by target support | format follows the medium |
-
-Conversion caveats: JPEG has no alpha (transparency flattens); SVG is **not** converted by these
-scripts - rasterizing/vectorizing needs a dedicated toolchain and this skill says so instead of
-guessing. Full guidance: `references/02-formats-and-conversion.md`.
-
-## Platform assets
-
-Web: favicon set + apple-touch + manifest icons (192/512) + OG image (1200x630). Mobile: app icon sets
-per platform (iOS up to 1024, Android mipmaps), and a **splash screen that is not optional**. Desktop
-and other platforms: their own icon formats. Check the platform's current requirements - and ask the
-user before deciding the visual. Sizes and commands: `references/03-platform-assets.md`.
-
-## Localization - stop depending on someone else's CDN
-
-`localize.py` downloads the icons/fonts/media a project loads from external hosts into the repo,
-verifying the bytes so an HTML error page never lands as a "font". Keep the license text the source
-ships; downloading makes a file local, not licensed. A webfont CSS endpoint needs one extra step:
-fetch the CSS, then the font files it references - and note the CDN picks the format from the
-User-Agent (localize sends a browser UA so Google Fonts returns WOFF2, not TTF). See
-`references/04-localization.md`.
-
-## Optimization - all media, not just images
-
-- **Images:** `optimize.py` produces WebP/JPEG at a chosen quality, width variants for responsive use
-  (`name-320.webp`, `name-640.webp`), thumbnails, and a max-width downscale. Every run ends with a
-  per-file **before/after table** (source size, output size, saved %, totals) - quote those numbers.
-- **Fonts:** ship WOFF2 (web) or the platform's native format; subset to the glyphs actually used.
-- **Audio:** lossy at a purpose-appropriate bitrate, lossless source kept.
-- **Video:** a modern codec and a sane bitrate per resolution; generate a poster still.
-- **Documents:** ship PDFs named by content, keep the editable source; compression is a PDF-tool job.
-- **Audio/video:** use **ffmpeg** directly - probe (`ffprobe`), transcode (`ffmpeg -i in.mp4 -c:v libx264 …`),
-  poster (`-frames:v 1`). Bun projects can use `Bun.Image` for native-speed image work and
-  `.placeholder()` LQIPs instead of the Python image scripts.
-
-There is no script per medium - the rules are fixed across media; guidance and budgets:
-`references/05-optimization.md`, and `inventory.py` reports file counts and sizes per category
-(images, fonts, audio, video, documents).
-
-## References and the small code changes
-
-Assets are files *and* the places code points at them. `inventory.py` finds duplicates, files nothing
-references, and external asset URLs. Renaming or moving a file is a shell job (`mv` / `Move-Item`), but
-it is only half the change: after moving, grep the old name across the project and fix every path that
-named it - the reference update is the part agents forget, and it needs the same review as code. The
-skill may edit code **only** for this: the paths that name an asset. It does not implement features or
-restructure code. Reference styles per stack and the rename protocol: `references/06-references-and-code.md`.
-
-## Boundaries
-
-| Not this | Go instead |
+| The user asks | Go to |
 |---|---|
-| Asset pipelines, upload processing, storage services, CDN infrastructure | those are application/infrastructure work - `dtb` for the how, the relevant engineering skill for the build |
-| Designing a design system or component library | `components`, `denoise`, `impeccable` |
-| Writing application features that display assets | the implementation skills |
-| Deciding a stack for media tooling | `techstack`, `thebest` |
-| Generating brand-new artwork from a description | an image-generation tool/skill, not this one |
+| Which images does this page need? What should we generate? | `collection` (BOM phase) |
+| Write the prompts / keep the illustrations consistent | `collection` |
+| Generate the images | `generate` |
+| Cut this generated sheet into project files / normalise sizes and names | `resources` (conform) |
+| Measure a sheet before cutting it | `resources` (`sheet_probe.py`) |
+| Check delivered edges and transparency by eye | `resources` (`contact_sheet.py`) |
+| Convert, optimize, rename, localize, inventory files | `resources` |
+| Real photos, avatars from a library | `fahlwy` |
+| Which pages exist at all | `pages` - the BOM consumes `PAGES.md` |
 
-## Files
+## The slot id
 
-| Need | Load |
-|---|---|
-| Naming rules, folder layout, brand-vs-content separation | `references/01-naming-and-organization.md` |
-| Format selection, alpha, production formats, conversion caveats | `references/02-formats-and-conversion.md` |
-| Favicon/app icon/splash/OG sizes and platform requirements | `references/03-platform-assets.md` |
-| Localizing CDN assets: manifests, licensing, webfont CSS | `references/04-localization.md` |
-| Optimization for images, fonts and video, with budgets | `references/05-optimization.md` |
-| How each stack references assets; rename and inventory protocol | `references/06-references-and-code.md` |
-| Exact commands and flags for all ten scripts | `references/07-scripts.md` |
+One id, four places: the BOM row, the prompt block, the raw render's cell, the delivered filename.
+`avatar-01` is the same string everywhere; ranges (`avatar-01..10`) expand in row-major cell order.
+This is what removes the manual linking step - if two of the four disagree, the pipeline broke.
+
+## Artifact paths
+
+| Path | Owner | Purpose |
+|---|---|---|
+| `bom/BOM.md` | `collection` | index: page, image count, generated count, `no-images` |
+| `bom/<page>.md` | `collection` | slot table + prompts for generated slots |
+| `bom/style.md` | `collection` | Style DNA, character canon, hard/soft rules - the only canon |
+| `raw/` | `generate` | untouched masters; never edited by hand |
+| delivery folder | project | slot-named files written by conform; the code reads these |
+| `conform-report.json` | `resources` | what was written, skipped, warned, failed |
+| review sheet | `resources` | checkerboard of the delivered files, with measured alpha edges |
+
+## What this skill does not own
+
+- **Naming, formats, optimization, icon/splash specs** - `resources`. Do not restate them here.
+- **Style DNA, character canon, prompt anatomy, economy math** - `collection`. One canon, one owner.
+- **Generation execution, providers, cost ledger** - `generate`.
+- **Page inventory** - `pages`.
+
+If this file starts growing tables of sizes or naming rules, it has begun duplicating a child and
+should be cut back to routing.
+
+## When the pipeline breaks
+
+| Symptom | Where it broke | Next step |
+|---|---|---|
+| Prompt asks for detail a cell cannot hold | plan: master not checked against delivery | re-run the BOM economy row, adjust master or DPR |
+| Delivery files soft or aliased | conform ran on too small a cell | raise the master or lower the DPR; never ship `--allow-upscale` |
+| Filenames do not match the code | slot id renamed in one place only | fix the BOM row, regenerate the names; the BOM is the source |
+| A page has no images and nobody noticed | page missing from `BOM.md` | list it and mark `no-images` explicitly |
+| A generated sheet has 9 subjects for 10 slots | step 2 / seed drift | re-render; conform already refuses to guess |

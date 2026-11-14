@@ -1,56 +1,62 @@
-# <Usage> Artwork — <project name>
+# <Page or set> — image BOM — <project name>
 
-<!-- Copy to <usage>.md (e.g. on-boarding.md) in the project. Fill every <placeholder>; delete
-     this comment. Style DNA, Character canon and Hard rules are copied VERBATIM into each
-     prompt. Leave shipped artwork alone — prompts exist only for slots that need (re)generation. -->
+<!-- Copy to bom/<page>.md in the project (one file per page that needs images), or to
+     <usage>.md when the whole product is a single set. Fill every <placeholder>; delete this
+     comment. Style DNA, Character canon and Hard rules are copied VERBATIM into each prompt.
+     Leave shipped artwork alone - prompts exist only for slots that need (re)generation. -->
 
-- **Status:** <style-confirmed / nothing-pending / N frames pending>
-- **Style anchor:** <path of first approved image, or "none yet">
+- **Source:** `PAGES.md` §<page>
+- **Status:** <style-confirmed / nothing-pending / N slots pending>
+- **Style canon:** `bom/style.md` (or "this file, single-page project")
+- **Style anchor:** <path of the first approved image, or "none yet">
+- **Placement:** `<public/images/<page>/>` - <how the build consumes it, e.g. "the glob picks
+  files up automatically; no project-file edit needed">
+- **Filenames are the contract:** the code looks up <where: enum/map/slot names>. New artwork for
+  an existing slot = a same-named file dropped in; renaming or adding a slot is the only change
+  that touches code.
+- **Sheet plan:** <e.g. one 1536x1024 5x2 render for the avatar set; fallback: two 2x2 sheets>
+- **Regeneration recipe:** `resources conform` reads the table below - do not rename slots there
+  without updating the code.
 
-## Placement & integration
+## Slots
 
-- **Folder:** `<Resources/Images/Onboarding/>` — <how the build consumes it, e.g. "the csproj
-  glob picks PNGs up automatically; no project-file edit needed">
-- **Filenames are the contract:** the code looks up <where: enum/map/resource names>. New artwork
-  for an existing slot = a same-named file dropped in; renaming or adding a slot is the only
-  change that touches code.
-- **Regeneration recipe:** produce at <dimensions/format from Soft rules>, save under the slot's
-  name, done.
+| Slot | Role | Source | Master | Delivery | Status |
+|---|---|---|---|---|---|
+| `<hero-home>` | <hero illustration, right of headline> | generate single | `<1600x900 single>` | `<1600x900 16:9 avif q60 @1x,2x>` | <pending> |
+| `<avatar-01..10>` | <testimonial personas> | generate sheet 5x2 | `<1536x1024 sheet 5x2 gutter 0>` | `<128x128 1:1 webp q82 @1x,2x>` | <pending> |
+| `<logo>` | <brand mark, header> | reuse `brand/logo.svg` | — | `<240x64 svg>` | <shipped> |
+| `<step-3>` | <permissions step> | none - the sheet UI is the illustration | — | — | <no-image> |
+| `<photo-teaser>` | <pricing card photo> | fahlwy | — | `<640x360 16:9 jpeg q80 @2x>` | <pending> |
 
-## Mapping (slot -> file -> subject -> status)
+<Only `generate` rows get a prompt block and a master spec. Everything else is listed so the next
+agent does not invent artwork for it. Close with the honest total: "N slots, M files shipped,
+nothing pending" / "Pending: <slots>". Statuses: pending / shipped / reused / no-image.>
 
-| Slot / screen | File | Subject | Status |
-|---|---|---|---|
-| <step 1 — "monitor projects as they publish"> | <step1.png> | <satellite dish> | <shipped> |
-| <step 2 — "instant alerts"> | <step2.png> | <bell> | <shipped> |
-| <step 5 — platform picker> | — | <the picker UI is the illustration> | <no-image> |
-| <step 6 — "ready?"> | <step5.png> | <reused final scene> | <reused> |
-
-<Close with the honest total: "All N steps covered by M shipped files; nothing pending." /
-"Pending: <slots>." Statuses: shipped / replaced / reused / no-image / pending.>
-
-## Shared Style (Style DNA — verbatim in every prompt)
+## Shared Style (Style DNA - verbatim in every prompt)
 
 > <Medium + mood + shape language, e.g. "Flat vector illustration, warm cream background
 > (#FDF6EC). Accent palette: <brand blue> (#2386C8) and <brand orange> (#FFA200), teal detail
-> (#1B7A5A). Soft elliptical dark ground shadow. Small geometric confetti — dots, plus signs,
-> short squiggles. Generous negative space, thick clean shapes, minimal shading. Strictly 2D —
+> (#1B7A5A). Soft elliptical dark ground shadow. Small geometric confetti - dots, plus signs,
+> short squiggles. Generous negative space, thick clean shapes, minimal shading. Strictly 2D -
 > no 3D rendering, no realistic materials, no skin textures.">
+
+<If the project has more than one page with images, move this section (and the two below) into
+`bom/style.md` once, and link it from every page BOM. One canon, many references.>
 
 ## Character canon (verbatim; omit if the set has no recurring subject)
 
 > <"Same character throughout: young man, orange hair, dark-green t-shirt (#1B5E47), navy
-> trousers (#1E2A4A), white sneakers." — or the subject-canon sentence for mascot/knight sets.>
+> trousers (#1E2A4A), white sneakers." - or the subject-canon sentence for mascot/knight sets.>
 
-## Hard rules (NO image may contain these — embedded in every prompt)
+## Hard rules (NO image may contain these - embedded in every prompt)
 
 - <No text, no letters, no numbers.>
 - <No real brand logos or site marks.>
 - <...project-specific: no faces of real people, no religious symbols, ...>
 
-A violation here is a defect: regenerate the image, embedded rule stays.
+A violation here is a defect: regenerate the image, the embedded rule stays.
 
-## Soft rules (recommended — aim, don't force)
+## Soft rules (recommended - aim, don't force)
 
 - <Dimension/format: 1024x1024 PNG, square 1:1.>
 - <Composition: generous negative space, calm palette, one focal object.>
@@ -58,16 +64,26 @@ A violation here is a defect: regenerate the image, embedded rule stays.
 
 A violation here is a judgment call, not a defect.
 
-## Frames needing prompts (regenerate-only-if-needed)
+## Economy check (generated sheet rows only)
 
-<!-- One block per slot with Status pending/replaced/pending-optional. Shipped slots get NO
-     prompt block. Reference: the anchor path once it exists. -->
+| Slot | Delivery x max DPR | Required master | Sheet cell | Valid? | Fallback |
+|---|---|---|---|---|---|
+| `<avatar-01..10>` | `<128px x 2>` | `<256x256>` | `<283x328>` | <yes> | <2x2 sheets / singles> |
 
-### <step4.png> — <search/filter scene>
+<required_master = ceil(delivery px x max DPR); cell = (sheet px - gutters) / cols. Measure an
+existing render with `resources`' `sheet_probe.py` before trusting this table.>
 
-**Use it in:** <Onboarding step 4 — "search smartly">
-**Save as:** `<Resources/Images/Onboarding/step4.png>` (slot name from the mapping)
-**Reference:** <anchor path / none — this frame defines the style>
+## Prompts - generated slots only (regenerate-only-if-needed)
+
+<!-- One block per slot whose Status is pending or replaced. Shipped slots get NO prompt block.
+     Prompt sections are fixed and in this order: Style, Character, Action, Color & Background. -->
+
+### `<hero-home>` - <hero illustration>
+
+**Use it in:** <Home page, right of the headline>
+**Slot / save as:** `<public/images/home/hero-home.avif>` (the slot id is the filename stem)
+**Master:** `<1600x900 single>` -> **Delivery:** `<1600x900 16:9 avif q60 @1x,2x>`
+**Reference:** <anchor path / none - this frame defines the style>
 
 **Prompt:**
 
@@ -76,3 +92,18 @@ A violation here is a judgment call, not a defect.
   when chaining.
 - **Action:** <this frame's pose + subject interaction, one clear idea>
 - **Color Palette & Background:** <shared palette + frame-specific composition notes>
+
+## After generation
+
+```bash
+# 1. generate the master (command derived from the Master column)
+# 2. measure, then cut into slot files
+python scripts/conform.py --bom bom/<page>.md --group <slot-prefix> \
+    --in raw/<master>.png --out <delivery folder>
+# 3. review the result: transparency is invisible against white
+python scripts/contact_sheet.py <delivery folder> --out review/<page>.png --skip-density
+```
+
+Conform trims each cell, fits the delivery aspect, writes the DPR ladder and verifies every file.
+The review sheet proves the edges by eye; the conform report proves the geometry. Prompts,
+generation and conform must all use the same slot ids.

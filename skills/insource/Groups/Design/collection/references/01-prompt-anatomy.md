@@ -43,7 +43,7 @@ Description aligns a set; a reference image *locks* it:
 - Frame 1 (the **style anchor**) is generated from text only, then human-reviewed as the style
   law of the project.
 - Every later frame is generated image-to-image against the anchor (generator's reference/
-  edit input — [ImageGen `images` param], [any img2img reference slot]), and its prompt swaps
+  edit input — `generate`'s `--image` flag, [any img2img reference slot]), and its prompt swaps
   description for pointer: **"Matches the exact visual style and 2D character design of the
   reference image"** + **"The exact same stylized 2D cartoon character … from the reference
   image."**
