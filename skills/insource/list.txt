@@ -1,0 +1,70 @@
+Viber Needed skills:
+mistakes
+antipattern
+anti-slop
+ladder
+packages
+pvc
+states
+treat
+FULL CODE folder
+assets
+bleed
+pages
+denoise
+prototype
+styling
+styleup
+close-topics
+personalize
+reveal
+seam
+theskills
+type-up
+contract
+agents-md
+architeture
+commiments-md
+glossary-md
+idea-md
+readme-md
+steering
+system-md
+units-md
+
+
+Development needed skills:
+Session
+subagent
+persona
+Bequest
+amongus
+How-to-do
+cross-check
+exmaine
+please-verify
+scraper-optimizaer
+seo
+FULL CRAWL folder
+FULL DECISION folder
+parity
+Full FILES folder
+Full GENERALIZE folder
+FULL GIT folder
+FULL PROSPECTING folder
+FULL SEARCH folder
+FUL SPECIAL folder
+FULL TALK folder
+FULL VIDEO folder
+animation
+avatar
+benchmark
+caution
+compare
+learning-test
+no-framework
+sly
+spike
+take-a-breath
+yo-nerdy
+impuritites

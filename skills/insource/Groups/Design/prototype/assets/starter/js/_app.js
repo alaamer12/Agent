@@ -19,7 +19,10 @@ export function parse(search, spec) {
   const state = {};
   for (const key of Object.keys(spec)) state[key] = coerce(p.get(key), spec[key]);
   const foreign = {};
-  for (const [k, v] of p.entries()) if (!(k in spec)) foreign[k] = v;
+  for (const k of new Set(p.keys())) if (!Object.hasOwn(spec, k)) {
+    const values = p.getAll(k);
+    Object.defineProperty(foreign, k, { value: values.length === 1 ? values[0] : values, enumerable: true });
+  }
   return { state, foreign };
 }
 
@@ -30,7 +33,9 @@ export function toQuery(state, spec, foreign = {}) {
     const v = state[key];
     if (v !== null && v !== undefined && v !== "" && String(v) !== String(def.default)) p.set(key, v);
   }
-  for (const [k, v] of Object.entries(foreign)) p.set(k, v);
+  for (const [k, v] of Object.entries(foreign)) {
+    for (const value of Array.isArray(v) ? v : [v]) p.append(k, value);
+  }
   const s = p.toString();
   return s ? "?" + s : "";
 }
@@ -88,8 +93,10 @@ export function parseStoryIds(search) {
  * If story_id is present in location.search, moves matching [data-story] elements
  * onto a centered #stage and mounts the floating toolbox (sy_*).
  */
-export function mountStory(container = document.body) {
+export function mountStory(container) {
   if (typeof window === "undefined" || !location.search) return false;
+  container ??= document.querySelector(".app");
+  if (!container || container === document.body) return false;
   const p = new URLSearchParams(location.search);
   if (!p.has("story_id")) return false;
 
@@ -109,10 +116,22 @@ export function mountStory(container = document.body) {
   if (!ids.length || missing.length) {
     const box = document.createElement("div");
     box.id = "story-index";
-    const list = all.map(e => `<li><code>${e.dataset.story}</code> – <a href="?story_id=${e.dataset.story}">open</a></li>`).join("");
-    box.innerHTML = (ids.length ? `<h1>Story not found</h1><p>Missing: <code>${missing.join(", ")}</code></p>` : "<h1>Stories</h1>") +
-      `<p>Available stories on this page:</p><ul>${list || "<li><em>No [data-story] elements found</em></li>"}</ul>` +
-      `<p>Tools: <code>sy_bg</code>, <code>sy_grid</code>, <code>sy_outline</code>, <code>sy_inspect</code>, <code>sy_toolbar=hide|open</code></p>`;
+    const heading = document.createElement("h1");
+    heading.textContent = ids.length ? "Story not found" : "Stories";
+    const detail = document.createElement("p");
+    detail.textContent = missing.length ? `Missing: ${missing.join(", ")}` : "Available stories on this page:";
+    const list = document.createElement("ul");
+    for (const element of all) {
+      const item = document.createElement("li"), link = document.createElement("a");
+      const url = new URL(location.href);
+      url.searchParams.set("story_id", element.dataset.story);
+      link.href = url.href;
+      link.textContent = element.dataset.story;
+      item.appendChild(link);
+      list.appendChild(item);
+    }
+    if (!all.length) list.textContent = "No [data-story] elements found";
+    box.append(heading, detail, list);
     stage.appendChild(box);
   }
 
@@ -138,10 +157,11 @@ function mountToolbox(stage, p) {
   }
 
   const grid = document.createElement("div"); grid.id = "sy-grid"; stage.appendChild(grid);
-  const hl = document.createElement("div"); hl.id = "sy-hl"; const lb = document.createElement("span"); hl.appendChild(lb); document.body.appendChild(hl);
+  const hl = document.createElement("div"); hl.id = "sy-hl"; const lb = document.createElement("span"); hl.appendChild(lb); stage.appendChild(hl);
 
   const raw = p.get("sy_toolbar");
-  const mode = raw === null ? "closed" : (/^(0|false|off|no|hide)$/i.test(raw) ? "hide" : raw.toLowerCase());
+  const mode = window.DevDock || p.get("dock") === "hide" ? "hide"
+    : raw === null ? "closed" : (/^(0|false|off|no|hide)$/i.test(raw) ? "hide" : raw.toLowerCase());
 
   if (mode !== "hide") {
     const bar = document.createElement("div"); bar.id = "sy-toolbar"; bar.setAttribute("role", "region"); bar.setAttribute("aria-label", "Story tools");
@@ -157,7 +177,7 @@ function mountToolbox(stage, p) {
         <label>Inspect <input type="checkbox" id="sy-i"></label>
         <button id="sy-x">Hide tools</button>
       </div>`;
-    document.body.appendChild(bar);
+    stage.appendChild(bar);
 
     const hd = bar.querySelector("#sy-hd"), pn = bar.querySelector("#sy-pn"), selEl = bar.querySelector("#sy-bg");
     const setOpen = o => { pn.hidden = !o; bar.classList.toggle("open", o); hd.setAttribute("aria-expanded", o); };
@@ -227,11 +247,10 @@ function mountToolbox(stage, p) {
 export function mountAppsToolbar(apps = []) {
   if (typeof window === "undefined" || !apps.length) return;
   const p = new URLSearchParams(location.search);
-  const raw = p.get("apps_toolbar");
-  if (raw !== null && /^(0|false|off|no|hide)$/i.test(raw)) return;
-
   const existing = document.getElementById("apps-toolbar");
   if (existing) existing.remove();
+  const raw = p.get("apps_toolbar");
+  if (window.DevDock || p.get("dock") === "hide" || (raw !== null && /^(0|false|off|no|hide)$/i.test(raw))) return;
 
   const bar = document.createElement("div");
   bar.id = "apps-toolbar";
@@ -280,16 +299,19 @@ export function mountAppsToolbar(apps = []) {
 export function mountState(spec, render) {
   const { state, foreign } = parse(location.search, spec);
   let curState = state, curForeign = foreign;
+  const title = document.title;
 
   function runRender() {
+    document.title = title;
     render(curState);
-    mountStory(document.body);
+    dispatchEvent(new Event("prototype:render"));
+    mountStory();
   }
 
   function sync(changes, opts = {}) {
     curState = patch(curState, changes);
     const qs = toQuery(curState, spec, curForeign);
-    const url = location.pathname + qs;
+    const url = location.pathname + qs + location.hash;
     const mode = opts.replace ? "replace"
       : (opts.key ? historyMode(opts.key, spec) : "push");
     history[mode === "replace" ? "replaceState" : "pushState"]({}, "", url);

@@ -69,6 +69,13 @@ error carefully") belongs to nobody and displaces what does.
 
 ```md
 - Reproduce: <the exact failing state and how to reach it locally>
+- Registered debug instruments (the product's own ways in - what Q10 settled):
+  - entry points (any carrier: flag / `debug`-style command / env switch / dev route), real names here:
+    <name -> which gate it skips, which page it opens, which state it freezes, which data it seeds>
+  - dev-only state exports: <route or file, and its gating mechanism>
+  - log surfaces and reset utilities: <paths, scripts>
+  - never bypassed: <the boundaries no instrument may skip - auth, validation, payment>
+  - an instrument not listed here does not exist: never guess an entry point, none of these ship live
 - Escalate in this order:
   1. <data layer check, e.g. write a debug SQL file in scratch/ and query directly - confirms the data exists>
   2. <service layer check, e.g. call the existing service from a scratch script - isolates backend vs UI>
@@ -87,6 +94,18 @@ step; a project that forbids touching local data gets that prohibition in bold r
 "inspect if needed". Writing a debugging capability the project does not have is worse than omitting it -
 the agent will try to fabricate the tool.
 
-**Scaffolding note.** The project may need helper scripts for these steps (a DB inspector, a screenshot
-runner). agents-md records the duty and the path; it does not create the helpers. That is another skill's job,
-and creating a stub would imply a capability that does not exist yet.
+**Debugging engineering - the instruments block, shallowly.** A product can be built so an agent boots past
+human gates (gate-skip, state-freeze, deterministic-seed, dev-only state exports) instead of burning a
+session clicking through navigation to reach the failing state: fewer tokens, faster verification, better
+tested product. The same door is the price - an instrument alive in a shipped build is an attack surface - so
+whether the project carries any, and which, is settled by Q10 ("how do you want the agent instrumented into
+debugging?") and recorded here as the registered inventory plus its gating and its never-bypassed line. This
+file deliberately holds only that: what exists, where, and what is forbidden to guess. The choice rule (KISS -
+the simplest instrument that reaches the state, since the code is disposable), the pattern catalog, the
+quarantine-and-prove-it-dead rails, and the seed/purge discipline belong to the **dbug** skill
+(`references/instrumentation.md` §Debugging engineering) - it is the application of the idea; the rulebook is
+its register.
+
+**Scaffolding note.** The project may need helper scripts for these instruments (a DB inspector, a screenshot
+runner, a launch harness). agents-md records the duty and the path; it does not create the helpers. That is
+the dbug skill's job, and creating a stub would imply a capability that does not exist yet.

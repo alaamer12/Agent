@@ -10,9 +10,9 @@ The user supplies a screen recording, a GIF, a short video, a screenshot sequenc
 
 ## Pipeline
 
-1. **Extract frames.** `python scripts/match/extract_frames.py <video> --out frames/` (needs ffmpeg). Use the frame rate of the source; sample densely around the action.
+1. **Extract frames.** `python scripts/match/extract_frames.py <video> frames/ [--start S --duration S]` (needs ffmpeg). Use the frame rate of the source; sample densely around the action.
 2. **Track motion.** `python scripts/match/track_motion.py frames/` follows the region of interest and records position, scale and opacity over time (needs opencv-python and numpy).
-3. **Fit curves.** `python scripts/match/fit_curves.py <tracks.json>` fits cubic-bezier or spring parameters to the tracked series (needs numpy and scipy). Try springs when there is overshoot or settling oscillation; cubic-bezier otherwise.
+3. **Fit curves.** `python scripts/match/fit_curves.py frames/metrics.json` fits cubic-bezier or spring parameters to the tracked series (needs numpy and scipy). Try springs when there is overshoot or settling oscillation; cubic-bezier otherwise.
 4. **Decide the structure.** Identify what animates, in what order (the synchronization form: see synchronization.md), the duration, the delays, and whether the reverse was shown.
 5. **Emit code** in the project's stack, using the fitted values.
 

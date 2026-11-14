@@ -16,7 +16,7 @@ generated as one sheet. Every number below was measured, not guessed.
 |---|---|---|---|---|---|
 | `avatar-01..10` | testimonial personas | generate sheet 5x2 | 1536x1024 sheet 5x2 gutter 0 | `128x128 1:1 webp q82 @1x,2x` | pending |
 | `logo-customer` | customer wordmark row | reuse `brand/customers.svg` | — | `240x64 svg` | shipped |
-| `bg-testimonial` | section texture | generate single | 2048x1152 single | `1440x810 16:9 webp q70 @1x,2x` | pending |
+| `bg-testimonial` | section texture | generate single | 2048x1152 single | `1024x576 16:9 webp q70 @1x,2x` | pending |
 
 ### Why `@1x,2x` and not `@3x`
 
@@ -70,5 +70,5 @@ Result: 20 files (`avatar-01.webp` … `avatar-10.webp` plus `@2x`), 128×128 an
 transparent outside each subject, `conform-report.json` with `ok: true`, no warnings, ≈190 KB
 total. A review sheet (`contact_sheet.py --skip-density`) composites the ten 1x files on a
 checkerboard: clean circular edges, transparent corners, no halo. The other two rows are outside
-this run: `logo-customer` is `shipped` (reused), and `bg-testimonial` is a single-slot conform with
-its own `--group`.
+this run: `logo-customer` is `shipped` (reused), and `bg-testimonial` is its own single-master
+run (`--slots bg-testimonial --in raw/bg-testimonial.png`), used whole with its background kept.

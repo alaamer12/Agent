@@ -1,7 +1,7 @@
 ---
 name: system-md
-description: 'Produces and maintains SYSTEM-COMPONENTS.md for a confirmed application: an architectural inventory of the functional building blocks - subsystems, services, engines, integrations, processors, data systems, infrastructure - each with purpose, responsibilities, in/out-of-scope ownership, inputs and outputs, error handling, configuration, related components, plus an ASCII relationship map and a "removing it would" summary table. Answers "what exists and what does each piece own" without reading all the code. Application-scoped: in a monorepo, one document per confirmed app, never one blended document across apps. Extracted from like-a-pro phase 3 (as system-creator Mode A). Reusable-unit catalogs (UI builder blocks, and code units generally) belong to UNITS.md and are owned by units-md, not here; a button or card never appears in SYSTEM-COMPONENTS.md, a queue or rate limiter never in UNITS.md. Documents only - no code changes, no enforcement.'
-when_to_use: The user asks to document or map the system's components, "what subsystems does this app have", write or refresh SYSTEM-COMPONENTS.md, produce a component hierarchy and relationship map for onboarding, or is running like-a-pro phase 3 after the application boundary was confirmed.
+description: 'Produces and maintains SYSTEM-COMPONENTS.md for a confirmed application: an architectural inventory of the functional building blocks - subsystems, services, engines, integrations, processors, data systems, infrastructure - each with purpose, responsibilities, in/out-of-scope ownership, inputs and outputs, error handling, configuration, related components, plus an ASCII relationship map and a "removing it would" summary table. Answers "what exists and what does each piece own" without reading all the code. Application-scoped: in a monorepo, one document per confirmed app, never one blended document across apps. Reusable-unit catalogs (UI builder blocks, and code units generally) belong to UNITS.md and are owned by units-md, not here; a button or card never appears in SYSTEM-COMPONENTS.md, a queue or rate limiter never in UNITS.md. Documents only - no code changes, no enforcement.'
+when_to_use: The user asks to document or map the system's components, "what subsystems does this app have", write or refresh SYSTEM-COMPONENTS.md, produce a component hierarchy and relationship map for onboarding, or needs one document per application in a monorepo.
 argument-hint: "[app path, defaults to the confirmed application]"
 ---
 
@@ -26,7 +26,7 @@ document's shape.
 - One document per **application**, placed at the app root or in its docs folder
   (`apps/<app>/SYSTEM-COMPONENTS.md`), or the project root for a single-app project.
 - **Never infer the boundary from the directory tree.** Confirm it: the protocol lives in
-  [like-a-pro's app-boundary discovery reference](../../../like-a-pro/references/app-boundary-discovery.md); the short
+  [`references/app-boundary-discovery.md`](references/app-boundary-discovery.md); the short
   form is scan candidates, show the evidence (manifests, entry points, deployables), and ask the user which are
   applications before writing anything.
 - Monorepo: each app gets its own document with its own component set. Shared platform code is listed in the app
@@ -100,4 +100,4 @@ Documents only: this skill writes `SYSTEM-COMPONENTS.md` and touches nothing els
 |---|---|
 | [`references/components-template.md`](references/components-template.md) | the copy-pasteable skeleton and per-field notes |
 | [`references/components-worked-example.md`](references/components-worked-example.md) | a complete worked instance: depth, tone, diagrams |
-| [`../../../like-a-pro/references/app-boundary-discovery.md`](../../../like-a-pro/references/app-boundary-discovery.md) | the confirmation protocol this skill depends on |
+| [`references/app-boundary-discovery.md`](references/app-boundary-discovery.md) | the confirmation protocol this skill depends on |

@@ -71,8 +71,9 @@ cut. A hero illustration with a bespoke composition is never a sheet cell.
 
 ### Read 5 - find economy
 
-Only for generated rows. Compute, do not guess (see §2). Record both the chosen plan and the
-fallback in the master cell: `1536x1024 sheet 5x2 gutter 0 (fallback: 2x2 sheets)`.
+Only for generated rows. Compute, do not guess (see §2). The Master cell holds only the chosen
+plan, because `conform` parses it: `1536x1024 sheet 5x2 gutter 0`. Record the fallback
+(`2x2 sheets`) in the economy check's Fallback column.
 
 ---
 

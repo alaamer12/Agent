@@ -6,6 +6,7 @@ Commands
     python manager.py skill <name> ...     link/copy skills (default command)
     python manager.py agent                deploy AGENTS.md to agent configs
     python manager.py lint                 validate SKILL.md descriptions and sync
+    python manager.py viber                install every skill the Viber lifecycle uses
 
 The default command is ``skill``, so ``python manager.py avatar`` and
 ``python manager.py skill avatar`` are equivalent.
@@ -25,6 +26,7 @@ Examples
     python manager.py skill --refresh
     python manager.py agent --hard-copy --agents claude,opencode
     python manager.py lint --strict
+    python manager.py viber --into ./my-project --hard-copy
 """
 
 from __future__ import annotations
@@ -45,6 +47,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Iterable, Sequence
+from urllib.parse import unquote
 
 __version__ = "2.0.0"
 
@@ -112,7 +115,7 @@ ALIASES = {
 }
 
 REGISTRY = Path(__file__).resolve().parent
-COMMANDS = {"skill", "agent", "lint"}
+COMMANDS = {"skill", "agent", "lint", "viber"}
 
 
 class ManagerError(Exception):
@@ -621,14 +624,19 @@ def audit_all(registry: Path, agents: Sequence[str], jobs: int) -> list[SyncIssu
         root = agent_skill_dir(agent)
         if not root.is_dir():
             continue
-        for name, source in known.items():
-            direct = root / name
-            if is_link_like(direct):
-                if not direct.exists():
-                    add("link", name, direct, "broken-link", f"link target is gone (expected {source})")
-                elif not same_path(direct, source):
-                    add("link", name, direct, "wrong-target",
-                        f"points at {os.path.realpath(direct)} instead of {source}")
+        for direct in sorted(root.iterdir()):
+            if not is_link_like(direct):
+                continue
+            name = direct.name
+            source = known.get(name)
+            if not direct.exists():
+                detail = f"link target is gone (expected {source})" if source else "link target is gone; name is not in the registry"
+                add("link", name, direct, "broken-link", detail)
+            elif source is not None and not same_path(direct, source):
+                add("link", name, direct, "wrong-target",
+                    f"points at {os.path.realpath(direct)} instead of {source}")
+            elif not has_skill(direct):
+                add("link", name, direct, "missing-skill", "link target has no SKILL.md")
         for name, per_agent in locked.items():
             if agent not in per_agent or name not in known:
                 continue
@@ -1136,6 +1144,60 @@ def cmd_skill(args: argparse.Namespace, registry: Path, jobs: int, invoked: set[
     return 1 if failures else 0
 
 
+VIBER_MANIFEST = Path("Groups") / "Viber" / "viber.json"
+
+
+def viber_plan(registry: Path) -> list[dict[str, Any]]:
+    """Resolve the viber manifest into rows: phase, name, status, entry label, path (None = not in registry)."""
+    manifest_file = registry / VIBER_MANIFEST
+    if not manifest_file.is_file():
+        raise ManagerError(f"viber manifest not found: {manifest_file}")
+    try:
+        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ManagerError(f"cannot read {manifest_file}: {exc}") from exc
+    known = registry_skills(registry)
+    rows: list[dict[str, Any]] = []
+    for phase in manifest.get("phases", []):
+        for entry in phase.get("skills", []):
+            label = entry.get("as") or entry["name"]
+            base = {"phase": phase.get("phase", "-"), "status": entry.get("status", "-"), "entry": label}
+            if "path" in entry:
+                group = registry / entry["path"]
+                members = sorted(walk_skills(group), key=lambda p: p.name) if group.is_dir() else []
+                if not members:
+                    rows.append({**base, "name": entry["name"], "path": None})
+                for member in members:
+                    rows.append({**base, "name": member.name, "path": member})
+            else:
+                rows.append({**base, "name": entry["name"], "path": known.get(entry["name"])})
+    return rows
+
+
+def cmd_viber(args: argparse.Namespace, registry: Path, jobs: int, invoked: set[str]) -> int:
+    rows = viber_plan(registry)
+    if args.list:
+        display_table(
+            ["Phase", "Entry", "Skill", "Status", "Path"],
+            [[row["phase"], row["entry"], row["name"], row["status"],
+              str(row["path"].relative_to(registry)) if row["path"] else "not in registry"] for row in rows],
+            title=f"viber skills ({len({row['path'] for row in rows if row['path']})} installable)",
+            always=True,
+        )
+        return 0
+    missing = sorted({row["entry"] for row in rows if row["path"] is None})
+    if missing:
+        display_warn(f"viber names skills that are not in the registry yet, skipped: {', '.join(missing)}")
+    sources: list[Path] = []
+    for row in rows:
+        if row["path"] is not None and row["path"] not in sources:
+            sources.append(row["path"])
+    if not sources:
+        raise ManagerError("no viber skill resolves to the registry")
+    args.skills = [str(path) for path in sources]
+    return cmd_skill(args, registry, jobs, invoked)
+
+
 def sync_copy(record: CopyRecord, registry: Path, *, force: bool, dry_run: bool) -> tuple[str, str]:
     source = Path(record.source)
     target = Path(record.target)
@@ -1355,10 +1417,13 @@ def read_frontmatter(path: Path) -> tuple[dict[str, Any] | None, str | None]:
     if yaml is not None:
         try:
             data = yaml.safe_load(raw)
-        except Exception:
-            data = None
+        except yaml.YAMLError as exc:
+            mark = getattr(exc, "problem_mark", None)
+            location = f" at line {mark.line + 2}" if mark is not None else ""
+            return None, f"invalid YAML{location}"
         if isinstance(data, dict):
             return data, None
+        return None, "frontmatter must be a mapping"
     parsed = parse_minimal_frontmatter(raw)
     return (parsed, None) if parsed else (None, "frontmatter is empty or unparsable")
 
@@ -1379,18 +1444,229 @@ def lint_skill_dirs(
     for record in records:
         if record.kind == "dir":
             add(record.skill, Path(record.target), "hard-copy")
-    for path in walk_skills(registry):
+    for path in walk_skills(registry, prune=False):
         add(path.name, path, "registry")
-    for agent in DEFAULT_AGENTS:
-        root = agent_skill_dir(agent)
-        if root.is_dir():
-            for path in walk_skills(root):
-                add(path.name, path, f"agent:{agent}")
-    for root in extra_roots:
-        if root.is_dir():
-            for path in walk_skills(root):
-                add(path.name, path, f"into:{root}")
+    roots = [(agent_skill_dir(agent), f"agent:{agent}") for agent in DEFAULT_AGENTS]
+    roots.extend((root, f"into:{root}") for root in extra_roots)
+    for root, label in roots:
+        if not root.is_dir():
+            continue
+        add(root.name, root, label)
+        for path in walk_skills(root, prune=False):
+            add(path.name, path, label)
+        for path in sorted(root.iterdir()):
+            if is_link_like(path) and has_skill(path):
+                add(path.name, path, label)
+                for nested in walk_skills(path, prune=False):
+                    add(nested.name, nested, label)
     return list(seen.values())
+
+
+README_NAME = "README.md"
+STANDALONE_CATEGORY = "Standalone (repository root)"
+_README_QI_RE = re.compile(r"^- \[([^\]]+)\]\(([^)]+)\)(?: — (.*))?$")
+_README_FIELD_RE = re.compile(r"^- \*\*([^*]+):\*\* (.*)$")
+_README_PATH_RE = re.compile(r"\]\(([^)]+)\)")
+_README_LINK_RE = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
+
+
+def _squash(value: Any) -> str:
+    return " ".join(str(value).split()) if isinstance(value, str) else ""
+
+
+def _readme_path(target: str) -> str:
+    """A README link target as a registry-relative posix path: decoded, no './', no anchor or title."""
+    target = target.strip()
+    if ' "' in target:
+        target = target.split(' "', 1)[0]
+    path = unquote(target.split("#", 1)[0]).replace("\\", "/").strip()
+    while path.startswith("./"):
+        path = path[2:]
+    return path.lstrip("/")
+
+
+def _path_key(path: str) -> str:
+    return _readme_path(path).casefold()
+
+
+def expected_catalog(registry: Path) -> dict[str, dict[str, Any]]:
+    """rel SKILL.md path -> what the README must say about that skill."""
+    dirs = walk_skills(registry, prune=False)
+    catalog: dict[str, dict[str, Any]] = {}
+    for path in dirs:
+        rel = path.relative_to(registry)
+        data, _ = read_frontmatter(path / "SKILL.md")
+        data = data or {}
+        ancestors = [other for other in dirs if other != path and is_under(path, other)]
+        parent = max(ancestors, key=lambda p: len(p.parts)) if ancestors else None
+        catalog[(rel / "SKILL.md").as_posix()] = {
+            "dir": path,
+            "name": data.get("name") if isinstance(data.get("name"), str) else path.name,
+            "description": _squash(data.get("description")),
+            "use_case": _squash(data.get("when_to_use")),
+            "hint": _squash(data.get("argument-hint")),
+            "category": rel.parts[1] if rel.parts[0] == "Groups" and len(rel.parts) > 2 else STANDALONE_CATEGORY,
+            "parent": parent,
+        }
+    by_dir = {info["dir"]: info for info in catalog.values()}
+    for info in catalog.values():
+        info["parent_name"] = by_dir[info["parent"]]["name"] if info["parent"] in by_dir else None
+        info["children"] = sorted(
+            other["name"] for other in catalog.values() if other["parent"] == info["dir"]
+        )
+    return catalog
+
+
+def parse_readme(text: str) -> dict[str, Any]:
+    header, _, rest = text.partition("## Quick Index")
+    quick, _, rest = rest.partition("## Skill Details")
+    details_text, _, archive_text = rest.partition("## Archive")
+    parsed: dict[str, Any] = {"header": header, "quick": [], "details": [], "archive": []}
+
+    category = None
+    for line in quick.splitlines():
+        if line.startswith("### "):
+            category = line[4:].strip()
+        elif match := _README_QI_RE.match(line):
+            parsed["quick"].append({"name": match[1], "path": _readme_path(match[2]), "summary": match[3] or "", "category": category})
+
+    category, block = None, None
+    for line in details_text.splitlines():
+        if line.startswith("#### "):
+            block = {"name": line[5:].strip().strip("`"), "category": category, "fields": {}}
+            parsed["details"].append(block)
+        elif line.startswith("### "):
+            category, block = line[4:].strip(), None
+        elif block is not None and (match := _README_FIELD_RE.match(line)):
+            block["fields"][match[1].strip()] = match[2].strip()
+
+    for line in archive_text.splitlines():
+        if match := _README_QI_RE.match(line):
+            parsed["archive"].append({"name": match[1], "path": _readme_path(match[2])})
+    return parsed
+
+
+def check_readme(registry: Path) -> list[tuple[str, str, str]]:
+    """Return (skill, section, issue) rows where README.md disagrees with the skills on disk."""
+    readme = registry / README_NAME
+    if not readme.is_file():
+        return [("-", "readme", f"{README_NAME} not found in {registry}")]
+    text = readme.read_text(encoding="utf-8", errors="replace")
+    parsed = parse_readme(text)
+    catalog = expected_catalog(registry)
+    issues: list[tuple[str, str, str]] = []
+
+    archive_root = registry / "Archive"
+    archived = sorted(
+        (path / "SKILL.md").relative_to(registry).as_posix()
+        for path in walk_skills(archive_root, prune=False)
+    ) if archive_root.is_dir() else []
+    standalone = sum(1 for info in catalog.values() if info["category"] == STANDALONE_CATEGORY)
+    groups = len({info["category"] for info in catalog.values()} - {STANDALONE_CATEGORY})
+    claims = [
+        (r"Total active skills: \*\*(\d+)\*\*", len(catalog), "active skills"),
+        (r"(\d+) standalone", standalone, "standalone skills"),
+        (r"(\d+) topic groups", groups, "topic groups"),
+        (r"(\d+) archived", len(archived), "archived skills"),
+    ]
+    for pattern, actual, label in claims:
+        match = re.search(pattern, parsed["header"])
+        if match is None:
+            issues.append(("-", "header", f"no count of {label} (on disk: {actual})"))
+        elif int(match[1]) != actual:
+            issues.append(("-", "header", f"claims {match[1]} {label}, on disk: {actual}"))
+
+    quick_by_path: dict[str, dict[str, Any]] = {}
+    for entry in parsed["quick"]:
+        if _path_key(entry["path"]) in quick_by_path:
+            issues.append((entry["name"], "quick-index", f"listed twice ({entry['path']})"))
+        quick_by_path[_path_key(entry["path"])] = entry
+    details_by_path: dict[str, dict[str, Any]] = {}
+    for block in parsed["details"]:
+        match = _README_PATH_RE.search(block["fields"].get("Path", ""))
+        if match is None:
+            issues.append((block["name"], "details", "detail block has no Path link"))
+            continue
+        block["path"] = _readme_path(match[1])
+        if _path_key(block["path"]) in details_by_path:
+            issues.append((block["name"], "details", f"listed twice ({block['path']})"))
+        details_by_path[_path_key(block["path"])] = block
+
+    def check_case(name: str, section: str, listed: str, actual: str) -> None:
+        if listed != actual:
+            issues.append((name, section, f"path case differs: README has {listed}, disk has {actual}"))
+
+    for rel, info in sorted(catalog.items()):
+        name = info["name"]
+        entry = quick_by_path.get(_path_key(rel))
+        if info["parent"] is None:
+            if entry is None:
+                issues.append((name, "quick-index", f"missing ({rel})"))
+            else:
+                check_case(name, "quick-index", entry["path"], rel)
+                if entry["category"] != info["category"]:
+                    issues.append((name, "quick-index", f"under '{entry['category']}', expected '{info['category']}'"))
+                if entry["name"] != name:
+                    issues.append((name, "quick-index", f"listed as '{entry['name']}'"))
+                summary = _squash(entry["summary"]).rstrip("…").rstrip()
+                if summary and not info["description"].startswith(summary):
+                    issues.append((name, "quick-index", "summary does not match the current description"))
+        elif entry is not None:
+            issues.append((name, "quick-index", f"nested under '{info['parent_name']}'; only top-level skills belong here"))
+
+        block = details_by_path.get(_path_key(rel))
+        if block is None:
+            issues.append((name, "details", f"missing ({rel})"))
+            continue
+        check_case(name, "details", block["path"], rel)
+        fields = block["fields"]
+        if block["name"] != name:
+            issues.append((name, "details", f"headed '{block['name']}'"))
+        if block["category"] != info["category"]:
+            issues.append((name, "details", f"under '{block['category']}', expected '{info['category']}'"))
+        if _squash(fields.get("Description")) != info["description"]:
+            issues.append((name, "details", "description differs from SKILL.md"))
+        if _squash(fields.get("Use-case")) != info["use_case"]:
+            issues.append((name, "details", "use-case differs from when_to_use"))
+        usage = _squash(fields.get("Usage")).strip("`")
+        expected_usage = f"/{name} {info['hint']}" if info["hint"] else ""
+        if usage != expected_usage:
+            issues.append((name, "details", "usage differs from argument-hint"))
+        if (fields.get("Parent") or "").strip("`") != (info["parent_name"] or ""):
+            issues.append((name, "details", f"parent should be '{info['parent_name'] or 'none'}'"))
+        listed_children = sorted(part.strip().strip("`") for part in fields.get("Sub-skills", "").split(",") if part.strip())
+        if listed_children != info["children"]:
+            issues.append((name, "details", f"sub-skills should be {', '.join(info['children']) or 'none'}"))
+
+    active_keys = {_path_key(rel) for rel in catalog}
+    for key, entry in quick_by_path.items():
+        if key not in active_keys:
+            issues.append((entry["name"], "quick-index", f"stale entry: no active skill at {entry['path']}"))
+    for key, block in details_by_path.items():
+        if key not in active_keys:
+            issues.append((block["name"], "details", f"stale entry: no active skill at {block['path']}"))
+
+    listed_archive = {_path_key(entry["path"]): entry for entry in parsed["archive"]}
+    archived_keys = {_path_key(rel): rel for rel in archived}
+    for key, rel in archived_keys.items():
+        entry = listed_archive.get(key)
+        if entry is None:
+            issues.append((Path(rel).parent.name, "archive", f"missing ({rel})"))
+        else:
+            check_case(entry["name"], "archive", entry["path"], rel)
+    for key, entry in listed_archive.items():
+        if key not in archived_keys:
+            issues.append((entry["name"], "archive", f"stale entry: no archived skill at {entry['path']}"))
+
+    reported = set(quick_by_path) | set(details_by_path) | set(listed_archive)
+    for match in _README_LINK_RE.finditer(text):
+        target = match[1].strip()
+        if not target or target.startswith("#") or re.match(r"^[a-z][a-z0-9+.-]*:", target, re.I):
+            continue
+        rel = _readme_path(target)
+        if _path_key(rel) not in reported and not (registry / rel).exists():
+            issues.append(("-", "links", f"broken link: {target}"))
+    return issues
 
 
 def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequence[SyncIssue]) -> int:
@@ -1402,25 +1678,39 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
     skills = lint_skill_dirs(registry, extra_roots, records)
     if not skills:
         display_warn(f"no SKILL.md files found in {registry} or the configured skill folders")
-        return 0
 
     frontmatters = map_concurrent(
         lambda item: read_frontmatter(item[1] / "SKILL.md"), skills, jobs
     )
     warnings: list[tuple[str, str, Path, int | None, str]] = []
     checked_rows: list[list[str]] = []
+    registry_names: dict[str, Path] = {}
     total_checked = 0
+    if yaml is None:
+        warnings.append(("-", "environment", registry, None, "YAML validation unavailable; install PyYAML for full validation"))
     for (name, path, label), (data, error) in zip(skills, frontmatters):
         total_checked += 1
         if data is None:
             warnings.append((name, label, path, None, error or "missing frontmatter"))
             checked_rows.append([name, label, "missing", "missing", str(path)])
             continue
+        skill_name = data.get("name")
+        if not isinstance(skill_name, str) or not re.fullmatch(r"[a-z0-9-]+", skill_name):
+            warnings.append((name, label, path, None, "missing or invalid name (use lowercase letters, digits and hyphens)"))
+        else:
+            if skill_name != path.name:
+                warnings.append((name, label, path, None, f"name '{skill_name}' does not match folder '{path.name}'"))
+            if label == "registry":
+                previous = registry_names.setdefault(skill_name, path)
+                if previous != path:
+                    warnings.append((name, label, path, None, f"duplicate name '{skill_name}' also at {previous}"))
         description = data.get("description")
         if not isinstance(description, str) or not description.strip():
             warnings.append((name, label, path, None, "missing description"))
             checked_rows.append([name, label, "missing", "missing", str(path)])
             continue
+        if "\n" in description.strip() or "\r" in description.strip():
+            warnings.append((name, label, path, None, "description must be a single-line string"))
         length = len(description)
         state = "over" if length > limit else "ok"
         checked_rows.append([name, label, str(length), state, str(path)])
@@ -1430,14 +1720,11 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
     if warnings:
         rows = []
         for name, label, path, length, reason in warnings:
-            if length is None:
-                rows.append([name, label, "missing", str(limit), "-", reason])
-            else:
-                rows.append([name, label, str(length), str(limit), str(length - limit), reason])
+            rows.append([name, label, str(length) if length is not None else "-", reason, str(path / "SKILL.md")])
         display_table(
-            ["Skill", "Location", "Chars", "Limit", "Over by", "Issue"],
+            ["Skill", "Location", "Chars", "Issue", "Path"],
             rows,
-            title=f"description warnings ({len(warnings)})",
+            title=f"skill warnings ({len(warnings)})",
             always=True,
         )
     if _DISPLAY.verbose and checked_rows:
@@ -1454,29 +1741,37 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
             title=f"synchronization issues ({len(issues)})",
             always=True,
         )
-
-    hard_copies = sum(1 for record in records if record.kind == "dir")
-    display_kv(
-        [
-            ("Registry", str(registry)),
-            ("Roots scanned", str(1 + len(extra_roots) + sum(
-                1 for agent in DEFAULT_AGENTS if agent_skill_dir(agent).is_dir()
-            ))),
-            ("SKILL.md files checked", str(total_checked)),
-            ("Hard copies tracked", str(hard_copies)),
-            ("Description warnings", str(len(warnings))),
-            ("Synchronization issues", str(len(issues))),
-            ("Description limit", f"{limit} characters"),
-        ],
-        title="lint summary",
-        always=True,
-    )
-    if not warnings and not issues:
-        display_ok(
-            f"all {total_checked} SKILL.md files are within {limit} characters and every copy is in sync"
+    readme_issues = check_readme(registry) if args.readme else []
+    if readme_issues:
+        display_table(
+            ["Skill", "Section", "Issue"],
+            [list(row) for row in readme_issues],
+            title=f"README issues ({len(readme_issues)})",
+            always=True,
         )
 
-    return 1 if (args.strict and (warnings or issues)) else 0
+    hard_copies = sum(1 for record in records if record.kind == "dir")
+    summary = [
+        ("Registry", str(registry)),
+        ("Roots scanned", str(1 + len(extra_roots) + sum(
+            1 for agent in DEFAULT_AGENTS if agent_skill_dir(agent).is_dir()
+        ))),
+        ("SKILL.md files checked", str(total_checked)),
+        ("Hard copies tracked", str(hard_copies)),
+        ("Skill warnings", str(len(warnings))),
+        ("Synchronization issues", str(len(issues))),
+    ]
+    if args.readme:
+        summary.append(("README issues", str(len(readme_issues))))
+    summary.append(("Description limit", f"{limit} characters"))
+    display_kv(summary, title="lint summary", always=True)
+    if not warnings and not issues and not readme_issues:
+        tail = " and README.md matches the registry" if args.readme else ""
+        display_ok(
+            f"all {total_checked} SKILL.md files passed metadata checks and no synchronization issues were found{tail}"
+        )
+
+    return 1 if (args.strict and (warnings or issues or readme_issues)) else 0
 
 
 # ---------------------------------------------------------------------------
@@ -1524,12 +1819,14 @@ def build_parser() -> argparse.ArgumentParser:
             "  python manager.py skill --refresh\n"
             "  python manager.py agent --agents claude,opencode\n"
             "  python manager.py lint --strict\n"
+            "  python manager.py lint --readme\n"
+            "  python manager.py viber --into ./my-project --hard-copy\n"
         ),
     )
     parser.add_argument(
         "-V", "--version", action="version", version=f"%(prog)s {__version__}"
     )
-    subparsers = parser.add_subparsers(dest="command", metavar="{skill,agent,lint}")
+    subparsers = parser.add_subparsers(dest="command", metavar="{skill,agent,lint,viber}")
 
     skill = subparsers.add_parser(
         "skill",
@@ -1549,6 +1846,25 @@ def build_parser() -> argparse.ArgumentParser:
     skill.add_argument("-B", "--no-backup", action="store_true", help="skip the backup before --refresh")
     skill.add_argument("-L", "--list", action="store_true", help="list registry skills and exit")
 
+    viber = subparsers.add_parser(
+        "viber",
+        help="install every skill the Viber lifecycle uses, in one shot",
+        description=(
+            "Link or copy the whole Viber skill set (listed in Groups/Viber/viber.json) into global "
+            "agent folders or a project folder. Same flags and behaviour as `skill`; the skill list "
+            "comes from the manifest instead of the command line."
+        ),
+    )
+    add_common(viber)
+    add_deploy_flags(viber)
+    add_mode_flag(viber)
+    viber.add_argument("-A", "--agents", default="all", help="comma-separated agents or 'all'")
+    viber.add_argument("-l", "--lock", action="store_true", help="record installs in skills-lock.json")
+    viber.add_argument("-i", "--into", default=None, help="project folder to install into instead of agent folders")
+    viber.add_argument("-c", "--hard-copy", action="store_true", help="copy instead of link and track sync")
+    viber.add_argument("-L", "--list", action="store_true", help="list the viber skills and where they resolve, then exit")
+    viber.set_defaults(skills=[], all=False, refresh=False, no_backup=False)
+
     agent = subparsers.add_parser(
         "agent",
         help="deploy AGENTS.md to agent configurations",
@@ -1562,8 +1878,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     lint = subparsers.add_parser(
         "lint",
-        help="validate descriptions and copy synchronization",
-        description="Check every SKILL.md description against the limit and audit hard-copy sync.",
+        help="validate skill metadata and installation synchronization",
+        description="Check all nested SKILL.md metadata and audit installed copies and links.",
     )
     add_common(lint)
     lint.add_argument(
@@ -1576,7 +1892,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     lint.add_argument(
         "-S", "--strict", action="store_true",
-        help="exit 1 when there are description warnings or sync issues",
+        help="exit 1 when there are description warnings, sync issues or README issues",
+    )
+    lint.add_argument(
+        "--readme", action="store_true",
+        help="also check README.md against the registry: counts, entries, categories, "
+             "descriptions, usage, nesting, archive list and links",
     )
 
     return parser
@@ -1669,6 +1990,8 @@ def lint_flag_labels(args: argparse.Namespace) -> list[str]:
         labels.append("-m/--max-description")
     if args.strict:
         labels.append("-S/--strict")
+    if args.readme:
+        labels.append("--readme")
     if args.quiet:
         labels.append("-q/--quiet")
     if args.verbose:
@@ -1719,11 +2042,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         # --list is a fast registry read; do not run the sync audit first.
         if command == "skill" and args.list:
             return cmd_skill(args, registry, jobs, invoked)
+        if command == "viber" and args.list:
+            return cmd_viber(args, registry, jobs, invoked)
 
-        if command == "skill":
+        if command in {"skill", "viber"}:
+            settings = skill_settings(args, registry)
+            if command == "viber":
+                settings[-1] = ("Skills", f"viber set ({VIBER_MANIFEST.as_posix()})")
             display_command_report(
-                "skill",
-                settings=skill_settings(args, registry),
+                command,
+                settings=settings,
                 flags=skill_flag_labels(args),
                 implicit=implicit,
             )
@@ -1766,6 +2094,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         if command == "skill":
             return cmd_skill(args, registry, jobs, invoked)
+        if command == "viber":
+            return cmd_viber(args, registry, jobs, invoked)
         if command == "agent":
             return cmd_agent(args, registry)
         return cmd_lint(args, registry, jobs, issues)

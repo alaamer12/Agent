@@ -15,8 +15,9 @@
  *     listening on popstate) re-renders with no reload. A project that only
  *     reads params on load picks the change up on next navigation — both are
  *     correct; the URL stays the single source of truth either way.
- *   - On load the dock self-applies what it can without JS cooperation:
- *     ?font= sets --font on <html>, ?theme= sets data-theme on <html>.
+ *   - On load and after every URL change the dock self-applies what it can
+ *     without JS cooperation: ?font= sets --font on <html>, ?theme= sets
+ *     data-theme on <html>; clearing either restores the project default.
  *     sy_* and filled remain the project's mechanism (mountStory / specs);
  *     the dock only provides their UI.
  *   - Project extension: window.DevDockInit = { apps, states, stories, frames,
@@ -27,7 +28,8 @@
  *     genuinely custom views. The dock accent is never hardcoded: it resolves
  *     explicit config > the page's brand token (--brand/--accent/--primary…) >
  *     meta theme-color > the most vivid color token > neutral slate.
- *   - ?dock=hide removes the dock entirely (screenshots, embedding, gallery).
+ *   - ?dock=hide hides only the dock UI (screenshots, embedding, gallery);
+ *     URL effects and the DevDock API keep working, and removing it restores the UI.
  *
  * Self-contained: no dependencies, no build step, works over file:// and any
  * static server. Everything inside the panel below marked CUSTOMIZE is meant
@@ -35,8 +37,9 @@
  * ==========================================================================*/
 (() => {
   if (window.DevDock) return;
-  const params0 = new URLSearchParams(location.search);
-  if (params0.get('dock') === 'hide') return;
+  const defaultTheme = document.documentElement.getAttribute('data-theme');
+  const defaultFont = document.documentElement.style.getPropertyValue('--font');
+  const defaultFontPriority = document.documentElement.style.getPropertyPriority('--font');
 
   /* ===== CUSTOMIZE: general settings (window.DevDockInit overrides these) ===== */
   const CONFIG = Object.assign({
@@ -58,6 +61,7 @@
        any non-ASCII) values automatically — never hand-concatenate raw text into a URL. */
     get: (k) => new URLSearchParams(location.search).get(k),
     has: (k) => new URLSearchParams(location.search).has(k),
+    enabled: (k) => { const v = new URLSearchParams(location.search).get(k); return v !== null && !/^(0|false|off|no)$/i.test(v); },
     all: () => [...new URLSearchParams(location.search).entries()],
     write(changes) {                       // { key: value | null(delete) }
       const p = new URLSearchParams(location.search);
@@ -368,6 +372,7 @@
     stopInspect();
   }
   function startInspect() {
+    if (Q.get('dock') === 'hide') return;
     close(); inspecting = true; inspectBtn.classList.add('on'); sync();
     toast('Click an element to copy its selector · Esc to cancel');
     addEventListener('mousemove', onMove, true); addEventListener('click', onPick, true);
@@ -390,8 +395,11 @@
   const fontSet = () => (isRtl() ? FONTS_AR : FONTS_LATIN);
   const stack = (name) => `"${name}", ${isRtl() ? '"Segoe UI", Tahoma' : 'system-ui'}, sans-serif`;
   function applyFont(name) {
-    if (!name) { document.documentElement.style.removeProperty('--font'); return; }
-    if (![...FONTS_LATIN, ...FONTS_AR].includes(name)) return;   // only the curated set reaches the network
+    if (![...FONTS_LATIN, ...FONTS_AR].includes(name)) {
+      if (defaultFont) document.documentElement.style.setProperty('--font', defaultFont, defaultFontPriority);
+      else document.documentElement.style.removeProperty('--font');
+      return;
+    }
     if (!root.querySelector(`link[data-dd-font="${name}"]`) && !document.querySelector(`link[data-dd-font="${name}"]`)) {
       const l = h('link', { rel: 'stylesheet', href: `https://fonts.googleapis.com/css2?family=${encodeURIComponent(name)}:wght@400;500;600;700&display=swap` });
       l.dataset.ddFont = name;
@@ -401,13 +409,13 @@
   }
 
   const tabs = [
-    { id: 'states', label: 'States', icon: 'db', group: 0, sub: () => declared.states.length ? `${declared.states.length} control(s)` : (Q.get('filled') ? 'filled data' : 'sparse data'), render: () => [
+    { id: 'states', label: 'States', icon: 'db', group: 0, sub: () => declared.states.length ? `${declared.states.length} control(s)` : (Q.has('filled') ? 'filled data' : 'sparse data'), render: () => [
       ...(declared.states.length ? declared.states.map((s) => seg(s.label || s.key,
         [['', s.defaultLabel || 'default'], ...(s.values || []).map((o) => (typeof o === 'string' ? [o, o] : [o.v, o.l]))],
         Q.get(s.key) || '', (v) => Q.write({ [s.key]: v || null })))
         : [sec('Declared state controls', empty('Pages declare their state trees to the dock — DevDock.declare({ states: [{ key, label, values }] }) — and the dock renders the pickers. A page template never renders its own state switches.'))]),
       ...(declared.states.some((s) => s.key === 'filled') ? [] : [sec('Data fidelity', box(
-        tog('Filled (seeded) data', () => !!Q.get('filled'), (v) => Q.write({ filled: v ? '1' : null }), '?filled=1 · sparse by default')))]),
+        tog('Filled (seeded) data', () => Q.has('filled'), (v) => Q.write({ filled: v ? '1' : null }), '?filled=1 · sparse by default')))]),
       sec('This URL', box(
         ...(Q.all().length ? Q.all().map(([k, v]) => h('div', { class: 'row' },
           h('span', { class: 'k' }, k), h('span', { class: 'v', title: v }, v),
@@ -442,7 +450,7 @@
       seg(`Family${isRtl() ? ' (Arabic set — RTL)' : ' (Latin set)'}`,
         [['', 'Project default'], ...fontSet().map((f) => [f, f])],
         Q.get('font') || '',
-        (v) => { Q.write({ font: v || null }); applyFont(v || Q.get('font')); }),
+        (v) => Q.write({ font: v || null })),
       sec('Note', empty('The pick sets --font on <html> live and writes ?font= so the choice survives sharing. theme.css owns the project default; ?fonts=ar switches an LTR page to the Arabic set.')),
     ] },
 
@@ -452,8 +460,8 @@
       seg('Grid overlay', [['', 'off'], ['8', '8px'], ['16', '16px']],
         Q.get('sy_grid') || '', (v) => Q.write({ sy_grid: v || null })),
       sec('Outlines', box(
-        tog('Outline all elements', () => Q.get('sy_outline') === '1', (v) => Q.write({ sy_outline: v ? '1' : null })),
-        tog('Hover dimensions', () => Q.get('sy_inspect') === '1', (v) => Q.write({ sy_inspect: v ? '1' : null })))),
+        tog('Outline all elements', () => Q.enabled('sy_outline'), (v) => Q.write({ sy_outline: v ? '1' : null })),
+        tog('Hover dimensions', () => Q.enabled('sy_inspect'), (v) => Q.write({ sy_inspect: v ? '1' : null })))),
       sec('Applies to', empty('Story tools act on ?story_id= isolation stages — start a story from the URL (?story_id=<id>) and these write its sy_* params. The stage mechanism lives in the project state helper, not here.')),
     ] },
 
@@ -468,10 +476,7 @@
       const toks = colorTokens();
       return [
         seg('data-theme', [['', 'auto (system)'], ['light', 'light'], ['dark', 'dark']],
-          Q.get('theme') || '', (v) => {
-            Q.write({ theme: v || null });
-            v ? document.documentElement.dataset.theme = v : document.documentElement.removeAttribute('data-theme');
-          }),
+          Q.get('theme') || '', (v) => Q.write({ theme: v || null })),
         sec(`Project palette — ${toks.length} color token(s)`, toks.length
           ? h('div', { class: 'tks' }, ...toks.map(([n, v]) =>
               h('button', { class: 'tk', type: 'button', title: `${n} · ${v} — click copies var(${n})`,
@@ -495,7 +500,7 @@
 
     { id: 'about', label: 'Dock', icon: 'gear', group: 9, sub: () => 'help', render: () => [
       sec('Keyboard', box(
-        kv('Toggle dock', 'Ctrl+Shift+D'), kv('Close / cancel pick', 'Esc'), kv('Hide entirely', '?dock=hide (URL param)'))),
+        kv('Toggle dock', 'Ctrl+Shift+D'), kv('Close / cancel pick', 'Esc'), kv('Hide UI', '?dock=hide (URL effects stay)'))),
       sec('Persistence', box(
         kv('Dock position', 'localStorage (edge, pos, size, tab)'),
         kv('Prototype state', 'the URL — every control writes query params'))),
@@ -543,6 +548,7 @@
 
   /* ---------- open / close ---------- */
   function open() {
+    if (Q.get('dock') === 'hide') return;
     isOpen = true; dd.classList.add('open'); logo.setAttribute('aria-expanded', 'true'); sync(); render();
     clearInterval(timer);
     timer = setInterval(() => { const t = allTabs().find((x) => x.id === S.tab); if (t && t.live) render(); }, 1000);
@@ -615,6 +621,23 @@
     rz.onpointerup = () => { rz.onpointermove = rz.onpointerup = null; save(); };
   });
 
+  function syncUrl() {
+    applyFont(Q.get('font'));
+    const theme = Q.get('theme');
+    if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+    else if (defaultTheme === null) document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', defaultTheme);
+    discoverStories();
+    document.getElementById('sy-toolbar')?.remove();
+    document.getElementById('apps-toolbar')?.remove();
+    if (Q.get('dock') === 'hide') {
+      close(); stopInspect(); host.remove();
+    } else if (!host.isConnected) {
+      (document.body || document.documentElement).append(host);
+    }
+    render();
+  }
+
   /* ---------- global listeners ---------- */
   document.addEventListener('pointerdown', (e) => { if (isOpen && !e.composedPath().includes(host)) close(); });
   document.addEventListener('keydown', (e) => {
@@ -622,7 +645,8 @@
     else if (e.key === 'Escape' && isOpen) close(true);
     else if (CONFIG.shortcut(e)) { e.preventDefault(); toggle(); }
   });
-  for (const ev of ['resize', 'popstate', 'hashchange']) addEventListener(ev, () => isOpen && render());
+  addEventListener('resize', () => isOpen && render());
+  for (const ev of ['popstate', 'hashchange', 'prototype:render']) addEventListener(ev, syncUrl);
 
   /* ---------- public API ---------- */
   window.DevDock = {
@@ -638,9 +662,5 @@
   };
 
   /* ---------- boot: self-apply persisted URL choices, then mount ---------- */
-  applyFont(Q.get('font'));
-  const th = Q.get('theme');
-  if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th;
-  (document.body || document.documentElement).append(host);
-  apply(); sync(); render();
+  apply(); sync(); syncUrl();
 })();

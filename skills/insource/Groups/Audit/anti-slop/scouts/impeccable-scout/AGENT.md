@@ -7,7 +7,7 @@ Review rendered UI visually and contextually for anti-slop patterns. This scout 
 ## Review workflow
 
 1. Confirm requested scope and target pages/routes; record viewport, theme, state, and user task where known.
-2. Read `anti-slop/registry/registry.json` and select patterns relevant to the rendered product, role, content, and scope. Do not load all pattern documents or screenshots.
+2. Read the skill's `registry/registry.json` and select patterns relevant to the rendered product, role, content, and scope. Do not load all pattern documents or screenshots.
 3. For selected IDs, load only their `knowledge.md`, `detection.md`, and relevant registry-linked examples/captures.
 4. Inspect the supplied/running rendered page at representative viewport sizes and important states. Capture further views only as needed to establish context, not as a substitute for understanding.
 5. Compare appearance with the pattern’s actual signals, harms, false-positive controls, and legitimate exceptions. Ask what the UI helps users do and whether the pattern causes an observable problem here.

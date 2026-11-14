@@ -124,8 +124,8 @@ Use this map as the package index. Paths are relative to this `SKILL.md`. Read t
 
 ### External source inputs (maintenance only)
 
-The project-root [`../antipatterns.json`](../antipatterns.json), [`../registry.rs`](../registry.rs), and [`../slop.PNG`](../slop.PNG) are original/reconciliation inputs, not runtime skill resources. Read them only when maintaining or auditing the catalog’s provenance; use `registry/registry.json` as the operational routing index. The PNG is a partial viewport, not complete catalog evidence.
+The catalog was reconciled from three original inputs - `antipatterns.json`, `registry.rs` and `slop.PNG` - that are not shipped with this skill. They are maintenance-only: `scripts/build_registry.py` (and the optional reconciliation step of `scripts/validate_registry.py`) read them when they are placed beside the skill folder. Use `registry/registry.json` as the operational routing index; the PNG was a partial viewport, not complete catalog evidence.
 
 ## Quick validation
 
-From the repository root, run `python anti-slop/scripts/validate_registry.py` and the test commands in `references/operations-and-evaluation.md`. The registry is reference data; never regenerate it during a product review.
+From this skill's folder, run `python scripts/validate_registry.py` and the test commands in `references/operations-and-evaluation.md`. The registry is reference data; never regenerate it during a product review.

@@ -1,5 +1,5 @@
 ---
-name: scss-best-practices
+name: scss
 description: SCSS/Sassy CSS best practices and coding guidelines for maintainable, scalable stylesheets
 ---
 

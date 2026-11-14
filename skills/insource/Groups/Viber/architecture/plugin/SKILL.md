@@ -1,6 +1,6 @@
 ---
 name: plugin
-description: Authors an application's plugin and settings architecture as one extensibility system. Settings and plugins are the same family: a closed host exposes a small extension contract, and an open set of contributions adds behavior without editing shared code. Use when designing, reviewing or refactoring settings pages, configuration catalogs, feature flags, per-tenant or per-platform preferences, extension points, module systems, or plugin hosts. Decides build-time versus runtime loading per axis, enforces an Open/Closed growth gate, and specifies descriptor data, contribution registries, layered composition, scope and storage, renderer shapes, consumer authorities, migration, versioning, trust and failure isolation.
+description: "Authors an application's plugin and settings architecture as one extensibility system. Settings and plugins are the same family: a closed host exposes a small extension contract, and an open set of contributions adds behavior without editing shared code. Use when designing, reviewing or refactoring settings pages, configuration catalogs, feature flags, per-tenant or per-platform preferences, extension points, module systems, or plugin hosts. Decides build-time versus runtime loading per axis, enforces an Open/Closed growth gate, and specifies descriptor data, contribution registries, layered composition, scope and storage, renderer shapes, consumer authorities, migration, versioning, trust and failure isolation."
 argument-hint: "[project root or app name]"
 ---
 

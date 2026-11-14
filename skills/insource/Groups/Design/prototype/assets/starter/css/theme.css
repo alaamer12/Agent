@@ -17,8 +17,12 @@
   --fs-xs: 12px; --fs-sm: 13px; --fs-md: 15px; --fs-lg: 19px; --fs-xl: 26px;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
     --bg: #12151d; --surface: #1a1f2b; --ink: #e7ebf5; --muted: #93a0bd;
     --line: #2a3244; --shadow: 0 1px 3px rgb(0 0 0 / .4);
   }
+}
+:root[data-theme="dark"] {
+  --bg: #12151d; --surface: #1a1f2b; --ink: #e7ebf5; --muted: #93a0bd;
+  --line: #2a3244; --shadow: 0 1px 3px rgb(0 0 0 / .4);
 }

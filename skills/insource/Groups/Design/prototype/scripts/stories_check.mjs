@@ -130,7 +130,7 @@ export function coverage(reg, implDir) {
     }
     const file = path.join(implDir, `${c.renderer}.js`);
     if (!existsSync(file)) {
-      f.push(`impl: ${c.id} -> renderer '${c.renderer}' not found at ${file} (shared renderer missing, or the story cloned it - see references/06)`);
+      f.push(`impl: ${c.id} -> renderer '${c.renderer}' not found at ${file} (shared renderer missing, or the story cloned it - see references/component-registry-stories.md)`);
       continue;
     }
     const src = readFileSync(file, "utf8");

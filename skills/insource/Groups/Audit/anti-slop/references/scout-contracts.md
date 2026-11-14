@@ -12,10 +12,10 @@ When producing or validating machine-readable visual-scout output, read [`scouts
 
 [`scouts/structural-scout/README.md`](../scouts/structural-scout/README.md) defines the code/structure reviewer. It reads relevant registry entries and detection guides, scans only applicable paths, and emits source-backed candidate evidence. It cannot confirm violations.
 
-Run the reusable scanner from the repository root:
+Run the reusable scanner from the product repository (`<anti-slop>` is this skill's folder):
 
 ```text
-python anti-slop/scripts/structural_scout.py <file-or-directory> [--pattern <pattern-id> ...] [--json]
+python <anti-slop>/scripts/structural_scout.py <file-or-directory> [--pattern <pattern-id> ...] [--json]
 ```
 
 When invoking `--json` or returning machine-readable structural-scout output, read [`scouts/structural-scout/output.schema.json`](../scouts/structural-scout/output.schema.json). It constrains the scanner's candidate-only payload; skip it for prose-only notes. Supported detector IDs are defined by `candidate_detector_ids()` in the scanner; do not assume every registry item has an implemented detector.

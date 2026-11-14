@@ -81,7 +81,7 @@ The schema lives here; `resources conform` reads it and changes nothing about it
 | Slot | Role | Source | Master | Delivery | Status |
 |---|---|---|---|---|---|
 | `avatar-01..10` | avatar set | generate sheet 5x2 | 1536x1024 sheet 5x2 gutter 0 | `128x128 1:1 webp q82 @1x,2x` | pending |
-| `hero-home` | hero illustration | generate single | 1600x900 single | `1600x900 16:9 avif q60 @1x,2x` | pending |
+| `hero-home` | hero illustration | generate single | 1600x900 single | `800x450 16:9 avif q60 @1x,2x` | pending |
 | `logo` | brand mark | reuse `brand/logo.svg` | — | `240x64 svg` | shipped |
 | `photo-teaser` | stock photo | `fahlwy` | — | `640x360 16:9 jpeg q80 @2x` | pending |
 | `icon-search` | icon | `resources` / icon set | — | `24x24 svg` | shipped |
@@ -90,6 +90,7 @@ The schema lives here; `resources conform` reads it and changes nothing about it
 - **Source**: `generate` (single or sheet), `reuse <path>`, `fahlwy`, `resources`. Only generated
   rows get a prompt and a master spec.
 - **Master**: `WxH single`, or `WxH sheet CxR [gutter N]` - the raw render the slot is cut from.
+  It must hold `delivery px x max DPR` per axis; `conform` reads this cell, so notes never go in it.
 - **Delivery**: `WxH [aspect] [format] [qN] [@1x,2x,3x]` - exactly what `conform` implements.
 - **Status**: `pending / shipped / reused / no-image`.
 
@@ -123,7 +124,8 @@ Measure with `resources`' `sheet_probe.py` before committing the plan.
 
 Economy is not cheapness. A sheet trades cost for **correlated risk**: one bad cell invalidates
 the whole render, while individual generations drift in style. Record the fallback (`2x2 sheets`
-or `singles`) in the BOM row so a failed sheet has a plan, not a panic. Never estimate prices in
+or `singles`) in the economy check, outside the Master cell `conform` reads, so a failed sheet has
+a plan, not a panic. Never estimate prices in
 the BOM - the actual cost comes from `generate`'s `usage.jsonl`.
 
 ## Regenerate-only-if-needed

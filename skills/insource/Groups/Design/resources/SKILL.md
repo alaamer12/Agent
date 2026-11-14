@@ -46,7 +46,7 @@ them by looking at the folder.
 | Audit assets: duplicates, unused, external URLs | `scripts/inventory.py` | `--root . --assets assets public` |
 | Convert/compare colors across CSS Color 4 spaces | `scripts/color.py` | `"#3366FF" --to oklch` · `--contrast A B` · `--mix A B --space oklch` |
 | Bun projects: variants + ThumbHash placeholders (built-in, zero deps) | `scripts/bun-image.ts` | `bun run bun-image.ts in.png --out-dir out --variants 320,640 --placeholder` |
-| Split a generated sheet into slot files fitted to the BOM | `scripts/conform.py` | `--bom bom/page.md --in raw/ --out assets/` · `--grid 4x4 --cell 512 --slots avatar-01..10` |
+| Conform a generated sheet or single master into slot files fitted to the BOM | `scripts/conform.py` | `--bom bom/page.md --group avatar --in raw/avatars.png --out assets/avatars` · `--slots hero-home --in raw/hero-home.png` |
 | Measure a generated sheet before cutting it | `scripts/sheet_probe.py` | `sheet.png --grid 5x2 --delivery "128x128 1:1 webp @1x,2x"` · `--json` |
 | Review delivered slots on a checkerboard, with alpha-edge facts | `scripts/contact_sheet.py` | `assets/avatars --out review.png --skip-density` · `--json` |
 
@@ -130,7 +130,8 @@ it, then **review** the files the project ships:
 - `conform.py` splits each cell, trims dead margin, pads to the target aspect (never squash it),
   resizes once at the largest needed size, emits the DPR ladder, names by slot, then verifies every
   file and writes `conform-report.json`. Cut lines go through the **content box**, not the canvas,
-  so uneven margins cannot clip the last column.
+  so uneven margins cannot clip the last column. A `single` master is one slot: used whole (no
+  content-box cut, trim or keying unless requested), then fitted, laddered and verified the same way.
 - `contact_sheet.py` composites the delivered files on a checkerboard and measures their alpha
   edges. Transparency is invisible against white: a sheet is how a halo, an opaque corner or a
   clipped subject becomes visible, and the per-file facts say whether the background was keyed at
@@ -147,11 +148,13 @@ it, then **review** the files the project ships:
   a cell smaller than the required master is an error unless `--allow-upscale`.
 - **Count mismatch stops the run.** If detection finds 9 subjects where the BOM expects 10, it reports
   and exits non-zero instead of guessing which cell is wrong.
-- One run = one sheet group; `--group <prefix>` scopes it. A set that needs more than one render
-  is written as one BOM row per sheet (`avatar-01..04`, `avatar-05..08`); each row is its own run.
+- One run = one master: a sheet group or one single slot; `--group <prefix>` or `--slots <id>`
+  scopes it. A set that needs more than one render is written as one BOM row per sheet
+  (`avatar-01..04`, `avatar-05..08`); each row is its own run.
 
-Scale, trimming and padding rules: `references/08-conform.md`. Generic single-file crops stay in
-`transform.py`; conform exists only for "one render, many delivery assets".
+Scale, trimming and padding rules: `references/08-conform.md`. One-off crops with no BOM row stay
+in `transform.py`; every generated BOM row goes through conform so its slot id links the render to
+the shipped files.
 
 ## References and the small code changes
 

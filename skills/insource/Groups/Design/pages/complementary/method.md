@@ -33,7 +33,7 @@ screens (empty results and validation errors belong to their pages, §7).
 4. **Build per the family reference** — each of the nine `references/<family>.md` files owns
    the per-class copy laws and anti-patterns.
 5. **Register in PAGES.md §6** — one row per screen per `../references/output-contract.md`:
-   family, trigger, condition source,
+   route, family, trigger, condition source, states handled,
    exits, status. Exclusions (e.g. a cancel page the failure screen already owns) go to §9
    with kind=complementary; worked shape in `examples/after-payment/anatomy-sheets.md`.
 6. **`audit <routes-dir>`** — sweep real routes for conditional pages that violate a law:

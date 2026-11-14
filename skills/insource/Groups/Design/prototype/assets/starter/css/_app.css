@@ -9,6 +9,7 @@ body::-webkit-scrollbar { display: none; }
 body { scrollbar-width: none; }
 
 .app { max-width: 1200px; margin: 0 auto; padding: var(--space-4); }
+.app:has(> #stage) { max-width: none; padding: 0; }
 .icon { width: 18px; height: 18px; vertical-align: -4px; }
 
 .topbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; }

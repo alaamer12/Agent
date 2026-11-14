@@ -139,10 +139,18 @@ confirmed topic and probe its specific angles:
     commit vs. rebase), and how a broken merge on a shared track is reverted or hotfixed.
 - **If `Debugging & Verification` is in the slate (feeds Q10 & [`04`](04-execution-env-debug.md)):**
   - *Research mandate:* Inspect the project's layers (UI, API, DB, workers, native bridge) and observability
-    tools.
+    tools; sweep startup-argument parsing, dev-gated routes, and any seed/reset/parity tooling to learn which
+    instruments the app ALREADY carries before asking about them.
   - *Single playbook vs. folder split:* Should debugging stay one file (`rules/debugging.md`) or split by layer
     (`rules/debugging/ui.md`, `rules/debugging/db.md`, `rules/debugging/workers.md`)? Plus deterministic repro
     methods, read vs. mutate safety per environment, visual proof, and scratch cleanup.
+  - *Agent instrumentation (Q10's second half):* debug entry points the product itself exposes - gate-bypass,
+    page-direct-open and state-freeze instruments (flags, subcommands, env switches, dev routes),
+    deterministic-seed modes, dev-only state exports - are engineered, not assumed. Present the evidence (existing flags found in code, or their absence with the session cost: "the
+    agent must click through onboarding + live network to reproduce"), then settle per project: which
+    instruments to build, their gating mechanism, and the never-bypassed boundaries. Record the accepted
+    inventory in the debugging doc; un-built instruments stay proposals, the pattern catalog and
+    dead-in-production rails are the dbug skill's job.
 - **If `Execution & Tooling` or `Environment & Configuration` is in the slate (feeds Q7–9 & [`04`](04-execution-env-debug.md)):**
   - *Research mandate:* Inspect task runners (`turbo`, `nx`, `make`), shell pitfalls, daemon management, and how
     config flows from secret stores/templates into build-time and boot-time validation schemas.
@@ -193,7 +201,7 @@ options are concrete and grounded in the repo's stack.
 | 7 | Which shell must be avoided and why; chaining allowed? Scratch script location and cleanup duty? | 3 - execution.md | ask; this is environment-specific knowledge only the user has |
 | 8 | One package manager, confirmed? | 3 - execution.md | use the inferred one, marked *inferred from lockfile* |
 | 9 | Environment strategy: type-safe schema? build-time generation from a central file? runtime secret store? paths and commands | 3 - environment.md | `pending` + the prohibition that is always safe: do not edit `.env` directly |
-| 10 | Debugging: single playbook or folder split by layer (`ui.md`, `db.md`)? Inspect data permitted? Modify permitted, in which environment? How to verify visual/GUI behavior? | 3 - the debugging how-to doc | permit read-only inspection locally, require a question for anything mutating |
+| 10 | Debugging: single playbook or folder split by layer (`ui.md`, `db.md`)? Inspect data permitted? Modify permitted, in which environment? How to verify visual/GUI behavior? **And: how do you want the agent instrumented into debugging?** Does the app carry debug entry points - launch flags, a `debug`-style subcommand, environment switches, dev-only routes - that skip human gates, open a named page directly, freeze state, seed fixture data, or export live state, and reset scripts - and should any be built? Which gates are bypassable, which never (auth, validation, payment)? Every instrument stays inert in shipped builds; the dbug skill owns how to build one, this rulebook owns what exists and under which name. | 3 - the debugging how-to doc | permit read-only inspection locally, require a question for anything mutating; instruments: register "none built, none assumed" - the agent may not guess an entry point or add an instrument on its own |
 | 11 | What must happen before the first edit in a session? | 5 | derive from sections 2, 3, 4 as a startup checklist |
 | 12 | Subagent naming scheme; report location and filename pattern; is reusing a role name allowed to overwrite? | 6 | propose a default and mark it *proposed* |
 | 13 | What may a subagent decide alone vs return undecided, and how are parallel write-isolation boundaries (lockfiles, barrel exports, migrations, codegen) enforced? | 6 | default: reversible local edits in disjoint scope = decide; anything crossing files/branches/destructive = return undecided |

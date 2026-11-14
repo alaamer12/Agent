@@ -2,7 +2,7 @@
 """Fit easing curves to a per-frame metrics timeline.
 
 Run:
-    python3 scripts/fit_curves.py <metrics.json> [--fps N] [--property NAME]
+    python3 scripts/match/fit_curves.py <metrics.json> [--fps N] [--property NAME]
 
 For each animated property (position, scale, opacity, ...) this fits two models
 to its normalized 0->1 progress over time:
@@ -11,8 +11,8 @@ to its normalized 0->1 progress over time:
     bezier   cubic-bezier easing        -> { x1, y1, x2, y2 }
 
 Both report a normalized RMS fit error. Lower is better; a spring that clearly
-overshoots will beat a bezier (and vice versa). Read references/curve-fitting.md
-to interpret the numbers and pick the model. A high error on BOTH usually means
+overshoots will beat a bezier (and vice versa). Read references/match-existing.md
+("Fitting curves") to interpret the numbers and pick the model. A high error on BOTH usually means
 the motion is multi-phase: split it and fit each phase separately.
 
 Requires: numpy, scipy  (pip install numpy scipy)

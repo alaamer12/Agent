@@ -26,13 +26,13 @@ A subagent inherits nothing: not the rulebook, not the conversation, not the use
 
 **1. The brief carries the rulebook.** Read the project's AGENTS.md before writing the brief. Copy in the slice the task touches: the compressed baseline block (mandatory context, skills, shell, env, units, reports — per `agents-md` §10), the Privacy paths the task could write into, the Resourceful rule (project-local installs), and the Authority settings. Instruct the subagent plainly: *these rules bind you exactly as if you had read AGENTS.md; your report must name the rules that shaped your decisions and every action you took under an authority grant.* A subagent that has never seen the rulebook is not "independent" — it is unconstrained.
 
-**2. The parent asks on the subagent's behalf.** A subagent cannot ask the user mid-task. So before dispatch, enumerate every action the task requires that AGENTS.md §13 marks *ask-per-session* — installing a binary outside the project, running an external process (emulator, daemon), writing to an existing database, touching credentials, changing machine config — and ask the user up front, in one batch:
+**2. The parent asks on the subagent's behalf.** A subagent cannot ask the user mid-task. So before dispatch, enumerate every action the task requires that AGENTS.md §9 (Authority) marks *ask-per-session* — installing a binary outside the project, running an external process (emulator, daemon), writing to an existing database, touching credentials, changing machine config — and ask the user up front, in one batch:
 
 > "The subagent will need to <action> to complete <task>. Do you grant authority for it?"
 
 Record each answer in the brief's Autonomy Bounds as an explicit grant or denial. A denial is not a suggestion: re-scope the task, or drop the blocked step and report it. Never let the subagent meet the limit mid-task and improvise around it.
 
-**3. Autonomous mode overrides the asking.** When the user has already put the agent in an anonymous, autonomous state — a skill like `iwts` ("I want to sleep", "take over", "finish it while I'm away") — the agent and its subagents hold **full authority** for the delegated work unless the user carved something out. Skip the batch question; state in each brief: "Autonomous session: full authority for this task within the project; anything the user excluded stays out, and the rulebook's hard constraints (privacy paths, never-sacrifice commitments) remain in force; destructive or out-of-project actions are still reported." Hard constraints are not authority grants — they stay binding even here.
+**3. Autonomous mode passes down whole — its freedom and its stop list.** When the user has put the agent in an anonymous, autonomous state — a mode like `iwts` ("I want to sleep", "take over", "finish it while I'm away") — nobody is awake to answer, so the batch question moves to *before the user leaves* (AGENTS.md §13, "Before going anonymous") and each brief carries what was settled there plus the §9 grants marked fixed. Subagents then decide ordinary engineering themselves, exactly as the parent does: no questions back for routine choices. Autonomy never grants what the mode reserves for the user — `iwts`'s stop list: irreversible destruction with unclear intent, pushes/publishes/purchases, real cost or external commitments, credentials not provided, ambiguity that materially changes the outcome, out-of-scope work — nor any §9 action left ask-per-session. A subagent that reaches one does not execute it: it skips that step, finishes the rest, and reports the exact blocked action, so the parent records it as the run's waiting question. State in each brief: "Autonomous session: decide ordinary engineering yourself; the mode's user-owned actions and ungranted §9 actions are reported as blocked, never executed; hard constraints (privacy paths, never-sacrifice commitments) stay binding."
 
 ## Mandatory Brief Structure
 
@@ -77,7 +77,7 @@ You are an executor, not a decision-maker.
 **Authority (per the parent's pre-delegation ask):**
 - Granted for this task: [actions the user approved, or "none beyond project-local work"]
 - Denied / unavailable: [actions to avoid - report instead of executing]
-- Session mode: [normal - ask-per-session rules carry over to the parent, not to you; or AUTONOMOUS - full authority within the project, hard constraints still apply]
+- Session mode: [normal - ask-per-session rules carry over to the parent, not to you; or AUTONOMOUS - decide ordinary engineering yourself; user-owned actions (the mode's stop list) and ungranted §9 actions are reported as blocked, never executed; hard constraints still apply]
 
 ## 5. Output Contract
 1. Emit every raw search result, tool output, and intermediate finding in full inside the conversation.
@@ -185,7 +185,7 @@ the exception:
     The brief carries the rulebook slice the task touches (baseline block, privacy paths, resourceful rule, authority settings); the report names which rules shaped decisions and every granted action taken. A subagent operating without the rulebook is unconstrained, not independent.
 
 12. **Ask authority before dispatch, on the subagent's behalf**  
-    Enumerate the ask-per-session actions the task needs (external installs, external processes, existing-DB writes, credentials, machine config) and get the user's grant or denial in one batch before spawning; record it in Autonomy Bounds. In an autonomous session (e.g. `iwts`), the agent and its subagents hold full authority unless the user carved something out — the brief says so, and hard constraints still apply.
+    Enumerate the ask-per-session actions the task needs (external installs, external processes, existing-DB writes, credentials, machine config) and get the user's grant or denial in one batch before spawning; record it in Autonomy Bounds. In an autonomous session (e.g. `iwts`), the asking happens before the user leaves; subagents then decide ordinary engineering themselves, while the mode's user-owned actions and ungranted §9 actions are reported as blocked, never executed — the brief says so, and hard constraints still apply.
 
 ## Optional Forked Mode
 

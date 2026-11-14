@@ -2,8 +2,8 @@
 """Measure a moving element across extracted frames, frame by frame.
 
 Run:
-    python3 scripts/track_motion.py <framedir> [--out metrics.json]
-                                    [--bbox X,Y,W,H] [--invert] [--threshold T]
+    python3 scripts/match/track_motion.py <framedir> [--out metrics.json]
+                                          [--bbox X,Y,W,H] [--invert] [--threshold T]
 
 --bbox restricts frame-diff detection to that region (use when several elements
 move and you want just one; run once per element). The element is still tracked
@@ -17,8 +17,8 @@ Outputs a JSON timeline of per-frame measurements for the tracked element:
     blur            normalized inverse sharpness in [0,1] (1 = most blurred)
     radius          corner-roundness proxy in [0,1] (1 = most rounded)
 
-These are PROXIES from pixels, not ground truth. Read references/measurement-guide.md
-for what each one means and when to trust it. Feed the JSON to fit_curves.py.
+These are PROXIES from pixels, not ground truth. Read references/match-existing.md
+("Reading the measurements") for what each one means and when to trust it. Feed the JSON to fit_curves.py.
 
 Requires: opencv-python, numpy  (pip install opencv-python numpy)
 """

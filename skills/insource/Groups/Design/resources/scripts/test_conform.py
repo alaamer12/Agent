@@ -7,6 +7,8 @@ to that contract.
 """
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import os
 import sys
@@ -98,6 +100,11 @@ class ParseMasterTest(unittest.TestCase):
 
     def test_blank_master(self):
         self.assertIsNone(conform.parse_master("-"))
+
+    def test_fallback_note_is_rejected_with_its_home(self):
+        with self.assertRaises(conform.SpecError) as caught:
+            conform.parse_master("1536x1024 sheet 5x2 gutter 0 (fallback: 2x2 sheets)")
+        self.assertIn("economy check", str(caught.exception))
 
     def test_multi_sheet_plan_is_separate_rows(self):
         # One BOM row is one render. A set spanning several sheets is several rows, each its own
@@ -292,6 +299,51 @@ class DryRunTest(unittest.TestCase):
                              "--delivery", "32x32 png @1x,2x", "--dry-run", "--json")
         self.assertEqual(code, 0)
 
+    def test_single_master_plans_the_whole_canvas(self):
+        args = conform.build_parser().parse_args([
+            "--bom", str(self.bom), "--slots", "hero-home", "--in", "hero.png",
+            "--out", str(self.root / "out"), "--dry-run", "--json",
+        ])
+        result = conform.Result(bom=args.bom, sheet=args.inp, dry_run=True)
+        with contextlib.redirect_stdout(io.StringIO()):
+            conform.run(args, result)
+        self.assertEqual([(entry["width"], entry["height"]) for entry in result.files],
+                         [(800, 450), (1600, 900)])
+        self.assertEqual({tuple(entry["box"]) for entry in result.files}, {(0, 0, 1600, 900)})
+
+    def test_single_master_refuses_more_than_one_slot(self):
+        self.bom.write_text(
+            "| Slot | Master | Delivery |\n|---|---|---|\n"
+            "| hero-a | 1600x900 single | 800x450 webp |\n"
+            "| hero-b | 1600x900 single | 800x450 webp |\n",
+            encoding="utf-8",
+        )
+        with contextlib.redirect_stderr(io.StringIO()) as stderr:
+            code = self.run_main("--bom", str(self.bom), "--group", "hero",
+                                 "--in", "hero.png", "--out", str(self.root / "out"), "--dry-run")
+        self.assertEqual(code, 2)
+        self.assertIn("single master holds one slot", stderr.getvalue())
+
+    def test_single_master_rejects_sheet_overrides(self):
+        for extra in (("--grid", "2x2"), ("--cell", "512")):
+            with self.subTest(extra=extra), contextlib.redirect_stderr(io.StringIO()) as stderr:
+                code = self.run_main("--bom", str(self.bom), "--slots", "hero-home", *extra,
+                                     "--in", "hero.png", "--out", str(self.root / "out"), "--dry-run")
+                self.assertEqual(code, 2)
+                self.assertIn("single master", stderr.getvalue())
+
+    def test_single_master_still_refuses_upscale(self):
+        self.bom.write_text(
+            "| Slot | Master | Delivery |\n|---|---|---|\n"
+            "| hero | 1600x900 single | 1600x900 16:9 webp @1x,2x |\n",
+            encoding="utf-8",
+        )
+        with contextlib.redirect_stderr(io.StringIO()) as stderr:
+            code = self.run_main("--bom", str(self.bom), "--slots", "hero",
+                                 "--in", "hero.png", "--out", str(self.root / "out"), "--dry-run")
+        self.assertEqual(code, 2)
+        self.assertIn("3200x1800", stderr.getvalue())
+
 
 @unittest.skipUnless(HAVE_PIL, "pillow is not installed")
 class ConformRunTest(unittest.TestCase):
@@ -433,6 +485,66 @@ class ConformRunTest(unittest.TestCase):
                              "--in", str(self.sheet), "--out", str(self.out),
                              "--full-canvas")
         self.assertEqual(code, 4)
+
+    def make_hero(self, size=(1600, 900)):
+        hero = Image.new("RGB", size, (255, 255, 255))
+        hero.paste((30, 60, 200), (size[0] // 4, size[1] // 4, size[0] * 3 // 4, size[1] * 3 // 4))
+        hero.save(self.sheet)
+
+    def report(self):
+        return json.loads((self.out / "conform-report.json").read_text(encoding="utf-8"))
+
+    def test_single_master_keeps_composition_and_background(self):
+        self.make_hero()
+        code = self.run_main("--bom", str(self.bom), "--slots", "hero-home",
+                             "--in", str(self.sheet), "--out", str(self.out))
+        self.assertEqual(code, 0)
+        report = self.report()
+        self.assertEqual(report["master"]["kind"], "single")
+        self.assertEqual(report["region"], [0, 0, 1600, 900])
+        self.assertFalse(report["key"]["applied"])
+        self.assertEqual(report["warnings"], [])
+        for name, size in (("hero-home.webp", (800, 450)), ("hero-home@2x.webp", (1600, 900))):
+            with Image.open(self.out / name) as written:
+                self.assertEqual(written.size, size)
+                corner = written.convert("RGBA").getpixel((0, 0))
+                self.assertEqual(corner[3], 255)
+                self.assertGreater(min(corner[:3]), 240)
+
+    def test_single_master_honours_explicit_trim_and_keying(self):
+        self.make_hero()
+        code = self.run_main("--bom", str(self.bom), "--slots", "hero-home", "--trim", "--key-bg",
+                             "--delivery", "400x225 16:9 png", "--in", str(self.sheet),
+                             "--out", str(self.out))
+        self.assertEqual(code, 0)
+        self.assertTrue(self.report()["key"]["applied"])
+        with Image.open(self.out / "hero-home.png") as written:
+            self.assertEqual(written.size, (400, 225))
+            corner = written.convert("RGBA").getpixel((0, 0))
+            self.assertLessEqual(max(abs(a - b) for a, b in zip(corner, (30, 60, 200, 255))), 2)
+
+    def test_single_master_pads_and_warns_on_aspect_mismatch(self):
+        self.bom.write_text(
+            "| Slot | Master | Delivery |\n|---|---|---|\n"
+            "| banner | 1000x1000 single | 400x200 png |\n",
+            encoding="utf-8",
+        )
+        self.make_hero((1000, 1000))
+        code = self.run_main("--bom", str(self.bom), "--slots", "banner",
+                             "--in", str(self.sheet), "--out", str(self.out))
+        self.assertEqual(code, 0)
+        self.assertIn("padded, not cropped", self.report()["warnings"][0])
+        with Image.open(self.out / "banner.png") as written:
+            self.assertEqual(written.size, (400, 200))
+            self.assertEqual(written.getpixel((0, 0))[3], 0)
+            self.assertEqual(written.getpixel((200, 100))[3], 255)
+
+    def test_directory_input_is_explained(self):
+        with contextlib.redirect_stderr(io.StringIO()) as stderr:
+            code = self.run_main("--bom", str(self.bom), "--slots", "hero-home",
+                                 "--in", str(self.root), "--out", str(self.out))
+        self.assertEqual(code, 2)
+        self.assertIn("one generated image file", stderr.getvalue())
 
 
 if __name__ == "__main__":

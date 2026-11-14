@@ -90,14 +90,16 @@ Canon per document — one row, platforms point at it.
 ## 6. Complementary screens
 
 Conditional pages (`/pages complementary` designs them; this section registers them with the
-anatomy fields that make them auditable).
+anatomy fields that make them auditable - the row shape is `../complementary/references/anatomy.md`'s
+decision record, plus the canon route).
 
-| Screen | Family | Trigger | Condition source | Exits | Status |
-|---|---|---|---|---|---|
-| Payment Success | transaction-success | order status `settled` | `GET /orders/{id}/status` | receipt · manage · home | confirmed |
-| Payment Failed | transaction-failure | status `declined\|failed` | same + webhook state | retry(manual per contract) · change method · home | confirmed |
-| OAuth callback relay | relay-redirect | provider return path hit | server state/nonce check | allowlisted forward only | confirmed |
-| Onboarding | onboarding | setup incomplete | account flag | complete · skip · resume | inferred |
+| Screen | Route | Family | Trigger | Condition source | States handled | Exits | Status |
+|---|---|---|---|---|---|---|---|
+| Payment Success | `/payments/success` | transaction-success | order status `settled` | `GET /orders/{id}/status` | in-flow · replay · bookmarked · logged-out → `session-gates` | receipt · manage · home | confirmed |
+| Payment Failed | `/payments/failed` | transaction-failure | status `declined\|failed` | same + webhook state | in-flow · replay after retry · bookmarked (re-check, forward if settled) | retry(manual per contract) · change method · home | confirmed |
+| Payment Pending | `/payments/pending` | transaction-failure | status `unknown` after provider timeout | same + webhook state | in-flow · reopened (re-poll) | check again · support · home | inferred |
+| OAuth callback relay | `/auth/callback` | relay-redirect | provider return path hit | server state/nonce check | in-flow · replayed code (reject) · cold hit (no state → login) | allowlisted forward only | confirmed |
+| Onboarding | `/onboarding` | onboarding | setup incomplete | account flag | first run · resumed · completed account deep-links (forward home) | complete · skip · resume | inferred |
 
 ## 7. States
 
@@ -178,7 +180,7 @@ kind column says which universe it was rejected from.
 | `Confidence` | Confidence in existence, not design. `high` needs evidence. |
 | `Evidence` | File path, doc section, route file, ticket, or `domain logic`. No vague "common". |
 | `Family` (§6) | One of the nine complementary families — must match a `complementary/references/` doc. |
-| `Trigger`/`Condition source`/`Exits` (§6) | Per `../complementary/references/anatomy.md`; a §6 row missing any is an audit defect. |
+| `Trigger`/`Condition source`/`States handled`/`Exits` (§6) | Per `../complementary/references/anatomy.md`; a §6 row missing any is an audit defect. `States handled` names every reachability state the page answers (cold deep-link, bookmarked replay, logged-out arrival, fresh in-flow). Continuation ownership and announcement stay in the anatomy sheet, not the row. |
 | `Notes` | Scope caveat, split pointer, state note, redirect target. Keep short. |
 
 ### Status rules

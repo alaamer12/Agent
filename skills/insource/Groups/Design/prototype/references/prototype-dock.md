@@ -43,8 +43,12 @@ The dock and the project never call each other's internals:
   project DOM to fake reactivity (except `--font`/`data-theme`, which it owns, see below).
 - Every value the dock shows is read back from `location.search` — after `popstate`/`hashchange`
   the open panel re-renders, so the URL stays authoritative even when the person edits it by hand.
-- `?dock=hide` removes the dock for clean screenshots and gallery iframes. The gallery itself
-  never mounts a dock inside screen previews.
+- `?dock=hide` removes only the dock UI, not its URL effects or declaration API. Font, theme,
+  page state, and story tools still apply. Removing that param restores the same dock instance.
+  Gallery previews load the dock script with `dock=hide`; hiding controls never disables state.
+- Render product content into its own root (`.app` in the starter), never replace `document.body`.
+  After rendering, dispatch `prototype:render` so the dock refreshes its inventory before story
+  isolation moves components inside the product root. The dock stays outside that root.
 
 ## Tabs that ship in the template
 
@@ -60,8 +64,9 @@ The dock and the project never call each other's internals:
 | **Dock** (bottom) | — | shortcuts, persistence notes, extension API |
 
 The font and theme tabs apply their values live because those are CSS-level side effects with no
-project mechanism to delegate to; `devdock.js` self-applies them from the URL at boot, so a shared
-`?font=Cairo&theme=dark` URL reproduces exactly. Everything else is param-writing only.
+project mechanism to delegate to; `devdock.js` applies them at boot and on every URL update,
+including browser history and reset, even with `dock=hide`. Clearing a choice restores the
+project default. Everything else is param-writing only.
 
 ## Mounting
 

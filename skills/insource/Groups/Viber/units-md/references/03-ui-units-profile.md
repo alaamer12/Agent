@@ -1,6 +1,6 @@
 # Profile: UI builder units
 
-Carried over from `like-a-pro`'s old system-creator "Mode B", now folded into units-md. A specialization of the
+A specialization of the
 units index for the presentation layer: reusable visual components, adaptive concepts,
 design-system primitives, and builder functions. Everything in
 [`01-the-file.md`](01-the-file.md) still applies — same entry form, same ids, same required fields, same linter.

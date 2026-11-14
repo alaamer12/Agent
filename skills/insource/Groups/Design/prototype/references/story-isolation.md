@@ -113,7 +113,7 @@ This allows visual regression tools (Playwright, Puppeteer) or reviewers to capt
 
 ## 6. The Story Toolbox (`sy_*` URL Parameters)
 
-All staging tool configurations live entirely in URL query parameters, bookmarkable and test-controllable. **These params are the contract; the interactive UI that writes them is the Dev Dock's Story tools tab** ([`prototype-dock.md`](prototype-dock.md)) — a page module never renders toolbox buttons itself. The `mountToolbox()` body-injected toolbar in `assets/starter/` predates the dock and remains a working fallback for its params.
+All staging tool configurations live entirely in URL query parameters, bookmarkable and test-controllable. **These params are the contract; the interactive UI that writes them is the Dev Dock's Story tools tab** ([`prototype-dock.md`](prototype-dock.md)) — a page module never renders toolbox buttons itself. The starter's legacy toolbar appears only without Dev Dock and without `dock=hide`; the stage effects apply regardless of dock visibility. Story isolation replaces only the product root, never the document body or dock.
 
 | Parameter | Values | Purpose |
 |---|---|---|

@@ -63,6 +63,18 @@ check("history policy: discrete component states push, continuous fields replace
       historyMode("open", FUNDS_SPEC) === "push" && historyMode("q", FUNDS_SPEC) === "replace");
 
 check("?filled round-trips in the URL", toQuery(parse("?filled=17", FUNDS_SPEC).state, FUNDS_SPEC) === "?filled=17");
+check("bare ?filled normalizes to the default seed", parse("?filled", FUNDS_SPEC).state.filled === "1");
+check("bare ?filled survives another state change",
+      toQuery(patch(parse("?filled", FUNDS_SPEC).state, { status: "pending" }), FUNDS_SPEC).includes("filled=1"));
+check("bare and explicit default seeds are identical", rng(parse("?filled", FUNDS_SPEC).state.filled)() === rng("1")());
+const repeated = parse("?story_id=topbar&story_id=tabs&custom=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7&custom=&dock=hide", FUNDS_SPEC);
+const repeatedQuery = new URLSearchParams(toQuery(patch(repeated.state, { sort: "nav" }), FUNDS_SPEC, repeated.foreign));
+check("repeated foreign query values survive state changes", repeatedQuery.getAll("story_id").join(",") === "topbar,tabs");
+check("Unicode and empty foreign values survive", repeatedQuery.getAll("custom").join("|") === "مرحبا|" && repeatedQuery.get("dock") === "hide");
+const reserved = parse("?__proto__=literal&constructor=value", FUNDS_SPEC);
+check("foreign keys cannot alter the state object's prototype",
+      Object.getPrototypeOf(reserved.foreign) === Object.prototype && reserved.foreign.__proto__ === "literal"
+      && toQuery(reserved.state, FUNDS_SPEC, reserved.foreign).includes("constructor=value"));
 const r1 = rng("17"), r2 = rng("17"), r3 = rng("42");
 check("seeded rng is reproducible and seed-sensitive", r1() === r2() && r1() !== r3());
 

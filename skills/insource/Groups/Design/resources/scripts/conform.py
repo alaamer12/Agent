@@ -1,12 +1,14 @@
-"""Conform a generated sheet into the delivery slot files a project ships.
+"""Conform a generated master into the delivery slot files a project ships.
 
 One render often carries several subjects - ten avatars inside one 2K image. This script reads the
 bill of materials (BOM) written by the `collection` skill, slices the sheet into its grid cells,
 fits each cell to its slot's delivery spec without distorting it, writes the DPR ladder with the
-slot's format and quality, and then verifies every file it produced.
+slot's format and quality, and then verifies every file it produced. A `single` master (a hero, a
+section background) is one slot: used whole, fitted, laddered and verified the same way.
 
 Usage:
     python scripts/conform.py --bom bom/home.md --group avatar --in raw/avatars.png --out assets/avatars
+    python scripts/conform.py --bom bom/home.md --slots hero-home --in raw/hero-home.png --out assets/home
     python scripts/conform.py --bom bom/home.md --slots avatar-01..10 --in raw.png --out out --dry-run
     python scripts/conform.py --in sheet.png --out out --grid 4x4 --cell 512 --gutter 24 \
         --slots a,b --delivery "128x128 1:1 webp q82 @1x,2x"
@@ -252,9 +254,11 @@ def parse_master(text):
             master.cols, master.rows = (int(part) for part in token.split("x"))
             index += 1
         else:
+            hint = (" - notes such as a fallback plan belong in the economy check, not the "
+                    "Master cell" if token.startswith("(") else "")
             raise SpecError(
                 f"unrecognised master token {tokens[index]!r} in {text!r}: expected "
-                "WxH [single|sheet CxR] [gutter N] [cell N]"
+                f"WxH [single|sheet CxR] [gutter N] [cell N]{hint}"
             )
     if master.kind == "sheet" and master.capacity < 1:
         raise SpecError(f"sheet master needs a grid: {text!r}")
@@ -633,25 +637,37 @@ def _resolve(args):
     if args.grid:
         cols, rows = (int(part) for part in args.grid.lower().split("x"))
         base = selected[0].master
+        if base is not None and base.kind == "single":
+            raise SpecError(
+                f"slot {selected[0].slot} has a single master; --grid only re-cuts sheet plans"
+            )
         master = Master(
             width=base.width if base else 0, height=base.height if base else 0,
             kind="sheet", cols=cols, rows=rows, gutter=args.gutter,
         )
     else:
         master = selected[0].master
-    if master is None or master.kind != "sheet":
+    if master is None:
         raise SpecError(
-            "conform needs a sheet master plan; pass --grid COLSxROWS (with --gutter) or write "
-            "a sheet row in the BOM"
+            "conform needs a master plan; write `WxH single` or `WxH sheet CxR` in the BOM's "
+            "Master column, or pass --grid COLSxROWS (with --gutter)"
         )
-    if args.cell:
+    if master.kind == "single":
+        if len(selected) != 1:
+            raise SpecError(
+                f"a single master holds one slot, but {len(selected)} matched "
+                f"({', '.join(slot.slot for slot in selected)}); pass --slots <id>"
+            )
+        if args.cell:
+            raise SpecError("--cell applies to sheet masters; a single master is used whole")
+    elif args.cell:
         master.cell = args.cell
     for slot in selected:
-        if slot.master is not None and (slot.master.kind != "sheet"
+        if slot.master is not None and (slot.master.kind != master.kind
                                         or slot.master.capacity != master.capacity):
             raise SpecError(
-                f"slot {slot.slot} belongs to a different sheet plan than "
-                f"{selected[0].slot}; conform one sheet group per run"
+                f"slot {slot.slot} belongs to a different master plan than "
+                f"{selected[0].slot}; conform one master per run"
             )
     return selected, master, skipped
 
@@ -674,9 +690,9 @@ def _plan(args, selected, boxes):
     return planned
 
 
-def _keying(args):
+def _keying(value):
     """Return (enabled, colour) for background keying."""
-    value = (args.key_bg or "off").strip().lower()
+    value = (value or "off").strip().lower()
     if value in ("off", "none", "no"):
         return False, None
     if value == "auto":
@@ -725,6 +741,8 @@ def run(args, result):
     _require_pillow()
     from PIL import Image
 
+    if not Path(args.inp).is_file():
+        raise SpecError(f"--in must name one generated image file, not {args.inp!r}")
     with Image.open(args.inp) as handle:
         handle.load()
         sheet = handle.copy()
@@ -735,9 +753,13 @@ def run(args, result):
         )
 
     # Cut lines go through the content bounds, not the canvas: generated sheets have uneven
-    # margins, and dividing the canvas shifts the last column into a subject.
+    # margins, and dividing the canvas shifts the last column into a subject. A single master is
+    # composed art, so it is used whole and keeps its background unless the flags say otherwise.
+    single = master.kind == "single"
+    trim = (not single) if args.trim is None else args.trim
+    key_value = args.key_bg if args.key_bg is not None else ("off" if single else "auto")
     region = (0, 0, sheet.width, sheet.height)
-    if not args.full_canvas:
+    if not (args.full_canvas or single):
         region = _content_box(sheet, args.trim_threshold)
     result.region = list(region)
     boxes = plan_boxes(master, len(selected), region)
@@ -751,16 +773,18 @@ def run(args, result):
         raise SpecError("; ".join(problems))
 
     planned = _plan(args, selected, boxes)
-    keying, key_color = _keying(args)
+    keying, key_color = _keying(key_value)
     pad_color = _parse_color(args.pad_color)
     if keying:
         sheet, keyed, key_reason = _key_sheet(sheet, args.trim_threshold, key_color)
         result.key = {"applied": keyed, "reason": key_reason}
+    elif single and args.key_bg is None:
+        result.key = {"applied": False, "reason": "single master: keying is off unless --key-bg is passed"}
     background = None if _has_transparency(sheet) else sheet.convert("RGB").getpixel((0, 0))
 
     for slot, box in zip(selected, boxes):
         cell = sheet.crop(box)
-        if args.trim:
+        if trim:
             trimmed = _trim_box(cell, args.trim_threshold, background)
             if trimmed is None:
                 if master.capacity == 1:
@@ -783,6 +807,12 @@ def run(args, result):
             )
             continue
         pad = "transparent" if slot.delivery.has_alpha() else "color"
+        if single and abs(cell.width / cell.height - slot.delivery.ratio()) > 0.01:
+            result.warnings.append(
+                f"{slot.slot}: master aspect {cell.width}:{cell.height} differs from delivery "
+                f"{slot.delivery.width}:{slot.delivery.height}; padded, not cropped - regenerate "
+                "at the delivery aspect or crop deliberately with transform.py"
+            )
         fitted = _fit(cell, target_w, target_h, pad, pad_color or (255, 255, 255, 255))
         for dpr, width, height in slot.delivery.ladder():
             image = fitted if (width, height) == fitted.size else fitted.resize(
@@ -946,14 +976,14 @@ def _print_summary(payload, report_path):
 
 def build_parser():
     parser = argparse.ArgumentParser(
-        description="Split a generated sheet into the delivery slot files a BOM describes.",
+        description="Conform a generated sheet or single master into the delivery slot files a BOM describes.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
     parser.add_argument("--bom", help="BOM markdown file with the slot table")
     parser.add_argument("--group", help="slot id prefix to conform, e.g. avatar")
     parser.add_argument("--slots", help="explicit slot ids, ranges allowed (avatar-01..10)")
-    parser.add_argument("--in", dest="inp", required=True, help="the generated sheet")
+    parser.add_argument("--in", dest="inp", required=True, help="the generated master image (one file)")
     parser.add_argument("--out", dest="out", required=True, help="output folder")
     parser.add_argument("--grid", help="override the sheet grid, COLSxROWS")
     parser.add_argument("--gutter", type=int, default=0, help="gutter in px (with --grid)")
@@ -962,8 +992,9 @@ def build_parser():
     parser.add_argument("--naming", default="{slot}{ext}",
                         help="filename pattern; tokens {slot} {w} {h} {dpr} {ext}; @Dx is "
                              "appended for dpr > 1 unless the pattern uses {dpr} or {w}")
-    parser.add_argument("--trim", action="store_true", default=True,
-                        help="trim uniform margin before fitting (default: on)")
+    parser.add_argument("--trim", action="store_true",
+                        help="trim uniform margin before fitting (default: on for sheets, off "
+                             "for single masters)")
     parser.add_argument("--no-trim", dest="trim", action="store_false",
                         help="keep the full cell")
     parser.add_argument("--trim-threshold", type=int, default=8,
@@ -971,9 +1002,9 @@ def build_parser():
     parser.add_argument("--pad-color", help="pad colour for formats without alpha, e.g. #FFFFFF")
     parser.add_argument("--full-canvas", action="store_true",
                         help="divide the whole canvas instead of the content bounds")
-    parser.add_argument("--key-bg", nargs="?", const="auto", default="auto",
-                        help="make the border-connected background transparent: auto (default), "
-                             "off, or a #hex seed colour")
+    parser.add_argument("--key-bg", nargs="?", const="auto",
+                        help="make the border-connected background transparent: auto (default "
+                             "for sheets), off (default for single masters), or a #hex seed colour")
     parser.add_argument("--no-key-bg", dest="key_bg", action="store_const", const="off",
                         help="keep the sheet background")
     parser.add_argument("--allow-upscale", action="store_true",
@@ -985,6 +1016,7 @@ def build_parser():
     parser.add_argument("--report", help="report path (default: <out>/conform-report.json)")
     parser.add_argument("--json", action="store_true", help="print the report as JSON")
     parser.add_argument("--dry-run", action="store_true", help="print the plan, write nothing")
+    parser.set_defaults(trim=None, key_bg=None)
     return parser
 
 

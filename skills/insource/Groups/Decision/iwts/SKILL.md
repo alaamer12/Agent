@@ -153,6 +153,13 @@ state/persistence and document skills for records, sub-agent skills for
 parallel work, verification skills for the Validate step. The loop above is
 the contract; the tools are whatever the project already has.
 
+The project's `AGENTS.md` and iwts add up, never override each other: iwts
+owns *when to stop and who decides*; the rulebook owns *what is allowed* —
+its Authority grants (§9), its "ask before going anonymous" rule (§13), its
+hard constraints. Sub-agents spawned in the run inherit both: they decide
+ordinary engineering, and report — never execute — anything on the stop
+list above or not granted by the rulebook.
+
 ## Final responsibility
 
 The user's expectation while they sleep:

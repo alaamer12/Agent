@@ -4,10 +4,10 @@
 
 ## Local HTML evaluation
 
-Run from the repository root:
+Run from the skill's folder:
 
 ```text
-python anti-slop/evals/run_html_evals.py
+python evals/run_html_evals.py
 ```
 
 The runner uses headless Chromium through Playwright to render each page at its declared viewport, save a screenshot under `evals/screenshots/`, record selected browser-observable conditions, and run the read-only structural scout. `evals/results.json` records the run and candidate-signature precision/recall/F1 against `expected_structural_pattern_ids`. The score does not evaluate visual judgment and a structural match remains candidate-only.
@@ -15,7 +15,7 @@ The runner uses headless Chromium through Playwright to render each page at its 
 After two independent reviewers assess the same cases without seeing each other’s findings, record their pattern IDs/statuses in `agent-review-observations.json` and run:
 
 ```text
-python anti-slop/evals/score_agent_reviews.py
+python evals/score_agent_reviews.py
 ```
 
 The scorer compares the recorded observations to the visual, structural, false-positive, and overall-status annotations, then writes `agent-review-score.json`. Its precision/recall/F1 values use case-pattern pairs, so the same pattern in two cases counts as two evaluations. Do not treat the curated score as production accuracy, a 67-pattern benchmark, or a compatible-host LLM skill score.

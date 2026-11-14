@@ -16,16 +16,16 @@ Inspect source and structure for pattern-specific, source-backed candidate evide
 
 ## Run
 
-From the repository root:
+From the product repository (`<anti-slop>` is the skill's folder):
 
 ```text
-python anti-slop/scripts/structural_scout.py <file-or-directory> [--pattern <id> ...] [--json]
+python <anti-slop>/scripts/structural_scout.py <file-or-directory> [--pattern <id> ...] [--json]
 ```
 
-The current implementation supports the registry IDs returned by `candidate_detector_ids()` in `scripts/structural_scout.py`. Use `--pattern` after registry routing to restrict a scan. Positive, negative, and exception fixtures are stored under `tests/fixtures/<pattern-id>/`. Run the accuracy suite with:
+The current implementation supports the registry IDs returned by `candidate_detector_ids()` in `scripts/structural_scout.py`. Use `--pattern` after registry routing to restrict a scan. Positive, negative, and exception fixtures are stored under `tests/fixtures/<pattern-id>/`. Run the accuracy suite from the skill's folder with:
 
 ```text
-python -m unittest discover -s anti-slop/tests/structural -p "test_*.py"
+python -m unittest discover -s tests/structural -p "test_*.py"
 ```
 
 ## Output schema

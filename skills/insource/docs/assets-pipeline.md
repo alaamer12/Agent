@@ -79,7 +79,7 @@ The schema has one owner; `conform.py` reads it and changes nothing about it.
 | Slot | Role | Source | Master | Delivery | Status |
 |---|---|---|---|---|---|
 | `avatar-01..10` | testimonial personas | generate sheet 5x2 | `1536x1024 sheet 5x2 gutter 0` | `128x128 1:1 webp q82 @1x,2x` | pending |
-| `hero-home` | hero illustration | generate single | `1600x900 single` | `1600x900 16:9 avif q60 @1x,2x` | pending |
+| `hero-home` | hero illustration | generate single | `1600x900 single` | `800x450 16:9 avif q60 @1x,2x` | pending |
 | `logo` | brand mark | reuse `brand/logo.svg` | — | `240x64 svg` | shipped |
 | `photo-teaser` | card photo | `fahlwy` | — | `640x360 16:9 jpeg q80 @2x` | pending |
 | `icon-search` | nav icon | `resources` icon set | — | `24x24 svg` | shipped |
@@ -89,7 +89,8 @@ The schema has one owner; `conform.py` reads it and changes nothing about it.
 - **Source** — `generate single`, `generate sheet CxR`, `reuse <path>`, `fahlwy`,
   `resources`. Only the two generated routes get a master spec and a prompt. Everything
   else is still listed, so a later agent cannot mistake an icon slot for a render.
-- **Master** — `WxH single` or `WxH sheet CxR [gutter N]`. The raw render.
+- **Master** — `WxH single` or `WxH sheet CxR [gutter N]`. The raw render, large enough for
+  `delivery px × max DPR`. Conform parses this cell, so fallback notes live in the economy check.
 - **Delivery** — `WxH [aspect] [format] [qN] [@DPRs]`. What conform implements.
 - **Status** — `pending / shipped / reused / no-image`. Closes the "is anything
   missing" question without a conversation.

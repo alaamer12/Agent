@@ -27,12 +27,12 @@ export const FUNDS_SPEC = {
   transactionId:   { default: null },
 
   toast:           { default: null },
-  filled:          { default: null },
+  filled:          { default: null, parse: value => value === "" ? "1" : value },
 };
 
 export const DASH_SPEC = {
   tab: { default: "summary", values: ["summary", "activity"] },
-  filled: { default: null },
+  filled: { default: null, parse: value => value === "" ? "1" : value },
   // the refresh dropdown as a queryable component with its own states
   refresh: { default: null, values: [null, "open", "loading", "done"] },
 };

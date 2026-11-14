@@ -65,7 +65,7 @@ Rules:
   and `node_modules`.
 - A harness that outlives the question belongs in the project's regular place for such things (`bench/`,
   `benchmarks/`, a `-bench` target). If the session produced something a future agent would rerun, that is a
-  [`bequeath`](../../bequeath/SKILL.md) candidate — `bench/` is a project asset, not a `bequest/` one; bequeath
+  [`bequeath`](../../Groups/Agent/Bequest/bequeath/SKILL.md) candidate — `bench/` is a project asset, not a `bequest/` one; bequeath
   the *how we measured this* procedure instead.
 
 ## The report

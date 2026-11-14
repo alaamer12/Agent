@@ -1,0 +1,67 @@
+{
+  "name": "viber",
+  "description": "Every skill the Viber project lifecycle uses, by phase. `python manager.py viber` installs this whole list in one shot.",
+  "source": "Viber Project Lifecycle, section 9 (Skills Inventory)",
+  "notes": {
+    "steering": "steering-perception and steering-tech are the perception and tech tiers of the one steering skill",
+    "FULL CODE": "a skill group, not a skill: every skill under Groups/Code is installed",
+    "unclassified": "named by the lifecycle but awaiting a phase; not installed until classified"
+  },
+  "phases": [
+    {
+      "phase": "Idea & Understanding",
+      "skills": [
+        {"name": "idea-md", "status": "mandatory"},
+        {"name": "reveal", "status": "optional"},
+        {"name": "steering", "status": "mandatory", "as": "steering-perception"},
+        {"name": "agents-md", "status": "mandatory"}
+      ]
+    },
+    {
+      "phase": "Vision",
+      "skills": [
+        {"name": "pages", "status": "mandatory"},
+        {"name": "prototype", "status": "mandatory"},
+        {"name": "denoise", "status": "optional"},
+        {"name": "anti-slop", "status": "optional"}
+      ]
+    },
+    {
+      "phase": "Project Foundation",
+      "skills": [
+        {"name": "steering", "status": "mandatory", "as": "steering-tech"},
+        {"name": "architecture", "status": "mandatory"},
+        {"name": "steering", "status": "mandatory"},
+        {"name": "contract", "status": "mandatory"},
+        {"name": "pvc", "status": "mandatory"},
+        {"name": "states", "status": "mandatory"},
+        {"name": "styling", "status": "mandatory"},
+        {"name": "styleup", "status": "mandatory"},
+        {"name": "type-up", "status": "mandatory"},
+        {"name": "antipattern", "status": "mandatory"},
+        {"name": "readme-md", "status": "mandatory"},
+        {"name": "commitments-md", "status": "mandatory"},
+        {"name": "glossary-md", "status": "mandatory"},
+        {"name": "system-md", "status": "mandatory"},
+        {"name": "units-md", "status": "mandatory"},
+        {"name": "packages", "status": "optional"},
+        {"name": "personalize", "status": "optional"}
+      ]
+    },
+    {
+      "phase": "Implementation",
+      "skills": [
+        {"name": "FULL CODE", "status": "mandatory group", "path": "Groups/Code"}
+      ]
+    },
+    {
+      "phase": "Shared",
+      "skills": [
+        {"name": "grill-me", "status": "intermediate"},
+        {"name": "close-topics", "status": "intermediate"},
+        {"name": "mistakes", "status": "optional"}
+      ]
+    }
+  ],
+  "unclassified": ["assets", "treat", "ladder", "bleed", "seam", "theskills"]
+}

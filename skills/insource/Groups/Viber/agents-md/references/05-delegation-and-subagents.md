@@ -95,12 +95,17 @@ wrong needs permission to *stop*, or it will complete a wrong task beautifully.
 - **Default: ask per session, on the subagent's behalf.** Batch the questions before dispatch ("the
   subagent will need to <action> - do you grant authority?"), record each answer in the brief, and re-scope
   on a denial.
-- **Autonomous sessions override the asking.** When the user has already placed the agent in an
+- **Autonomous sessions move the asking, they do not remove it.** When the user has placed the agent in an
   anonymous, autonomous state (whatever mode does that in this project - "take over", "finish it while
-  I'm away"), the agent and its subagents
-  hold full authority for the delegated work unless the user carved something out. The brief says so; hard
-  constraints (privacy paths, never-sacrifice commitments) still apply, and destructive or out-of-project
-  actions are still reported.
+  I'm away"), the batch question is asked before the user leaves (section 13, "Before going anonymous"),
+  and the brief carries those answers plus the section 9 grants marked fixed. Subagents then decide
+  ordinary engineering themselves, as the parent does. The mode's own stop list stays binding - for `iwts`:
+  irreversible destruction with unclear intent, pushes/publishes/purchases, real cost or external
+  commitments, missing credentials, outcome-changing ambiguity, out-of-scope work - and so does every
+  section 9 action left ask-per-session: the subagent reports it as blocked and finishes the rest; the
+  parent records it as the run's waiting question. Hard constraints (privacy paths, never-sacrifice
+  commitments) always apply. The autonomous mode owns *when to stop*; this rulebook owns *what is
+  allowed* - they add up, neither overrides the other.
 
 ## The baseline block
 

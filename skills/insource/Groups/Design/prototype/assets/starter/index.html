@@ -58,7 +58,9 @@
       const set = i => {
         curIdx = i;
         const q = previews[i].query;
-        frame.src = page.url + q;
+        const preview = new URL(page.url + q, location.href);
+        preview.searchParams.set("dock", "hide");
+        frame.src = preview.pathname + preview.search;
         open.href = page.url + q;
         strip.querySelectorAll("button").forEach((b, j) => b.classList.toggle("on", j === i));
       };

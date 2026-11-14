@@ -2,8 +2,8 @@
 """Extract frames from a screen recording and build a contact sheet.
 
 Run:
-    python3 scripts/extract_frames.py <video> <outdir> [--fps N] [--cols C]
-                                      [--start SECONDS] [--duration SECONDS]
+    python3 scripts/match/extract_frames.py <video> <outdir> [--fps N] [--cols C]
+                                            [--start SECONDS] [--duration SECONDS]
 
 On a multi-second recording, trim to just the transition with --start/--duration;
 extracting the whole clip floods the contact sheet and dilutes tracking.

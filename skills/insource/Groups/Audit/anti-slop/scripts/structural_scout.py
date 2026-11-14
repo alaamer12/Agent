@@ -12,8 +12,7 @@ from pathlib import Path
 from typing import Iterable
 
 
-ROOT = Path(__file__).resolve().parents[2]
-REGISTRY_PATH = ROOT / "anti-slop" / "registry" / "registry.json"
+REGISTRY_PATH = Path(__file__).resolve().parents[1] / "registry" / "registry.json"
 SUPPORTED_SUFFIXES = {
     ".css",
     ".scss",

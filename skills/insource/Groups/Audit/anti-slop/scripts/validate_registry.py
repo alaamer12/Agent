@@ -8,9 +8,10 @@ from collections import Counter
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
-SKILL_ROOT = ROOT / "anti-slop"
+SKILL_ROOT = Path(__file__).resolve().parents[1]
+ROOT = SKILL_ROOT.parent
 REGISTRY_FILE = SKILL_ROOT / "registry" / "registry.json"
+# Maintenance-only input placed beside the skill folder; it is not shipped with the skill.
 LOCAL_CATALOG = ROOT / "antipatterns.json"
 
 
@@ -22,7 +23,8 @@ def validate() -> list[str]:
     ids = [pattern["id"] for pattern in patterns]
     registry_ids = set(ids)
     example_ids = {example["id"] for example in examples}
-    local_records = json.loads(LOCAL_CATALOG.read_text(encoding="utf-8"))
+    has_catalog = LOCAL_CATALOG.is_file()
+    local_records = json.loads(LOCAL_CATALOG.read_text(encoding="utf-8")) if has_catalog else []
     local_by_id = {record["id"]: record for record in local_records}
 
     if len(patterns) != 67:
@@ -69,6 +71,7 @@ def validate() -> list[str]:
         local_source = pattern.get("localSource")
         if local_source:
             expected_local_ids.add(local_source["id"])
+        if local_source and has_catalog:
             local = local_by_id.get(local_source["id"])
             if local is None:
                 errors.append(f"{pattern['id']} refers to unknown local ID {local_source['id']}")
@@ -127,7 +130,7 @@ def validate() -> list[str]:
 
     if len(expected_local_ids) != 60:
         errors.append(f"expected 60 mapped local IDs, found {len(expected_local_ids)}")
-    if expected_local_ids != set(local_by_id):
+    if has_catalog and expected_local_ids != set(local_by_id):
         errors.append("registry local IDs do not match the complete antipatterns.json set")
     catalog_screenshots = list((SKILL_ROOT / "assets" / "screenshots" / "slop" / "impeccable.style_slop").glob("*.png"))
     if len(catalog_screenshots) != 23:
@@ -143,3 +146,5 @@ if __name__ == "__main__":
             print(f"- {problem}")
         raise SystemExit(1)
     print("Registry validation passed: 67 unique patterns, complete knowledge/detection fields, 11 linked examples, 60 local IDs, and existing evidence files.")
+    if not LOCAL_CATALOG.is_file():
+        print(f"Skipped: local-catalog reconciliation ({LOCAL_CATALOG.name} is a maintenance input, not shipped).")

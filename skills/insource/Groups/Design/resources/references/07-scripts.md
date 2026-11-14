@@ -68,6 +68,7 @@ when the sheet is irregular - the notes are the finding. Needs pillow.
 
 ```bash
 python scripts/conform.py --bom bom/home.md --group avatar --in raw/avatars.png --out assets/avatars
+python scripts/conform.py --bom bom/home.md --slots hero-home --in raw/hero-home.png --out assets/home
 python scripts/conform.py --bom bom/home.md --slots avatar-01..10 --in raw.png --out out --dry-run
 python scripts/conform.py --in sheet.png --out out --grid 4x4 --gutter 24 --cell 512 \
     --slots a,b --delivery "128x128 1:1 webp q82 @1x,2x"
@@ -75,11 +76,13 @@ python scripts/conform.py --in sheet.png --out out --grid 4x4 --gutter 24 --cell
 
 Cuts the content box into the BOM's grid, trims each cell to its subject, pads to the delivery
 aspect without distorting, writes the DPR ladder with the slot's format and quality, then verifies
-each file and writes `conform-report.json`. `--key-bg auto` (default) keys out a flat
-border-connected background; `--no-trim`, `--pad-color`, `--allow-upscale`, `--allow-empty` and
-`--full-canvas` are the escape hatches. Exit 0 ok, 2 bad spec, 3 count/empty mismatch, 4 verify
-failure. Method, cut-line rule and failure modes: `08-conform.md`. Needs pillow for image work;
-`--dry-run` does not.
+each file and writes `conform-report.json`. `--key-bg auto` (default for sheets) keys out a flat
+border-connected background. A `single` master uses the whole canvas and keeps its background:
+trim and keying are off unless `--trim` / `--key-bg` are passed; an aspect mismatch is padded and
+warned about. `--in` is always one image file. `--no-trim`, `--pad-color`, `--allow-upscale`,
+`--allow-empty` and `--full-canvas` are the escape hatches. Exit 0 ok, 2 bad spec, 3 count/empty
+mismatch, 4 verify failure. Method, cut-line rule and failure modes: `08-conform.md`. Needs pillow
+for image work; `--dry-run` does not.
 
 ## contact_sheet.py
 

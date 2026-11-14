@@ -30,8 +30,10 @@ are the page's contract; the map records them; the audit checks them.
 
 ```
 ### <Page name>
-Family · Trigger · Condition source · States handled · Exits · Status: confirmed|inferred|excluded(reason)
+Route · Family · Trigger · Condition source · States handled · Exits · Status: confirmed|inferred|excluded(reason)
 ```
+
+The `PAGES.md` §6 row carries exactly these columns (`../../references/pages-md-format.md`).
 
 Exclusions are recorded like in `/pages main` — an outage page *deliberately absent because the
 product has none of that operational story yet* is a decision that must survive the next

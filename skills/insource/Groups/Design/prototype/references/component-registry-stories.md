@@ -88,6 +88,28 @@ export const components = [
 - **`states`**: At least one state required. A component with only one state is usually a bug in enumeration.
 - **`props`**: Every declared state key must map to props or explicitly declare `{ via: "props" }`.
 
+### The renderer question — ask, do not assume
+
+`js/stories.renderers.js` is the seam between a story card and the real component. How it gets its
+renderers **is the user's decision, and the agent must ask it** before writing any renderer.
+
+| Mode | When it fits | What it costs |
+|---|---|---|
+| **A. Shared** — `js/components/<id>.js`, imported by both pages and stories | the project already has `js/components/`, or the components are genuinely reused | pages must be refactored to consume the shared module; the first pass is slower |
+| **B. Cloned** — implementations live in `js/stories.renderers.js`, copied from the page markup | the component exists only inside a page module today, and extracting it now would touch code the user did not ask to touch | drift: the gallery can show a state the real page cannot produce, and it looks authoritative |
+| **C. Hybrid** — shared by default, story-local only for states the pages never reach | a component with a real state the product cannot currently trigger | needs the exception marked per card, or the gallery becomes a lie with good manners |
+
+How to ask it, concretely, once the repo has been inspected:
+
+> `js/components/` does not exist; `toggle` is currently built inline in `pages/settings.js:88`. Either (A) I
+> extract it into `js/components/toggle.js` and have the page import it — the gallery and the settings screen
+> then cannot disagree, but the page file changes; or (B) the story clones the markup now and we accept that
+> the two can drift until someone extracts it. Which do you want?
+
+If the user picks B, mark it in code (`fn.storySource = "cloned-from:pages/settings.js:88"`) and list every
+cloned component in the delivery report as drift risk. `stories_check.mjs coverage --impl <bundle-file>`
+prints that warning automatically.
+
 ---
 
 ## 4. URL State & Descriptor Grammar

@@ -1,8 +1,9 @@
-# Conforming a generated sheet
+# Conforming a generated master
 
 One render, many assets. A model asked for "ten diverse avatars" returns a single image holding a
 grid of ten faces; the project needs ten files, each the same size, each correctly named, each
-cropped where the subject actually is. **Conform** is that step.
+cropped where the subject actually is. **Conform** is that step. A `single` master (one hero, one
+texture) goes through the same step as a one-slot run - see §3a.
 
 ```
 BOM row  ──►  generate      ──►  probe + conform        ──►  delivery files + report
@@ -90,6 +91,7 @@ construction.
 
 ```bash
 python scripts/conform.py --bom bom/home.md --group avatar --in raw/avatars.png --out assets/avatars
+python scripts/conform.py --bom bom/home.md --slots hero-home --in raw/hero-home.png --out assets/home
 python scripts/conform.py --bom bom/home.md --slots avatar-01..10 --in raw.png --out out/ --dry-run
 python scripts/conform.py --in sheet.png --out out/ --grid 4x4 --gutter 24 --cell 512 \
     --slots a,b,c --delivery "128x128 1:1 webp q82 @1x,2x"
@@ -98,14 +100,33 @@ python scripts/conform.py --in sheet.png --out out/ --grid 4x4 --gutter 24 --cel
 - **`--group avatar`** selects every BOM slot whose id is `avatar` or starts with `avatar-`.
 - **`--slots avatar-01..10`** selects explicitly; ranges keep zero padding (`avatar-01`, not
   `avatar-1`). Both forms accept comma lists.
-- **One run = one sheet group.** All selected slots must share the sheet plan; a BOM with two
-  different sheet sizes is two runs.
+- **One run = one master.** `--in` is one image file. All selected slots must share its master
+  plan; a BOM with two different sheet sizes, or a sheet plus a single, is two runs.
 - Row-major order: cell 1 is top-left, cell N is bottom-right.
 - `--dry-run` prints the plan without opening the image or writing anything - safe in CI and
   before spending a re-render.
 
 Rows the BOM marks `shipped`, `reused`, `no-image`, `done` or `skip` are skipped, as are rows with
-no master spec (stock photos, CSS icons, SVG logos). `--force` re-does shipped slots.
+no master spec (stock photos, CSS icons, SVG logos). `--force` re-does shipped slots. Without a
+BOM, there is no master to read: pass `--grid COLSxROWS` or the run stops instead of guessing.
+
+### 3a. Single masters
+
+A `WxH single` master holds exactly one slot, composed for its layout. Conform treats it as a
+finished composition, not a cell:
+
+| Behaviour | Sheet | Single |
+|---|---|---|
+| Region | content box (or `--full-canvas`) | the whole canvas, always |
+| Trim | on (`--no-trim` to keep the cell) | off (`--trim` to opt in) |
+| Keying | `auto` (`--no-key-bg` to keep) | off (`--key-bg auto\|#HEX` to opt in) |
+| Slots per run | the sheet's cells | exactly one - select it with `--slots <id>` |
+| `--grid` / `--cell` | re-cut the plan | rejected - a single master is used whole |
+| Aspect mismatch | padded | padded **and warned**: regenerate at the delivery aspect or crop deliberately with `transform.py` |
+| Upscale refusal, DPR ladder, naming, verify | same | same |
+
+Negative space and backgrounds are part of a hero's layout; trimming or keying them by default
+would ship a different picture than the one approved.
 
 ---
 
@@ -118,7 +139,7 @@ After cropping a cell, the subject's bounding box is measured against:
   corner matters when a subject touches a cell edge - the corner would then be the subject and the
   "subject" would come out as the gap.
 
-`--trim` (on by default) crops to that box; `--no-trim` keeps the full cell. `--trim-threshold`
+`--trim` (on by default for sheets, off for singles) crops to that box; `--no-trim` keeps the full cell. `--trim-threshold`
 (default 8) is how much a pixel must differ from the background to count.
 
 A cell whose remaining area is uniform is **empty**. If any cell is empty the run reports which
@@ -131,7 +152,8 @@ there means "nothing to trim", not "empty".
 
 ## 5. Background keying (`--key-bg`)
 
-Generated sheets often return an opaque white background. `--key-bg auto` (default) makes the
+Generated sheets often return an opaque white background. `--key-bg auto` (default for sheets;
+singles keep their background unless asked) makes the
 background transparent before cropping, using a **border-seeded flood fill**:
 
 - Seeded from the sheet's edge, so only background *connected to the edge* is removed. A white
@@ -250,6 +272,10 @@ count/empty mismatch, **4** verification failure.
 | Soft/aliased edges | upscaled | raise the master or lower the DPR; do not ship `--allow-upscale` output |
 | `pillow is required` | dependency missing | install in the project's environment, never globally |
 | Non-square cells | expected | cells are slice regions, not asset aspects; every subject is trimmed and refit |
+| `a single master holds one slot, but N matched` | `--group` matched several single rows | one run per single: `--slots <id>` |
+| `single master ... padded, not cropped` warning | the render's aspect differs from the delivery | regenerate at the delivery aspect, or crop deliberately with `transform.py` first |
+| `conform needs a master plan` | no BOM master and no `--grid` | conform from the BOM, or pass `--grid COLSxROWS` |
+| `fallback notes belong in the economy check` | Master cell holds `(fallback: ...)` | move the note out; conform parses Master strictly |
 
 ## 10. Limits
 

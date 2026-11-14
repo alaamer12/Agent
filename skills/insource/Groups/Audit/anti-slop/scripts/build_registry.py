@@ -7,8 +7,8 @@ import re
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
-SKILL_ROOT = ROOT / "anti-slop"
+SKILL_ROOT = Path(__file__).resolve().parents[1]
+ROOT = SKILL_ROOT.parent
 SOURCE_MAP = SKILL_ROOT / "source-map.md"
 LOCAL_CATALOG = ROOT / "antipatterns.json"
 RUST_REGISTRY = ROOT / "registry.rs"

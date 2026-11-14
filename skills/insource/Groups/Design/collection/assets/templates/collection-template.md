@@ -22,7 +22,7 @@
 
 | Slot | Role | Source | Master | Delivery | Status |
 |---|---|---|---|---|---|
-| `<hero-home>` | <hero illustration, right of headline> | generate single | `<1600x900 single>` | `<1600x900 16:9 avif q60 @1x,2x>` | <pending> |
+| `<hero-home>` | <hero illustration, right of headline> | generate single | `<1600x900 single>` | `<800x450 16:9 avif q60 @1x,2x>` | <pending> |
 | `<avatar-01..10>` | <testimonial personas> | generate sheet 5x2 | `<1536x1024 sheet 5x2 gutter 0>` | `<128x128 1:1 webp q82 @1x,2x>` | <pending> |
 | `<logo>` | <brand mark, header> | reuse `brand/logo.svg` | — | `<240x64 svg>` | <shipped> |
 | `<step-3>` | <permissions step> | none - the sheet UI is the illustration | — | — | <no-image> |
@@ -82,7 +82,7 @@ existing render with `resources`' `sheet_probe.py` before trusting this table.>
 
 **Use it in:** <Home page, right of the headline>
 **Slot / save as:** `<public/images/home/hero-home.avif>` (the slot id is the filename stem)
-**Master:** `<1600x900 single>` -> **Delivery:** `<1600x900 16:9 avif q60 @1x,2x>`
+**Master:** `<1600x900 single>` -> **Delivery:** `<800x450 16:9 avif q60 @1x,2x>`
 **Reference:** <anchor path / none - this frame defines the style>
 
 **Prompt:**
@@ -97,13 +97,15 @@ existing render with `resources`' `sheet_probe.py` before trusting this table.>
 
 ```bash
 # 1. generate the master (command derived from the Master column)
-# 2. measure, then cut into slot files
+# 2. measure a sheet, then conform each master into slot files
 python scripts/conform.py --bom bom/<page>.md --group <slot-prefix> \
-    --in raw/<master>.png --out <delivery folder>
+    --in raw/<sheet>.png --out <delivery folder>
+python scripts/conform.py --bom bom/<page>.md --slots <single-slot-id> \
+    --in raw/<single>.png --out <delivery folder>
 # 3. review the result: transparency is invisible against white
 python scripts/contact_sheet.py <delivery folder> --out review/<page>.png --skip-density
 ```
 
-Conform trims each cell, fits the delivery aspect, writes the DPR ladder and verifies every file.
-The review sheet proves the edges by eye; the conform report proves the geometry. Prompts,
-generation and conform must all use the same slot ids.
+Conform trims each sheet cell or uses a single master whole, fits the delivery aspect, writes the
+DPR ladder and verifies every file. The review sheet proves the edges by eye; the conform report
+proves the geometry. Prompts, generation and conform must all use the same slot ids.

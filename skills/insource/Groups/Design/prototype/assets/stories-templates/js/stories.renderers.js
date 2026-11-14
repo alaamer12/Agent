@@ -1,7 +1,7 @@
 /**
  * stories.renderers.js — the seam between a story card and a real component.
  *
- * Two supported modes, chosen WITH THE USER (see references/06-integration-with-prototype.md):
+ * Two supported modes, chosen WITH THE USER (see references/component-registry-stories.md, "The renderer question"):
  *
  *  A. SHARED (preferred when js/components/ exists): import the project's renderers and re-export
  *     them here, so a card renders exactly what a page renders — the gallery can never drift.
