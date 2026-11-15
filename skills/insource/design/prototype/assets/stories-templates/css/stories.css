@@ -1,0 +1,56 @@
+/* stories.css — gallery CHROME only.
+   Component styles belong to the component (css/components.css or its own layer). If a rule here
+   changes how a component looks, it is in the wrong file: a card must show the component as the
+   pages show it. */
+
+/* ---------- tokens the gallery adds (component tokens live in theme.css) ---------- */
+:root {
+  --story-gap: 16px;
+  --story-pad: 20px;
+  --story-radius: 12px;
+  --story-line: color-mix(in srgb, currentColor 12%, transparent);
+  --story-surface: color-mix(in srgb, Canvas 100%, transparent);
+  --story-muted: color-mix(in srgb, CanvasText 55%, transparent);
+}
+:root[data-density="compact"] { --story-gap: 10px; --story-pad: 12px; --story-radius: 8px; }
+
+/* ---------- page frame ---------- */
+body { margin: 0; font: inherit; color-scheme: light dark; }
+#stories-root { max-inline-size: 1180px; margin-inline: auto; padding-block: var(--story-gap); padding-inline: var(--story-pad); }
+
+/* ---------- header ---------- */
+.stories__header { display: grid; gap: 8px; padding-block-end: var(--story-gap); border-block-end: 1px solid var(--story-line); }
+.stories__controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.stories__facet { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--story-line); border-radius: 999px; }
+.facet-btn { border: 0; background: transparent; color: inherit; padding: 4px 10px; border-radius: 999px; font: inherit; cursor: pointer; }
+.facet-btn.is-active { background: AccentColor; color: AccentColorText; }
+.stories__title { margin: 0; font-size: 1.25rem; font-weight: 700; }
+.stories__caption { margin: 0; color: var(--story-muted); font-size: .875rem; }
+.stories__count { margin: 0; color: var(--story-muted); font-size: .75rem; font-variant-numeric: tabular-nums; }
+.stories__search-label { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); }
+.stories__search { inline-size: 100%; padding: 10px 12px; border: 1px solid var(--story-line); border-radius: var(--story-radius); background: var(--story-surface); color: inherit; font: inherit; }
+.stories__search:focus-visible { outline: 2px solid AccentColor; outline-offset: 2px; }
+
+/* ---------- one component ---------- */
+.story-group { padding-block: calc(var(--story-gap) * 1.5); border-block-end: 1px solid var(--story-line); }
+.story-group__head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.story-group__name { margin: 0; font-size: 1.05rem; font-weight: 700; }
+.story-group__id { padding: 2px 8px; border-radius: 6px; font-size: .75rem; background: color-mix(in srgb, AccentColor 14%, transparent); color: AccentColor; }
+.story-group__caption { margin: 4px 0 0; color: var(--story-muted); font-size: .8125rem; }
+.story-group__grid { display: grid; gap: var(--story-gap); grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); margin-block-start: var(--story-gap); }
+
+/* ---------- one card = one state ---------- */
+.story-card { display: grid; gap: 10px; align-content: start; padding: var(--story-pad); border: 1px solid var(--story-line); border-radius: var(--story-radius); background: var(--story-surface); }
+.story-card__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.story-card__state { font-size: .75rem; font-weight: 600; color: var(--story-muted); }
+.story-card__permalink { text-decoration: none; opacity: .45; font-size: .875rem; }
+.story-card__permalink:hover, .story-card__permalink:focus-visible { opacity: 1; }
+.story-card__stage { display: grid; gap: 8px; }
+.story-card__note { margin: 0; font-size: .75rem; color: var(--story-muted); }
+.story-card__missing, .story-card__error { display: grid; gap: 4px; padding: 12px; border: 1px dashed crimson; border-radius: 8px; font-size: .8125rem; }
+.story-card__missing > span, .story-card__error > span { color: var(--story-muted); }
+
+/* ---------- empty result ---------- */
+.stories__empty { padding: 40px 0; color: var(--story-muted); text-align: center; }
+
+/* Logical properties throughout: dir=rtl flips the layout without a single override. */

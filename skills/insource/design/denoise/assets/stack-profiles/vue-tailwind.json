@@ -1,0 +1,22 @@
+{
+  "$comment": [
+    "Vue 3 + Tailwind + SFC components. Merged over base.json by the loader, so only what",
+    "differs is listed — that diff IS the answer to 'what did this stack force me to encode?'",
+    "Fill one in per project by running the greps in references/stack-profiles.md."
+  ],
+  "name": "vue-tailwind",
+  "colour": {
+    "utilityClasses": "\\b(?:text|bg|border|from|to|via|ring|divide|fill|stroke|shadow|outline|caret|placeholder)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|mauve|olive|mist)(?:-(?:25|50|[1-9]00|950))?(?:\\/\\d{1,3})?\\b"
+  },
+  "components": {
+    "localPrefixes": ["Sd", "Ui", "App", "Base"]
+  },
+  "logicBlock": { "style": "vue" },
+  "interaction": {
+    "$note": "The base patterns already see v-model and PascalCase dialog names; these add the bindings that actually identify a Vue field.",
+    "identityAttrPattern": "(?:^|\\s)(name|type|id|for|label|aria-label|placeholder|title|value|defaultValue|checked|required|disabled|step|field|options|items|v-model|:value|:model-value|:items|:options|:rules|@submit)(?=[\\s=/>])"
+  },
+  "routes": {
+    "configFilePattern": "(?:router|routes|useAdminShell|navigation|nav-?config|sidebar|ability|permissions)"
+  }
+}

@@ -1,0 +1,8 @@
+/* dashboard.css — page-scoped to body[data-page="dashboard"] */
+body[data-page="dashboard"] .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3); }
+body[data-page="dashboard"] .card { border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-3); }
+body[data-page="dashboard"] .card h4 { margin: 0 0 var(--space-1); color: var(--muted); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; }
+body[data-page="dashboard"] .big { font-size: var(--fs-xl); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+body[data-page="dashboard"] .activity { list-style: none; margin: 0; padding: 0; }
+body[data-page="dashboard"] .activity li { padding: var(--space-2) 0; border-bottom: 1px solid var(--line); font-size: var(--fs-sm); }

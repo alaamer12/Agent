@@ -1,0 +1,26 @@
+{
+  "$comment": [
+    "No utility-class colour layer — plain CSS, Sass, or a component library's own theming.",
+    "The point of this file is the null: with no utility classes to find, a grader that",
+    "silently used Tailwind patterns would report '0 raw colours' on a stylesheet full of them",
+    "and certify the pass. Scripts must print 'not measured' for a disabled knob, never 0.",
+    "Detection here leans on custom properties and @use/$-variables, which Sass and plain CSS",
+    "both give you."
+  ],
+  "name": "plain-css",
+  "exts": [".html", ".css", ".scss", ".sass", ".less", ".ts", ".js", ".erb", ".haml", ".blade.php", ".twig"],
+  "colour": {
+    "utilityClasses": null,
+    "inlineLiterals": "(?:#[0-9a-fA-F]{6}\\b|#[0-9a-fA-F]{3}\\b|rgba?\\(|hsla?\\(|oklch\\(|\\b(?:red|blue|green|white|black|gray|grey)\\b\\s*[;,)])",
+    "tokenDefinitions": "(--[a-z][a-z0-9-]*\\s*:|\\$[a-z][a-z0-9-]*\\s*:|@\\$[a-z][a-z0-9-]*\\s*:)",
+    "rampMinTokens": 10,
+    "rampGrowthFactor": 1.4
+  },
+  "components": { "localPrefixes": [] },
+  "logicBlock": { "style": "whole" },
+  "routes": {
+    "declarationPattern": "(?:^|[\\s\"'`<])(?:path|to|href|url)\\s*[:=]\\s*[\"'`](\\/?[\\w-]+(?:\\/[\\w-]+)*)[\"'`]",
+    "redirectStubPattern": null,
+    "configFilePattern": "(?:routes?|router|urls\\.(?:rb|py|php|go)|nav(?:igation)?|menu|sitemap|policy|permission)"
+  }
+}

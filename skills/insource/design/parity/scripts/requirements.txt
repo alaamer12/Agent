@@ -1,0 +1,22 @@
+# parity/scripts requirements
+#
+# Install with:
+#   python -m pip install -r requirements.txt
+#   python -m playwright install chromium
+#
+# The comparison engine and the mockup capture path are cross-platform.
+# Window capture (snip_tool / capture_app / parity_run / run_suite) is Windows-only.
+
+# Comparison engine
+numpy>=1.26
+opencv-python-headless>=4.9
+scikit-image>=0.22
+imagehash>=4.3
+pillow>=10.0
+
+# Mockup capture and batch capture
+playwright>=1.44
+
+# Windows window capture + process targeting
+pywin32>=306 ; sys_platform == "win32"
+psutil>=5.9

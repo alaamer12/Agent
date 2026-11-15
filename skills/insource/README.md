@@ -2,7 +2,7 @@
 
 This repository contains a comprehensive collection of modular Agent Skills. Each skill provides specialized domain instructions, operational workflows, patterns, and best practices for agents.
 
-Total active skills: **127** — 27 standalone at the repository root and the rest organized under 16 topic groups. 26 archived skills are listed at the end.
+Total active skills: **126** — 26 standalone at the repository root and the rest organized under 16 topic groups. 27 archived skills are listed at the end.
 
 ## Quick Index
 
@@ -166,7 +166,6 @@ Total active skills: **127** — 27 standalone at the repository root and the re
 - [caution](./caution/SKILL.md) — Informed-consent gate on the user's answers: screen every reply (chat, AskUserQuestion, command flags, hook or server input) for a decision whose cost the answe…
 - [close-topics](./close-topics/SKILL.md) — Guided, conversational, topic-by-topic technical specification: close one design area before opening the next. Use when a project has undecided architecture (sc…
 - [compare](./compare/SKILL.md) — Write professional, well-reasoned comparisons between two or more subjects of any kind — technologies, files, projects, code modules, books, documents, biologic…
-- [design](./design/SKILL.md) — One skill, 15 product design modes: assets (image pipeline: BOM, masters, conform), bleed (layout registers - full-bleed vs framed cards), collection (image BO…
 - [dont-stop](./dont-stop/SKILL.md) — Forces the agent to keep working autonomously until the ENTIRE goal is truly finished, across all phases, with no mid-way stops, no "phase 1 done, ready for pha…
 - [generate](./generate/SKILL.md) — Universal image AND video generation via RESTful providers (xAI, OpenAI, Gemini, KovAPI/NezhaGate) through registry data.csv: vendors and media types are data r…
 - [learning-test](./learning-test/SKILL.md) — Write and run a "learning test" (term coined by Jim Newkirk, popularized by Robert C. Martin/Uncle Bob in Clean Code ch.8 "Boundaries") to empirically discover…
@@ -1088,15 +1087,6 @@ Total active skills: **127** — 27 standalone at the repository root and the re
 
 - **Path:** [`compare/SKILL.md`](./compare/SKILL.md)
 - **Description:** Write professional, well-reasoned comparisons between two or more subjects of any kind — technologies, files, projects, code modules, books, documents, biological processes, products, strategies, or any named options. Use whenever the user asks to compare, evaluate trade-offs, distinguish, or choose between things, including "which is better," "what's the difference," or "help me decide." Supports open-ended discovery of relevant aspects and dimension-based comparison on user-specified or researched criteria. Enforces real differentiators only, "why it matters" reasoning, independent research, graded quantitative claims, and neutral context-driven conclusions.
-
----
-
-#### `design`
-
-- **Path:** [`design/SKILL.md`](./design/SKILL.md)
-- **Description:** One skill, 15 product design modes: assets (image pipeline: BOM, masters, conform), bleed (layout registers - full-bleed vs framed cards), collection (image BOM, style canon, prompts), denoise (calm a crowded UI: lite/medium/ultra), design-md (canonical DESIGN.md: tokens + rationale), diverge (n genuinely different directions before committing), pages (page universe into PAGES.md: inventory, legal docs, conditional screens), parity (mockup-to-device gap closed autonomously), playfile (linked HTML review screens, URL-forced states), prototype (URL-driven prototype systems: dock, stories, guards), resources (favicons, icons, splash, OG, optimize, localize, conform), stateful (derive, gate and implement every screen state), scss (SCSS best practices), styling (new styling: tokens, layer chain, naming), styleup (retrofit styling into enforced tokens). Triggers: prototype, mockup, legal pages, error pages, denoise UI, pixel parity, image plan, favicon, splash, design tokens, state coverage, CSS architecture.
-- **Use-case:** Any design-family task - prototypes and review files, page inventory and trust documents, UI cleanup or direction previews, layout framing, state completeness, mockup parity, image planning and resource files, design-system docs, styling systems. Also /design <mode>.
-- **Usage:** `/design <mode> [command] [target]`
 
 ---
 
