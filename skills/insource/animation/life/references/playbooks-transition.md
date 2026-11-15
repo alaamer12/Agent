@@ -9,7 +9,7 @@ Animating the move from one state, view or page to another. The question is alwa
 1. Map the **state graph**: list every state and every permitted move between them (including jumps, such as step 1 to step 4, and direct reverse).
 2. Write a **forward and reverse table** with one row per move. Fill both columns.
 3. Gate the transition: how often is it taken? Core navigation used constantly gets a minimal, fast transition; onboarding gets expressive treatment.
-4. Classify: what persists across the change (shared elements), what is replaced, and the synchronization form (often domino or instant; linked for related elements).
+4. Classify: what persists across the change (shared elements), what is replaced, and the synchronization relation (often sequence or together; linked for related elements).
 5. Choose technique and timing; design the reverse as its own motion.
 6. Test rapid back-and-forth, interruption mid-flight, skipped steps and reduced motion.
 

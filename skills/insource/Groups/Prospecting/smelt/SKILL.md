@@ -1,6 +1,6 @@
 ---
 name: smelt
-description: 'Turns a completed mine run — or any research corpus of checkpoints, distillations, plans, and witness notes — into a durable, evidence-linked knowledge base another agent can consume. Trigger on "/smelt", "smelt the mine", "turn the mine for X into a knowledge base", "compress the mining folder", "make this research reusable", "build a knowledge base from these files", or any request to preserve everything learned across many large files without losing knowledge. Takes a source folder and a destination folder; works one file at a time, folds each into a running knowledge file, then reconciles all folders globally. The writing is free-form and shaped by the knowledge itself — no template — but every claim stays traceable to its source. Never summarizes sources away, never deletes a finding, always keeps the evidence pointer.'
+description: 'Turns a completed mine run — or any research corpus of checkpoints, distillations, plans, and witness notes — into a durable, evidence-linked knowledge base another agent can consume. Trigger on "/smelt", "smelt the mine", "turn the mine for X into a knowledge base", "compress the mining folder", "make this research reusable", "build a knowledge base from these files", or any request to preserve everything learned across many large files without losing knowledge. Takes a source folder and a destination; works file by file into a running knowledge file, then reconciles folders globally. Verifies every reference URL the run left behind — exhaustively, never a sample — recording status and handling dead links, and reports each source file''s smelt yield (what share of its knowledge entered the base) sorted top yield to bottom. Writing is free-form — no template — and every claim stays traceable to its source. Never summarizes sources away, never deletes a finding, always keeps the evidence pointer.'
 ---
 
 # Smelt
@@ -84,7 +84,8 @@ Transparency is structural, not a disclaimer at the bottom:
 - **Nothing is deleted.** A correction marks what was believed before, what replaced it, and why. The old reading stays legible.
 - **Disagreement stays visible.** Two sources that conflict are shown side by side, with what turns on the difference. They are not averaged into a tidy middle.
 - **Gaps are first-class.** What the corpus could not establish, and what would settle it, is part of the knowledge, not an omission from it.
-- **Coverage is accounted for.** Every source file is listed with what it contributed, confirmed, or why it was skipped.
+- **Coverage is accounted for.** Every source file is listed with what it contributed, confirmed, or why it was skipped — and with its **smelt yield**: the share of that file's knowledge that entered the base (e.g. `80% of experience/05-atlas.md`), computed from the fold ledger, sorted top yield to bottom, with a one-line reason wherever the yield is low. `provenance/yield.md`.
+- **References are verified, all of them.** Every URL a mining file cites — checkpoint ledgers, bibliography, inline sources — gets checked before delivery, exhaustively, not by sampling: alive, redirected, or dead, with the date and what was done about it (recovered from an archive, the claim's confidence marked down, a gap written). A dead reference is stated at the claim it supports, never quietly dropped. `provenance/links.md`.
 - **Every merge is recorded.** What was combined, what was kept apart, and what changed the writer's mind.
 
 ## Writing standards
@@ -122,12 +123,12 @@ A folder whose files are not readable text (images, recordings, datasets) is rec
 
 ## Before delivery
 
-Read the knowledge base cold, as a consumer would. It must answer, without opening the source: what this corpus knows, how confident it is, where each claim came from, what it contradicts, and what it does not cover. Every file must be reachable from `INDEX.md` and from at least one sibling. If any of that requires the source, the package is incomplete.
+Read the knowledge base cold, as a consumer would. It must answer, without opening the source: what this corpus knows, how confident it is, where each claim came from, what it contradicts, and what it does not cover. Every file must be reachable from `INDEX.md` and from at least one sibling. The link ledger must show every unique URL checked (counts must match the sweep, or the pass is incomplete) and the yield table must cover every read file. If any of that requires the source, the package is incomplete.
 
 ## References
 
 | File | Read it when |
 |---|---|
-| `references/workflow.md` | Running the fold: per-file integration, closing a folder, the single global reconciliation, large files, resume |
+| `references/workflow.md` | Running the fold: URL sweep and check ledger, per-file integration with fold tallies, closing a folder, the single global reconciliation, large files, resume |
 | `references/knowledge-model.md` | Deciding whether something is new, duplicate, a variant, a contradiction, or a correction |
 | `references/output.md` | Writing the destination: layout, index, provenance, and the quality bar |

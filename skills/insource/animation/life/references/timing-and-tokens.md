@@ -59,11 +59,24 @@ A duration over its cap needs a one-line reason in the spec or report.
 
 | Level | Offset | Notes |
 |---|---|---|
-| List items | 30 to 50ms | Whole list finishes within about 300ms; group beyond roughly five items |
+| List items | 30 to 80ms | Whole group finishes within about 300ms; group beyond roughly five items |
 | Section level | 80 to 100ms | Title block, description, actions |
 | Word level | about 80ms | Hero headline only |
+| Showcase / marketing level | 100 to 150ms on 0.5 to 0.6s entrances | Seen once per visit; the motion is part of the message |
 
-Use smaller offsets on small screens. Vary delay and distance by importance. Never block interaction while a stagger plays.
+Use smaller offsets on small screens. Vary delay and distance by importance; shrinking (eased) gaps read as a wave, equal gaps as a metronome. Long lists: items past the first handful share the 5th item's delay. Never block interaction while a stagger plays.
+
+## Choreography values
+
+| Thing | Value |
+|---|---|
+| Sequence handoff overlap | second starts ~0.05 to 0.1s before the first ends (queue → gesture) |
+| Accent landing window | final ~20% of the lead's timeline (times 0.7 to 0.9); follower accents ~40ms behind the first |
+| Delta-scaled fade duration | clamp(0.15s, Δpx / 500, 0.27s) |
+| Attention loop | ~2.5s before the first run; repeatDelay ~6s; stops during interaction; resumes only after the reset completes |
+| High-frequency surfaces | no stagger at all (menus, command palettes, tab content) |
+
+Rules and relations belong to synchronization.md; only these numbers live here.
 
 ## Distance, scale and blur
 
@@ -78,13 +91,13 @@ Use smaller offsets on small screens. Vary delay and distance by importance. Nev
 |---|---|
 | Ease-out curve value | `enter` token above; a project's existing strong ease-out is equivalent and wins |
 | UI under 300ms vs longer entrances | Under 300ms for routine. Longer allowed only for rare and showcase tiers, stated in the report |
-| Stagger cap vs per-item offset | 30 to 50ms per item, about 300ms total, group beyond about five items; section and word offsets are separate levels |
+| Stagger cap vs per-item offset | 30 to 80ms per item, about 300ms total, group beyond about five items; section and word offsets are separate levels |
 | Start scale 0.8 vs 0.9 to 0.97 | 0.95 to 0.97 default, 0.92 popovers, 0.8 only for rare delight |
 | Hero sequence 800 to 1600ms vs 300ms | Showcase tier only, with labeled beats |
 | Layout tween exceptions | Default never; a deliberate container tween (card resize, container morph) is allowed when labeled `layout_exception` |
 | Blur amount | 2 to 4px default, 8px rare entrance, 20px hard cap |
 | Drawer and modal duration | 200 to 350ms stands as the canonical range (wider numbers elsewhere are pending correction by their files) |
-| Stagger bands | 30 to 50ms items, 80 to 100ms sections, about 80ms hero words: these are THE ranges; other files link here |
+| Stagger bands | 30 to 80ms items, 80 to 100ms sections, about 80ms hero words, 100 to 150ms showcase: these are THE ranges; other files link here |
 | Package name for new work | New React work uses `motion` with `motion/react` imports; follow the project otherwise (details: stacks/react-motion.md) |
 | Scroll reveal replay | Reveal once, never replay on scroll-up (implementation: scroll.md) |
 

@@ -2,9 +2,9 @@
 
 Command: `life micro CheckoutButton.tsx "feels dead, make it premium"`
 
-**0 Understand.** "Premium" maps to restraint, light and depth cues, soft press, no bounce, one slower beat. Restated: "I read this as: reflection or sheen plus a settled press · scope=micro, interaction=interactive, sync=instant · feel=premium, restrained. Proceeding unless you meant a more playful feel."
+**0 Understand.** "Premium" maps to restraint, light and depth cues, soft press, no bounce, one slower beat. Restated: "I read this as: reflection or sheen plus a settled press · scope=micro, interaction=interactive, sync=together · feel=premium, restrained. Proceeding unless you meant a more playful feel."
 
-**1 Survey and classify.** Stack: React with Motion; no tokens file; the button already has `transition: all 300ms`. Existing animation is reviewed first: `ease` default, layout property in the transition. Classification: `scope=micro · interaction=interactive (press), non-interactive (success) · sync=domino (label then check) · direction=press/release`.
+**1 Survey and classify.** Stack: React with Motion; no tokens file; the button already has `transition: all 300ms`. Existing animation is reviewed first: `ease` default, layout property in the transition. Classification: `scope=micro · interaction=interactive (press), non-interactive (success) · sync=sequence (label then check) · direction=press/release`.
 
 **2 Gate.** Frequency: a checkout button is seen occasionally (not 100 times a day). Purpose: feedback and state indication. Speed: press 140ms; success within 360ms. Function: helps. Outcome: animate, tier rare.
 

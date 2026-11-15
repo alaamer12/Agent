@@ -628,12 +628,13 @@ Every run gets one conventional directory named after the task:
 `./mine/mining-the-800-page-handbook`) — this is
 the default location; if the user names a different output location, use
 that instead, keeping the same naming and subdirectory conventions below.
-Two absolute rules: **every scratch, cache, tool, and evidence file a run
+Three absolute rules: **every scratch, cache, tool, and evidence file a run
 produces lives inside its run directory** — nothing loose in `/tmp`, no
 orphaned artifacts elsewhere — because everything a checkpoint or ledger
 cites must still be findable by someone reopening that folder a month later;
-and the directory has a **fixed set of static folders** that exist in every
-run, plus **dynamic folders** created only when the task needs them.
+**nothing the run produced is ever deleted — the trail is evidence** (see
+"The trail is evidence" below); and the directory has a **fixed set of static folders**
+that exist in every run, plus **dynamic folders** created only when the task needs them.
 
 **Static folders** (same names and roles in every run; `plan/` is created in
 Phase 1 when the plan is written, the rest at the start of Phase 2):
@@ -649,8 +650,8 @@ Phase 1 when the plan is written, the rest at the start of Phase 2):
 | `distillation/` | The final document plus the true full journey of the run — how discovery actually went, the cross-source ground table if you built one, the union of the per-source ledgers as the run's bibliography, category quotas met or missed, substitutions/dedup removals, the noise-skip summary (what was skipped across all sources and on what evidence), budget reality vs estimate, tools used. In run-mining, the score table and ranked verdict live here too, and the reproducible probe is kept so the user can re-run or extend it |
 
 **Dynamic folders** (created by the task, not by convention — the static list
-is closed, the dynamic list never is): `scratch/` for throwaway working
-files; `slices/` for per-subagent page-range extracts in within-source
+is closed, the dynamic list never is): `scratch/` for working files — the
+journey's trail, kept to the end, not trash; `slices/` for per-subagent page-range extracts in within-source
 fan-out; `extracts/`, `frames/`, `transcripts/` when one cache type deserves
 its own tree; `fixtures/` and `probes/` for run-mining inputs and harnesses;
 whatever else a specific task genuinely generates. Rules: kebab-case names;
@@ -659,7 +660,37 @@ document that uses it; every file in it traceable to at least one checkpoint
 or ledger; and a dynamic folder never duplicates a static role — raw bytes
 belong in `sources/`, derivations in `cache/`, proof in `witness/`, reusable
 machinery in `tools/`. If something in `scratch/` outlives the run and the
-distillation cites it, it was filed in the wrong place.
+distillation cites it, it was filed in the wrong place — **move it to its
+role's folder; never delete it as a way of filing.**
+
+### The trail is evidence — nothing gets deleted
+
+Work artifacts created along the way — probe scripts, half-finished
+extractors, exploratory dumps, the `tee -a` URL lists, abandoned approaches,
+dead-end notes — are not cleaned up when the run ends, even the ones written
+"temporarily" to unblock a single step. They are the **trail**: the only
+honest record of how the journey went, the evidence a later reader needs to
+doubt or re-run any checkpoint, and the cheapest possible starting point for
+the next run. `smelt` and future agents can only verify what still exists.
+
+The end-of-run duty is **filing, not cleaning**:
+
+- Anything a checkpoint, ledger, or distillation cites belongs in `witness/`,
+  `tools/`, or `cache/` per its role — re-file it there.
+- Anything abandoned mid-journey stays where it landed, under `scratch/`,
+  with a one-line header saying what it was testing and why it stopped —
+  dead ends are part of the map, and they are what makes the noise-skip and
+  substitution records checkable.
+- A run file may be moved, renamed, or annotated; it is never deleted.
+  Deleting a falsified experiment destroys the evidence that it was tried.
+- The only legitimate removals are secrets (never write them in the first
+  place) and files the agent created by accident outside the run directory,
+  which get moved in, not deleted.
+
+`cache/` keeps its rebuildable character: replacing a derivation with a
+fresher equivalent is regeneration, not evidence loss — what may never be
+purged is the unique trail: `scratch/` work files, `witness/` proofs,
+`tools/`, `sources/` raw bytes, and any note nothing else can reproduce.
 
 `plan/` is created in Phase 1 — the plan needs its file before mining starts,
 and the rest of the folders get created at the start of Phase 2; every path

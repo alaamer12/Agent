@@ -8,7 +8,7 @@ Turn vague wording into precise animation terms and classification values. The u
 
 1. Read for intent, not keywords. People describe what they see or feel ("springy", "slides off", "draws itself in").
 2. Sort the phrase into one of the three kinds below.
-3. Map it to glossary terms (see the vocabulary reference) and to classification dimensions.
+3. Map it to glossary terms (grep `../data.csv` — the `expressions` column holds the loose user wording) and to classification dimensions.
 4. Restate the translation in one line using the precise terms.
 5. Confirm only if two readings would lead to different builds. Otherwise proceed and let the report show the interpretation.
 
@@ -50,7 +50,7 @@ Contrast close terms so the user can choose:
 - Pop in vs bounce: overshoot on entry only vs a repeated spring.
 - Shared element transition vs layout animation: an element travels between two places vs one element animates to its new size or position.
 - Crossfade vs morph: two things overlap in place vs one shape becomes another.
-- Stagger vs domino: offset starts of the same effect vs one animation handing off to the next.
+- Stagger (overlap) vs hand-off (sequence): offset starts of the same effect vs one animation passing to the next.
 - Scroll reveal vs scroll-driven: starts once on entry vs progress follows the scroll position.
 
 ## When nothing matches

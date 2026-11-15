@@ -35,7 +35,7 @@ It runs automatically for broad targets. It never edits files.
 | Gesture seam | Draggable or swipeable thing snaps with no physics | Drag handlers with no spring, velocity, or boundary friction |
 | Flat delight moment | Rare high-emotion state rendered flat | First-run, empty, success, completion components |
 | Unlinked relatives | Related elements that react independently | Hover or selection on one item with related items visibly static (linked) |
-| Unordered group | Several related animations that start arbitrarily | Parts of one flow with no designed order (domino) |
+| Unordered group | Several related animations that start arbitrarily | Parts of one flow with no designed order (sequence or overlap) |
 | Missing reverse | A forward move with no designed way back | Steps, tabs, routes, open/close pairs where only one direction animates |
 
 ## Using the script

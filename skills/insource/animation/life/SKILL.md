@@ -1,6 +1,6 @@
 ---
 name: life
-description: Designs, builds, reviews, and prototypes UI animation through three commands - micro (a single element), component (a whole component as one visual unit), transition (moving between states, views, or pages, always with forward and backward motion). Resolves vague requests such as "make it feel premium", "an onboarding intro when the app starts" or "that bouncy thing when it opens", finds animation opportunities across a page or project when the user does not know what to animate, proposes creative options as ASCII or HTML prototypes before touching production code, and reviews its own animation against a craft bar. Use whenever the user mentions animation, motion, entrances, exits, intros, onboarding animation, transitions, micro-interactions, easing, springs, scroll reveals, page or route transitions, hover or press feedback, or wants an interface to feel more alive or polished, even if they never say "animate".
+description: Designs, builds, reviews, and prototypes UI animation through three commands - micro, component, transition (one element, one visual unit, one state-to-state move with forward and back). Choreographs groups that move together - cast roles (lead/support/decoration/static), choose each pair's relation (together, overlap, sequence, carry, linked), no stagger on high-frequency UI, a timing table before code. Resolves vague requests like "make it feel premium" or "that bouncy thing when it opens", finds animation opportunities when the user does not know what to animate, proposes creative options as ASCII or HTML prototypes before touching production code, and reviews its own work against a craft bar. Use whenever the user mentions animation, motion, entrances, exits, intros, transitions, micro-interactions, easing, springs, scroll reveals, hover or press feedback, stagger, choreography, "feels mechanical", "too much going on", or wants an interface to feel more alive or polished, even if they never say "animate".
 compatibility: Works with any agent that can read files and ask the user questions. Optional scripts need Python 3.9+ using only the standard library; the match-existing scripts additionally need ffmpeg, opencv-python, numpy and scipy.
 metadata:
   version: "0.2.0"
@@ -19,7 +19,7 @@ This file is the one router: it is the **only** place that maps requests to file
 
 - Designing and implementing UI animation: micro-interactions, component animation, transitions between states, views and pages.
 - Entrances and exits, first-run and onboarding intros, hover and press feedback, state and number swaps, scroll-linked motion, gestures and springs, SVG and clip-path motion.
-- Relating animations to each other (instant, domino, linked) and designing both directions of every pair.
+- Relating animations to each other — cast roles and the five relations (together, overlap, sequence, carry, linked) — and designing both directions of every pair.
 - Finding where an app should animate and where it should not.
 - Prototyping creative options (ASCII by default, live HTML when needed) before implementing.
 - Reviewing and debugging existing animation; matching a recorded animation.
@@ -46,7 +46,7 @@ The target is a file, component, page or route, directory, the whole project, or
 
 1. Every run reads two mandatory files whatever the job: [classification.md](references/classification.md) (phase 1) and [gate.md](references/gate.md) (phase 2). Unsure what a phase requires or where to stop? [run-procedure.md](references/run-procedure.md) is the sole home of the phase detail.
 2. Decide the **scope** (which command) from what changes: one element, a whole unit, or a change between states.
-3. Name the **job** from the user's words using the table below. If the wording is vague (a feeling, a loose description), read intent-resolution and vocabulary first to translate it into precise terms, restate it in one line, then continue.
+3. Name the **job** from the user's words using the table below. If the wording is vague (a feeling, a loose description), read intent-resolution and grep `data.csv` (its `expressions` column is the reverse-lookup: description → precise term) first to translate it into precise terms, restate it in one line, then continue.
 4. Read the job's files from the table. If the job produces code, finish with the **build tail**, in order: timing-and-tokens → exactly one stacks file → performance-and-accessibility → review-standards. Whenever the target is broad or the user does not know what to animate, discovery runs first, whatever the words said.
 
 | Job | The user says (examples) | Typical command | Job files, in order |
@@ -56,17 +56,17 @@ The target is a file, component, page or route, directory, the whole project, or
 | Feedback or state swap | press, hover, focus, toggle, tick, shake, icon swap, count changes, loading button | micro | playbooks-micro |
 | Component lifecycle | modal, popover, menu, drawer, toast, card, accordion, list item | component | playbooks-component, entrances-and-exits |
 | Transition | steps, wizard, tabs, back, list to detail, route or page change | transition | playbooks-transition, synchronization; nextjs-transitions for routes |
-| Synchronization | cascade, one after another, ripple, connected, highlights related, all together | any | synchronization |
+| Synchronization / choreography | cascade, one after another, stagger, choreography, wave, crossfade, "feels mechanical", "too much going on", "slow to open", ripple, connected, highlights related, all together | any | synchronization; choreography-recipes when implementing |
 | Physics | bouncy, springy, weighty, momentum, alive | any | intent-resolution, springs |
 | Gesture | drag, swipe, flick, reorder, knob | micro or component | gestures, springs |
 | Scroll | on scroll, parallax, pinned scene, scroll progress | component or transition | scroll, entrances-and-exits |
 | Vector or clip | draws itself, wipe, mask, morph a shape, before and after | micro or component | svg-and-clip-path |
-| Feeling word | premium, snappy, playful, calm, cinematic | any | intent-resolution, vocabulary |
+| Feeling word | premium, snappy, playful, calm, cinematic | any | intent-resolution, data.csv |
 | Creative | unique, wow, something different, light, reflection, 3D | any | creative-direction, prototype-ascii, prototype-html if needed, review-standards in spec mode |
 | Discovery | what should I animate, whole page or project, "the app feels flat" | any | discovery, gate, then the pick's job row |
 | Diagnosis | janky, laggy, flickers, "feels off", review my animations | any | debugging, review-standards, performance-and-accessibility |
 | Match | "like this recording or GIF", attached media | any | match-existing, then the matching job's files |
-| Naming | "what is that effect called", "that thing where..." | any | vocabulary, intent-resolution |
+| Naming | "what is that effect called", "that thing where..." | any | data.csv, intent-resolution |
 | Sound | sound, click sound | micro | interface-sound |
 | Constraints | reduced motion, accessible, performance, 60fps | any | performance-and-accessibility |
 
@@ -87,7 +87,7 @@ Detail for every phase, including what to decide and where to stop, is in [run-p
 7 Report       output contract below
 ```
 
-Rules that never bend: classify before choosing a technique; the gate comes before creativity; no plain fade, slide or scale unless the user chose traditional; no production code before an option is picked; every enter has an exit and every forward has a reverse; the review runs before the report. Stop for the user only at: a divergent-reading confirmation, the discovery pick, the style question, the option pick, and the ASCII-or-HTML question.
+Rules that never bend: classify before choosing a technique; the gate comes before creativity; no plain fade, slide or scale unless the user chose traditional; no production code before an option is picked; every enter has an exit and every forward has a reverse; a group gets cast and a written timeline before code — one entrance per container, no stagger on high-frequency surfaces; the review runs before the report. Stop for the user only at: a divergent-reading confirmation, the discovery pick, the style question, the option pick, and the ASCII-or-HTML question.
 
 ## Directory map
 
@@ -101,7 +101,7 @@ Paths below are relative to this file. Each row says when to open the file and w
 | [classification.md](references/classification.md) | phase 1 of every run, before choosing any technique, or when unsure whether something is scope, interaction, synchronization, technique or timing | the classification line is already written and unchanged |
 | [gate.md](references/gate.md) | phase 2 of every run, before any creative work, and whenever animation is requested on something frequent or keyboard-driven | never skip during a run; skip only for pure vocabulary questions or diagnosis with no build |
 | [intent-resolution.md](references/intent-resolution.md) | the request has a feeling (premium, snappy), a loose description, a job word (intro, dismiss, press), or no command | the user already named exact terms and a command |
-| [vocabulary.md](references/vocabulary.md) | you must name an effect, or turn a description ('slides off', 'draws itself') into a precise term | the terms are already unambiguous |
+| [data.csv](data.csv) | you must name an effect, turn a description ('slides off', 'draws itself') into a precise term, or look up a term's tags/related/owner — grep the `term` and `expressions` columns | the terms are already unambiguous |
 | [discovery.md](references/discovery.md) | the target is a directory, a page with many parts, a route tree or the whole project, or the user says 'what should I animate?' or 'the app feels flat' | a single known element or component is targeted |
 | [match-existing.md](references/match-existing.md) | the user supplies a recording, GIF, screenshots or says 'like this one' | there is no reference media |
 | [debugging.md](references/debugging.md) | existing animation feels off, janky, flickers, jumps, stutters, restarts or goes the wrong way | you are designing new animation with nothing existing to diagnose |
@@ -111,7 +111,8 @@ Paths below are relative to this file. Each row says when to open the file and w
 
 | File | Read when | Skip when |
 |---|---|---|
-| [synchronization.md](references/synchronization.md) | two or more elements animate together, in order, or react to each other (cascade, ripple, hover affecting neighbors, connected nodes) | a single element animates alone |
+| [synchronization.md](references/synchronization.md) | two or more elements animate together, in order, or react to each other (cascade, ripple, hover affecting neighbors, connected nodes), or the user says the group 'feels mechanical', 'too much going on', 'slow to open' — owns cast, the five relations, hard rules, interruption, the timeline artifact | a single element animates alone |
+| [choreography-recipes.md](references/choreography-recipes.md) | implementing a multi-element plan: delay-variable CSS/WAAPI staggers, eased variant staggers, popLayout removal, delta-scaled crossfades, direction-aware steps, sequenced draws, duplicate-view morph, carry, imperative orchestration | the relation is decided but nothing is being coded yet (decisions live in synchronization.md) |
 | [entrances-and-exits.md](references/entrances-and-exits.md) | something appears or leaves: first-run or onboarding intros, hero, page load, sections, lists, dialogs opening and closing, dismissal, removal; words like intro, appear, show up, fade in, pop in, close, dismiss | the change is between two states that both stay (use the transition playbook) or it is pure press, hover or focus feedback (use the micro playbook) |
 | [principles.md](references/principles.md) | a judgment call the playbooks do not settle, or when you need to explain why a choice is right | a recipe already fixes the decision |
 | [timing-and-tokens.md](references/timing-and-tokens.md) | you are about to write any duration, easing, stagger, scale or blur value, or the project has no tokens — **the single owner of every value range**; other files link here instead of re-listing numbers | you are only naming, classifying or discovering, not choosing values |
@@ -172,6 +173,7 @@ Each script prints usage with `--help`. If scripts cannot run, use the manual fa
 ```text
 Classification   scope=<> · interaction=<> · sync=<> · direction=<> · technique=<> · timing=<>
 Decision         animate | reduce | none, tier=<routine|rare|showcase>, style=<creative|traditional>
+Choreography     when sync ≠ none: timeline rows (element · role · start · duration · motion · relation) + what deliberately does not move, with reasons
 Built            files changed, one line each
 Values           properties, durations, easing, stagger, origin, reverse behavior
 Review           audit script result, verdict (Approve or Block with reasons)

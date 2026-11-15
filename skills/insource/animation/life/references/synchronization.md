@@ -1,82 +1,117 @@
-# Synchronization
+# Synchronization and choreography
 
-> Owns the instant/domino/linked forms (definitions, propagation, per-form rules, pitfalls); routing lives in `../SKILL.md`.
+> Owns how two or more moving elements relate: cast, the five relations, hard rules, moment sync, adaptive timing, direction and exits, interruption, attention loops, reduce behavior, and the timeline artifact. Value ranges belong to timing-and-tokens.md. Implementation patterns: choreography-recipes.md. Routing: `../SKILL.md`.
 
-How animated elements relate to each other. Choose the form from the relationship, then implement it.
+A group reads as one intentional motion when order, overlap, timing and stillness are *decided* — not when every part animates smoothly on its own. The default failure is choreographing by addition: every child gets a delay, the panel slides then its items trickle in; each piece is nice, and the user waits for the interface to finish performing before using it. Good choreography is mostly **cutting moving parts and running the rest in parallel**.
 
-## Choosing the form
+Sequence only when order carries meaning: reading order, cause → effect, or one thing physically arriving before another. A sequence that means something reads as a **wave** (one gesture); one that doesn't reads as a **queue**. Uniform timing affects a group the way `linear` affects one element.
 
-| Question | Answer | Form |
+## Hard rules
+
+1. **One entrance per container.** If the panel slides in, its content is already there. Never animate a parent's entrance *and* stagger its children — that is two entrance layers the user waits through.
+2. **Never stagger high-frequency or keyboard-triggered UI.** Dropdown items, menu rows, command palettes, tab content: appear together, or with no animation. A stagger looks nice once and slows every use after.
+3. **Uniform stagger is forbidden.** Same delay + same distance + same duration + same easing on every item = metronome. Vary by importance; let gaps shrink as the group goes on.
+4. **Choreography never blocks interaction.** Everything on screen is clickable as soon as it is visible; a delayed item must not hold back a button the user is already reaching for.
+5. **Every sequence must survive interruption.** If a mid-flight re-trigger replays out of order or stacks animations, it isn't finished. See §Interruption.
+6. **Reduced motion collapses the choreography, not just shortens it.** Drop delays and movement, keep opacity, let the group appear together. If the sequence *is* the explanation, jump between frames instead of animating them.
+
+## Step 1 — cast the elements
+
+Before any timing, list every element that moves on the event and give each a role (vocabulary rows in `../data.csv`):
+
+| Role | What it is | Treatment |
 |---|---|---|
-| Should elements start and end together? | Yes | Instant synchronous |
-| Does one element's animation hand off to the next? | Yes | Domino |
-| Does acting on one element mean its relatives should react? | Yes | Linked |
-| Are the elements independent? | Yes | No synchronization; keep them simple |
+| **Lead** | the one thing the user must notice — title, new view, acted-on item | moves first, travels most, stays longest |
+| **Support** | secondary content following the lead — subtitle, CTAs, rest of list | shorter, smaller motion |
+| **Decoration** | pills, badges, accents, dividers | fade only — or nothing at all |
+| **Static** | everything else, including containers whose content animates | does not animate |
 
-Different techniques can share one relationship: one element fades out, another slides out, a third scales, all under the same timing, order, or link.
+More than one element wanting to be the lead = a hierarchy problem motion cannot fix; say so. Most groups shrink at this step: a side panel with eight menu items becomes *one* move — the panel slides, the items are simply there.
 
-## Instant synchronous
+## Step 2 — pick the relation for each pair
 
-Elements start together and share one clock. Use it when the parts read as one object (a card whose image, title and badge arrive together) or when different techniques express one change.
-
-Rules
-- One shared duration and easing, or deliberately related ones. Mismatched timing in a group is the usual cause of "something feels off".
-- Paired elements (modal and overlay, tooltip and arrow) must share easing and duration.
-- Let techniques differ, not clocks.
-
-```css
-.group > * { transition-duration: var(--dur); transition-timing-function: var(--ease); }
+```
+Do both elements belong to the same visual object or the same moment?
+├── Yes → TOGETHER — same start, one timing family.
+└── No → does the order carry meaning (reading order, cause → effect, arrival)?
+         ├── No → TOGETHER — order without meaning is just delay.
+         └── Yes → would showing both at once look broken (overlap, pass-through,
+         │        two rich views fighting)?
+         │        ├── Yes → SEQUENCE — second starts as the first finishes, or just before.
+         │        └── No → OVERLAP — a stagger; second starts while first moves.
 ```
 
-```js
-// WAAPI: one timing object reused by every member
-const timing = { duration: 240, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'both' };
-members.forEach((el, i) => el.animate(keyframesFor(i), timing));
-```
+Plus a fifth that is not timing at all:
 
-## Domino / sequential
+- **CARRY** — when a child's motion can't be steered directly (shared-layout/`layoutId`), animate the **parent** and let children ride. Images fly *into* the bin because the container they belong to moves, not because each image was tuned.
 
-One animation depends on or follows another, so motion travels through the interface in order. The order carries meaning: it should match reading order, importance, or causality.
+And the relation for interfaces that represent relationships:
 
-Rules
-- Order by hierarchy: the primary element leads, supporting elements follow, the call to action lands last.
-- Overlap beats waiting. Start the next element before the previous finishes (a stagger offset smaller than the duration) unless a hard hand-off is the point.
-- Keep the total short: domino uses the list-item and section stagger bands, and each band's numbers belong to timing-and-tokens.md §Stagger.
-- Never block interaction while a chain plays.
-- Vary delay and distance by importance. A uniform offset reads as a metronome.
-- A chain of more than about five items needs grouping, or the later items feel slow. Animate groups as units.
+- **LINKED** — acting on one element makes related elements react (§Linked below).
 
-```css
-.item { animation: enter var(--dur) var(--ease) both; animation-delay: calc(var(--i) * var(--stagger-list)); }
-```
+### Together, by default
 
-```js
-// Explicit hand-off: B starts when A finishes
-await elA.animate(kfA, timing).finished;
-await elB.animate(kfB, timing).finished;
-```
+- **A leaving element stops taking up space immediately.** Take it out of the layout at the moment of removal so siblings slide into the gap *while* it fades. Otherwise the gap closes only after the exit finishes: both motions smooth, the pause between them makes the whole interaction feel slow. (In Motion: `AnimatePresence mode="popLayout"`; without a library: `position: absolute` at the read offset before animating out.)
+- **Swapping views in one container is a crossfade** — old exits while new enters — which means `popLayout` again, not default `sync` (which stacks both until the exit completes).
+- **Sub-animations of one component share a timing family**: same duration, same easing family, so the component reads as one entity. A drawer that opens in 500ms then resizes in 200ms reads as two objects. Inner animations may use a *lighter* curve of the same family (slower content fade so the swap stays visible) — never a different family: ease-in-out body inside ease-out container feels out of sync. Set the family once (shared config or one CSS custom property).
+- Paired elements (modal + overlay, tooltip + arrow) share duration and easing. Let techniques differ, not clocks.
 
-Motion `staggerChildren` on the parent: see stacks/react-motion.md.
+### Overlap: the stagger
 
-Choose one level of entrance per container. If the container animates in, its children are already visible on arrival; if the children stagger, the container does not also move.
+- Order follows **importance, not DOM order**; group title + first paragraph into one beat when they read as one unit.
+- **Vary treatment, not just delay:** lead slides furthest, support less, decoration fades in place. Shrinking gaps (or eased delays) read organic; equal gaps read mechanical. Bands and totals: timing-and-tokens.md §Stagger.
+- **Long lists stagger only the first handful**; the rest arrive with the last one. Item 20 must never wait 20× the delay.
+- Direction follows reading order, or radiates outward from the point the user interacted with.
+
+### Sequence: when to wait
+
+- **Two rich states in a container that changes width *and* height**: the old content leaves before the new starts (safe default `mode="wait"`); to keep a crossfade anyway use the duplicate-view technique (choreography-recipes.md).
+- **One element would visibly pass through another**: show the occluding face just as the movers land — a delay, not a full sequence.
+- **Cause and effect draws**: the square draws, *then* the checkmark — second starts just before the first ends; both hold their end state (`forwards`/`both`). The slight handoff overlap is what turns a queue into one gesture.
+
+## Step 3 — sync secondary motion to the moment that matters
+
+Supporting effects hook onto a specific moment of the lead — its start, its **impact**, or its **settle** — not a delay that happens to look about right:
+
+- **Sync to the cause, not the previous trigger.** Hover-then-click: the background pulses *on the click*, with the press — not on hover.
+- **Land the accents with the lead.** Motion lines/sparkles complete as the main shape finishes (late slice of its timeline); most-important line first, others a few frames behind (values: timing-and-tokens.md §Choreography values).
+- **A repeat action skips the buildup.** Once the hover state is set, the click plays immediately: same internal proportions, whole thing earlier.
+
+## Step 4 — adapt timing to what changed
+
+- **Scale duration by distance**: a big container jump needs the full fade; the same fade on a tiny jump flickers. Derive from the delta, clamp (formula + bounds: timing-and-tokens.md).
+- **Scale bounce by size**: smaller elements need more bounce to read alive; one bounce value makes large views heavier or slower than their siblings (tuning: springs.md).
+- **Few finite states ⇒ hardcode per transition.** A dozen hand-tuned pairs beat a clever formula nobody can fine-tune; formulas only when the state set is too large.
+
+## Step 5 — direction and exits
+
+- **Direction follows the mental model.** Forward moves content left (new enters from right); back reverses. Next and Back sliding the same way contradicts the action. Sibling-menu switches enter from the side of the trigger the user came from.
+- **Exits read state at their start**, so the direction passes through to both the presence container and the child — otherwise the leaving element animates with its mount-time direction.
+- **Exits are simultaneous, shorter, simpler.** Never reverse-stagger a closing group: the user already decided to leave.
+- **An exit mirrors its entry.** Slid in from the right ⇒ leaves toward the right; a fade-only exit teleports the object.
+
+## Interruption
+
+A sequence has more states than a single animation — test each:
+
+- **Re-trigger mid-sequence**: hover out halfway, click Next twice fast, switch menus while the first opens. Every run *stops* in-flight animations before starting new ones; never stack.
+- **Wait for completion before chaining**: an idle loop resuming after a hover-out starts only when *all* reset animations finish (await them together), or it fights the reset.
+- **Rapid view switching** can leave two children mounted: check explicitly; every child has a stable unique key (a missing key is the first suspect when an exit doesn't play).
+
+## Attention loops
+
+An idle animation that invites interaction (a hand that occasionally taps, an icon that wiggles): first run after a beat, repeats rarely, stops while the user interacts, resumes only after the interaction's reset completed. Values: timing-and-tokens.md §Choreography values.
 
 ## Linked
 
-An action or animation on one element causes a corresponding effect on elements it is related to. This fits interfaces that represent relationships: canvases, diagrams, graphs, editors, tables with related rows, highlight systems.
-
-Examples
-- Selecting a node highlights its neighbors.
-- Hovering one item highlights related items.
-- Interacting with one element changes the state of connected elements.
-- Animating one element animates its linked elements correspondingly.
+An action or animation on one element causes a corresponding effect on related elements. Fits interfaces that represent relationships: canvases, diagrams, graphs, editors, related rows, highlight systems.
 
 ### Model the relationship first
 
-Linked synchronization needs data, not just CSS. Decide:
-1. **Link source.** Where do relationships come from (edges in a graph, a shared id or group, a parent relation, a query)?
-2. **Link strength.** All linked elements react equally, or the reaction falls off with distance (hops).
-3. **Link direction.** Symmetric or one-way (selecting a parent affects children but not the reverse).
-4. **Reaction.** Same effect, or a corresponding but different effect (the source pulses, neighbors brighten, distant nodes dim slightly).
+1. **Link source.** Where relationships come from (edges, shared id/group, parent relation, query).
+2. **Link strength.** Equal reaction for all, or falloff with distance (hops).
+3. **Link direction.** Symmetric, or one-way (parent selection affects children only).
+4. **Reaction.** Same effect, or corresponding-but-different (source pulses, neighbors brighten, distant nodes dim).
 
 ### Propagation pattern
 
@@ -100,7 +135,7 @@ function linkedStrengths(graph: Map<string, string[]>, source: string, maxHops =
 }
 ```
 
-Apply the result by writing one data attribute or one property per element, not by animating from script every frame:
+Apply by writing one data attribute or custom property per element — not by animating from script every frame:
 
 ```ts
 for (const [id, s] of linkedStrengths(graph, hoveredId)) {
@@ -112,30 +147,46 @@ for (const [id, s] of linkedStrengths(graph, hoveredId)) {
 .node { opacity: calc(0.45 + 0.55 * var(--link, 1)); transition: opacity 160ms var(--ease); }
 ```
 
-For plain DOM relationships, CSS can carry the link without script (`:has()` de-emphasis pattern: see stacks/css-native.md).
+Plain-DOM relationships can ride CSS without script (`:has()` de-emphasis: stacks/css-native.md).
 
-### Implementation notes
-- Reset on leave or deselect: restore all linked elements, including ones a fast pointer skipped.
-- Batch updates inside one frame. On large graphs update only elements whose strength changed.
-- Cap the reach (`maxHops`). Linking a whole dense graph reads as noise and costs frames.
-- Linked effects must not rely on color alone, and must also respond to keyboard focus and selection, not only pointer hover.
-- On touch devices there is no hover. Use tap to select, and keep the link effect tied to selection.
-- Canvas and SVG: update the same strength map in the draw loop; avoid per-element listeners.
+### Linked implementation notes
 
-## Combining forms
+- Reset on leave/deselect, including elements a fast pointer skipped.
+- Batch inside one frame; on large graphs update only changed strengths. Cap `maxHops` — a dense graph fully linked reads as noise and costs frames.
+- Never color-only; respond to keyboard focus/selection, not only hover. No hover on touch: tap-to-select carries the link.
+- Canvas/SVG: same strength map in the draw loop; avoid per-element listeners.
 
-The forms nest. A selection can be linked (neighbors react) while the reaction itself is a domino (neighbors respond in order of distance at list-item offsets, timing-and-tokens.md §Stagger). A transition can run instant for the container and domino for its contents. Name each layer in the classification line.
+## Combining and interaction
 
-## Interaction with synchronization
+Forms nest: a selection can be linked while its reaction sequences; a transition can be Together for the container and Overlap for its contents. Name each layer in the classification line. Interactive and synchronized are not exclusive: the interaction drives the animation, the synchronization defines what else moves — the manipulated element stays pointer-locked (no easing), relatives may follow with light easing or a spring.
 
-Interactive and synchronized are not exclusive. The interaction drives the animation; the synchronization defines what else moves. During direct manipulation the manipulated element stays locked to the pointer with no easing, while linked elements may follow with light easing or a spring.
+## Tool choice
+
+Pick the lightest tool that expresses the relationships (patterns: choreography-recipes.md):
+
+- **CSS custom-property delays** on one keyframe — one-shot entrances.
+- **Declarative variants with an eased, source-aware stagger** on the parent — groups entering/exiting with state.
+- **Imperative orchestration** — only when several elements coordinate across several events and completion must be awaited; more powerful, much harder to maintain, never for a simple stagger.
+
+## The timeline artifact
+
+Before coding a multi-element run, write the timeline: one row per moving element in start order — element · role · start · duration · motion · relationship. Check it against the budgets (timing-and-tokens.md). Then list up to 5 elements motion was deliberately **removed** from, each with its reason ("Menu items: one entrance per container, the panel carries them"). If none were removed, say so.
+
+Finish by feeling-checking: record the interaction and step through it — a wave and a queue look the same at full speed in your head and different on a recording. Then imagine the 50th use today; if you'd skip the animation, cut it.
+
+**Tone:** talk in relationships and moments ("the lines land with the click"), not adjectives. When a sequence is fine as-is, say so; when the right choreography is no choreography, say that too.
 
 ## Pitfalls
 
-- Treating a stagger as the only synchronization tool; it only covers the domino form.
-- Domino chains that delay the useful content.
-- Uniform offsets and distances.
-- Linked reactions with unbounded reach.
-- Linked state that never resets after a fast pointer exit.
-- Animating both a container and its staggered children.
-- Different clocks inside a group that should read as one object.
+- Choreographing by addition (more delays, more layers) instead of casting and cutting.
+- Parent entrance + child stagger on one container.
+- Stagger on high-frequency surfaces; uniform metronome delays anywhere.
+- Sequencing when order carries no meaning (a queue, not a wave).
+- Gap closing *after* the exit instead of during it (sync mode instead of popLayout).
+- Two clocks in one object (open 500ms + resize 200ms; ease families mixed inside one component).
+- Secondary effects with feel-delays instead of moments; accents that drift from the lead.
+- Fixed duration across very different distances; one bounce across very different sizes.
+- Reverse-staggering exits; fade-only exits for objects that slid in; same-direction Next/Back.
+- Sequences untested against interruption; idle loops that never stop for input.
+- Treating a stagger as the only synchronization tool; unbounded linked reach; linked state that never resets.
+- Delayed items gating the interaction; reduced motion that merely shortens instead of collapsing.

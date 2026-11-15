@@ -51,7 +51,7 @@ Label  ████████░░░░░░░░░░░░   0-160ms   
 Check  ░░░░██████████████░░   120-360ms line drawing
 ```
 
-This is how domino order, instant sync and linked propagation become readable in ASCII. For linked relationships, add one lane per hop group (source, neighbors, distant) with their offsets.
+This is how overlap/sequence order, together timing and linked propagation become readable in ASCII. For linked relationships, add one lane per hop group (source, neighbors, distant) with their offsets.
 
 ## Worked frame example
 

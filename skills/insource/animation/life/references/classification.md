@@ -45,7 +45,7 @@ The three scopes, their units and their commands: the hub's Commands table (`../
 
 ## Synchronization
 
-The three forms (instant, domino, linked), their rules and patterns: see synchronization.md. Synchronization does not require identical animations: different elements can use different techniques and still be synchronized through shared timing, sequence, or relationship.
+The relations (together, overlap, sequence, carry, linked), the cast roles, hard rules and the timeline artifact: see synchronization.md. Synchronization does not require identical animations: different elements can use different techniques and still be synchronized through shared timing, order, or relationship.
 
 ## Direction
 

@@ -15,6 +15,8 @@ YYY/
     fold/<relative-path>.md   the knowledge file produced for each source folder
     sources.md                every source file, its role, and its disposition
     merges.md                 what was merged, varied, contradicted, or corrected
+    links.md                  every reference URL in the corpus, checked, with status and handling
+    yield.md                  per-file smelted share, sorted top yield to bottom
 ```
 
 The shape inside `knowledge/` is the writer's decision. It can be one file or many; by topic, by kind of knowledge, by product, or as one coherent essay. The material decides. What is fixed is only this: each file owns a distinct body of knowledge, files link to each other, and `INDEX.md` routes to all of them.
@@ -37,7 +39,7 @@ Answer these in order, briefly and plainly:
 2. **What it covers** — the domains and questions the corpus actually addresses.
 3. **What it does not cover** — unreachable sources, pre-plan areas, unmeasured fields, unresolved contradictions.
 4. **How to trust it** — how evidence is shown, what stated versus inferred means, and how confidence was assigned.
-5. **How it was made** — one paragraph: file-by-file fold into one knowledge file per folder, then a single global reconciliation across all folders, with the evidence chain preserved.
+5. **How it was made** — one paragraph: file-by-file fold into one knowledge file per folder, then a single global reconciliation across all folders, with the evidence chain preserved, every reference URL checked, and a per-file yield reported.
 
 No marketing. No claims the corpus does not support.
 
@@ -90,6 +92,32 @@ Effect: the old reading stays visible, marked corrected; the current account car
 
 Every merge, variant, contradiction, and correction appears here. The log is what makes "nothing was lost" checkable rather than asserted.
 
+## `provenance/links.md`
+
+One row per unique URL the corpus references, filled from the sweep, statuses set by the verify pass:
+
+```
+https://…/pricing-api          experience/03.md, distillation/biblio.md   alive (200)      2026-11-14   —
+https://…/spec-v2              experience/05.md                           redirect→v3      2026-11-14   cited both
+https://…/blog-post            witness/notes.md                           dead             2026-11-14   archive copy found; claim cites live+archive
+https://…/internal-metrics     experience/07.md                           dead             2026-11-14   no recovery; confidence lowered, gap written
+```
+
+Rules: no row stays `unchecked` at delivery; dead-with-recovery keeps the claim and cites both; dead-without-recovery downgrades the claim's provenance at the citation point and appears in the gaps. The pointer is never quietly deleted — the dead link is knowledge (an unreachable citation is a fact about the corpus).
+
+## `provenance/yield.md`
+
+The accounting of how much was smelted, sorted highest yield to lowest:
+
+```
+experience/05-atlas.md        80%  (10 units: 7 new · 2 merged · 1 corrected · noise excluded)
+experience/09-cli.md          62%  (8 units: 5 new · 3 merged; low: much duplicated 05)
+distillation/long-form.md     35%  (derived; confirmed 12 claims, added 2)
+experience/02-nav.md           0%  (navigation boilerplate — recorded, contributed nothing)
+```
+
+Each row: file, smelted share (meaning-share: substantive units represented ÷ substantive units), the tally behind it, and the reason when the number is low. Header line: total files read, corpus-weighted yield. This is what lets the next agent judge whether a gap is "the corpus didn't know it" or "smelt missed it" — the fold tallies, not memory, are the source of the percentages.
+
 ## `provenance/fold/<relative-path>.md`
 
 The knowledge file for each source folder, including every nested folder, named after the folder's relative path (`experience__atlas.md`, `distillation__themes__authorization.md`). Each is kept exactly as its fold left it. Entries were corrected file by file as later sources arrived, but the file was not re-read or compressed at the folder boundary; that happened once, globally, after every folder was closed.
@@ -118,7 +146,8 @@ Before calling the destination complete:
 
 - **Every claim is traceable.** A reader can find the source, the location, and the exact words without trusting the writer.
 - **Every quote is verbatim** at the cited location. Spot-check across files.
-- **Every source file has a disposition** in `sources.md`.
+- **Every source file has a disposition** in `sources.md`, and a smelted yield with its tally in `provenance/yield.md` — sorted, low yields explained, total stated.
+- **Every reference URL is checked.** `provenance/links.md` has a status for every unique URL — no `unchecked` rows, no sampling; dead links are recovered-and-cited or downgraded-and-gapped, never silently dropped.
 - **No knowledge is duplicated.** Same subject, scope, and assertion appear once; variants are linked; contradictions are shown side by side.
 - **Lineage is honest.** Derived evidence is marked, and no confidence rests on it alone.
 - **The file graph closes.** Every file is linked from `INDEX.md` and from at least one sibling; every cross-file reference resolves.

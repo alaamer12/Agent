@@ -16,6 +16,7 @@ Before reading anything:
 2. List the folders and files with sizes. Write the first version of `sources.md` in the destination: every file, its role, and whether it will be read or skipped.
 3. Establish the read order. The default is scope → experience → distillation → witness → tools. If the request names a starting folder, start there and continue with the rest afterwards; a partial order is still an order.
 4. Read the plan before the first checkpoint. It supplies the vocabulary and the questions the run was built to answer, so the first knowledge file does not invent its own frame.
+5. Sweep the corpus for every URL it references — checkpoint closing ledgers, the distillation bibliography, inline citations, and `scratch/` URL lists if the run kept them — and write `provenance/links.md` with one row per unique URL: the URL, the files citing it, status `unchecked`. Mining runs accumulate references precisely because they were alive when touched; by smelt time they may not be, and only checking says which. The check pass itself runs before delivery (§5); nothing sampled. The sweep is grep-level reading of files for URLs — it does not contradict "read only knowledge folders for content."
 
 ### Folder order and nested folders
 
@@ -72,6 +73,8 @@ Write each piece as prose, notes, a table, or whatever shape carries it best. Th
 
 Append to the knowledge file's source note: file path, what it contributed, and anything it raised that is still open. Append the same line to `sources.md`.
 
+Keep a **fold tally** while reading: the file's substantive knowledge units and their outcome — new, merged-into-existing (still represented), correction, noise/boilerplate (excluded from the denominator), derived-repeat. At record time write the file's **smelt yield**: the share of its substantive units now represented in the base — (new + merged + corrected) ÷ substantive. "80%" is a meaning-share, not a byte count, and it is honest arithmetic only if the tally was kept — a low yield gets the reason in one line (thin checkpoint, duplicate of an earlier file, pure navigation content). The numbers land in `provenance/yield.md`, sorted highest to lowest.
+
 ### Update the question ledger
 
 The knowledge file keeps the open questions the fold is carrying. A file may answer a question raised three files earlier — close it and name the knowledge that resolved it. A file may raise a new one — add it. Unresolved questions become gaps at the end; they are not dropped.
@@ -96,7 +99,7 @@ The global pass does five things:
 2. **Resolve cross-folder contradictions.** Two folders may hold incompatible claims about the same subject. Keep both, say what each claims and what turns on the difference. Do not choose a winner unless a source explicitly does.
 3. **Reorganise the writing.** The delivered base is for a consumer who wants knowledge, not a tour of the run. Arrange it in whatever shape the material supports: by theme, by kind, by product, or as one continuous argument. It may be one file or several. Each delivered file owns a distinct body of knowledge; when two files would cover the same piece, one file owns it and the other links to it. Keep the folder files as provenance.
 4. **Link the files.** The base is a graph, not a folder of orphans. Every delivered file names the files it depends on and the files that depend on it, and every cross-file reference resolves. `INDEX.md` is the hub, but sibling files link directly as well.
-5. **Build the navigation layer.** The index, the topic routes, the term list, the contradiction list, the file map, and the gaps all come from what was actually written.
+5. **Build the navigation layer.** The index, the topic routes, the term list, the contradiction list, the file map, and the gaps all come from what was actually written. So do the two accounting surfaces: the yield table (per-file smelted share, sorted, with the corpus-weighted total) and the link-status summary (alive / redirected / dead / recovered counts).
 
 Compression here means deduplication and correction, never shortening a piece that carries unique detail.
 
@@ -105,7 +108,9 @@ Compression here means deduplication and correction, never shortening a piece th
 No script runs this check; the agent walks it:
 
 - **Evidence.** Pick a sample of claims across files. Open the cited file and confirm the quoted words are there at the cited location. A fabricated or drifted quote is a blocker, not a note.
+- **Links — exhaustive, never sampled.** Check every `unchecked` row in `provenance/links.md` with a real request (HEAD, or GET where HEAD is refused), record status and date. Where a URL 301s, record the target; where it is dead, make one rescue attempt (archive snapshot, an equivalent source the corpus itself names) — if recovered, the knowledge cites live-and-archive together; if not, mark the supported claim's provenance "reference dead as of <date>", lower its confidence, and write a gap line. The counts must reconcile: unique URLs swept = rows with a status. A single unverified row fails this check.
 - **Coverage.** Every file listed in `sources.md` is either represented by at least one claim or marked skipped with a reason. A file read but contributing nothing is recorded as confirming or as empty — not omitted.
+- **Yield.** Every `read in full` file has a smelted percentage in `provenance/yield.md`, sorted top to bottom, low yields explained, the weighted total stated; percentages reconcile with the fold tallies recorded during the fold, not recomputed from memory at the end.
 - **Uniqueness.** Search the delivered knowledge for the same claim under two names. Variants are allowed and linked; duplicates are not. No piece appears in two files.
 - **Lineage.** Any evidence marked independent traces to a different raw source or a different run. Anything derived from a file already in evidence is marked derived.
 - **File graph.** Every delivered file is referenced from `INDEX.md` and from at least one sibling file, every cross-file link resolves, and no file is an orphan.
@@ -128,6 +133,8 @@ The state is on disk:
 - `sources.md` says which files are done.
 - `provenance/fold/<relative-path>.md` holds the accumulated folder knowledge.
 - `provenance/merges.md` holds what changed and why.
+- `provenance/links.md` holds the URL sweep — rows may still say `unchecked` until the verify pass; a resumed run never re-sweeps from zero, it continues the ledger.
+- `provenance/yield.md` holds the per-file tallies as they were recorded.
 
 On re-entry, read those three, announce where the run stands, and continue at the first unprocessed file. Do not rebuild a finished folder, and do not re-extract a file already represented unless a verification check failed.
 
