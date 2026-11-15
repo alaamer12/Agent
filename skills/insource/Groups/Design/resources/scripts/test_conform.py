@@ -145,6 +145,11 @@ class SlotsTest(unittest.TestCase):
         with self.assertRaises(conform.SpecError):
             conform.expand_slots("a5..2")
 
+    def test_range_must_end_in_a_number(self):
+        with self.assertRaises(conform.SpecError) as caught:
+            conform.expand_slots("b1..b5")
+        self.assertIn("must end in a number", str(caught.exception))
+
 
 class BomTest(unittest.TestCase):
     def setUp(self):
@@ -546,6 +551,158 @@ class ConformRunTest(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("one generated image file", stderr.getvalue())
 
+    def test_grid_override_replaces_the_bom_plan(self):
+        # The BOM says 2x2; --grid is the escape hatch for a sheet whose cells do not follow it.
+        make_sheet(self.sheet)
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = self.run_main("--bom", str(self.bom), "--slots", "avatar-01..04",
+                                 "--in", str(self.sheet), "--out", str(self.out),
+                                 "--grid", "2x4")
+        self.assertEqual(code, 0)
+        self.assertEqual(self.report()["master"]["grid"], [2, 4])
+
+    def test_rows_override_is_measured_against_the_image(self):
+        # --rows 2,4 on a 2x2 render: the override is accepted, then the second row is measured
+        # and does not show the four subjects the flag claims.
+        make_sheet(self.sheet)
+        with contextlib.redirect_stderr(io.StringIO()) as stderr:
+            code = self.run_main("--bom", str(self.bom), "--slots", "avatar-01..04",
+                                 "--in", str(self.sheet), "--out", str(self.out),
+                                 "--rows", "2,4")
+        self.assertEqual(code, 3)
+        self.assertIn("row 2 of the plan has 4", stderr.getvalue())
+
+
+class RowsPlanTest(unittest.TestCase):
+    """A sheet whose rows hold different numbers of subjects."""
+
+    def test_rows_plan_parses(self):
+        master = conform.parse_master("1536x1024 sheet rows 8,8,8,10")
+        self.assertEqual(master.row_counts, [8, 8, 8, 10])
+        self.assertEqual(master.capacity, 34)
+        self.assertTrue(master.banded)
+
+    def test_rows_plan_rejects_a_grid_or_a_gutter(self):
+        for text in ("1024x1024 sheet 4x4 rows 4,4", "1024x1024 sheet rows 4,4 gutter 8",
+                     "1024x1024 sheet rows 4,0"):
+            with self.assertRaises(conform.SpecError):
+                conform.parse_master(text)
+
+    def test_even_grid_refuses_a_rows_plan(self):
+        master = conform.parse_master("400x400 sheet rows 2,3")
+        with self.assertRaises(conform.SpecError) as caught:
+            conform.plan_boxes(master, 5)
+        self.assertIn("measured gutters", str(caught.exception))
+
+
+@unittest.skipUnless(HAVE_PIL, "pillow is not installed")
+class BandCutTest(unittest.TestCase):
+    """Cutting on the gutters an image actually has, instead of an even pitch."""
+
+    COLOURS = [(200, 30, 30), (30, 140, 60), (30, 60, 200), (180, 120, 20), (90, 40, 160)]
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.sheet = self.root / "staggered.png"
+        self.out = self.root / "out"
+        self.bom = self.root / "bom.md"
+        self.subjects = [
+            (20, 20, 180, 160), (185, 20, 380, 160),
+            (10, 220, 120, 380), (160, 220, 260, 380), (300, 220, 390, 380),
+        ]
+        image = Image.new("RGB", (400, 400), (255, 255, 255))
+        for index, box in enumerate(self.subjects):
+            image.paste(self.COLOURS[index], box)
+        image.save(self.sheet)
+        self.bom.write_text(
+            "| Slot | Master | Delivery | Status |\n|---|---|---|---|\n"
+            "| badge-01..05 | 400x400 sheet rows 2,3 | 48x48 1:1 png @1x | pending |\n",
+            encoding="utf-8",
+        )
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def boxes(self):
+        image = Image.open(self.sheet)
+        return conform.plan_cuts(image, conform.parse_master("400x400 sheet rows 2,3"),
+                                 5, conform.content_box(image))
+
+    def report(self):
+        return json.loads((self.out / "conform-report.json").read_text(encoding="utf-8"))
+
+    def test_cuts_land_between_subjects(self):
+        boxes, mode = self.boxes()
+        self.assertEqual(mode, "bands")
+        self.assertEqual(len(boxes), 5)
+        # Row 1's two subjects are 5px apart (180-185); an even split at x=200 would slice the
+        # second one. The band cut goes through the middle of the gap.
+        self.assertEqual(boxes[1][0], 182)
+        self.assertLess(boxes[1][0], 185)
+        self.assertGreater(boxes[1][0], 180)
+
+    def test_a_wrong_row_count_is_a_count_mismatch(self):
+        image = Image.open(self.sheet)
+        with self.assertRaises(conform.BandError) as caught:
+            conform.plan_cuts(image, conform.parse_master("400x400 sheet rows 2,3,3"), 8,
+                              conform.content_box(image))
+        self.assertIn("3 row(s)", str(caught.exception))
+        self.assertIn("2 content row band(s)", str(caught.exception))
+
+    def test_a_wrong_column_count_names_the_row(self):
+        image = Image.open(self.sheet)
+        with self.assertRaises(conform.BandError) as caught:
+            conform.plan_cuts(image, conform.parse_master("400x400 sheet rows 2,4"), 6,
+                              conform.content_box(image))
+        self.assertIn("row 2", str(caught.exception))
+
+    def test_rows_plan_writes_every_subject(self):
+        code = conform.main(["--bom", str(self.bom), "--slots", "badge-01..05",
+                             "--in", str(self.sheet), "--out", str(self.out)])
+        self.assertEqual(code, 0)
+        report = self.report()
+        self.assertEqual(report["cut"]["mode"], "bands")
+        self.assertEqual(report["master"]["rows"], [2, 3])
+        self.assertEqual([entry["slot"] for entry in report["files"]],
+                         ["badge-01", "badge-02", "badge-03", "badge-04", "badge-05"])
+        for index in range(1, 6):
+            with Image.open(self.out / f"badge-0{index}.png") as written:
+                self.assertEqual(written.size, (48, 48))
+                self.assertEqual(written.convert("RGBA").getpixel((24, 24))[:3],
+                                 self.COLOURS[index - 1])
+
+    def test_subset_cuts_its_own_cell(self):
+        code = conform.main(["--bom", str(self.bom), "--slots", "badge-05",
+                             "--in", str(self.sheet), "--out", str(self.out)])
+        self.assertEqual(code, 0)
+        with Image.open(self.out / "badge-05.png") as written:
+            self.assertEqual(written.convert("RGBA").getpixel((24, 24))[:3], self.COLOURS[4])
+
+    def test_even_grid_on_a_staggered_sheet_warns(self):
+        self.bom.write_text(
+            "| Slot | Master | Delivery | Status |\n|---|---|---|---|\n"
+            "| badge-01..05 | 400x400 sheet 3x2 | 48x48 1:1 png @1x | pending |\n",
+            encoding="utf-8",
+        )
+        code = conform.main(["--bom", str(self.bom), "--slots", "badge-01..05",
+                             "--in", str(self.sheet), "--out", str(self.out)])
+        self.assertEqual(code, 0)
+        warnings = " ".join(self.report()["warnings"])
+        self.assertIn("--bands", warnings)
+
+    def test_bands_flag_re_cuts_a_uniform_grid(self):
+        self.bom.write_text(
+            "| Slot | Master | Delivery | Status |\n|---|---|---|---|\n"
+            "| badge-01..05 | 400x400 sheet 3x2 | 48x48 1:1 png @1x | pending |\n",
+            encoding="utf-8",
+        )
+        code = conform.main(["--bom", str(self.bom), "--slots", "badge-01..05", "--bands",
+                             "--in", str(self.sheet), "--out", str(self.out)])
+        # 3x2 says five slots in a 3-wide grid, but the image is 2,3: band mode says so.
+        self.assertEqual(code, 3)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+

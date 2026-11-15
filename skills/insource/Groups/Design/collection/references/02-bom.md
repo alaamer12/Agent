@@ -126,24 +126,43 @@ Before trusting a BOM row, measure the render with `resources`' probe:
 python scripts/sheet_probe.py raw/avatars.png --grid 5x2 --delivery "128x128 1:1 webp @1x,2x"
 ```
 
-It reports content bounds, band counts, gap widths, per-cell subject sizes, empty cells and the
-delivery ceiling. If `ceiling` is smaller than `required_master`, the plan fails **before** writing
-prompts - fix the delivery spec or the sheet size then.
+It reports content bounds, the layout row by row, gutter widths, per-cell subject sizes, empty
+cells, the interior cut lines an even split would land on, and the delivery ceiling. If `ceiling`
+is smaller than `required_master`, the plan fails **before** writing prompts - fix the delivery
+spec or the sheet size then.
 
 Worked example (a real 1536×1024 RGBA sheet, five columns, two rows):
 
 ```
 content   [62, 167, 1475, 822]   margins left=62 top=167 right=61 bottom=202
-columns   5 bands, gaps [12, 12, 12, 12]
-rows      2 bands, gap [100]
+columns   5 bands, gaps [15, 15, 15, 16]
+rows      2 bands, gap [103]
+layout    regular - 10 subject(s), rows 5,5
 grid      5x2 cells about 283x328
-subjects  min 269x272, max 271x276
+subjects  min 269x275, max 271x277
 ceiling   269px square master
-delivers  64@1x,2x,3x,4x  96@1x,2x  128@1x,2x  192@1x  256@1x
+master    1536x1024 sheet 5x2
 ```
 
 Conclusion for the BOM: `128x128 @1x,2x` is valid (needs 256 ≤ 269); `@3x` is not. The uneven
 margins mean the cut must follow the content box, which is what `conform` does by default.
+
+### A sheet whose rows disagree
+
+A real catalog page is often not a grid: four rows holding 8, 8, 8 and 10 subjects, with the last
+row's subjects closer together. The probe reports it instead of inventing a grid:
+
+```
+layout    mixed - 34 subject(s), rows 8,8,8,10
+subjects  min 128x169, max 189x182
+master    1536x1024 sheet rows 8,8,8,10
+clips     8 interior cut line(s) of an even split land on content
+```
+
+`sheet rows ...` is the plan; conform cuts each row down the middle of its own measured gutters.
+An even `8x4` grid would slice ten subjects and produce 32 files for 34 slots. The full worked
+BOM: `examples/badge-catalog-bom.md`.
+
 
 ---
 
@@ -189,13 +208,22 @@ Every `bom/<page>.md` starts with what a later agent needs before reading the ta
 |---|---|---|
 | Slot | `hero-home`, `avatar-01..10` | range = one sheet row; ids become filename stems |
 | Role | free text | what the region needs it for |
-| Source | `generate sheet 5x2` / `generate single` / `reuse <path>` / `fahlwy` / `resources` | producer, not format |
-| Master | `WxH single` or `WxH sheet CxR [gutter N]` | required for generated rows, `-` otherwise |
+| Source | `generate sheet 5x2` / `generate single` / `sheet <path>` / `reuse <path>` / `fahlwy` / `resources` | producer, not format |
+| Master | `WxH single`, `WxH sheet CxR [gutter N]`, or `WxH sheet rows 8,8,8,10` | required for any row that is cut, `-` otherwise |
 | Delivery | `WxH [aspect] [format] [qN] [@DPRs]` | exactly what `conform` implements |
 | Status | `pending / shipped / reused / no-image` | closes the "is anything missing" question |
 
+`sheet rows` is for a master whose rows hold different subject counts. `conform` cuts it on the
+measured gutters, so it takes no `gutter` and no `CxR` - writing both is a spec error, not a hint.
+
 Both spec grammars are executed by `resources conform`; it reads this table directly. Do not write
 a private variant of them in a project - if the grammar is missing something, change it here.
+
+**An existing sheet is a BOM row too.** When the user already owns the pixels (a catalog page, a
+sprite sheet), the route is `sheet <path>` with the same Master and Delivery columns and no prompt:
+`conform` cuts and fits it exactly like a render. That is how a reference image becomes project
+assets without regenerating art that already exists.
+
 
 ---
 
@@ -220,6 +248,7 @@ Before leaving the plan:
 | Prompt asks for more detail than a cell can hold | master not planned | raise sheet size or make it a single |
 | Same avatar appears twice with different faces | no shared style anchor / sheet reused across sets | one canon, one anchor, one sheet per set |
 | Delivery files look soft | cell smaller than required master | raise master, lower DPR, or split sheets |
+| The cut slices subjects / 32 files for 34 slots | the sheet's rows hold different counts, planned as `CxR` | probe it; plan `WxH sheet rows 8,8,8,10` instead |
 | Icons appear as illustrations | classification skipped | route icons to `resources` |
 | A page's images never shipped | page absent from `BOM.md` | list every page, mark `no-images` explicitly |
 | Prompts and filenames disagree | slot id not used as the key | one id from BOM row to delivery file |

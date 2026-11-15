@@ -1,5 +1,6 @@
 ---
 name: assets
+version: 1.0.0
 description: >-
   Pipeline contract for a project's imagery: plan the bill of materials, generate the masters,
   conform them into delivery files. Routes the three steps to the skills that execute them -
@@ -47,6 +48,7 @@ pages marked `no-images`.
 | Write the prompts / keep the illustrations consistent | `collection` |
 | Generate the images | `generate` |
 | Cut this generated sheet into project files / normalise sizes and names | `resources` (conform) |
+| Cut a reference sheet I already own into project files (catalog page, sprite sheet) | `resources` (conform) - BOM row `sheet <path>`, no prompt |
 | Measure a sheet before cutting it | `resources` (`sheet_probe.py`) |
 | Check delivered edges and transparency by eye | `resources` (`contact_sheet.py`) |
 | Convert, optimize, rename, localize, inventory files | `resources` |
@@ -90,3 +92,4 @@ should be cut back to routing.
 | Filenames do not match the code | slot id renamed in one place only | fix the BOM row, regenerate the names; the BOM is the source |
 | A page has no images and nobody noticed | page missing from `BOM.md` | list it and mark `no-images` explicitly |
 | A generated sheet has 9 subjects for 10 slots | step 2 / seed drift | re-render; conform already refuses to guess |
+| 32 files for 34 slots, or cut crowns | plan: rows hold 8,8,8,10 but the BOM says `CxR` | probe it and plan `sheet rows 8,8,8,10`; conform cuts on the measured gutters |

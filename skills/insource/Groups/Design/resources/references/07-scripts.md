@@ -59,10 +59,13 @@ python scripts/sheet_probe.py raw/avatars.png --grid 5x2 --delivery "128x128 1:1
 python scripts/sheet_probe.py raw/avatars.png --json
 ```
 
-Measures a generated sheet before it is cut: content bounds and margins, the number of subject
-bands per axis and the gap widths, per-cell subject boxes, empty cells, the largest square master
-the subjects can supply, and which delivery sizes at which DPRs that ceiling supports. Exit 0 even
-when the sheet is irregular - the notes are the finding. Needs pillow.
+Measures a generated sheet before it is cut: content bounds and margins, the layout row by row
+(per-row column counts, so a staggered or mixed sheet is described honestly instead of as one
+column), the gap widths, which interior cut lines an even split would land on, per-cell subject
+boxes, empty cells, the largest square master the subjects can supply, and which delivery sizes at
+which DPRs that ceiling supports. It ends with the master spec to paste into the BOM:
+`1536x1024 sheet 5x2` or `1536x1024 sheet rows 8,8,8,10`. Exit 0 even when the sheet is irregular -
+the notes are the finding. Needs pillow.
 
 ## conform.py
 
@@ -72,6 +75,8 @@ python scripts/conform.py --bom bom/home.md --slots hero-home --in raw/hero-home
 python scripts/conform.py --bom bom/home.md --slots avatar-01..10 --in raw.png --out out --dry-run
 python scripts/conform.py --in sheet.png --out out --grid 4x4 --gutter 24 --cell 512 \
     --slots a,b --delivery "128x128 1:1 webp q82 @1x,2x"
+python scripts/conform.py --in sheet.png --out out --rows 8,8,8,10 \
+    --slots a,b --delivery "96x96 1:1 webp @1x"
 ```
 
 Cuts the content box into the BOM's grid, trims each cell to its subject, pads to the delivery
@@ -79,10 +84,22 @@ aspect without distorting, writes the DPR ladder with the slot's format and qual
 each file and writes `conform-report.json`. `--key-bg auto` (default for sheets) keys out a flat
 border-connected background. A `single` master uses the whole canvas and keeps its background:
 trim and keying are off unless `--trim` / `--key-bg` are passed; an aspect mismatch is padded and
-warned about. `--in` is always one image file. `--no-trim`, `--pad-color`, `--allow-upscale`,
-`--allow-empty` and `--full-canvas` are the escape hatches. Exit 0 ok, 2 bad spec, 3 count/empty
-mismatch, 4 verify failure. Method, cut-line rule and failure modes: `08-conform.md`. Needs pillow
-for image work; `--dry-run` does not.
+warned about. `--in` is always one image file.
+
+Two cut modes: the even **grid** (default) and the measured **bands** - `--bands`, or implied by a
+`sheet rows 8,8,8,10` master / `--rows`, which cuts each row down the middle of its own gutters and
+is the only way to cut a sheet whose rows hold different counts. In grid mode the run warns when an
+interior cut line lands on content. A subset (`--slots a4..a6`) cuts those cells, not the first
+three. `--no-trim`, `--pad-color`, `--allow-upscale`, `--allow-empty` and `--full-canvas` are the
+escape hatches. Exit 0 ok, 2 bad spec, 3 count/empty/band mismatch, 4 verify failure. Method,
+cut-line rule and failure modes: `08-conform.md`. Needs pillow for image work; `--dry-run` does not.
+
+## sheet_geometry.py
+
+Not a command: the masks, bands, layout and cut boxes that `sheet_probe.py` and `conform.py` both
+import, so the report and the cut cannot disagree about one image. Change a measurement rule there,
+never in two places. Needs pillow.
+
 
 ## contact_sheet.py
 

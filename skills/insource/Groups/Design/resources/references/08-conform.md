@@ -13,13 +13,14 @@ BOM row  ──►  generate      ──►  probe + conform        ──►  d
 The slot id is the key in all four places: the BOM row, the generation prompt, the raw render and
 the delivered file. Nothing is re-derived by hand.
 
-Three scripts:
+Four files, three of them runnable:
 
 | Script | Answers |
 |---|---|
-| `sheet_probe.py` | What is on this sheet - content bounds, bands, gaps, cell sizes, how large a master the subjects can supply? |
+| `sheet_probe.py` | What is on this sheet - content bounds, row-by-row layout, gutters, cut lines, cell sizes, how large a master the subjects can supply? |
 | `conform.py` | Cut it, fit it, name it, verify it against the BOM. |
 | `contact_sheet.py` | Do the delivered files look right - clean alpha edges, no halos, no leftover background? |
+| `sheet_geometry.py` | Not run: the masks, bands and cut boxes the two above share, so the report and the cut cannot disagree. |
 
 ---
 
@@ -32,30 +33,39 @@ python scripts/sheet_probe.py raw/avatars.png --grid 5x2 --delivery "128x128 1:1
 ```text
 size      1536x1024 RGBA alpha=yes background=(2, 2, 3)
 content   [62, 167, 1475, 822]  margins left=62 top=167 right=61 bottom=202
-columns   5 band(s) gaps [12, 12, 12, 12]
-rows      2 band(s) gaps [100]
+columns   5 band(s) gaps [15, 15, 15, 16]
+rows      2 band(s) gaps [103]
+layout    regular - 10 subject(s), rows 5,5
 grid      5x2 cells about 283x328
-subjects  10 found, min 269x272, max 271x276
+subjects  10 found, min 269x275, max 271x277
 ceiling   269px square master
 delivers  64@1x,2x,3x,4x  96@1x,2x  128@1x,2x  192@1x  256@1x
+master    1536x1024 sheet 5x2
 note      left/right margins differ (62 vs 61): cutting the canvas would shift the grid
 ```
 
-Read it as four decisions:
+Read it as five decisions:
 
-1. **Do the bands match the plan?** 5 columns and 2 rows for a 5x2 grid means every subject is
+1. **Is it one grid at all?** `layout regular` with `rows 5,5` means the rows agree, so `5x2` is a
+   true description. `staggered` or `mixed` means they do not - §3b.
+2. **Do the bands match the plan?** 5 columns and 2 rows for a 5x2 grid means every subject is
    separated by background. A band count lower than the grid means two subjects touch - an even
    cut would slice one of them, so cut on the measured bands or regenerate.
-2. **Is the grid regular?** Even gaps mean an even split is safe. `(uneven)` means the generator
-   spaced subjects unevenly; use the measured band starts to place cuts.
-3. **How large is a subject?** `ceiling` is the smallest subject side, so it is the largest square
+3. **Is the grid regular?** Even gaps mean an even split is safe. `(uneven)` and the `clipped_cuts`
+   list say which interior cut lines land on content; those are the ones that would clip.
+4. **How large is a subject?** `ceiling` is the smallest subject side, so it is the largest square
    master the sheet can supply **without upscaling**. Here 269px: `128x128@2x` (needs 256) fits,
    `128x128@3x` (needs 384) does not.
-4. **Where is the content?** Margins of 62/61/167/202 mean the subject grid does not fill the
+5. **Where is the content?** Margins of 62/61/167/202 mean the subject grid does not fill the
    canvas. That single fact decides the cut mode below.
 
-`--json` gives the same report as data: `content_box`, `columns.starts/ends/gaps`, per-cell
-`subject` boxes, `empty_cells`, `master_ceiling`, `delivery_ceiling.fits`.
+`--json` gives the same report as data: `content_box`, `layout` (kind, per-row counts, master
+spec, clipped cut lines), `columns.starts/ends/gaps`, per-cell `subject` boxes, `empty_cells`,
+`master_ceiling`, `delivery_ceiling.fits`.
+
+`master` is the line to paste into the BOM's Master column. It comes from the pixels, not from
+you: `1536x1024 sheet 5x2`, or `1536x1024 sheet rows 8,8,8,10` when the rows disagree.
+
 
 ---
 
@@ -73,9 +83,20 @@ lands **inside it**. Dividing the content box (62-1475) instead puts every cut l
 | content box (default) | margins absorbed, every cut line in a gutter |
 | `--full-canvas` | classic equal-cell split; correct only when the sheet has no margins or they are symmetric and even |
 | `--cell N` | fixed pitch from the region origin; for sheets whose cell size is known exactly |
+| `--bands` | cut down the middle of the gutters the image actually has (§3b) |
 
 Remainder pixels are distributed, never dropped: a 100px-wide region split into 3 gives 33, 34,
 33. A one-pixel difference between cells is irrelevant because every cell is trimmed and refit.
+
+The run checks its own cuts. Before writing, every interior boundary of the even grid is sampled
+against the content mask; boundaries that land on a subject are listed as a warning and the report
+still `ok`, because the trim may recover it - but a boundary that lands on content is the signal to
+switch to `--bands`:
+
+```text
+warning   1 of 2 interior cut line(s) of the even grid land on content (x=200); the gutters are
+          not even - cut on the measured bands with `--bands` or plan `sheet rows ...`
+```
 
 A set that needs more than one render is written as one BOM row per sheet (`avatar-01..04`,
 `avatar-05..08`); each row is its own run. One BOM row never spans two images.
@@ -84,6 +105,7 @@ A set that needs more than one render is written as one BOM row per sheet (`avat
 the neighbouring cell may hold the rest of that subject. Touching the sheet's outer boundary is
 not warned about - in content-box mode the outermost cells start at the subject's own edge by
 construction.
+
 
 ---
 
@@ -95,20 +117,28 @@ python scripts/conform.py --bom bom/home.md --slots hero-home --in raw/hero-home
 python scripts/conform.py --bom bom/home.md --slots avatar-01..10 --in raw.png --out out/ --dry-run
 python scripts/conform.py --in sheet.png --out out/ --grid 4x4 --gutter 24 --cell 512 \
     --slots a,b,c --delivery "128x128 1:1 webp q82 @1x,2x"
+python scripts/conform.py --in sheet.png --out out/ --grid 4x4 --bands \
+    --slots a,b,c --delivery "128x128 1:1 webp q82 @1x,2x"
 ```
 
 - **`--group avatar`** selects every BOM slot whose id is `avatar` or starts with `avatar-`.
 - **`--slots avatar-01..10`** selects explicitly; ranges keep zero padding (`avatar-01`, not
-  `avatar-1`). Both forms accept comma lists.
+  `avatar-1`) and the range must end in a number (`avatar-01..10`, not `avatar-01..avatar-10`).
+  Both forms accept comma lists.
 - **One run = one master.** `--in` is one image file. All selected slots must share its master
   plan; a BOM with two different sheet sizes, or a sheet plus a single, is two runs.
-- Row-major order: cell 1 is top-left, cell N is bottom-right.
+- Row-major order: cell 1 is top-left, cell N is bottom-right. A **subset** cuts its own cells:
+  `--slots avatar-05..08` produces cells 5-8, not the first four - every slot on the master owns a
+  cell, including the ones already shipped.
 - `--dry-run` prints the plan without opening the image or writing anything - safe in CI and
-  before spending a re-render.
+  before spending a re-render. In band mode the boxes are an even estimate and the report says so
+  (`cut.estimated`); the real gutters are measured at run time.
 
 Rows the BOM marks `shipped`, `reused`, `no-image`, `done` or `skip` are skipped, as are rows with
 no master spec (stock photos, CSS icons, SVG logos). `--force` re-does shipped slots. Without a
-BOM, there is no master to read: pass `--grid COLSxROWS` or the run stops instead of guessing.
+BOM, there is no master to read: pass `--grid COLSxROWS` or `--rows C1,C2,...` or the run stops
+instead of guessing.
+
 
 ### 3a. Single masters
 
@@ -128,7 +158,65 @@ finished composition, not a cell:
 Negative space and backgrounds are part of a hero's layout; trimming or keying them by default
 would ship a different picture than the one approved.
 
+### 3b. Staggered and mixed sheets: cut on the gutters
+
+A sheet whose rows hold different numbers of subjects has **no grid**. The global x-projection
+smears across all rows, so the probe reports one column band even though every row holds eight or
+ten subjects. The honest reading is row by row, and that is what the probe does:
+
+```text
+layout    mixed - 34 subject(s), rows 8,8,8,10
+subjects  34 found, min 128x169, max 189x182
+master    1536x1024 sheet rows 8,8,8,10
+clips     8 interior cut line(s) of an even split land on content (x=213, x=399, x=584, x=770)
+```
+
+Here is what the two cuts do to the same real catalog - 34 badges, `rows 8,8,8,10`:
+
+| | even `8x4` grid | `rows 8,8,8,10` |
+|---|---|---|
+| capacity | 32 cells for 34 slots - refuses | 34 |
+| cut line | 186px pitch against 189px subjects, 8px gutters | middle of each measured gutter |
+| result | clipped crowns, shifted rows, subjects reaching every interior edge | 34 clean files, one warning |
+
+The plan, and the run:
+
+```bash
+python scripts/conform.py --bom bom/badges.md --group badge \
+    --in refs/badges.png --out assets/badges
+```
+
+The same cut without a BOM:
+
+```bash
+python scripts/conform.py --in refs/badges.png --out out/ --rows 8,8,8,10 \
+    --slots badge-01..34 --delivery "96x96 1:1 webp q82 @1x"
+```
+
+How it cuts: row bands are measured first, then each row's own column bands, and every boundary is
+the midpoint of the gutter between two bands - outer edges stay on the content box. Trimming then
+has a margin, so "subject reaches the cell edge" means a real clip rather than a flush subject.
+
+- **`--bands`** does the same for a uniform sheet: `--grid 8x3 --bands` measures the gutters
+  instead of dividing evenly. Use it whenever the probe reports `(uneven)` or `clipped_cuts`.
+- **A rows plan implies band cutting.** It also refuses `gutter`, `CxR` and `--cell`, because none
+  of them can describe rows that do not share a pitch.
+- **`--rows`/`--grid` override the BOM's plan for one run**, not just supply it when absent. The
+  override is still measured, so a flag that disagrees with the image stops at the count check below
+  rather than cutting the wrong cells.
+- **Count mismatch stops the run** with exit **3**, naming the row:
+
+  ```text
+  conform: row 2 of the plan has 4 subject(s) but the image shows 3 column band(s) in that row;
+           subjects may be touching - regenerate with more spacing, or fix the plan
+  ```
+
+  Band mode has no "empty cell": a row that does not show its count is a mismatch, not a hole.
+- **A rows plan cannot be re-timed.** The reference is the only master, so if the smallest subject
+  is below the delivery's required master, lower the DPR - not the quality (§6).
+
 ---
+
 
 ## 4. Trimming, empty cells and the count check
 
@@ -239,9 +327,10 @@ the same facts as data; the script never edits the assets.
   "bom": "bom/home.md",
   "sheet": "raw/avatars.png",
   "group": "avatar",
-  "master": {"size": [1536, 1024], "kind": "sheet", "grid": [5, 2], "gutter": 0,
-             "cell": [307, 512], "boxes": [[62, 167, 345, 495]]},
+  "master": {"size": [1536, 1024], "kind": "sheet", "grid": [5, 2], "rows": null,
+             "gutter": 0, "cell": [307, 512], "boxes": [[62, 167, 345, 495]]},
   "region": [62, 167, 1475, 822],
+  "cut": {"mode": "grid", "rows": [5, 5]},
   "key": {"applied": false, "reason": "sheet already has transparency"},
   "expected": 10,
   "empty_cells": [],
@@ -254,8 +343,13 @@ the same facts as data; the script never edits the assets.
 }
 ```
 
+`cut.mode` is `grid` or `bands`; `cut.rows` is the per-row column counts actually used, and
+`cut.estimated` marks a dry-run's estimate. `master.rows` is the `sheet rows ...` plan, `null` for
+`CxR`.
+
 `--json` prints it instead of the table. Exit codes: **0** ok, **2** bad spec or image, **3**
-count/empty mismatch, **4** verification failure.
+count/empty mismatch (including a band count that disagrees with the plan), **4** verification
+failure.
 
 ---
 
@@ -264,7 +358,10 @@ count/empty mismatch, **4** verification failure.
 | Symptom | Cause | Fix |
 |---|---|---|
 | Last column is cut in half | canvas divided instead of content | default mode already fixes it; drop `--full-canvas` |
-| One slot contains two half-faces | subjects touch; even grid splits them | regenerate with more spacing, or cut on the probe's measured band starts |
+| One slot contains two half-faces | subjects touch; even grid splits them | regenerate with more spacing, or cut on the bands: `--bands` |
+| `N of M interior cut line(s) ... land on content` | the gutters are not even | `--bands`, or write the measured `sheet rows ...` plan |
+| 32 cells for 34 slots / rows shifted by one subject | the rows hold different counts (`8,8,8,10`) | probe it and plan `sheet rows 8,8,8,10` instead of `CxR` |
+| `row 2 of the plan has 4 subject(s) but the image shows 3` | subjects touch in that row, or the plan is wrong | regenerate with spacing, or fix the plan; exit 3 |
 | `N of M cells are empty` | the render has fewer subjects than the BOM | re-render, fix the BOM, or `--allow-empty` and fill the hole separately |
 | `subject reaches the cell edge` warning | subject spans a cut line | re-render; if the design truly bleeds, cut with explicit `--full-canvas --cell` |
 | `cell ... smaller than the required master` | the sheet cannot supply that DPR | lower the DPR, raise the sheet size, or split into more sheets |
@@ -274,14 +371,20 @@ count/empty mismatch, **4** verification failure.
 | Non-square cells | expected | cells are slice regions, not asset aspects; every subject is trimmed and refit |
 | `a single master holds one slot, but N matched` | `--group` matched several single rows | one run per single: `--slots <id>` |
 | `single master ... padded, not cropped` warning | the render's aspect differs from the delivery | regenerate at the delivery aspect, or crop deliberately with `transform.py` first |
-| `conform needs a master plan` | no BOM master and no `--grid` | conform from the BOM, or pass `--grid COLSxROWS` |
+| `conform needs a master plan` | no BOM master, no `--grid`, no `--rows` | conform from the BOM, or pass `--grid COLSxROWS` / `--rows C1,C2,...` |
+| `slot range ... must end in a number` | wrote `avatar-01..avatar-10` | `avatar-01..10` |
 | `fallback notes belong in the economy check` | Master cell holds `(fallback: ...)` | move the note out; conform parses Master strictly |
 
 ## 10. Limits
 
 - A subject that is **partially outside** the canvas cannot be recovered; the probe's `columns`
   band count is the early signal.
-- **Uneven, hand-made collages** need explicit `--grid`/`--cell` cuts; a grid is a grid.
+- **Hand-made collages** are cut on their gutters, not on a grid: probe, then `rows` or `--bands`.
+  What geometry still cannot do is invent a grid the image does not have - a sheet whose rows
+  overlap, or whose subjects touch with no gutter, is re-rendered.
+- **Very large sheets** are measured on a projection capped at 2048px on the long side, so a
+  gutter narrower than about one downscaled pixel is invisible. Below that size nothing is
+  downscaled.
 - **Non-flat backgrounds** are not keyed out (see §5).
 - **Overlapping subjects** cannot be separated by geometry - that is a segmentation problem.
 - Conform never decides what a page *needs*; that is the BOM's job, written by `collection`.

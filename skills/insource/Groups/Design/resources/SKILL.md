@@ -1,6 +1,7 @@
 ---
 name: resources
-description: 'Resource files for any platform: images, icons, fonts, audio, video, documents, color values - the files, not the systems that serve them. Fourteen tools: recolor (family or picked pixel), convert/fix-extension, rotate/flip/scale/resize/crop, favicon/app icon sets, OG images, splash screens, optimization with before/after sizes, CDN localization (browser-UA fonts, sniffing), inventory (duplicates, unused, external URLs, sizes), CSS Color 4 + WCAG contrast, a Bun.Image variants/ThumbHash script, and conform - probe a generated sheet, split it into slots fitted to a BOM delivery spec (size, aspect, DPR), review the files on a checkerboard with alpha-edge facts, then verify each one. Audio/video use ffmpeg; renames are shell moves + reference updates. Rules: names, brand-vs-content, formats by purpose, ask-first splash choices. Triggers: favicon, icons, splash, OG, recolor, convert, optimize, localize, color, rename, unused resources, conform, split a generated image, sprite sheet, probe sheet.'
+version: 1.0.0
+description: 'Resource files for any platform: images, icons, fonts, audio, video, documents, color values - the files, not the systems that serve them. Fourteen tools: recolor, convert/fix-extension, rotate/flip/scale/resize/crop, favicon/app icon sets, OG images, splash screens, optimization with before/after sizes, CDN localization, inventory (duplicates, unused, external URLs), CSS Color 4 + WCAG contrast, a Bun.Image variants/ThumbHash script, and conform - probe a generated sheet (row-by-row layout, cut lines, ceiling), cut it into slots on an even grid or the measured gutters, fit each to its BOM delivery spec, review on a checkerboard with alpha-edge facts, verify. Audio/video use ffmpeg; renames are shell moves + reference updates. Rules: names, brand-vs-content, formats by purpose, ask-first splash choices. Triggers: favicon, icons, splash, OG, recolor, convert, optimize, localize, color, rename, unused resources, conform, split a generated image, sprite sheet, staggered sheet, probe sheet.'
 when_to_use: The user asks to create, convert, transform, recolor, organize, rename, localize or optimize project resources (images, icons, fonts, video, splash/loading screens, favicons, OG images), to split and fit generated images to their delivery spec, or to audit a resource folder for duplicates and unused files. Also /resources.
 argument-hint: "[the resource, folder or task - icons, favicon, splash, og, optimize, localize, inventory, rename, recolor, convert, transform, conform]"
 ---
@@ -46,8 +47,8 @@ them by looking at the folder.
 | Audit assets: duplicates, unused, external URLs | `scripts/inventory.py` | `--root . --assets assets public` |
 | Convert/compare colors across CSS Color 4 spaces | `scripts/color.py` | `"#3366FF" --to oklch` · `--contrast A B` · `--mix A B --space oklch` |
 | Bun projects: variants + ThumbHash placeholders (built-in, zero deps) | `scripts/bun-image.ts` | `bun run bun-image.ts in.png --out-dir out --variants 320,640 --placeholder` |
-| Conform a generated sheet or single master into slot files fitted to the BOM | `scripts/conform.py` | `--bom bom/page.md --group avatar --in raw/avatars.png --out assets/avatars` · `--slots hero-home --in raw/hero-home.png` |
-| Measure a generated sheet before cutting it | `scripts/sheet_probe.py` | `sheet.png --grid 5x2 --delivery "128x128 1:1 webp @1x,2x"` · `--json` |
+| Conform a generated sheet or single master into slot files fitted to the BOM | `scripts/conform.py` | `--bom bom/page.md --group avatar --in raw/avatars.png --out assets/avatars` · `--slots hero-home --in raw/hero-home.png` · `--rows 8,8,8,10` |
+| Measure a generated sheet before cutting it: content, row-by-row layout, cut lines, ceiling | `scripts/sheet_probe.py` | `sheet.png --grid 5x2 --delivery "128x128 1:1 webp @1x,2x"` · `--json` |
 | Review delivered slots on a checkerboard, with alpha-edge facts | `scripts/contact_sheet.py` | `assets/avatars --out review.png --skip-density` · `--json` |
 
 Full flags, exit codes and examples: `references/07-scripts.md`. Dependencies, installed **in the
@@ -123,15 +124,18 @@ There is no script per medium - the rules are fixed across media; guidance and b
 A generated sheet arrives as a grid of subjects (ten avatars in one 2K render). **Probe** it, **conform**
 it, then **review** the files the project ships:
 
-- `sheet_probe.py` measures before anything is cut: content bounds and margins, how many subject
-  bands each axis really has, gap widths, per-cell subject boxes, empty cells, and the largest
-  master the subjects can supply. Its delivery ceiling is what makes a BOM honest - a 269px subject
-  supports `128@2x`, not `128@3x`.
+- `sheet_probe.py` measures before anything is cut: content bounds and margins, the layout row by row
+  (a staggered sheet has no single grid), the gutters, which interior cut lines of an even split land
+  on content, per-cell subject boxes, empty cells, and the largest master the subjects can supply. It
+  ends with the master spec to paste into the BOM - `1536x1024 sheet rows 8,8,8,10`. Its delivery
+  ceiling is what makes a BOM honest: a 269px subject supports `128@2x`, not `128@3x`.
 - `conform.py` splits each cell, trims dead margin, pads to the target aspect (never squash it),
   resizes once at the largest needed size, emits the DPR ladder, names by slot, then verifies every
   file and writes `conform-report.json`. Cut lines go through the **content box**, not the canvas,
-  so uneven margins cannot clip the last column. A `single` master is one slot: used whole (no
-  content-box cut, trim or keying unless requested), then fitted, laddered and verified the same way.
+  so uneven margins cannot clip the last column; `--bands` cuts down the middle of the measured
+  gutters, and a `sheet rows 8,8,8,10` plan does that per row. A `single` master is one slot: used
+  whole (no content-box cut, trim or keying unless requested), then fitted, laddered and verified the
+  same way.
 - `contact_sheet.py` composites the delivered files on a checkerboard and measures their alpha
   edges. Transparency is invisible against white: a sheet is how a halo, an opaque corner or a
   clipped subject becomes visible, and the per-file facts say whether the background was keyed at
@@ -141,9 +145,11 @@ it, then **review** the files the project ships:
   spec (size, aspect, format, quality, DPR) written by `collection`. Encoding and quality stay with
   `optimize.py` - conform computes the widths and hands them over; it does not own a second quality
   vocabulary. BOM format: `collection`'s template (one schema owner, linked not copied).
-- **Never invent geometry.** Grid and cell size come from the BOM. Without a BOM, `--grid/--cell/--gutter`
-  is required. `sheet_probe.py` reports uneven gutters; conform cuts the grid the BOM declares, so an
-  irregular sheet is a re-render or an explicit `--cell`, never a guess.
+- **Never invent geometry.** Grid and cell size come from the BOM. Without a BOM, `--grid/--cell` or
+  `--rows` is required. When the sheet's gutters are not even, the run says so and points at
+  `--bands` instead of cutting through subjects; when the image does not show the rows or columns the
+  plan claims, it stops with the counts rather than guessing.
+
 - **Never distort, never silently upscale.** Mismatched aspect is padded (transparent or `--pad-color`);
   a cell smaller than the required master is an error unless `--allow-upscale`.
 - **Count mismatch stops the run.** If detection finds 9 subjects where the BOM expects 10, it reports

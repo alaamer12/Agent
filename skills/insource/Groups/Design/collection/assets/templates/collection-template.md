@@ -24,13 +24,16 @@
 |---|---|---|---|---|---|
 | `<hero-home>` | <hero illustration, right of headline> | generate single | `<1600x900 single>` | `<800x450 16:9 avif q60 @1x,2x>` | <pending> |
 | `<avatar-01..10>` | <testimonial personas> | generate sheet 5x2 | `<1536x1024 sheet 5x2 gutter 0>` | `<128x128 1:1 webp q82 @1x,2x>` | <pending> |
+| `<badge-01..34>` | <achievement badges from the client's catalog> | sheet `refs/badges.png` | `<1536x1024 sheet rows 8,8,8,10>` | `<96x96 1:1 webp q82 @1x>` | <pending> |
 | `<logo>` | <brand mark, header> | reuse `brand/logo.svg` | — | `<240x64 svg>` | <shipped> |
 | `<step-3>` | <permissions step> | none - the sheet UI is the illustration | — | — | <no-image> |
 | `<photo-teaser>` | <pricing card photo> | fahlwy | — | `<640x360 16:9 jpeg q80 @2x>` | <pending> |
 
-<Only `generate` rows get a prompt block and a master spec. Everything else is listed so the next
-agent does not invent artwork for it. Close with the honest total: "N slots, M files shipped,
-nothing pending" / "Pending: <slots>". Statuses: pending / shipped / reused / no-image.>
+<Any row with a Master is cut by `conform`; generated rows also get a prompt block. `sheet rows
+8,8,8,10` is for a master whose rows hold different counts - only measurable, never guessed. List
+everything else so the next agent does not invent artwork for it. Close with the honest total:
+"N slots, M files shipped, nothing pending" / "Pending: <slots>". Statuses: pending / shipped /
+reused / no-image.>
 
 ## Shared Style (Style DNA - verbatim in every prompt)
 
@@ -69,9 +72,11 @@ A violation here is a judgment call, not a defect.
 | Slot | Delivery x max DPR | Required master | Sheet cell | Valid? | Fallback |
 |---|---|---|---|---|---|
 | `<avatar-01..10>` | `<128px x 2>` | `<256x256>` | `<283x328>` | <yes> | <2x2 sheets / singles> |
+| `<badge-01..34>` | `<96px x 1>` | `<96x96>` | `<128x169>` (smallest subject) | <yes> | <none: reference is the only master> |
 
-<required_master = ceil(delivery px x max DPR); cell = (sheet px - gutters) / cols. Measure an
-existing render with `resources`' `sheet_probe.py` before trusting this table.>
+<required_master = ceil(delivery px x max DPR); cell = (sheet px - gutters) / cols, or the smallest
+measured subject for a `rows` plan. Measure an existing render with `resources`' `sheet_probe.py`
+before trusting this table.>
 
 ## Prompts - generated slots only (regenerate-only-if-needed)
 
@@ -107,5 +112,6 @@ python scripts/contact_sheet.py <delivery folder> --out review/<page>.png --skip
 ```
 
 Conform trims each sheet cell or uses a single master whole, fits the delivery aspect, writes the
-DPR ladder and verifies every file. The review sheet proves the edges by eye; the conform report
-proves the geometry. Prompts, generation and conform must all use the same slot ids.
+DPR ladder and verifies every file. A `rows` plan needs no extra flag - conform sees it in the
+Master column and cuts on the measured gutters. The review sheet proves the edges by eye; the
+conform report proves the geometry. Prompts, generation and conform must all use the same slot ids.

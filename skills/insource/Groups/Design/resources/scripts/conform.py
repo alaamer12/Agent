@@ -1,16 +1,25 @@
 """Conform a generated master into the delivery slot files a project ships.
 
 One render often carries several subjects - ten avatars inside one 2K image. This script reads the
-bill of materials (BOM) written by the `collection` skill, slices the sheet into its grid cells,
-fits each cell to its slot's delivery spec without distorting it, writes the DPR ladder with the
-slot's format and quality, and then verifies every file it produced. A `single` master (a hero, a
-section background) is one slot: used whole, fitted, laddered and verified the same way.
+bill of materials (BOM) written by the `collection` skill, slices the master into its cells, fits
+each cell to its slot's delivery spec without distorting it, writes the DPR ladder with the slot's
+format and quality, and then verifies every file it produced. A `single` master (a hero, a section
+background) is one slot: used whole, fitted, laddered and verified the same way.
+
+Two ways to cut a sheet:
+
+- **even grid** (`sheet 5x2`) - divide the content box into equal cells. Correct while the gutters
+  are regular; the run warns when an interior cut line lands on content.
+- **measured bands** (`sheet rows 8,8,8,10`, or `--bands`) - cut down the middle of the gutters the
+  image actually has. Required when the rows hold different numbers of subjects, or when an even
+  pitch would slice one.
 
 Usage:
     python scripts/conform.py --bom bom/home.md --group avatar --in raw/avatars.png --out assets/avatars
+    python scripts/conform.py --bom bom/home.md --group badge --in raw/badges.png --out assets/badges
     python scripts/conform.py --bom bom/home.md --slots hero-home --in raw/hero-home.png --out assets/home
     python scripts/conform.py --bom bom/home.md --slots avatar-01..10 --in raw.png --out out --dry-run
-    python scripts/conform.py --in sheet.png --out out --grid 4x4 --cell 512 --gutter 24 \
+    python scripts/conform.py --in sheet.png --out out --rows 8,8,8,10 \
         --slots a,b --delivery "128x128 1:1 webp q82 @1x,2x"
 
 Requires: pillow, for the image work only. Parsing and `--dry-run` are standard library.
@@ -25,6 +34,18 @@ import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from sheet_geometry import (  # noqa: E402
+    BandError,
+    band_boxes,
+    clipped_cuts,
+    content_box,
+    content_mask,
+    has_alpha,
+    trim_box,
+)
 
 FORMATS = ("png", "jpeg", "jpg", "webp", "avif")
 ALIASES = {
@@ -76,15 +97,26 @@ class Master:
     rows: int = 1
     gutter: int = 0
     cell: int | None = None
+    # A sheet whose rows hold different numbers of subjects: one column count per row.
+    row_counts: list | None = None
 
     @property
     def capacity(self):
+        if self.row_counts:
+            return sum(self.row_counts)
         return self.cols * self.rows
+
+    @property
+    def banded(self):
+        """True when this master must be cut on measured gutters, not on an even grid."""
+        return bool(self.row_counts)
 
     def cell_size(self):
         """Smallest cell the grid yields - the conservative size for feasibility checks."""
         if self.cell:
             return self.cell, self.cell
+        if self.row_counts:
+            return self.width // max(self.row_counts), self.height // len(self.row_counts)
         usable_w = self.width - (self.cols - 1) * self.gutter
         usable_h = self.height - (self.rows - 1) * self.gutter
         if usable_w <= 0 or usable_h <= 0:
@@ -93,6 +125,7 @@ class Master:
                 f"{self.cols}x{self.rows}"
             )
         return usable_w // self.cols, usable_h // self.rows
+
 
 
 @dataclass
@@ -119,7 +152,9 @@ class Result:
     expected: int = 0
     region: list = field(default_factory=list)
     key: dict = field(default_factory=dict)
+    cut: dict = field(default_factory=dict)
     empty_cells: list = field(default_factory=list)
+
     files: list = field(default_factory=list)
     skipped: list = field(default_factory=list)
     warnings: list = field(default_factory=list)
@@ -229,7 +264,7 @@ def _parse_dprs(text):
 
 
 def parse_master(text):
-    """Parse `2048x2048 sheet 4x4 gutter 24` or `1600x900 single` into a Master."""
+    """Parse `2048x2048 sheet 4x4 gutter 24`, `1536x1024 sheet rows 8,8,8,10` or `1600x900 single`."""
     text = _clean(text)
     if not text:
         return None
@@ -250,6 +285,9 @@ def parse_master(text):
         elif token == "cell" and index + 1 < len(tokens):
             master.cell = int(tokens[index + 1])
             index += 2
+        elif token == "rows" and index + 1 < len(tokens):
+            master.row_counts = _parse_row_counts(tokens[index + 1], text)
+            index += 2
         elif re.fullmatch(r"\d+x\d+", token) and master.kind == "sheet":
             master.cols, master.rows = (int(part) for part in token.split("x"))
             index += 1
@@ -258,11 +296,33 @@ def parse_master(text):
                     "Master cell" if token.startswith("(") else "")
             raise SpecError(
                 f"unrecognised master token {tokens[index]!r} in {text!r}: expected "
-                f"WxH [single|sheet CxR] [gutter N] [cell N]{hint}"
+                f"WxH [single|sheet CxR|sheet rows C1,C2,...] [gutter N] [cell N]{hint}"
             )
+    if master.row_counts and master.cols * master.rows > 1:
+        raise SpecError(
+            f"master spec has both a grid and per-row counts: {text!r}; `sheet rows 8,8,8` "
+            "already says the grid, so use one form"
+        )
+    if master.row_counts and master.gutter:
+        raise SpecError(
+            f"master spec has a gutter with per-row counts: {text!r}; a rows plan is cut on the "
+            "measured gutters, so a fixed gutter means nothing - use `sheet CxR gutter N` instead"
+        )
     if master.kind == "sheet" and master.capacity < 1:
         raise SpecError(f"sheet master needs a grid: {text!r}")
     return master
+
+
+def _parse_row_counts(token, text):
+    """`8,8,8,10` -> [8, 8, 8, 10], one positive column count per row."""
+    try:
+        counts = [int(part) for part in token.strip(",").split(",")]
+    except ValueError:
+        raise SpecError(f"rows must be comma-separated column counts: {token!r} in {text!r}")
+    if not counts or any(count < 1 for count in counts):
+        raise SpecError(f"every row needs at least one column: {token!r} in {text!r}")
+    return counts
+
 
 
 def expand_slots(spec):
@@ -273,6 +333,11 @@ def expand_slots(spec):
             continue
         match = re.fullmatch(r"(.*?)(\d+)\.\.(\d+)", token)
         if not match:
+            if ".." in token:
+                raise SpecError(
+                    f"slot range {token!r} must end in a number: a range is `prefixN..M`, "
+                    "e.g. avatar-01..10 - not `prefixN..prefixM`"
+                )
             names.append(token)
             continue
         prefix, start, end = match.group(1), int(match.group(2)), int(match.group(3))
@@ -366,6 +431,11 @@ def plan_boxes(master, count, region=None):
     `region` is the area the grid covers - the sheet's content bounds by default. Cells divide
     that region evenly, so no cut line lands inside a subject when the gutters are regular.
     """
+    if master.banded:
+        raise SpecError(
+            "a rows master has no even grid; cut it on the measured gutters (band mode) instead "
+            "of dividing the region"
+        )
     if count > master.capacity:
         raise SpecError(
             f"{count} slots need more than the {master.cols}x{master.rows} sheet "
@@ -458,29 +528,13 @@ def _require_pillow():
 
 
 def _trim_box(image, threshold, background=None):
-    """Bounding box of the subject, or None when the cell is uniform.
-
-    `background` is the sheet's background colour. Using the sheet colour rather than the
-    cell's corner matters when a subject touches the cell edge: the corner would then be the
-    subject, and the "subject" would be measured as the gap.
-    """
-    from PIL import Image, ImageChops
-
-    if image.mode in ("RGBA", "LA") and _has_transparency(image):
-        alpha = image.getchannel("A")
-        return alpha.point(lambda value: 255 if value > threshold else 0).getbbox()
-    rgb = image.convert("RGB")
-    colour = background or rgb.getpixel((0, 0))
-    reference = Image.new("RGB", rgb.size, colour)
-    diff = ImageChops.difference(rgb, reference).convert("L")
-    return diff.point(lambda value: 255 if value > threshold else 0).getbbox()
+    """Bounding box of the subject, or None when the cell is uniform (see `sheet_geometry`)."""
+    return trim_box(image, threshold, background)
 
 
 def _has_transparency(image):
     """True when the image has real alpha, not just an alpha channel that is fully opaque."""
-    if image.mode not in ("RGBA", "LA"):
-        return False
-    return image.getchannel("A").getextrema()[0] < 250
+    return has_alpha(image)
 
 
 def _content_box(image, threshold):
@@ -490,8 +544,8 @@ def _content_box(image, threshold):
     every cut line in a gutter, which dividing the raw canvas does not (a wide left margin
     shifts every subject and the last column gets clipped).
     """
-    width, height = image.size
-    return _trim_box(image, threshold) or (0, 0, width, height)
+    return content_box(image, threshold)
+
 
 
 def _uniform_border(image, threshold):
@@ -612,7 +666,8 @@ def _parse_color(text):
 
 
 def _resolve(args):
-    """Return (selected slots, master) from the BOM and/or the explicit flags."""
+    """Return (selected slots, master, peers, skipped) from the BOM and/or the explicit flags."""
+    slots = []
     if args.bom:
         slots = parse_bom(args.bom)
         names = expand_slots(args.slots) if args.slots else None
@@ -633,6 +688,9 @@ def _resolve(args):
         override = parse_delivery(args.delivery)
         for slot in selected:
             slot.delivery = override
+    if args.grid and args.rows:
+        raise SpecError("pass one of --grid COLSxROWS or --rows C1,C2,... - not both")
+    overridden = bool(args.grid or args.rows)
     master = None
     if args.grid:
         cols, rows = (int(part) for part in args.grid.lower().split("x"))
@@ -645,13 +703,26 @@ def _resolve(args):
             width=base.width if base else 0, height=base.height if base else 0,
             kind="sheet", cols=cols, rows=rows, gutter=args.gutter,
         )
+    elif args.rows:
+        base = selected[0].master
+        if base is not None and base.kind == "single":
+            raise SpecError(
+                f"slot {selected[0].slot} has a single master; --rows only re-cuts sheet plans"
+            )
+        master = Master(
+            width=base.width if base else 0, height=base.height if base else 0,
+            kind="sheet", row_counts=_parse_row_counts(args.rows, "--rows"),
+        )
     else:
         master = selected[0].master
     if master is None:
         raise SpecError(
-            "conform needs a master plan; write `WxH single` or `WxH sheet CxR` in the BOM's "
-            "Master column, or pass --grid COLSxROWS (with --gutter)"
+            "conform needs a master plan; write `WxH single`, `WxH sheet CxR` or "
+            "`WxH sheet rows C1,C2,...` in the BOM's Master column, or pass --grid COLSxROWS / "
+            "--rows C1,C2,..."
         )
+    if args.bands and master.kind == "single":
+        raise SpecError("--bands cuts a sheet; a single master is used whole")
     if master.kind == "single":
         if len(selected) != 1:
             raise SpecError(
@@ -662,14 +733,80 @@ def _resolve(args):
             raise SpecError("--cell applies to sheet masters; a single master is used whole")
     elif args.cell:
         master.cell = args.cell
-    for slot in selected:
-        if slot.master is not None and (slot.master.kind != master.kind
-                                        or slot.master.capacity != master.capacity):
+    # Slots on one run must share one master plan - but a --grid/--rows override replaces the
+    # BOM's plan for this run, so the comparison is between slots, never against the override.
+    base = selected[0].master
+    if not overridden:
+        for slot in selected[1:]:
+            if base is None or slot.master is None:
+                continue
+            if (slot.master.kind != base.kind
+                    or slot.master.capacity != base.capacity):
+                raise SpecError(
+                    f"slot {slot.slot} belongs to a different master plan than "
+                    f"{selected[0].slot}; conform one master per run"
+                )
+    if overridden or not slots:
+        peers = selected
+    else:
+        # Every slot on this master owns a cell, including the ones already shipped: a selection
+        # is a subset of the sheet, not a sheet of its own.
+        peers = [slot for slot in slots if slot.master is not None
+                 and slot.master.kind == master.kind
+                 and slot.master.capacity == master.capacity]
+    return selected, master, peers, skipped
+
+
+def _index_of(slot, peers, fallback):
+    for index, peer in enumerate(peers):
+        if peer.slot == slot.slot:
+            return index
+    return fallback
+
+
+def plan_cuts(image, master, count, region, threshold=8, bands=False):
+    """[(slot index, box)] for the sheet, and the cut mode used.
+
+    `bands` cuts down the middle of the gutters the image actually has; the even grid divides the
+    region into equal cells. A rows master implies band cutting: its rows do not share a pitch.
+    """
+    if master.banded or bands:
+        counts = master.row_counts or [master.cols] * master.rows
+        return band_boxes(image, counts, region, threshold), "bands"
+    return plan_boxes(master, count, region), "grid"
+
+
+def estimate_cuts(master, count):
+    """Dry-run boxes: an even estimate through the canvas, no image needed."""
+    counts = master.row_counts or [master.cols] * master.rows
+    boxes = []
+    for row, columns in enumerate(counts):
+        top = round(row * master.height / len(counts))
+        bottom = round((row + 1) * master.height / len(counts))
+        for column in range(columns):
+            left = round(column * master.width / columns)
+            right = round((column + 1) * master.width / columns)
+            boxes.append((left, top, right, bottom))
+    return boxes[:count]
+
+
+def align_boxes(boxes, selected, peers):
+    """One box per selected slot, by the slot's position on the sheet.
+
+    Selecting four of ten slots must cut *those* cells, not the first four: the sheet does not
+    reshuffle because the command asked for a subset.
+    """
+    picked = []
+    for position, slot in enumerate(selected):
+        index = _index_of(slot, peers, position)
+        if index >= len(boxes):
             raise SpecError(
-                f"slot {slot.slot} belongs to a different master plan than "
-                f"{selected[0].slot}; conform one master per run"
+                f"slot {slot.slot} sits at cell {index + 1} of the plan, which only has "
+                f"{len(boxes)} cell(s)"
             )
-    return selected, master, skipped
+        picked.append(boxes[index])
+    return picked
+
 
 
 def _plan(args, selected, boxes):
@@ -701,17 +838,28 @@ def _keying(value):
 
 
 def run(args, result):
-    selected, master, skipped = _resolve(args)
+    selected, master, peers, skipped = _resolve(args)
     result.skipped = skipped
     result.expected = len(selected)
     result.group = args.group or (expand_slots(args.slots)[0] if args.slots else "")
+    banded = master.banded or args.bands
 
     if args.dry_run:
         if not master.width and master.cell:
             master.width = master.cols * (master.cell + master.gutter) - master.gutter
             master.height = master.rows * (master.cell + master.gutter) - master.gutter
-        boxes = plan_boxes(master, len(selected))
-        result.region = [0, 0, master.width, master.height]
+        if banded:
+            boxes = estimate_cuts(master, master.capacity)
+            result.region = [0, 0, master.width, master.height]
+        else:
+            boxes = plan_boxes(master, len(peers))
+            result.region = [0, 0, master.width, master.height]
+        boxes = align_boxes(boxes, selected, peers)
+        result.cut = {
+            "mode": "bands" if banded else "grid",
+            "rows": master.row_counts or [master.cols] * master.rows,
+            "estimated": banded,
+        }
         problems = []
         for slot, box in zip(selected, boxes):
             if master.width:
@@ -760,9 +908,14 @@ def run(args, result):
     key_value = args.key_bg if args.key_bg is not None else ("off" if single else "auto")
     region = (0, 0, sheet.width, sheet.height)
     if not (args.full_canvas or single):
-        region = _content_box(sheet, args.trim_threshold)
+        region = content_box(sheet, args.trim_threshold)
     result.region = list(region)
-    boxes = plan_boxes(master, len(selected), region)
+    boxes, mode = plan_cuts(sheet, master, len(peers), region, args.trim_threshold, args.bands)
+    result.cut = {
+        "mode": mode,
+        "rows": master.row_counts or [master.cols] * master.rows,
+    }
+    boxes = align_boxes(boxes, selected, peers)
 
     problems = []
     for slot, box in zip(selected, boxes):
@@ -771,6 +924,7 @@ def run(args, result):
                         check_feasible(master, slot.delivery, args.allow_upscale, cell))
     if problems:
         raise SpecError("; ".join(problems))
+
 
     planned = _plan(args, selected, boxes)
     keying, key_color = _keying(key_value)
@@ -844,6 +998,17 @@ def run(args, result):
             )
     if not args.no_verify and not result.errors:
         verify(selected, result)
+    if mode == "grid" and not result.errors:
+        cuts = clipped_cuts(content_mask(sheet, args.trim_threshold), region,
+                           master.cols, master.rows)
+        if cuts:
+            total = (master.cols - 1) + (master.rows - 1)
+            where = ", ".join(f"{cut['axis']}={cut['at']}" for cut in cuts)
+            result.warnings.append(
+                f"{len(cuts)} of {total} interior cut line(s) of the even grid land on content "
+                f"({where}); the gutters are not even - cut on the measured bands with `--bands` "
+                "or plan `sheet rows ...`"
+            )
     write_report(args, result, master, boxes)
     return result
 
@@ -918,13 +1083,16 @@ def _payload(args, result, master, boxes):
             "size": [master.width, master.height],
             "kind": master.kind,
             "grid": [master.cols, master.rows],
+            "rows": master.row_counts,
             "gutter": master.gutter,
             "cell": list(master.cell_size()),
             "boxes": [list(box) for box in boxes],
         },
         "expected": result.expected,
         "region": result.region,
+        "cut": result.cut,
         "key": result.key,
+
         "empty_cells": result.empty_cells,
         "files": result.files,
         "skipped": result.skipped,
@@ -947,11 +1115,18 @@ def write_report(args, result, master, boxes):
 
 def _print_summary(payload, report_path):
     master = payload["master"]
+    rows = master.get("rows")
+    plan = (f"rows {','.join(str(count) for count in rows)}" if rows
+            else f"{master['grid'][0]}x{master['grid'][1]} gutter {master['gutter']}")
     print(f"sheet     {payload['sheet']}")
     print(f"master    {master['size'][0]}x{master['size'][1]} {master['kind']} "
-          f"{master['grid'][0]}x{master['grid'][1]} gutter {master['gutter']} "
-          f"cell {master['cell'][0]}x{master['cell'][1]}")
+          f"{plan} cell {master['cell'][0]}x{master['cell'][1]}")
+    cut = payload.get("cut") or {}
+    if cut:
+        print(f"cut       {cut.get('mode', 'grid')}"
+              f"{' (estimated - measured at run time)' if cut.get('estimated') else ''}")
     print(f"slots     {payload['expected']} expected, {len(payload['files'])} files")
+
     if payload["region"]:
         print(f"region    {payload['region'][0]},{payload['region'][1]} -> "
               f"{payload['region'][2]},{payload['region'][3]}")
@@ -986,7 +1161,13 @@ def build_parser():
     parser.add_argument("--in", dest="inp", required=True, help="the generated master image (one file)")
     parser.add_argument("--out", dest="out", required=True, help="output folder")
     parser.add_argument("--grid", help="override the sheet grid, COLSxROWS")
+    parser.add_argument("--rows", help="per-row column counts for a staggered sheet, e.g. "
+                                       "8,8,8,10 - cut on the measured gutters")
+    parser.add_argument("--bands", action="store_true",
+                        help="cut on the measured gutters instead of an even split (a rows plan "
+                             "implies this)")
     parser.add_argument("--gutter", type=int, default=0, help="gutter in px (with --grid)")
+
     parser.add_argument("--cell", type=int, help="override the cell size in px")
     parser.add_argument("--delivery", help="delivery spec applied to every selected slot")
     parser.add_argument("--naming", default="{slot}{ext}",
@@ -1030,6 +1211,9 @@ def main(argv=None):
     result = Result(bom=args.bom or "", sheet=args.inp, dry_run=args.dry_run)
     try:
         run(args, result)
+    except BandError as error:
+        print(f"conform: {error}", file=sys.stderr)
+        return 3
     except SpecError as error:
         print(f"conform: {error}", file=sys.stderr)
         return 2

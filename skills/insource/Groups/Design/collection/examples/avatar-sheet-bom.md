@@ -25,9 +25,9 @@ impossible without upscaling. Measured with `sheet_probe`:
 
 ```
 content   margins left=62 top=167 right=61 bottom=202
-columns   5 bands, gaps [12, 12, 12, 12]
-rows      2 bands, gap [100]
-subjects  min 269x272, max 271x276
+columns   5 bands, gaps [15, 15, 15, 16]
+rows      2 bands, gap [103]
+subjects  min 269x275, max 271x277
 ceiling   269px square master
 delivers  64@1x,2x,3x,4x  96@1x,2x  128@1x,2x  192@1x  256@1x
 ```

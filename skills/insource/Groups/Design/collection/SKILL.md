@@ -1,5 +1,6 @@
 ---
 name: collection
+version: 1.0.0
 description: >-
   Method for a project's generated imagery: dissect a reference or page set into a bill of
   materials (BOM), fix the style canon once, write the prompts, plan generation economically. Per
@@ -81,16 +82,20 @@ The schema lives here; `resources conform` reads it and changes nothing about it
 | Slot | Role | Source | Master | Delivery | Status |
 |---|---|---|---|---|---|
 | `avatar-01..10` | avatar set | generate sheet 5x2 | 1536x1024 sheet 5x2 gutter 0 | `128x128 1:1 webp q82 @1x,2x` | pending |
+| `badge-01..34` | achievement badges | sheet `refs/badges.png` | 1536x1024 sheet rows 8,8,8,10 | `96x96 1:1 webp q82 @1x` | pending |
 | `hero-home` | hero illustration | generate single | 1600x900 single | `800x450 16:9 avif q60 @1x,2x` | pending |
 | `logo` | brand mark | reuse `brand/logo.svg` | — | `240x64 svg` | shipped |
 | `photo-teaser` | stock photo | `fahlwy` | — | `640x360 16:9 jpeg q80 @2x` | pending |
 | `icon-search` | icon | `resources` / icon set | — | `24x24 svg` | shipped |
 
 - **Slot**: one id, or a range (`avatar-01..10`) for a sheet. The id becomes the filename stem.
-- **Source**: `generate` (single or sheet), `reuse <path>`, `fahlwy`, `resources`. Only generated
-  rows get a prompt and a master spec.
-- **Master**: `WxH single`, or `WxH sheet CxR [gutter N]` - the raw render the slot is cut from.
-  It must hold `delivery px x max DPR` per axis; `conform` reads this cell, so notes never go in it.
+- **Source**: `generate` (single or sheet), `sheet <path>` (an existing sheet image to cut - a
+  reference catalog the user owns), `reuse <path>`, `fahlwy`, `resources`. Only rows with a master
+  get a spec and a prompt; only generated rows get a prompt.
+- **Master**: `WxH single`, `WxH sheet CxR [gutter N]`, or `WxH sheet rows 8,8,8,10` when the rows
+  hold different subject counts - the raw render the slot is cut from. It must hold
+  `delivery px x max DPR` per axis; `conform` reads this cell, so notes never go in it. Do not
+  guess it: `resources`' `sheet_probe.py` measures the image and prints the exact spec to paste.
 - **Delivery**: `WxH [aspect] [format] [qN] [@1x,2x,3x]` - exactly what `conform` implements.
 - **Status**: `pending / shipped / reused / no-image`.
 
@@ -104,7 +109,8 @@ The schema lives here; `resources conform` reads it and changes nothing about it
 4. **Route.** Generated sheet / generated single / reuse existing / stock (`fahlwy`) / icon set
    (`resources`). Only the first two get prompts.
 5. **Find economy.** Repeated, same-sized, same-style subjects are sheet candidates; unique
-   full-bleed art is a single. Record the arithmetic, not a feeling.
+   full-bleed art is a single. Sheet rows do not have to share a column count - a catalog of
+   badges is 8,8,8,10 - but each row is still one render plan. Record the arithmetic, not a feeling.
 
 Detail, worked sheets and the full dissection checklist: `references/02-bom.md`.
 
@@ -202,3 +208,5 @@ The BOM and manifest are the deliverable; images are the second act.
 - `references/02-bom.md` - dissection checklist, economy math, sheet planning, worked examples
 - `examples/onboarding-collection.md` - a filled manifest excerpt, four frames
 - `examples/avatar-sheet-bom.md` - a filled page BOM: one sheet, ten avatar slots, measured
+- `examples/badge-catalog-bom.md` - a filled page BOM for an existing catalog sheet whose rows
+  hold 8,8,8,10 subjects: the `sheet rows` route, cut without regenerating anything

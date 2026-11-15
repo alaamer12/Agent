@@ -103,6 +103,47 @@ class ProbeTest(unittest.TestCase):
         with self.assertRaises(sheet_probe.ProbeError):
             sheet_probe.probe(self.root / "nope.png")
 
+    def test_regular_layout_keeps_a_grid_spec(self):
+        sheet = self.make("grid.png", (320, 200), [
+            (10, 20, 90, 100), (110, 20, 190, 100), (210, 20, 290, 100),
+            (10, 110, 90, 190), (110, 110, 190, 190), (210, 110, 290, 190),
+        ])
+        report = sheet_probe.probe(sheet)
+        self.assertEqual(report["layout"]["kind"], "regular")
+        self.assertEqual(report["layout"]["counts"], [3, 3])
+        self.assertEqual(report["layout"]["master"], "320x200 sheet 3x2")
+        self.assertEqual(report["grid"]["columns"], 3)
+
+    def test_mixed_layout_is_read_row_by_row(self):
+        # Two subjects in row one (5px apart), three in row two: no single grid describes it, and
+        # an even two-column split would cut through the second subject.
+        sheet = self.make("staggered.png", (400, 400), [
+            (20, 20, 180, 160), (185, 20, 380, 160),
+            (10, 220, 120, 380), (160, 220, 260, 380), (300, 220, 390, 380),
+        ])
+        report = sheet_probe.probe(sheet)
+        layout = report["layout"]
+        self.assertEqual(layout["kind"], "mixed")
+        self.assertEqual(layout["counts"], [2, 3])
+        self.assertEqual(layout["subjects"], 5)
+        self.assertEqual(layout["master"], "400x400 sheet rows 2,3")
+        self.assertIsNone(report["grid"])
+        self.assertEqual(report["subject"]["count"], 5)
+        self.assertTrue(any(cut["axis"] == "x" for cut in layout["clipped_cuts"]))
+        self.assertTrue(any("no single grid" in note for note in report["verdict"]))
+
+    def test_a_one_pixel_sliver_is_not_a_subject(self):
+        sheet = self.make("sliver.png", (300, 100), [
+            (10, 10, 90, 90), (110, 10, 190, 90), (210, 10, 290, 90),
+        ])
+        image = Image.open(sheet)
+        image.paste((20, 20, 30), (100, 50, 101, 51))  # a stray pixel in the first gutter
+        image.save(sheet)
+        report = sheet_probe.probe(sheet)
+        self.assertEqual(report["columns"]["count"], 3)
+        self.assertEqual(report["layout"]["counts"], [3])
+
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
