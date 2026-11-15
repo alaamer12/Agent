@@ -2,7 +2,7 @@
 
 This repository contains a comprehensive collection of modular Agent Skills. Each skill provides specialized domain instructions, operational workflows, patterns, and best practices for agents.
 
-Total active skills: **126** — 26 standalone at the repository root and the rest organized under 16 topic groups. 27 archived skills are listed at the end.
+Total active skills: **125** — 28 standalone at the repository root and the rest organized under 16 topic groups. 26 archived skills are listed at the end.
 
 ## Quick Index
 
@@ -68,12 +68,9 @@ Total active skills: **126** — 26 standalone at the repository root and the re
 - [bleed](./Groups/Design/bleed/SKILL.md) — Convert a web UI between layout registers - full-bleed page, framed cards, or hybrid - and fix the "document inside an app" smell where a page wraps itself in a…
 - [collection](./Groups/Design/collection/SKILL.md) — Method for a project's generated imagery: dissect a reference or page set into a bill of materials (BOM), fix the style canon once, write the prompts, plan gene…
 - [denoise](./Groups/Design/denoise/SKILL.md) — Transforms crowded, noisy, visually overwhelming UIs into calm, readable, professional interfaces that are easier to use, not just nicer to look at, at one of t…
-- [design-md](./Groups/Design/design-md/SKILL.md) — Authors and maintains a project-wide, binding DESIGN.md specification following Google Labs design.md and Stitch conventions. Bridges system architecture and vi…
 - [diverge](./Groups/Design/diverge/SKILL.md) — Previews genuinely different design directions for an existing UI before committing a whole project or batch of pages to one of them. Two commands: /diverge tas…
 - [pages](./Groups/Design/pages/SKILL.md) — A product's complete page universe: one skill, three modes, ONE artifact. /pages main plans the core-screen inventory, pruning a 492-row 30-discipline candidate…
 - [parity](./Groups/Design/parity/SKILL.md) — Framework for closing the gap between a design mockup (HTML/CSS, Figma export, or reference image) and what actually renders on a real device/emulator, for any…
-- [playfile](./Groups/Design/playfile/SKILL.md) — Lightweight design-review files: one self-contained HTML screen per file, real <a href> links between them, every meaningful state forced by URL query params (?…
-- [prototype](./Groups/Design/prototype/SKILL.md) — Interactive JS-rendered design prototypes with URL-driven states and component stories. Supports single apps and multi-app suites. Features: clean-URL dev serve…
 - [resources](./Groups/Design/resources/SKILL.md) — Resource files for any platform: images, icons, fonts, audio, video, documents, color values - the files, not the systems that serve them. Fourteen tools: recol…
 - [scss](./Groups/Design/Style/scss/SKILL.md) — SCSS/Sassy CSS best practices and coding guidelines for maintainable, scalable stylesheets
 - [stateful](./Groups/Design/stateful/SKILL.md) — Derive every state a user-visible screen can enter, then implement the approved ones — pending, empty, stale, partial; provider down, degraded, throttled, maint…
@@ -162,10 +159,10 @@ Total active skills: **126** — 26 standalone at the repository root and the re
   - [svg](./animation/svg/SKILL.md) — Animate a static, flat SVG logo or icon (solid-fill <path> elements) with one of twenty-five animation styles: chrome-liquid, draw-fill, loading-loop, elastic-e…
 - [avatar](./avatar/SKILL.md) — Creates avatars without defaulting to one style. An avatar is a stand-in for an absent entity, so the skill first reads the request on four axes - medium, sourc…
 - [benchmark](./benchmark/SKILL.md) — Benchmark candidates on task-derived dimensions, in normal or ultra mode. Think first: which decision is being made (faster, more accurate, less memory) and how…
-- [calibrate](./calibrate/SKILL.md) — Universal framework for extracting the complete design, visual, and interaction DNA of a confirmed 'North Star' reference implementation and systematically prop…
 - [caution](./caution/SKILL.md) — Informed-consent gate on the user's answers: screen every reply (chat, AskUserQuestion, command flags, hook or server input) for a decision whose cost the answe…
 - [close-topics](./close-topics/SKILL.md) — Guided, conversational, topic-by-topic technical specification: close one design area before opening the next. Use when a project has undecided architecture (sc…
 - [compare](./compare/SKILL.md) — Write professional, well-reasoned comparisons between two or more subjects of any kind — technologies, files, projects, code modules, books, documents, biologic…
+- [design](./design/SKILL.md) — Design work, one skill, four modes: design-md (author the project's canonical DESIGN.md: machine-readable tokens + human rationale, Google Labs design.md conve…
 - [dont-stop](./dont-stop/SKILL.md) — Forces the agent to keep working autonomously until the ENTIRE goal is truly finished, across all phases, with no mid-way stops, no "phase 1 done, ready for pha…
 - [generate](./generate/SKILL.md) — Universal image AND video generation via RESTful providers (xAI, OpenAI, Gemini, KovAPI/NezhaGate) through registry data.csv: vendors and media types are data r…
 - [learning-test](./learning-test/SKILL.md) — Write and run a "learning test" (term coined by Jim Newkirk, popularized by Robert C. Martin/Uncle Bob in Clean Code ch.8 "Boundaries") to empirically discover…
@@ -547,13 +544,6 @@ Total active skills: **126** — 26 standalone at the repository root and the re
 
 ---
 
-#### `design-md`
-
-- **Path:** [`Groups/Design/design-md/SKILL.md`](./Groups/Design/design-md/SKILL.md)
-- **Description:** Authors and maintains a project-wide, binding DESIGN.md specification following Google Labs design.md and Stitch conventions. Bridges system architecture and visual UI design: combines machine-readable YAML design tokens (OKLCH color scales, fluid typography, 4/8pt spacing, elevation, radius, component tokens) with prescriptive, human-readable UI rationale and explicit Do's and Don'ts. Use when bootstrapping a project's visual system, formalizing design rules for AI coding agents, auditing UI consistency, or authoring a canonical DESIGN.md. Triggers: design.md, create design.md, design doc, visual design system, brand identity spec, design tokens, ui spec.
-
----
-
 #### `diverge`
 
 - **Path:** [`Groups/Design/diverge/SKILL.md`](./Groups/Design/diverge/SKILL.md)
@@ -576,24 +566,6 @@ Total active skills: **126** — 26 standalone at the repository root and the re
 
 - **Path:** [`Groups/Design/parity/SKILL.md`](./Groups/Design/parity/SKILL.md)
 - **Description:** Framework for closing the gap between a design mockup (HTML/CSS, Figma export, or reference image) and what actually renders on a real device/emulator, for any UI framework. Covers the full pipeline (mockup + on-device capture, frame/chrome-noise normalization, similarity scoring, regional diagnosis) and an autonomous convergence loop that iterates capture→compare→diagnose→fix→rebuild without pausing for check-ins until threshold is met. Also covers: inventorying ItC (interact-to-change) components like dropdowns/drawers/modals and forcing their states via query params; dummy/placeholder mockup data needing fixtures so content mismatches don't masquerade as layout bugs; transition/animation ('smoothing') parity beyond static screenshots; and navigating past obstacle screens (splash/onboarding/permissions) without getting stuck. Use for pixel/visual parity with a design, automated visual regression, or an agent iterating to a similarity score. Triggers: parity, visual parity, pixel parity.
-
----
-
-#### `playfile`
-
-- **Path:** [`Groups/Design/playfile/SKILL.md`](./Groups/Design/playfile/SKILL.md)
-- **Description:** Lightweight design-review files: one self-contained HTML screen per file, real <a href> links between them, every meaningful state forced by URL query params (?state=error&theme=dark&step=3), organized in iteration folders (mvp/, v2-theme/) each with a README review dossier - Files table of force-params, dated decisions, open questions. No build, no server, no dock, no component system: double-click opens it, refresh and shared links reproduce exactly. Trigger on "/playfile", "playfile this screen/flow", "quick linked HTML mockups", "lighter prototype". The quirk kept from /prototype: the URL is the state - param names ASCII, values any language via URLSearchParams only, invalid values fall to defaults. Screens cross-link to the previous version instead of copying until changed. Not for app-shaped prototype systems with docks, story catalogs or deep state trees (prototype).
-- **Use-case:** A wave of design proposals needs review fast - screens as linked HTML files with URL-forceable states and a README dossier, without the prototype machinery. Also for running an iteration folder - copy the screen this version changes, link the rest, record the decisions.
-- **Usage:** `/playfile [screen or flow] [milestone/version folder]`
-
----
-
-#### `prototype`
-
-- **Path:** [`Groups/Design/prototype/SKILL.md`](./Groups/Design/prototype/SKILL.md)
-- **Description:** Interactive JS-rendered design prototypes with URL-driven states and component stories. Supports single apps and multi-app suites. Features: clean-URL dev server, thin HTML with JS DOM generation, per-component state trees via query params (Unicode-safe, Arabic values included), ?filled seeded stress testing, in-page story isolation (?story_id=), multi-state component catalogs (/stories), a unified floating Dev Dock owning every prototype control (declared state pickers, story/component picker, stage tools, 10-font picker, theme switch, live palette token browser with adaptive brand accent, cross-app switching, viewport readout) so screens stay chrome-free, designed empty/loading/error surfaces, and zero-duplication guards enforcing tokens, component classes, and a shared ui.js builder catalog. Triggers: prototype this, make this a prototype, /prototype components, stories gallery, dev dock, dedupe prototype styles. Not a throwaway review wave of linked HTML files - that is playfile.
-- **Use-case:** Build or extend interactive, URL-driven prototypes, audit existing mockups for dead controls, or generate multi-state component catalogs and story isolation links.
-- **Usage:** `/prototype [screen or app name] [topology or mode]`
 
 ---
 
@@ -1058,13 +1030,6 @@ Total active skills: **126** — 26 standalone at the repository root and the re
 
 ---
 
-#### `calibrate`
-
-- **Path:** [`calibrate/SKILL.md`](./calibrate/SKILL.md)
-- **Description:** Universal framework for extracting the complete design, visual, and interaction DNA of a confirmed 'North Star' reference implementation and systematically propagating it across all sibling pages, components, or screens. Operates across any UI stack (Web, React, Vue, Svelte, Mobile Flutter/React Native/SwiftUI, Desktop, HTML/Tailwind) without loss of subtle layers like atmosphere, iconography, micro-visualizations, typography hierarchy, or data simulation contracts. Triggers: calibrate, /calibrate, make all pages match this one, spread the design, North Star alignment, propagate design system.
-
----
-
 #### `caution`
 
 - **Path:** [`caution/SKILL.md`](./caution/SKILL.md)
@@ -1087,6 +1052,15 @@ Total active skills: **126** — 26 standalone at the repository root and the re
 
 - **Path:** [`compare/SKILL.md`](./compare/SKILL.md)
 - **Description:** Write professional, well-reasoned comparisons between two or more subjects of any kind — technologies, files, projects, code modules, books, documents, biological processes, products, strategies, or any named options. Use whenever the user asks to compare, evaluate trade-offs, distinguish, or choose between things, including "which is better," "what's the difference," or "help me decide." Supports open-ended discovery of relevant aspects and dimension-based comparison on user-specified or researched criteria. Enforces real differentiators only, "why it matters" reasoning, independent research, graded quantitative claims, and neutral context-driven conclusions.
+
+---
+
+#### `design`
+
+- **Path:** [`design/SKILL.md`](./design/SKILL.md)
+- **Description:** Design work, one skill, four modes: design-md (author the project's canonical DESIGN.md: machine-readable tokens + human rationale, Google Labs design.md conventions - "/design DESIGN.md <file>"), playfile (throwaway design-review waves: self-contained linked HTML screens, URL-forced states, README dossiers - "/design a playfile"), prototype (interactive URL-driven prototype system: dev dock, component stories, per-component state trees, dedup guards - "/design prototype <screen>"), calibrate (extract the full design, visual and interaction DNA of a North-Star reference implementation and apply it to a project - "calibrate the /design of X to Y"). The router picks ONE mode and reads only its method.md. Triggers: DESIGN.md, design tokens, playfile, quick linked HTML mockups, prototype this, dev dock, stories gallery, calibrate design, match this app's design to a reference. Not for UI redesign passes, page inventories or mockup-to-device parity - those stay separate skills (denoise, pages, parity).
+- **Use-case:** The user asks to author a DESIGN.md, run a wave of linked HTML review screens, build or extend an interactive URL-driven prototype, or calibrate a project's design to a reference implementation.
+- **Usage:** `/design [design-md|playfile|prototype|calibrate] <target>`
 
 ---
 

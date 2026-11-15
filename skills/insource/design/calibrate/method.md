@@ -1,8 +1,3 @@
----
-name: calibrate
-description: "Universal framework for extracting the complete design, visual, and interaction DNA of a confirmed 'North Star' reference implementation and systematically propagating it across all sibling pages, components, or screens. Operates across any UI stack (Web, React, Vue, Svelte, Mobile Flutter/React Native/SwiftUI, Desktop, HTML/Tailwind) without loss of subtle layers like atmosphere, iconography, micro-visualizations, typography hierarchy, or data simulation contracts. Triggers: calibrate, /calibrate, make all pages match this one, spread the design, North Star alignment, propagate design system."
----
-
 # Calibrate — Universal North Star Design Extraction & Propagation
 
 A universal engineering framework for extracting the complete visual and interactive DNA of a verified reference implementation (the **"North Star"**) and propagating it across sibling pages, views, or components with zero loss of subtlety.

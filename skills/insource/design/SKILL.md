@@ -1,85 +1,59 @@
 ---
 name: design
 version: 1.0.0
-description: 'One skill, 15 product design modes: assets (image pipeline: BOM, masters, conform), bleed (layout registers - full-bleed vs framed cards), collection (image BOM, style canon, prompts), denoise (calm a crowded UI: lite/medium/ultra), design-md (canonical DESIGN.md: tokens + rationale), diverge (n genuinely different directions before committing), pages (page universe into PAGES.md: inventory, legal docs, conditional screens), parity (mockup-to-device gap closed autonomously), playfile (linked HTML review screens, URL-forced states), prototype (URL-driven prototype systems: dock, stories, guards), resources (favicons, icons, splash, OG, optimize, localize, conform), stateful (derive, gate and implement every screen state), scss (SCSS best practices), styling (new styling: tokens, layer chain, naming), styleup (retrofit styling into enforced tokens). Triggers: prototype, mockup, legal pages, error pages, denoise UI, pixel parity, image plan, favicon, splash, design tokens, state coverage, CSS architecture.'
-when_to_use: Any design-family task - prototypes and review files, page inventory and trust documents, UI cleanup or direction previews, layout framing, state completeness, mockup parity, image planning and resource files, design-system docs, styling systems. Also /design <mode>.
-argument-hint: "<mode> [command] [target]"
+description: 'Design work, one skill, four modes: design-md (author the project''s canonical DESIGN.md: machine-readable tokens + human rationale, Google Labs design.md conventions - "/design DESIGN.md <file>"), playfile (throwaway design-review waves: self-contained linked HTML screens, URL-forced states, README dossiers - "/design a playfile"), prototype (interactive URL-driven prototype system: dev dock, component stories, per-component state trees, dedup guards - "/design prototype <screen>"), calibrate (extract the full design, visual and interaction DNA of a North-Star reference implementation and apply it to a project - "calibrate the /design of X to Y"). The router picks ONE mode and reads only its method.md. Triggers: DESIGN.md, design tokens, playfile, quick linked HTML mockups, prototype this, dev dock, stories gallery, calibrate design, match this app''s design to a reference. Not for UI redesign passes, page inventories or mockup-to-device parity - those stay separate skills (denoise, pages, parity).'
+when_to_use: The user asks to author a DESIGN.md, run a wave of linked HTML review screens, build or extend an interactive URL-driven prototype, or calibrate a project's design to a reference implementation.
+argument-hint: "[design-md|playfile|prototype|calibrate] <target>"
 ---
 
-# design — one entry point, fifteen modes
+# design — one skill, four ways to operate
 
-Each mode is a complete, self-contained method living in its folder; this file is the map and
-nothing more. Name the mode and the task (`/design denoise ultra on this admin panel`,
-`/create a /design prototype of the funds screen`); with no mode named, route below.
+Name a mode and the target; with no mode named, the routing table below decides. Each mode is a
+complete workflow in its own folder. The only rule that spans them: **load one `method.md`** —
+never run two modes' machinery for a one-mode job.
 
 ## Modes
 
-| Mode | Do it for | Also |
+| Mode | The request sounds like | Method |
 |---|---|---|
-| `assets` | the imagery pipeline end to end: plan the BOM, generate masters, conform sheets into delivery files | routes to `collection` + `resources`; owns order and handoffs |
-| `bleed` | "it looks like a page inside a page", take the full width, remove/contain the outer card | registers: page · framed · hybrid |
-| `collection` | what images a page needs, the style canon, the prompts, sheet economy math | writes `bom/BOM.md`, `bom/<page>.md`, `bom/style.md` |
-| `denoise` | a crowded, noisy UI must become calm and usable | modes lite/medium/ultra; verify-by-render mandatory |
-| `design-md` | the project's binding `DESIGN.md`: machine-readable tokens + human rationale | bootstrapping or auditing a visual system |
-| `diverge` | see n genuinely different directions before committing the project to one | `taste [n]` / `snippet` |
-| `pages` | which pages a product has, needs, or must not have — core inventory, trust documents, conditional screens | three own modes: `main` · `secondary` · `complementary`; artifact `PAGES.md` |
-| `parity` | the real device render must match the mockup, and the loop closes itself to threshold | capture→score→diagnose→fix, unattended |
-| `playfile` | a wave of reviewable design proposals as linked HTML files, no tooling | URL is the state; README dossier per wave |
-| `prototype` | an interactive prototype system that behaves like the app at scale | dev dock, stories, guards; multi-app suites |
-| `resources` | the resource files themselves: create, convert, recolor, optimize, localize, inventory, conform | fourteen scripts; naming and format rules |
-| `stateful` | every condition a screen can be found in must have an honest rendering | derive → gates → matrix consult → implement → verify |
-| `scss` | SCSS projects: architecture pattern, maps, mixins, nesting, BEM, module system | reference guide, not a workflow |
-| `styling` | writing NEW styling on any stack so a design system can exist | tokens, downward-only layer chain, naming |
-| `styleup` | retrofitting an existing project's hardcoded styling into an enforced token system | inventory → migrate → guard → parity evidence |
+| `design-md` | "create a DESIGN.md for this project", "design tokens spec", "the app looks AI-generated — formalize its visual system" | [`design-md/method.md`](./design-md/method.md) |
+| `playfile` | "quick linked HTML mockups of these screens", "review wave", "lighter prototype", "playfile this flow" | [`playfile/method.md`](./playfile/method.md) |
+| `prototype` | "prototype this", "dev dock", "component stories", "make the mockups behave like the app" | [`prototype/method.md`](./prototype/method.md) |
+| `calibrate` | "calibrate the design of X to Y", "make our app look like <reference>", "extract this reference's design DNA" | [`calibrate/method.md`](./calibrate/method.md) |
 
-## Routing a vague request
+## Disambiguation — the pairs that get confused
 
-- "Make me a mockup" → a throwaway review wave: `playfile`. Something that must behave like the
-  app (shared chrome, stories, deep state trees): `prototype`.
-- "Clean this up" → one decided pass: `denoise` (ask the mode). Several directions first:
-  `diverge`. The complaint is about the outer frame, not the content: `bleed`.
-- "Which pages/screens does this product need?" or any legal/trust document → `pages`.
-  Conditional screens that only appear on a trigger (payment result, 404, session gate) →
-  `pages complementary`. Full state derivation of one existing screen → `stateful`.
-- "Does the build match the design?" → `parity`.
-- Images: deciding which are needed and their prompts → `collection`; the whole pipeline →
-  `assets`; the files on disk (favicon, icons, splash, OG, conversion, sheet splitting) →
-  `resources`; real photographs from free sources → `fahlwy` (external).
-- Styling: new code and structure → `styling`; the project already exists and is hardcoded →
-  `styleup`; SCSS-specific mechanics → `scss`; formalizing the visual contract → `design-md`.
+- **playfile vs prototype.** A wave of proposals under review, one self-contained file per screen,
+  no tooling: `playfile`. The artifact must behave like the app at scale — dock, story catalogs,
+  deep state trees, shared modules: `prototype`. A playfile wave that graduates is rebuilt as a
+  prototype, not patched.
+- **design-md vs calibrate.** Inventing the project's own visual contract from its product feel:
+  `design-md`. Copying an *existing reference's* design DNA (colors, type, spacing, interaction)
+  into this project systematically: `calibrate`. A calibrated project still ends with its own
+  DESIGN.md — calibrate feeds design-md, it does not replace it.
+- **"calibrate the /design of X to Y" is calibrate mode**, never design-md: the word "design"
+  there is the object of calibration, not a document request.
 
-## Shared laws (modes inherit; mode methods do not repeat them)
+## Shared laws
 
-- **Load one mode.** Read the chosen `mode/method.md`, then only the references it tells you
-  to load. Modes never quote each other; cross-mode pointers name the mode (`/design <mode>`).
-- **Rendered work is verified by rendering.** Writing markup is not proof: render, look at the
-  screenshot, name what is wrong, fix, re-render. Required in `denoise`, `diverge`,
-  `prototype`, `playfile`, `parity`, `stateful`.
-- **Never invent what evidence owns** — a legal fact (`pages secondary`), sheet geometry
-  (`resources`), a trigger with no real event (`pages complementary`), data the product does
-  not have (`prototype` labels fakes as faked). Ask instead.
-- **One owner per fact.** Each mode folder owns its territory; nothing here restates a rule
-  from another mode or from an external skill (`generate`, `fahlwy`, `components`,
-  `impeccable`, `planner`, `techstack`).
+- **The URL is the state.** In both `playfile` and `prototype`, every meaningful screen state is
+  reachable by query param alone and survives refresh and copy-paste.
+- **Nothing ships unrendered.** Any file that displays — screen, story, token sample — is opened
+  in a browser and looked at before it is called done.
+- **Design data says so.** Fake content in either prototype mode is plausible product content,
+  labelled as design data; invented facts (legal numbers, reference-app claims) are never passed
+  as real.
 
 ## Layout
 
 ```
 design/
-├── SKILL.md        # this map: modes, routing, shared laws
-├── assets/         method.md                       (router into collection/generate/resources)
-├── bleed/          method.md + references/ + examples/
-├── collection/     method.md + references/ + assets/ + examples/
-├── denoise/        method.md + references/ + assets/ + examples/ + scripts/
-├── design-md/      method.md + references/ + templates/ + examples/
-├── diverge/        method.md + references/ + assets/ + examples/
-├── pages/          method.md + references/ + main/ + secondary/ + complementary/
-├── parity/         method.md + references/ + scripts/
-├── playfile/       method.md + references/ + assets/
-├── prototype/      method.md + references/ + assets/ + examples/ + scripts/
-├── resources/      method.md + references/ + scripts/
-├── stateful/       method.md + references/ + assets/ + examples/
-├── scss/           method.md                       (the full guide; sections per topic)
-├── styleup/        method.md + references/ + examples/ + scripts/
-└── styling/        method.md + references/ + examples/
+├── SKILL.md            # this router: mode table, disambiguation, shared laws
+├── design-md/          # method.md + references/ + templates/ + examples/
+├── playfile/           # method.md + references/ + assets/
+├── prototype/          # method.md + references/ + assets/ + scripts/ + examples/
+└── calibrate/          # method.md + references/ + examples/
 ```
+
+The four modes were previously standalone skills (`/design-md`, `/playfile`, `/prototype`,
+`/calibrate`); those entry points are gone — everything runs through `/design <mode>`.

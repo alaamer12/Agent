@@ -556,5 +556,115 @@ class EndToEndReportingTests(unittest.TestCase):
         self.assertIn("patch", proc.stdout)
 
 
+class FindTests(unittest.TestCase):
+    """`manager.py find`: registry inventory, agent folders (junctions + copies),
+    recorded --into installs with stale-prune, lockfile rows, path arguments."""
+
+    def setUp(self):
+        manager.configure_display(quiet=True, color=False, verbose=False)
+        self._agents = manager.DEFAULT_AGENTS
+        self._skill_dir = manager.agent_skill_dir
+        self.tmp = Path(tempfile.mkdtemp(prefix="mgr-find-"))
+        self._db_env = os.environ.get("MANAGER_DB")
+        os.environ["MANAGER_DB"] = str(self.tmp / "manager.db")
+        self.registry = self.tmp / "registry"
+        self.registry.mkdir(parents=True)
+        manager.DEFAULT_AGENTS = ["fake"]  # isolate from real global agent folders
+        self.agent_dir = self.tmp / "agents" / "fake"
+        manager.agent_skill_dir = lambda agent: self.agent_dir
+
+    def tearDown(self):
+        manager.DEFAULT_AGENTS = self._agents
+        manager.agent_skill_dir = self._skill_dir
+        if self._db_env is None:
+            os.environ.pop("MANAGER_DB", None)
+        else:
+            os.environ["MANAGER_DB"] = self._db_env
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def find(self, *names: str):
+        args = manager.build_parser().parse_args(
+            ["find", "--registry", str(self.registry), "-C", "-q", *names])
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = manager.cmd_find(args, self.registry, 1)
+        return code, buf.getvalue()
+
+    def test_found_in_registry(self):
+        make_skill(self.registry, "foo")
+        code, out = self.find("foo")
+        self.assertEqual(code, 0)
+        self.assertIn("inventory", out)
+
+    def test_not_found_anywhere_exits_1(self):
+        code, _ = self.find("nope")
+        self.assertEqual(code, 1)
+
+    def test_multiple_names_one_hit_exits_0(self):
+        make_skill(self.registry, "alpha")
+        code, out = self.find("alpha", "bravo")
+        self.assertEqual(code, 0)
+        self.assertIn("alpha", out)
+
+    def test_agent_hard_copy_found(self):
+        make_skill(self.agent_dir, "baz")
+        code, out = self.find("baz")
+        self.assertEqual(code, 0)
+        self.assertIn("hard copy", out)
+
+    def test_agent_junction_reported_as_registry_twin(self):
+        src = make_skill(self.registry, "qux")
+        kind = manager.make_link(src, self.agent_dir / "qux")
+        self.assertIn(kind, ("symlink", "junction"))
+        code, out = self.find("qux")
+        self.assertEqual(code, 0)
+        self.assertIn("twin", out)
+
+    def test_into_install_record_is_found(self):
+        target = self.tmp / "proj" / ".claude" / "skills" / "nick"
+        target.mkdir(parents=True)
+        manager.record_install(self.registry, target, self.registry / "nick",
+                               "symlink", self.tmp / "proj")
+        code, out = self.find("nick")
+        self.assertEqual(code, 0)
+        self.assertIn("into (recorded)", out)
+
+    def test_stale_into_record_is_pruned(self):
+        ghost = self.tmp / "gone" / "skills" / "echo"
+        manager.record_install(self.registry, ghost, self.registry / "echo",
+                               "symlink", self.tmp / "gone")
+        self.assertEqual(len(manager.load_installs(self.registry)["into"]), 1)
+        self.find("anything")
+        self.assertEqual(manager.load_installs(self.registry)["into"], {})
+
+    def test_lockfile_row_shown(self):
+        manager.record_locks(self.registry, ["lockedone"], ["fake"])
+        code, out = self.find("lockedone")
+        self.assertEqual(code, 0)
+        self.assertIn("locked", out)
+
+    def test_path_argument_resolves_to_skill_name(self):
+        directory = make_skill(self.registry, "deep")
+        code, out = self.find(str(directory))
+        self.assertEqual(code, 0)
+        self.assertIn("deep", out)
+
+    def test_real_cli_subprocess_find(self):
+        make_skill(self.registry, "cli")
+        proc = subprocess.run(
+            ["python", "manager.py", "find", "cli", "--registry", str(self.registry), "-q"],
+            capture_output=True, text=True, cwd=str(Path(__file__).resolve().parent),
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("inventory", proc.stdout)
+
+    def test_real_cli_subprocess_missing_exits_1(self):
+        proc = subprocess.run(
+            ["python", "manager.py", "find", "absent", "--registry", str(self.registry), "-q"],
+            capture_output=True, text=True, cwd=str(Path(__file__).resolve().parent),
+        )
+        self.assertEqual(proc.returncode, 1, proc.stderr)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

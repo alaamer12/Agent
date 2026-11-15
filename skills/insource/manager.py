@@ -50,7 +50,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Sequence
 from urllib.parse import unquote
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 
 # ---------------------------------------------------------------------------
 # optional dependencies
@@ -120,7 +120,7 @@ ALIASES = {
 }
 
 REGISTRY = Path(__file__).resolve().parent
-COMMANDS = {"skill", "agent", "lint", "viber", "report"}
+COMMANDS = {"skill", "agent", "lint", "viber", "report", "find"}
 
 
 class ManagerError(Exception):
@@ -473,6 +473,47 @@ def kv_set(registry: Path, store: str, data: Any) -> None:
         conn.commit()
     finally:
         conn.close()
+
+
+# ---------------------------------------------------------------------------
+# install index: where `--into` placed skills (links included, once lost)
+# ---------------------------------------------------------------------------
+
+
+def load_installs(registry: Path) -> dict[str, Any]:
+    data = kv_get(registry, "installs")
+    if not isinstance(data, dict):
+        return {"version": 1, "into": {}}
+    if not isinstance(data.get("into"), dict):
+        data["into"] = {}
+    return data
+
+
+def record_install(registry: Path, target: Path, source: Path, mode: str, project: Path) -> None:
+    data = load_installs(registry)
+    data.setdefault("into", {})[_key(target)] = {
+        "skill": target.name,
+        "target": str(target),
+        "source": str(source),
+        "mode": mode,
+        "project": str(project),
+        "installed_at": datetime.now().isoformat(timespec="seconds"),
+    }
+    kv_set(registry, "installs", data)
+
+
+def prune_installs(registry: Path) -> list[str]:
+    """Drop index rows whose target path no longer exists. Returns removed keys."""
+    data = load_installs(registry)
+    into = data.setdefault("into", {})
+    removed = [key for key, entry in into.items()
+               if not Path(entry.get("target", "")).exists()
+               and not is_link_like(Path(entry.get("target", "")))]
+    for key in removed:
+        del into[key]
+    if removed:
+        kv_set(registry, "installs", data)
+    return removed
 
 
 # ---------------------------------------------------------------------------
@@ -954,10 +995,14 @@ def deploy_skill(
     if mode == "symlink":
         if is_link_like(dest) and same_path(dest, src):
             if dest.exists():
+                if agent is None and not dry_run:
+                    record_install(registry, dest, src, mode, dest.parent)
                 return "unchanged", f"-> {src}"
             if not dry_run:
                 remove_entry(dest)
                 make_link(src, dest)
+                if agent is None:
+                    record_install(registry, dest, src, mode, dest.parent)
             return "repaired", f"broken link -> {src}"
 
         if is_link_like(dest):
@@ -987,6 +1032,8 @@ def deploy_skill(
         except OSError as exc:
             return "failed", str(exc)
         drop_record(registry, dest)
+        if agent is None:
+            record_install(registry, dest, src, mode, dest.parent)
         return status, detail
 
     # hard copy
@@ -1030,6 +1077,8 @@ def deploy_skill(
         return "failed", str(exc)
     if not remember_copy(registry, dest.name, src, dest):
         return "failed", "copied but could not fingerprint the result"
+    if agent is None:
+        record_install(registry, dest, src, mode, dest.parent)
     return status, detail
 
 
@@ -2204,6 +2253,79 @@ def cmd_report(args: argparse.Namespace, registry: Path, jobs: int) -> int:
     return 0
 
 
+def cmd_find(args: argparse.Namespace, registry: Path, jobs: int) -> int:
+    """Locate a skill everywhere it could live: the registry inventory, the agent
+    folders (live junctions and hard copies), the recorded --into installs, and the
+    lockfile. Stale --into records are pruned on sight. Exit 0 when any name resolves."""
+    names: list[str] = []
+    for item in args.skills:
+        candidate = Path(item).expanduser()
+        if candidate.is_dir() and has_skill(candidate):
+            names.append(candidate.name)
+        else:
+            names.append(item)
+    registry_real = os.path.normcase(os.path.realpath(str(registry))) + os.sep
+    installs = load_installs(registry)
+    removed = prune_installs(registry)
+    if removed:
+        installs = load_installs(registry)
+        display_info(f"[installs] pruned {len(removed)} stale --into record(s)")
+    locked = load_lockfile(registry).get("locked", {})
+    found_any = False
+    for name in dict.fromkeys(names):
+        rows: list[list[str]] = []
+        for path in walk_skills(registry, prune=False):
+            if path.name == name:
+                rel = path.relative_to(registry).as_posix()
+                depth = len(path.relative_to(registry).parts)
+                rows.append(["registry", "sub-skill" if depth > 1 else "inventory",
+                             rel, ""])
+        for agent in DEFAULT_AGENTS:
+            directory = agent_skill_dir(agent)
+            if not directory.is_dir():
+                continue
+            dest = directory / name
+            if is_link_like(dest):
+                kind = "junction" if is_reparse(dest) else "symlink"
+                try:
+                    tgt = os.path.realpath(dest)
+                except OSError:
+                    tgt = "?"
+                if not dest.exists():
+                    note = "BROKEN link"
+                elif os.path.normcase(os.path.realpath(tgt)).startswith(registry_real):
+                    note = "live twin -> this registry"
+                else:
+                    note = "live, points elsewhere"
+                rows.append([f"agent:{agent}", kind, tgt, note])
+            elif dest.is_dir() and has_skill(dest):
+                rows.append([f"agent:{agent}", "hard copy", str(dest), "real folder"])
+        for entry in installs.get("into", {}).values():
+            if entry.get("skill") != name:
+                continue
+            target = Path(entry.get("target", ""))
+            alive = target.exists() or is_link_like(target)
+            rows.append(["into (recorded)", entry.get("mode", "link"), str(target),
+                         f"installed {entry.get('installed_at', '-')}" if alive
+                         else "STALE on disk"])
+        if name in locked:
+            rows.append(["lockfile", "locked", ", ".join(sorted(locked[name])), ""])
+        if rows:
+            found_any = True
+            display_table(
+                ["Where", "Kind", "Path / target", "Note"],
+                rows,
+                title=f"find: {name} ({len(rows)} location(s))",
+                always=True,
+            )
+        else:
+            display_warn(
+                f"find: '{name}' not in the registry, any agent folder, or any recorded "
+                f"--into install; nothing else is known about it"
+            )
+    return 0 if found_any else 1
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -2238,7 +2360,7 @@ def add_mode_flag(parser: argparse.ArgumentParser) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="manager.py",
-        description="Link or hard-copy skills into agent folders, deploy AGENTS.md, and lint skills.",
+        description="Link or hard-copy skills into agent folders, deploy AGENTS.md, lint skills, report skill stats, and find where a skill lives.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "examples:\n"
@@ -2252,13 +2374,15 @@ def build_parser() -> argparse.ArgumentParser:
             "  python manager.py lint --readme\n"
             "  python manager.py report --sort files --reverse\n"
             "  python manager.py report techstack --json\n"
+            "  python manager.py find techstack\n"
+            "  python manager.py find pages revoke --quiet\n"
             "  python manager.py viber --into ./my-project --hard-copy\n"
         ),
     )
     parser.add_argument(
         "-V", "--version", action="version", version=f"%(prog)s {__version__}"
     )
-    subparsers = parser.add_subparsers(dest="command", metavar="{skill,agent,lint,viber,report}")
+    subparsers = parser.add_subparsers(dest="command", metavar="{skill,agent,lint,viber,report,find}")
 
     skill = subparsers.add_parser(
         "skill",
@@ -2350,6 +2474,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     report.add_argument("--reverse", action="store_true", help="sort descending")
     report.add_argument("--json", action="store_true", help="emit JSON instead of a table")
+
+    find = subparsers.add_parser(
+        "find",
+        help="locate a skill in the registry, agent folders, or recorded --into installs",
+        description="Search every known place a skill can live: this registry, the global "
+                    "agent folders (junctions and hard copies), installs recorded from "
+                    "--into deploys, and the lockfile. Read-only; exit 0 when any name "
+                    "resolves, 1 when nothing does. Stale --into records are pruned on sight.",
+    )
+    add_common(find)
+    find.add_argument(
+        "skills", nargs="+",
+        help="skill name(s), or a path to a skill folder (its name is used)",
+    )
 
     return parser
 
@@ -2561,6 +2699,23 @@ def main(argv: Sequence[str] | None = None) -> int:
                 implicit=implicit,
             )
             return cmd_report(args, registry, jobs)
+        elif command == "find":
+            display_command_report(
+                "find",
+                settings=[
+                    ("Registry", str(registry)),
+                    ("Skills", ", ".join(args.skills)),
+                ],
+                flags=[
+                    label for label, active in [
+                        ("-q/--quiet", args.quiet),
+                        ("-v/--verbose", args.verbose),
+                        ("-C/--no-color", args.no_color),
+                    ] if active
+                ],
+                implicit=implicit,
+            )
+            return cmd_find(args, registry, jobs)
         else:
             display_command_report(
                 "lint",

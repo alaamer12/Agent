@@ -140,7 +140,7 @@ When modeling multi-surface applications (e.g. mobile vs desktop):
 
 In production, multi-realm systems rely on DNS subdomains (e.g., `notion.so` for landing/pricing vs `app.notion.so` for workspace; `acme.platform.com` for tenant workspaces). During prototype review on a local dev server (`http://localhost:5173`), configuring local `/etc/hosts` or local DNS wildcards is friction that reviewers shouldn't have to bear.
 
-The `prototype` mode standardizes two compatible mechanisms for dual-realm and subdomain branching:
+The `prototype` skill standardizes two compatible mechanisms for dual-realm and subdomain branching:
 
 ### 1. Simulated Subdomains via Query Parameter (`?subdomain=<name>`)
 - A single page or app shell inspects `?subdomain=`:

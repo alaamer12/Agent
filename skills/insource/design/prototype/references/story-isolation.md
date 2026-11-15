@@ -1,6 +1,6 @@
 # Story Isolation — Rendering Single Components by URL
 
-> **What this owns:** The universal Story Isolation contract in the `prototype` mode: how every interactive or visual component declared in a prototype carries a `data-story` (and `data-testid`), how `?story_id=` isolates one or more components on a neutral stage, how state query parameters compose with story isolation, and the built-in inspection toolbox (`sy_*`).
+> **What this owns:** The universal Story Isolation contract in the `prototype` skill: how every interactive or visual component declared in a prototype carries a `data-story` (and `data-testid`), how `?story_id=` isolates one or more components on a neutral stage, how state query parameters compose with story isolation, and the built-in inspection toolbox (`sy_*`).
 
 ---
 

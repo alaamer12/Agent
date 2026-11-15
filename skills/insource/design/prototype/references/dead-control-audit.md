@@ -1,6 +1,6 @@
 # Dead-Control Audit (opt-in command)
 
-> **What this is:** the full procedure for the second entry point of the `prototype` mode — taking an **existing** HTML file and wiring the controls that look clickable but do nothing. It is the sibling of the build workflow in [`../method.md`](../method.md), not a step inside it.
+> **What this is:** the full procedure for the second entry point of the `prototype` skill — taking an **existing** HTML file and wiring the controls that look clickable but do nothing. It is the sibling of the build workflow in [`../method.md`](../method.md), not a step inside it.
 > **Read alongside:** [`feedback-heuristics.md`](feedback-heuristics.md) owns the affordance→component mapping and the dropdown/toast code patterns; [`query-param-states.md`](query-param-states.md) owns the param contract and bootstrap; [`viewport-frames.md`](viewport-frames.md) owns the viewport categories. This file owns *the order of operations* and links out for all three.
 
 **Run this only when asked.** Trigger phrases: "this does nothing when clicked", "the kebab doesn't do anything", "add feedback to the interactive elements", "make this feel real", "audit this for dead clicks", "wire up X". Never run it on a mockup you just built — a fresh build already wires every control per the main workflow, so there is nothing to audit.

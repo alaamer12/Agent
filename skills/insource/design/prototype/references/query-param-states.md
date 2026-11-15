@@ -1,6 +1,6 @@
 # The URL-State Contract
 
-The core of the `prototype` mode: every meaningful UI state is reachable,
+The core of the `prototype` skill: every meaningful UI state is reachable,
 reproducible, and shareable by URL alone, and the live UI and the URL never
 diverge. `/funds?tab=transactions&status=pending` renders exactly that;
 clicking to that state writes exactly that; back returns from it.

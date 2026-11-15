@@ -106,7 +106,7 @@ same mistake as the pasted toggle, one layer up.
 7. **Behaviour** — delegated handlers; a UI framework (e.g. Alpine) only if real reactivity is
    still missing after these.
 8. **Enforce** — guards in `--strict` as the exit criterion; screenshots per page via the
-   `parity` mode (`/design parity`) to catch visual drift during the migration.
+   `parity` skill (`/parity`) to catch visual drift during the migration.
 
 ## What the guards check
 
