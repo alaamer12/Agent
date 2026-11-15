@@ -1,5 +1,6 @@
 ---
 name: polyglot
+version: 1.0.0
 description: Teaches AI agents how to design and author universal, general, and language-agnostic agent skills, and how to write balanced, representative polyglot code examples. Use when creating or refactoring agent skills, coding standards, templates, or architectural specifications.
 ---
 

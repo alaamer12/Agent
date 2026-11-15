@@ -1,5 +1,6 @@
 ---
 name: animation
+version: 1.0.0
 description: 'Animation meta-skill — a router, nothing more. Routes any motion request to the sub-skill that holds the functionality: `life` (UI motion — micro, component, transition, entrances and exits, hover/press feedback, group choreography (cast, stagger, sequence), scroll, springs, onboarding intros, discovery, prototypes, animation review), `ascii` (character/terminal motion — ASCII intro or loader, image or video to ASCII, plasma and wave fields, per-glyph cascades, Three.js AsciiEffect), `svg` (25 SVG/logo animation styles — chrome-liquid, draw-fill, elastic-entrance, neon, unroll and 20 more, with light/dark variants). Use when the user asks for animation, motion, transitions, a page or route to move, an animated logo, a retro/ASCII effect, or wants an interface to "feel alive", even if no one says the word animate. Adds no rules or standards of its own: those belong to the sub-skill performing the work. Out of this domain: static visual quality, component state galleries, mockup fidelity, real video.'
 when_to_use: Any motion or animation request — UI transitions, micro-interactions, animated logos/SVGs, ASCII or terminal motion — where the work must first be assigned to the right sub-skill. Also /animation.
 argument-hint: "[life|ascii|svg] <command or style> <target>"

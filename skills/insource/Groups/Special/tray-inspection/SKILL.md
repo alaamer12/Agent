@@ -1,5 +1,6 @@
 ---
 name: tray-inspection
+version: 1.0.0
 description: Comprehensive workflow and Win32 inspection procedures for Windows system tray items, including listing active tray icons, reading explorer toolbar memory, extracting native HICON bitmaps/PNGs, capturing high-DPI tray snips, and diagnosing tray state or badging issues.
 ---
 

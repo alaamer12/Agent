@@ -1,6 +1,7 @@
 ---
 name: prototype
-description: "Interactive JS-rendered design prototypes with URL-driven states and component stories. Supports single apps and multi-app suites. Features: clean-URL dev server, thin HTML with JS DOM generation, per-component state trees via query params (Unicode-safe, Arabic values included), ?filled seeded stress testing, in-page story isolation (?story_id=), multi-state component catalogs (/stories), a unified floating Dev Dock owning every prototype control (declared state pickers, story/component picker, stage tools, 10-font picker, theme switch, live palette token browser with adaptive brand accent, cross-app switching, viewport readout) so screens stay chrome-free, designed empty/loading/error surfaces, and zero-duplication guards enforcing tokens, component classes, and a shared ui.js builder catalog. Triggers: prototype this, make this a prototype, /prototype components, stories gallery, dev dock, dedupe prototype styles."
+version: 1.0.1
+description: "Interactive JS-rendered design prototypes with URL-driven states and component stories. Supports single apps and multi-app suites. Features: clean-URL dev server, thin HTML with JS DOM generation, per-component state trees via query params (Unicode-safe, Arabic values included), ?filled seeded stress testing, in-page story isolation (?story_id=), multi-state component catalogs (/stories), a unified floating Dev Dock owning every prototype control (declared state pickers, story/component picker, stage tools, 10-font picker, theme switch, live palette token browser with adaptive brand accent, cross-app switching, viewport readout) so screens stay chrome-free, designed empty/loading/error surfaces, and zero-duplication guards enforcing tokens, component classes, and a shared ui.js builder catalog. Triggers: prototype this, make this a prototype, /prototype components, stories gallery, dev dock, dedupe prototype styles. Not a throwaway review wave of linked HTML files - that is playfile."
 when_to_use: Build or extend interactive, URL-driven prototypes, audit existing mockups for dead controls, or generate multi-state component catalogs and story isolation links.
 argument-hint: "[screen or app name] [topology or mode]"
 ---
@@ -14,6 +15,11 @@ pages (thin HTML) ──► js modules ──► URL query state helper ──�
 components        ──► ?story_id=  ──► in-page isolation     ──► neutral inspection stage
 registry          ──► /stories    ──► multi-state catalog   ──► component x state matrix
 ```
+
+**Boundary:** if what is wanted is a wave of throwaway review files — one self-contained HTML per screen,
+linked by plain hrefs, a README dossier, no shared machinery — that is `/playfile`, not this skill.
+`/prototype` is what design artifacts grow into when they must *behave like the app at scale*: the dock,
+spec-driven state trees, story catalogs and duplication guards below earn their keep exactly there.
 
 ## Core Tenets
 

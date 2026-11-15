@@ -1,5 +1,6 @@
 ---
 name: fahlwy
+version: 1.0.0
 description: 'Over-smart asset-source hunter. Find and PROVE a required number of working free asset sources (images, avatars, video, audio, icons, fonts, PDF books, brand logos) by fetching real bytes and validating magic signatures - never stopping at a guessed URL. Keeps its catalog as queryable CSV (data.csv: category, provider, family, url_form, kind, status, last_proven, access, rights, coverage, notes) plus an append-only growth ledger (log.csv), read and written through scripts/catalog.py. Use whenever asked to "find N sources", build an asset/placeholder source list, wire mockup media, or hunt down reliable hotlink/direct-download endpoints, then keep going until every slot is verified.'
 when_to_use: The user wants a countable list of working external asset URLs (images/avatars/video/audio/icons/fonts/PDF books/brand logos), asks to "find a way" to source media for a mockup/demo, wants verified placeholder/stock endpoints, or asks what the catalog already knows (`catalog.py list/search/stale`).
 ---

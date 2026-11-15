@@ -298,6 +298,13 @@ class DryRunTest(unittest.TestCase):
             self.run_main("--in", "sheet.png", "--out", str(self.root / "out"),
                           "--grid", "2x2", "--slots", "a,b", "--delivery", "64x64 png")
 
+    def test_rows_without_bom_needs_no_cell(self):
+        # A rows plan measures its own pitch; demanding --cell there was the bug.
+        code = self.run_main("--in", "sheet.png", "--out", str(self.root / "out"),
+                             "--rows", "2,2", "--slots", "a,b,c,d",
+                             "--delivery", "32x32 png", "--dry-run", "--json")
+        self.assertEqual(code, 0)
+
     def test_grid_override_with_cell_plans(self):
         code = self.run_main("--in", "sheet.png", "--out", str(self.root / "out"),
                              "--grid", "2x2", "--cell", "64", "--slots", "a,b",

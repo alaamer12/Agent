@@ -1,5 +1,6 @@
 ---
 name: bequeath
+version: 1.0.0
 description: 'End-of-session asset harvesting: review the whole conversation, propose what is worth keeping, and turn approved work into tested, reusable assets in the project''s bequest/ directory. Finds throwaway scripts, command sequences, debugging procedures, config snippets, queries, repeated workflows, useful patterns and instructive dead ends. Reports candidates first (name, type, original purpose, proposal, future use, direct-vs-generalize) and creates nothing until the user selects; silence is not approval. Generalizes only approved items - configurable inputs, no hardcoded values, temp paths or task assumptions - then tests beyond the original example and states verification honestly (verified automated/manual, partial, unverified). Each asset carries a card (what, when, how, inputs, outputs, assumptions, limitations, verification) beside its tests, with an index for discovery. Never stores secrets, never duplicates an asset, never claims untested reliability. Not session state or new global skills.'
 when_to_use: The conversation is ending, or the user says "bequeath", "save what we learned", "keep this for next time", "turn this into something reusable" — and work performed in the session may be worth preserving beyond it.
 argument-hint: "[optional scope: e.g. 'just the debugging scripts']"

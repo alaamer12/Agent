@@ -1,5 +1,6 @@
 ---
 name: scrape
+version: 1.0.0
 description: Fetch full framework documentation as clean local Markdown files. Commands per framework (currently `ionic` covering all guide pages + every API component page; capacitor/react/vue planned) plus `--auto` URL discovery for any Docusaurus-style docs site and explicit `--url` scraping, with a `--verify` mode that proves every page is reachable and server-rendered. Use whenever the agent needs authoritative external docs - e.g. Ionic component props/events/methods/CSS custom properties before building mobile UI, API reference lookups, or confirming doc URLs exist - instead of guessing from memory or fetching pages one by one.
 ---
 

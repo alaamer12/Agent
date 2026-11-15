@@ -1,5 +1,6 @@
 ---
 name: create-video
+version: 1.0.0
 description: 'Turn a vague video request into locked, numeric direction, then lay out, verify and deliver a professional video project. Loads after the hyperframes entry point has routed the job and written BRIEF.md, and never competes with it or the hyperframes domain skills. Converts the brief into six independent axes — genre, pacing, visual, camera, editing, tone — plus aspect, duration, audio and scenes, each resolving to numbers: cuts per minute, seconds per arrival, transition milliseconds, easing. scripts/spec.py validates the spec and derives a build sheet with a per-scene arrival budget; scripts/scaffold.py writes the project structure and passes hyperframes lint; scripts/qa.py gates the render on measurable thresholds — dead air, all-clips-at-t=0, dwell, loudness, true peak, safe-zone ink — and motion promises are measured on rendered frames. Use for launch, demo, explainer, ad, promo, reel, short or hero video when direction must be pinned, a project structured, or quality proven.'
 ---
 

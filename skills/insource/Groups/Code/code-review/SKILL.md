@@ -1,5 +1,6 @@
 ---
 name: code-review
+version: 1.0.0
 description: 'Review the changes since a fixed point (commit, branch, tag, merge-base) on two separated axes run as parallel subagents and aggregated side by side, never cross-reranked: Standards (does the diff follow the repo''s documented rules plus a Fowler code-smell baseline that the repo always overrides, skipping what tooling enforces?) and Spec & Quality (is the spec faithfully implemented, judged on correctness, readability, architecture, security, performance?). Carries the Google gate: approve when it definitely improves code health, not perfection; severity labels (Critical/Required/Nit/Optional/FYI); tests reviewed first; change sizing ~100/300/1000 lines; named structural remedies instead of "this is complex"; dependency discipline; dead-code ask-before-delete; no-LGTM honesty rules; never accept "fix it later". Use before merging, evaluating agent-written code, or when asked "is this ready". Not for fixing bugs a review finds (dbug, fix), commit messages (commit), or full-repo security scans (security-scan).'
 when_to_use: 'The user says review / is-this-ready / look at my diff, before any merge or PR, after a feature lands or an agent produced code, or after a bug fix when the regression test needs reviewing too.'
 argument-hint: "[fixed point: commit | branch | tag | 'main']"

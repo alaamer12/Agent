@@ -45,3 +45,16 @@ Sometimes the only honest result is: the artifact's value depends on details tha
 version both travels and teaches. Report it, propose the alternative - a rewritten lesson abstract, a
 restricted audience, or the access request that would make sharing legitimate - and stop. Shipping a
 look-sanitized document to satisfy a deadline is the specific harm this skill exists to prevent.
+
+## "There is nothing to revoke" is a complete and correct output too
+
+The mirror image of the stop: after the taxonomy walk ([`01`](01-what-makes-an-artifact-specific.md)) and the
+mechanical scan run over every surface ([`03`](03-leak-surfaces.md)), if nothing pins the artifact to a
+specific origin, the artifact ships **byte-identical** with the clean report
+([`04`](04-verification.md) §D, clean variant). This is the job done, not the job skipped.
+
+What is *not* covered by this heading: generalizing a public product name that identifies only its public
+vendor, rounding numbers that belong to nobody, or tightening prose "for generality" or "transparency." None of
+those cuts a tie to the artifact's origin, so none of them is revocation - they are edits, and a run that
+leaves a diff on an empty inventory either missed an item (redo the walk) or went looking for work (stop).
+The temptation to show effort is exactly the failure the clean output exists to refuse.

@@ -1,5 +1,6 @@
 ---
 name: scss
+version: 1.0.0
 description: SCSS/Sassy CSS best practices and coding guidelines for maintainable, scalable stylesheets
 ---
 

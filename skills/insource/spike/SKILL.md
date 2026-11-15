@@ -1,5 +1,6 @@
 ---
 name: spike
+version: 1.0.0
 description: Turn "will this break it?" into numbers. A measurement, not a decision - pick the smallest renderable unit that carries a claim, derive its state list from code, capture computed styles, tight crops, node inventories and interaction facts before and after one reversible change, and report drift by category, including the drift that refutes the claim. Use when someone is about to win an argument by asserting something measurable, before adopting or swapping a component, or when a pixel-perfect diff is being cited as proof about behaviour.
 argument-hint: "<the claim being tested>"
 ---

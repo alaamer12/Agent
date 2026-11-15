@@ -1,5 +1,6 @@
 ---
 name: pages
+version: 1.0.0
 description: 'A product''s complete page universe: one skill, three modes, ONE artifact. /pages main plans the core-screen inventory, pruning a researched 492-row 30-discipline candidate catalog against project evidence, splitting mixed concerns and recording redirects and exclusions with reasons. /pages secondary writes the always-present trust documents (ToS, Privacy, Cookies, Contact, Status, DPA, delete-account; one reference per type, ONE canon per document, never invented legal facts). /pages complementary designs the conditional screens that appear only when a trigger fires and the app runs normally without them (onboarding, transaction success/failure, HTTP 404/500/offline, session gates, maintenance, access gates, token handoffs, OAuth/SSO callback relays). Every page registers in PAGES.md tagged by kind; nothing a product lacks gets invented. Triggers: plan my pages, legal pages, onboarding flow, error page, callback URL. Not for designing/building screens (prototype, impeccable) or implementation order (planner).'
 when_to_use: Any question of which pages a product has, needs, or must not have — core inventory, trust documents, conditional screens — or when a change touches PAGES.md territory.
 argument-hint: "[main|secondary|complementary] [plan|list|new <x>|audit]"

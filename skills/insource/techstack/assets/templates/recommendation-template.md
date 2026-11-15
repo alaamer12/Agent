@@ -14,7 +14,17 @@ What is being given up by this choice. Named explicitly, not buried in a caveat 
 
 ## Feature-specific notes
 
-Any named feature from the requirements that is notably easy, awkward, or unsupported in this recommendation — called out directly rather than glossed over.
+Any named feature from the requirements that is notably easy, awkward, or unsupported in this recommendation — called out directly rather than glossed over. A negative note here ("awkward", "unsupported") must have passed the real-world-proof check (`references/evidence.md` Part 2): if a real app does it, state "possible, proven by `[app]`, at `[mechanism cost]`" instead.
+
+## Capability matrix
+
+Show this when the decision turned on hard capability gates — a close call, a must-have capability, or a product whose distinct modes give different answers. Omit it for a trivial decision with no contested capability. Derive the columns from the project's requirements; split each product's decision-relevant modes into its own row (`references/capability-matrix.md`).
+
+| Candidate (product — mode) | `[binary capability question 1]` | `[binary capability question 2]` |
+|---|---|---|
+| `[product] — [mode A]` | ✅/❌ `[mechanism note]` (`[version]`) | ✅/❌ `[mechanism note]` (`[version]`) |
+
+Every cell is a version-pinned yes/no with a short mechanism note and its evidence; every disqualifying "no" passed the real-world-proof check. Below the table, state which gate eliminated which candidate and which row survives — the matrix is evidence for the decision above, not a neutral menu.
 
 ## If priorities shift
 
@@ -22,7 +32,7 @@ What fact or changed priority would change this recommendation (e.g. "if native 
 
 ## Verified as of
 
-Note that the ecosystem state (maintenance status, recent changes) was checked as of the conversation date, since this can go stale — encourage re-verification if this recommendation is acted on much later.
+Record, per serious candidate, the **latest stable version number, its release date, and the source URL** it was checked against (`references/evidence.md` Part 1), plus the conversation date. Capability claims are pinned to those versions, not to memory. Note that this goes stale — encourage re-verification (and re-finding the latest version) if the recommendation is acted on much later.
 
 ---
 

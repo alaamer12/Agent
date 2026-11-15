@@ -1,5 +1,6 @@
 ---
 name: type-up
+version: 1.0.0
 description: >-
   Converts plain primitive types (string, number, boolean, etc.) into a
   professional typing system with semantic aliases, documentation, runtime

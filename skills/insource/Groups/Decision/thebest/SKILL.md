@@ -1,5 +1,6 @@
 ---
 name: thebest
+version: 1.0.0
 description: 'Evidence-based option choice for THIS project: gather proof, hand the user a verdict - "this is likely best for us, based on these tests and research" - and stop; the USER decides (dtb is the reverse). Frame hard constraints first (stack, platform, license, AGENTS.md) and eliminate violating options visibly, before testing. List ALL viable ways (user candidates, ecosystem standards, codebase precedents, lesser-known families), never a remembered shortlist. Map each criterion to its evidence: numbers -> /benchmark (real data, isolated environments), actual library behavior -> /learning-test, facts -> research (context7 if installed, else version-matched docs), fit -> argued; many decisions are pure research - a forced benchmark is fake rigor. Verdict carries confidence, runner-up with its flip condition, untested items. Use for "which approach/library for X", design forks, A-vs-B. Not fresh-stack picks (techstack), the measurement engine (benchmark), or an HTML decision page (decide).'
 when_to_use: The user asks which method/library/approach to use for something, presents candidates to choose between, or a design fork needs an evidence-based verdict; also /thebest.
 argument-hint: "[the decision, known options, and project constraints if already stated]"

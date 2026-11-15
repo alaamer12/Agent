@@ -1,5 +1,6 @@
 ---
 name: adapt
+version: 1.0.0
 description: 'Grows a project''s own Viber version. Viber has fixed foundations, but no two projects walk the same path. When the journey needs a capability nothing covers, adapt proves the gap is real by walking a short ladder (a Viber or deck Skill, a project document, an installable Skill, a how-to recipe) and only when every rung fails creates a small project Skill, preferably an extension of the closest existing Skill. Every adaptation is recorded in the Viber section of the project''s AGENTS.md. Never edits the fixed base, never runs what it creates, never creates a Skill where a document, rule or existing Skill would do. Triggers: ''we keep doing this by hand'', ''no skill covers this'', ''this project needs its own skill'', ''adapt''. Not catalog authoring (skill-creator), fixed recipes (how-to-do), the rest of the rulebook (agents-md).'
 when_to_use: A need keeps returning that no Skill covers, the same instruction or correction is given repeatedly, a project domain has no owning Skill, a deck Skill should become part of this project's path, or the user asks for a project-specific Skill. Also /adapt.
 argument-hint: "[the gap or repeated need - or nothing, to scan the current work for gaps]"

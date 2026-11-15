@@ -1,5 +1,6 @@
 ---
 name: watch-video
+version: 1.0.0
 argument-hint: <video-url-or-local-path> [section or question]
 description: Watch a video by reconstructing it from frames plus a timestamped transcript, measure how objects move through it, and write structured markdown notes. Downloads with yt-dlp, extracts auto-scaled JPEG frames with ffmpeg, gets captions (Whisper API fallback), then reads frames and speech together. scripts/motion.py compares two frames or a whole frame dump and reports which way the dominant object went as one of eight compass directions, in-place (including rotation about itself), or cannot-determine. Use when the user asks to watch, analyze, summarize, transcribe, take notes on, or explain a video, asks what is shown on screen at a given moment, asks where an object went, whether the camera pans, or about motion or editing style, wants a presentation or editing style replicated, hands over a YouTube/Vimeo/TikTok/X/Twitch/Loom/Instagram URL or a local mp4/mov/mkv/webm and asks about its content, or types /watch-video.
 ---

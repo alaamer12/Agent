@@ -1,5 +1,6 @@
 ---
 name: accessibility
+version: 1.0.0
 description: Orchestrates and authors an application's Accessibility Architecture specification into <docs>/architecture/accessibility-architecture.md. Moves beyond compliance checklists to design a comprehensive system spanning visual adaptation (high-contrast mode, eye-comfort presets like warm-cream/slate, user-tunable themes), typographic flexibility (multi-font selection, dyslexia-friendly fonts like Lexend/OpenDyslexic, fluid rem scaling without clipping), cognitive density tiers (compact vs standard vs spacious/verbose), comfort-reading modes, user autonomy and permission hygiene (contextual permissions, zero unexpected modals or popups), reduced motion, and assistive operability.
 argument-hint: "[project root or app name]"
 ---

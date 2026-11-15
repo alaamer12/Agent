@@ -68,6 +68,10 @@ Public library and product names, generic role labels (`[on-call]`, `[billing-se
 well-known protocols, documentation URLs, anything the artifact's argument depends on staying real. Write
 **[keep]** with a reason rather than leaving it unexamined - the unexamined row is where the leak lives.
 
+An inventory of zero identity rows is a complete, honest result - report it and return the artifact unchanged
+([`06`](06-boundaries-and-misuse.md)). Inventing rows to justify the run (generalizing a harmless public
+product name, softening numbers that identify nobody) is the failure this note exists to prevent.
+
 ## Inventory row format
 
 One line per item, and this is exactly what the script's map file consumes:

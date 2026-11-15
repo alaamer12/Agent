@@ -1,5 +1,6 @@
 ---
 name: theskills
+version: 1.0.0
 description: 'Pin skills as fixed, auto-apply behavior and persist that into the agent''s memory context, so future sessions run them without being asked. Run at the start of a conversation or project to load the pinned set and apply it all session: pinning `clean-code` with the trigger "writing or editing code" makes every later turn that writes code run clean-code first. The registry (.theskills/pins.json) is the source of truth; `sync` renders it into the AGENTS.md managed block — the baseline every harness reads — plus, only when the harness has them, secondary layers: a feedback memory entry with its MEMORY.md index line, or notes a session-start hook injects. `status` audits drift across the layers that exist. Pins resolving to no invocable skill are refused. Use for "make X a fixed skill", "always use X", "pin these skills", "so you never have to ask me to run X", /theskills, or to list/add/pause/unpin/sync/audit the set. Not for running one skill once, and not general memory cleanup (the remember skill).'
 when_to_use: /theskills at the start of a session or project; the user asks that certain skills always apply, wants the pinned list seen or changed, or a repo has .theskills/pins.json.
 argument-hint: "[bootstrap|pin <skill> --when \"…\"|list|sync|status]"

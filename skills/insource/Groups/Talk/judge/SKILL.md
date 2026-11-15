@@ -1,5 +1,6 @@
 ---
 name: judge
+version: 1.0.0
 description: Acts as a fair, unbiased judge comparing two or more candidates (libraries, frameworks, tools, architectural approaches, vendors, design options, or any comparable set of choices). Use whenever the user wants a rigorous, evidence-based comparison or recommendation rather than a quick opinion — phrases like "which is better", "compare X vs Y", "help me choose between", "which should I use", "evaluate these options", or "judge these candidates". Always trigger this for "best library for X" or "X vs Y" style questions, even if the user doesn't say "judge" or "compare" explicitly. This skill runs many web searches per candidate across multiple dimensions (ecosystem health, maintenance activity, API design, popularity/adoption, usage patterns, code quality, performance, real-world evaluations) and demands honesty, bravery in stating a real verdict, and zero bias toward any candidate — it never pulls punches to be diplomatic and never recommends something just because it's popular or familiar.
 ---
 

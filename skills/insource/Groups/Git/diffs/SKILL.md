@@ -1,5 +1,6 @@
 ---
 name: diffs
+version: 1.0.0
 description: 'Read git diffs like evidence, not text: triage huge diffs and search diff history. Establishes the right baseline (A..B vs A...B, worktree/staged/HEAD, merge base), surveys a change set (stat, name-status, renames, generated/binary/whitespace), reads hunks correctly (arithmetic, function context, word-diff, color-moved), spots risk (removed error handling, changed defaults, boundaries, mode bits, dependency and migration changes, secrets), and searches with pickaxe -S/-G, message-level --grep, log -L, git grep at a revision, range-diff, remerge diffs. Topic dossier (--topic): messages + code + history in four budgeted channels, never a -p dump. Also answers "is this diff truthful?" - message vs changes, tests present, debug leftovers, partial staging, scope creep. Ships scripts/diff_survey.py (deterministic triage, --json, --fail-on, budgets). Use for reviewing PRs or commits, investigating what a commit did, hunting where a string was added or removed, or when a diff is too large to read.'
 when_to_use: The user asks what a commit/PR/branch changed, asks to review a diff, points at a huge or confusing diff, asks where a string or behaviour was introduced or removed, or a change must be verified against its description.
 argument-hint: "[range|staged|worktree|merge <sha>] [path...]"

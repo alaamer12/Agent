@@ -1,6 +1,7 @@
 ---
 name: revoke
-description: 'Sanitise an artifact by revoking what ties it to a specific project, person, customer or deployment: the substance survives, the identity does not. Use when a report, spec, config, log, ticket thread or screenshot must leave its origin: inventory what is specific (names, ids, endpoints, secrets, amounts, dates, paths, metadata), choose per item [redact] [pseudonymize] [generalize] [aggregate] [keep] under one substitution map, verify nothing leaks (token and entropy sweeps, metadata, links, the map itself), and check the text still makes its argument. Modes: /revoke partial masks values to a recognizable fragment (A****) for owner-viewing screens - never secrets, never shared artifacts; /revoke image paints opaque blocks over visible identifiers (blur is not revocation) and strips metadata. Calibrate to the audience. Not polyglot (stack-neutral); revoke is identity-neutral. Never to hide wrongdoing, evade a legal hold, strip safety notices or erase accountability; the original stays intact.'
+version: 1.0.1
+description: 'Sanitise an artifact by revoking what ties it to a specific project, person, customer or deployment: the substance survives, the identity does not. Use when a report, spec, config, log or screenshot must leave its origin: inventory what is specific (names, ids, endpoints, secrets, dates, paths), choose per item [redact] [pseudonymize] [generalize] [aggregate] [keep] under one substitution map, verify nothing leaks (token/entropy sweeps, metadata, the map), and check the argument survives. No findings, no changes: with nothing identifying, the artifact ships byte-identical with a clean report; cosmetic rewording is editing, not revocation. Modes: /revoke partial masks values to fragments (A****) for owner-view screens - never secrets; /revoke image paints opaque blocks over visible identifiers (blur is not revocation), strips metadata. Not polyglot (stack-neutral); revoke is identity-neutral. Never to hide wrongdoing, evade a legal hold, strip safety notices or erase accountability; the original stays intact.'
 when_to_use: The user asks to sanitise, redact, anonymise, de-identify, genericise or "remove anything that identifies our project/customer" from a document, passage, config, log, screenshot, image or case study before sharing or reusing it. Also /revoke, /revoke partial (owner-recognition masks), /revoke image (pixel-level redaction of a picture).
 argument-hint: "[artifact or path] + [where it is going] | partial: [values] + [who will see them] | image: [image path] (+ regions, else revoke all visible identity)"
 ---
@@ -17,6 +18,12 @@ nobody can trace back is a document nobody can correct.
 **The second principle, and the one that separates this from blind redaction: the argument must survive.** If the
 reader can no longer follow why the thing happened or what to do, you have not sanitized a document, you have
 destroyed it. Meaning is preserved deliberately, item by item ([`00`](references/00-what-revoking-is.md)).
+
+**The third principle, aimed at the most common failure in practice: no findings, no changes.** An inventory
+and scan that surface nothing identifying are a complete, correct result. The artifact ships **byte-identical**
+and the deliverable is the clean report. Generalizing harmless public product names, softening numbers that
+identify nobody, or rewording for "transparency" touches no identity tie — that is editing dressed as
+sanitizing, and it is never the output of this skill ([`06`](references/06-boundaries-and-misuse.md)).
 
 ## Not the same as `polyglot`
 
@@ -50,6 +57,13 @@ the ones that feel innocent. Two categories people miss, and they are the expens
   hyperlinks, footnotes, code comments ([`03`](references/03-leak-surfaces.md)).
 - **Combinatorial identifiers** - nothing in "our 40-engineer fintech in Austin, migrated in Q3 2025" is
   secret, and the combination names the company. Uniqueness, not secrecy, is the test.
+
+**Zero rows is a valid inventory outcome.** If the taxonomy walk and `scripts/revoke.py scan` surface nothing
+that pins the artifact to an origin, the run ends here: skip Steps 2-4, hand back the artifact unchanged, and
+record the clean result - what was scanned, which surfaces were swept ([`03`](references/03-leak-surfaces.md)),
+the date ([`04`](references/04-verification.md) §D has the clean variant). Public product names, generic role
+labels and standard ports are [keep] material ( [`01`](references/01-what-makes-an-artifact-specific.md) §9),
+not work to invent.
 
 ## Step 2 - Choose one operation per item
 
@@ -154,7 +168,7 @@ Read [`06`](references/06-boundaries-and-misuse.md) before touching anything in 
 | [`03-leak-surfaces.md`](references/03-leak-surfaces.md) | Where data hides outside the prose: metadata, images, filenames, hashes, links, comments, tone | Step 1 and Step 4 |
 | [`04-verification.md`](references/04-verification.md) | The mechanical and human checks, the residual-risk question, and how to report what was lost | Step 4 |
 | [`05-purpose-calibration.md`](references/05-purpose-calibration.md) | Audience levels, what must survive at each, and the questions to ask when the destination is vague | Step 0 |
-| [`06-boundaries-and-misuse.md`](references/06-boundaries-and-misuse.md) | The stop list: concealment, legal holds, protective content, accountability, third-party data, originals, theatre | Step 0 and whenever tempted |
+| [`06-boundaries-and-misuse.md`](references/06-boundaries-and-misuse.md) | The stop list: concealment, legal holds, protective content, accountability, third-party data, originals, theatre, and why a clean empty run is a complete output | Step 0 and whenever tempted |
 | [`07-partial-masking.md`](references/07-partial-masking.md) | The owner-view mode: head/tail fragment choice as threat model, entropy floors, the never-for-secrets rule, why partial output must not leak into shared artifacts | Only under `/revoke partial` |
 | [`08-image-redaction.md`](references/08-image-redaction.md) | Pixel revocation: visible-identifier inventory, block-vs-blur honesty, corner/edge coverage, embedded thumbnails and multi-frame traps, the temp-render-then-look loop | Only under `/revoke image`, or whenever an image is in the artifact set |
 | [`09-placeholder-or-fake-data.md`](references/09-placeholder-or-fake-data.md) | The two stand-in styles and the genre question that picks between them, reserved name-spaces, the no-structure-inheritance rule, fake identifiers never fake evidence | Step 2, whenever a stand-in is chosen |
@@ -162,8 +176,8 @@ Read [`06`](references/06-boundaries-and-misuse.md) before touching anything in 
 ## Examples and script
 
 Cases in `examples/` show the operations on real-shaped artifacts, including one where over-revoking killed
-the point, and one where the leak was in a PNG's metadata. Read them after your own inventory, not instead of
-it:
+the point, one where the leak was in a PNG's metadata, and one where the correct output was no changes at all.
+Read them after your own inventory, not instead of it:
 
 | Case | Artifact | The lesson |
 |---|---|---|
@@ -175,6 +189,7 @@ it:
 | [`case-06`](examples/case-06-cannot-be-shared.md) | what "no viable sanitized version" looks like | reporting the stop instead of shipping a leak |
 | [`case-07`](examples/case-07-partial-mask-recovery-screen.md) | account-recovery screen | head-vs-tail per field, the refused password fragment, prose around the masks re-identifying |
 | [`case-08`](examples/case-08-chat-screenshot-image-revocation.md) | chat screenshot | block vs blur, the avatar corner that leaked past a tight box, the temp pass that caught it |
+| [`case-09`](examples/case-09-clean-exit-no-changes.md) | technical explainer with public names only | empty inventory ships the artifact byte-identical with a clean report |
 
 - `scripts/revoke.py` - `scan` finds candidate specific data (emails, URLs, IPs, keys, tokens, UUIDs, private
   key headers, paths, precise dates and money, internal hostnames) so your inventory is not memory-based;

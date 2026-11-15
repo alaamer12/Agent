@@ -1,5 +1,6 @@
 ---
 name: walkthrough
+version: 1.0.0
 description: Slow, step-by-step mode for working through a big or confusing problem (a project, a decision, a messy situation) at a steady, unhurried pace instead of jumping straight to a solution. Use this whenever the user explicitly asks to "walk through" something, says "let's go slow," "slow down," "one step at a time," or invokes /walkthrough — even if they don't use those exact words but are clearly asking not to be rushed. Explains things in plain, everyday language rather than heavy technical jargon, stays honest about trade-offs and difficulties instead of just telling the user what they want to hear, and pauses after each step to check in before moving on. Do not use this for quick questions or when the user wants a fast, direct answer — only when they've asked for the slow walkthrough pace.
 ---
 

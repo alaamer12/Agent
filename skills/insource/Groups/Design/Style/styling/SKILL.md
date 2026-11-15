@@ -1,5 +1,6 @@
 ---
 name: styling
+version: 1.0.0
 description: >-
   Platform-neutral rules for writing NEW styling on any stack (HTML/Web, Blazor, MAUI, Qt):
   per-module stylesheets, no monolith; role-named tokens as single source of truth; styling as a

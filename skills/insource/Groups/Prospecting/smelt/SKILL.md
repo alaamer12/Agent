@@ -1,5 +1,6 @@
 ---
 name: smelt
+version: 1.0.0
 description: 'Turns a completed mine run — or any research corpus of checkpoints, distillations, plans, and witness notes — into a durable, evidence-linked knowledge base another agent can consume. Trigger on "/smelt", "smelt the mine", "turn the mine for X into a knowledge base", "compress the mining folder", "make this research reusable", "build a knowledge base from these files", or any request to preserve everything learned across many large files without losing knowledge. Takes a source folder and a destination; works file by file into a running knowledge file, then reconciles folders globally. Verifies every reference URL the run left behind — exhaustively, never a sample — recording status and handling dead links, and reports each source file''s smelt yield (what share of its knowledge entered the base) sorted top yield to bottom. Writing is free-form — no template — and every claim stays traceable to its source. Never summarizes sources away, never deletes a finding, always keeps the evidence pointer.'
 ---
 

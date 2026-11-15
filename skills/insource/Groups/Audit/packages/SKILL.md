@@ -1,5 +1,6 @@
 ---
 name: packages
+version: 1.0.0
 description: 'One run, two jobs over a project''s dependencies, any ecosystem (JS/TS, Python, Go, Rust, JVM, .NET…) and any project shape. Job 1 — redundancy audit: classifies each dependency as explicit (imported) or implicit (needed without any import: toolchain binaries, native/link-time stubs, config plugins, entry-point-discovered packages, blank imports, peer deps, codegen, type-only), flagging for removal only what is neither. Job 2 — freshness: updates via the ecosystem''s first-class tooling when it exists (go mod tidy, bun update --latest, cargo upgrade, uv, dotnet-outdated…), else resolves latest via context7 or registry/web search — never memory; always a before/after report for approval, majors checked against migration guides and real project usage first. Both jobs close with a mandatory verification gate — resolve, typecheck/compile, build, tests, runtime — with commands discovered from the project''s scripts and CI, never invented. Use to audit, dedupe, clean up, update, or modernize dependencies in any stack.'
 ---
 

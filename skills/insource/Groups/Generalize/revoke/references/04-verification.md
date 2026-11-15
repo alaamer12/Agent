@@ -67,6 +67,24 @@ ORIGINAL  : untouched at <location>           MAP RETAINED: with the source, not
 The `LOST` line is the one agents omit and reviewers need. Sanitization always costs the reader something;
 naming the cost is what makes the artifact trustworthy rather than merely clean.
 
+### The clean variant
+
+An empty inventory is not a failed run - it is the other correct output, and it reports the same way:
+
+```text
+ARTIFACT  : <original> -> unchanged           CLEARED FOR: <destination level>
+INVENTORY : 0 identity rows (taxonomy walk over <n> surfaces; revoke.py scan: <n> candidates, all [keep])
+CHANGES   : none - nothing in the artifact pins it to an origin
+CHECKS    : shape scan <pass> metadata surfaces <pass>
+LOST      : nothing (no substitution was required or made)
+RESIDUAL  : low - <one line; or the combination you checked and found non-unique>
+ORIGINAL  : untouched - it is also the output
+```
+
+The candidate count with every candidate dispositioned [keep] is the evidence the scan ran; "0 candidates"
+without that record is an unproven clean. The shape checks (A) run on the original - there is no diff and no
+map, so do not substitute one: no rewording "to be safe" is part of this result.
+
 ## E. When verification is not yours to do
 
 Personal data, security findings not yet disclosed, and regulated content carry decisions above your

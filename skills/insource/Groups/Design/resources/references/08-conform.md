@@ -146,8 +146,9 @@ python scripts/conform.py --in sheet.png --out out/ --grid 4x4 --bands \
 
 Rows the BOM marks `shipped`, `reused`, `no-image`, `done` or `skip` are skipped, as are rows with
 no master spec (stock photos, CSS icons, SVG logos). `--force` re-does shipped slots. Without a
-BOM, there is no master to read: pass `--grid COLSxROWS` or `--rows C1,C2,...` or the run stops
-instead of guessing.
+BOM there is no master to read, so the geometry is on the command line: `--rows C1,C2,...` or
+`--bands` measure the image, while a bare `--grid COLSxROWS` also needs `--cell <px>` because
+nothing has told it the pitch. With none of them the run stops instead of guessing.
 
 
 ### 3a. Single masters
@@ -363,7 +364,84 @@ failure.
 
 ---
 
-## 9. Failure modes
+## 9. Running it, watching it, and what to do when it stops
+
+### 9a. The loop
+
+| Step | Command | Look at | Stop if |
+|---|---|---|---|
+| 1. Measure | `sheet_probe.py <master> --delivery "<spec>"` | `layout`, `rows`/`columns`, `subjects`, `ceiling`, `clips`, the `master` line | `ceiling` is smaller than `delivery x max DPR` - the sheet cannot supply those files (§6) |
+| 2. Plan | `conform.py ... --dry-run` | `master`, `cut`, `N expected`, each slot's `cell x,y` | a slot has no cell, two slots share one, or the cells do not match the picture |
+| 3. Cut | the same command without `--dry-run` | exit code, `result`, every `warning` line | exit is not 0 (§9b) |
+| 4. Review | `contact_sheet.py <out> --out review.png --skip-density` | the picture on a checkerboard, plus the per-file alpha facts | a halo, an opaque corner, a subject cut at a cell boundary |
+| 5. Record | edit the BOM | the `Status` column | a file shipped while its row still says `pending` |
+
+Each step is cheaper than the next one's failure: probing costs a moment, a wrong cut writes wrong
+files into the project's asset folder, and only a review sees a white halo that geometry passes.
+
+**`--dry-run` never opens the image.** It prints the plan from the BOM or the flags; a no-BOM plan
+therefore reports `master ... (size measured at run time)` and estimated cells. That is what makes it
+safe before spending a re-render. Use it for every selection question - *which slots matched, which
+were skipped, and which cell does each id own* - before touching pixels.
+
+### 9b. Exit codes: what to check first
+
+| Exit | The run is saying | First check | Then |
+|---|---|---|---|
+| **2** | the spec or the image could not be read | the message names the file, slot token or flag | fix that one thing - a Master cell, a `--slots` list, a delivery spec, a missing file - and re-run |
+| **3** | the image does not show what the plan claims: subject counts, empty cells, or band counts | re-probe and compare `rows ...` / `columns` against the plan | a touch/gap problem is a re-render; a wrong plan is a BOM edit; `--allow-empty` only when you intend to fill the hole |
+| **4** | files were written but verification failed | `errors` in the report, then `conform-report.json`'s `files` for the offending slot | a size/aspect failure means the delivery spec or the cut is wrong, not the file |
+
+Exit 3 is a *finding*, not a crash: the run refuses to guess which cell belongs to which id. Exit 4
+is the only code that leaves files on disk from a failed run - delete the output folder before
+re-running if the report shows partial writes.
+
+### 9c. Probe finding → what to write → which cut
+
+| The probe says | It means | Master column | Cut |
+|---|---|---|---|
+| `layout regular`, `rows 5,5`, even gaps | one grid, every row agrees | `WxH sheet 5x2` | grid (default) |
+| `layout regular`, gaps `(uneven)` or `clips` non-zero | rows agree, gutters do not | `WxH sheet 5x2` | `--bands` |
+| `layout mixed` / `staggered`, `rows 8,8,8,10` | no single grid describes it | `WxH sheet rows 8,8,8,10` | bands, per row (implied) |
+| `columns 1 band(s)` on a multi-column sheet | subjects in a row touch | - | not cuttable: regenerate with spacing |
+| `empty_cells` non-empty | the render shipped fewer subjects than the plan | fix the slot list or re-render | - |
+| `ceiling 128px` vs a `96@2x` delivery | 192px needed, 128 available | - | lower the DPR (§6), never upscale |
+
+The `master` line the probe prints is already in this grammar - paste it, do not re-derive it by
+hand. If you are writing the BOM before the master exists, plan `CxR` for a uniform sheet and
+`rows ...` only when the counts are known.
+
+### 9d. Reading `conform-report.json`
+
+Read it in this order; stop at the first line that answers the question:
+
+1. `ok` - false means at least one `errors` entry; those are the facts, the console is the summary.
+2. `expected` vs `files` - a gap means slots were skipped or cells were empty.
+3. `empty_cells` - names the slots whose cell held no subject.
+4. `skipped` - why a slot you expected is not there (`no master/delivery spec`, `shipped`, ...).
+5. `warnings` - each one is a decision: an interior cut line on content means `--bands`; a subject
+   at a cell edge means the cut may clip and the review sheet will show it.
+6. `cut` - `mode` (`grid`/`bands`), `rows` actually used, `estimated` for a dry run.
+7. `key` - `applied` and `reason`; an unapplied key on an opaque sheet explains white corners.
+8. `master.size` and `files[].box` - what was really cut, and which cell produced which file. If
+   `box` disagrees with what you see, the plan is wrong, not the trim.
+
+### 9e. Reading the review sheet
+
+`contact_sheet.py` composites every delivered file on a checkerboard and measures each one:
+
+| Fact | Reading |
+|---|---|
+| transparent share near 0 | keying did not run (check `key.reason`), or the subject genuinely fills the frame - the picture decides which |
+| corner alpha opaque | background left behind: the border ring was not flat enough to key, or `--no-key-bg` was passed |
+| opaque-border share high | same two possibilities, stated as a number instead of a corner sample |
+| a subject touching a cell boundary | the cut clipped it - `--bands`, or regenerate with more gutter |
+| soft edges on the 2x step only | the DPR ladder was produced from a smaller file instead of the master; that is a bug, not a setting |
+
+The sheet is evidence, not decoration: quote it when reporting to the user, and check it before
+marking BOM rows `shipped`.
+
+### 9f. Symptom → cause → fix
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -381,9 +459,48 @@ failure.
 | Non-square cells | expected | cells are slice regions, not asset aspects; every subject is trimmed and refit |
 | `a single master holds one slot, but N matched` | `--group` matched several single rows | one run per single: `--slots <id>` |
 | `single master ... padded, not cropped` warning | the render's aspect differs from the delivery | regenerate at the delivery aspect, or crop deliberately with `transform.py` first |
-| `conform needs a master plan` | no BOM master, no `--grid`, no `--rows` | conform from the BOM, or pass `--grid COLSxROWS` / `--rows C1,C2,...` |
+| `conform needs a master plan` | no BOM master, no `--grid`, no `--rows` | conform from the BOM, or pass `--grid COLSxROWS --cell N` / `--rows C1,C2,...` |
+| `without --bom, pass --rows ...` | a bare `--grid` run has no known cell size | add `--cell <px>`, or use `--rows`/`--bands`, which measure the image |
 | `slot range ... must end in a number` | wrote `avatar-01..avatar-10` | `avatar-01..10` |
 | `fallback notes belong in the economy check` | Master cell holds `(fallback: ...)` | move the note out; conform parses Master strictly |
+
+### 9g. One run, end to end
+
+A real catalog the user owned: 34 badges on one 1536x1024 canvas, no prompt, no generate step.
+
+```text
+$ python scripts/sheet_probe.py badges.png --delivery "96x96 1:1 webp @1x"
+size      1536x1024 RGBA alpha=yes background=(144, 118, 31)
+content   [27, 60, 1513, 896]  margins left=27 top=60 right=23 bottom=128
+columns   1 band(s) gaps []
+rows      4 band(s) gaps [33, 34, 64]  (uneven)
+layout    mixed - 34 subject(s), rows 8,8,8,10
+subjects  34 found, min 128x169, max 189x182
+ceiling   128px square master
+delivers  64@1x,2x  96@1x  128@1x
+master    1536x1024 sheet rows 8,8,8,10
+clips     8 interior cut line(s) of an even split land on content
+note      rows hold different column counts (8, 8, 8, 10) - no single grid describes this sheet
+note      8 interior cut line(s) of an even split land on content - cut on the measured gutters
+```
+
+Four facts decide the run: **34 subjects**, **rows 8,8,8,10**, **`columns 1 band(s)`** (so a global
+grid cannot work), **`ceiling 128`** (so `96@1x` is honest and `96@2x` is not). The plan is
+`rows 8,8,8,10` with band cutting; an even `8x4` would offer 32 cells and slice ten crowns.
+
+```text
+$ python scripts/conform.py --bom bom/badges.md --group badge --dry-run
+master    1536x1024 sheet rows 8,8,8,10 cell 153x256
+cut       bands (estimated - measured at run time)
+slots     34 expected, 34 files
+  badge-01             cell 0,0 192x256     @1x 96x96 webp -> assets/badges/badge-01.webp
+  badge-02             cell 192,0 192x256   @1x 96x96 webp -> assets/badges/badge-02.webp
+```
+
+The dry run is where a wrong BOM shows up cheaply: 34 slots, 34 cells, ids landing in sheet order.
+The real run then reports `cut bands`, region `27,60 -> 1513,896`, `result ok`, and exactly one
+warning - `badge-29: subject reaches the cell edge` - which the review sheet confirms is a badge
+that genuinely fills its cell rather than a clipped one. Only then do the BOM rows become `shipped`.
 
 ## 10. Limits
 

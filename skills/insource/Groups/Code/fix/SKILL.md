@@ -1,5 +1,6 @@
 ---
 name: fix
+version: 1.0.0
 description: After root-cause diagnosis with dbug, resolve the problem and improve the relevant implementation so the same or similar problems become easier to identify, understand, or prevent in the future. Use together with dbug whenever a problem has been understood and a fix is being applied. Covers immediate fix, local-context generalization, consequences, explicit and implicit references, and consistency. Not a standalone debugger.
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: styleup
+version: 1.0.0
 description: >-
   Turns an existing project's styling into a maintainable, professional system on any stack:
   inventories every hardcoded or duplicated style, works inside the styling system the project

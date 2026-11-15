@@ -65,7 +65,8 @@ column), the gap widths, which interior cut lines an even split would land on, p
 boxes, empty cells, the largest square master the subjects can supply, and which delivery sizes at
 which DPRs that ceiling supports. It ends with the master spec to paste into the BOM:
 `1536x1024 sheet 5x2` or `1536x1024 sheet rows 8,8,8,10`. Exit 0 even when the sheet is irregular -
-the notes are the finding. Needs pillow.
+the notes are the finding. How to read the report, field by field: `08-conform.md` §1 and §9c.
+Needs pillow.
 
 ## conform.py
 
@@ -91,8 +92,13 @@ Two cut modes: the even **grid** (default) and the measured **bands** - `--bands
 is the only way to cut a sheet whose rows hold different counts. In grid mode the run warns when an
 interior cut line lands on content. A subset (`--slots a4..a6`) cuts those cells, not the first
 three. `--no-trim`, `--pad-color`, `--allow-upscale`, `--allow-empty` and `--full-canvas` are the
-escape hatches. Exit 0 ok, 2 bad spec, 3 count/empty/band mismatch, 4 verify failure. Method,
-cut-line rule and failure modes: `08-conform.md`. Needs pillow for image work; `--dry-run` does not.
+escape hatches. Without a BOM the geometry comes from the flags: `--rows`/`--bands` measure the
+image, a bare `--grid` also needs `--cell <px>`. Exit 0 ok, 2 bad spec, 3 count/empty/band
+mismatch, 4 verify failure.
+
+Method, cut-line rule, plus the operating loop - what to check at each step, what each exit code
+means, and the symptom table: `08-conform.md` §1-§9. Needs pillow for image work; `--dry-run` does
+not open the image at all.
 
 ## sheet_geometry.py
 

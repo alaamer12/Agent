@@ -1,5 +1,6 @@
 ---
 name: seo
+version: 1.0.0
 description: 'Universal 100-point on-page SEO playbook for ANY web stack (Next.js, SvelteKit, Nuxt, Blazor, ASP.NET, Rails, Laravel, Django, Dioxus, Leptos, Astro, Hugo, static HTML - SSR, SSG or client-rendered). Use when the user wants to build, audit, or auto-fix pages so the raw first HTML packet scores 100/100 on Wincher-style on-page criteria (title/headings/body/meta/media/code/url), or makes any SEO complaint ("SEO audit", "my SEO is bad", "traffic dropped", "not ranking", "thin pages", "meta tags review"). Commands: /seo [target] = analyze then fix everything without asking, /seo analyze [target] = report only. Target may be a single page ("login page"), a section family ("funds page" = ALL funds-related routes: list, detail, tabs, categories, compare), or omitted (= whole codebase).'
 when_to_use: Auditing or fixing on-page SEO for any framework so pages reach a 100/100 first-packet score.
 argument-hint: '[analyze] [page | section | url]'

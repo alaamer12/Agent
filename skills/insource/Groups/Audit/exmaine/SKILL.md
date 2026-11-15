@@ -1,5 +1,6 @@
 ---
 name: exmaine
+version: 1.0.0
 description: >-
   Examine a project from the inside out, starting at AGENTS.md: follow every doc path it
   declares (design docs, units, glossary, commitments, decisions, skill sources), read them,

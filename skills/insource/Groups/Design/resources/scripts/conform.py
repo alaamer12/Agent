@@ -904,6 +904,10 @@ def run(args, result):
             f"{args.inp} is {sheet.width}x{sheet.height} but the sheet plan says "
             f"{master.width}x{master.height}"
         )
+    if not master.width or not master.height:
+        # No BOM (or a plan without a size): the image is the master, so its size is measured
+        # rather than assumed - the report should state what was actually cut.
+        master.width, master.height = sheet.width, sheet.height
 
     # Cut lines go through the content bounds, not the canvas: generated sheets have uneven
     # margins, and dividing the canvas shifts the last column into a subject. A single master is
@@ -1124,8 +1128,12 @@ def _print_summary(payload, report_path):
     plan = (f"rows {','.join(str(count) for count in rows)}" if rows
             else f"{master['grid'][0]}x{master['grid'][1]} gutter {master['gutter']}")
     print(f"sheet     {payload['sheet']}")
-    print(f"master    {master['size'][0]}x{master['size'][1]} {master['kind']} "
-          f"{plan} cell {master['cell'][0]}x{master['cell'][1]}")
+    if master["size"][0]:
+        print(f"master    {master['size'][0]}x{master['size'][1]} {master['kind']} "
+              f"{plan} cell {master['cell'][0]}x{master['cell'][1]}")
+    else:
+        # A dry run does not open the image, so a no-BOM plan has no measured size yet.
+        print(f"master    {master['kind']} {plan} (size measured at run time)")
     cut = payload.get("cut") or {}
     if cut:
         print(f"cut       {cut.get('mode', 'grid')}"
@@ -1222,8 +1230,13 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if not args.bom and not args.delivery:
         parser.error("pass --bom <file> or --delivery <spec>")
-    if not args.bom and not args.cell:
-        parser.error("without --bom, pass --cell <px> so the grid has a known cell size")
+    if not args.bom and not args.cell and not args.rows and not args.bands:
+        # A grid run needs a known pitch; a rows/bands run measures its own, so --cell is noise
+        # there and demanding it made the documented rows command fail at the door.
+        parser.error(
+            "without --bom, pass --rows C1,C2,... or --bands (the image is measured), or "
+            "--grid COLSxROWS with --cell <px> so the grid has a known cell size"
+        )
     result = Result(bom=args.bom or "", sheet=args.inp, dry_run=args.dry_run)
     try:
         run(args, result)

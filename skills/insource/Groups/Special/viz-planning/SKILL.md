@@ -1,5 +1,6 @@
 ---
 name: viz-planning
+version: 1.0.0
 description: Use this skill when planning, designing, or architecting a data visualization system, dashboard, chart component, reporting tool, or analytics app — anything built once and used repeatedly, or involving real complexity (unstable schemas, growing/streaming datasets, multiple sources, many categories, outliers, filtering or persisted state). Walks through data source stability, schema evolution, volume, semantics, chart selection, grouping/aggregation/outlier handling, filtering and state architecture, layout, and configuration precedence BEFORE any chart gets built, so the wrong visualization or a fragile pipeline doesn't get picked by default. Trigger even when the user just says "help me build a dashboard for X" or "I need to visualize this data" without naming any of these specifics — the point is surfacing considerations they haven't thought of yet. Do NOT use for one-off requests like "chart this CSV" or "plot Q3 revenue" against already-clean, already-understood data — just chart it directly.
 ---
 

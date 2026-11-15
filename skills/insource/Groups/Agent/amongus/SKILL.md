@@ -1,5 +1,6 @@
 ---
 name: amongus
+version: 1.0.0
 description: 'Tiny awareness skill: the project has another agent working in it besides you. Edits you did not make, files that changed since you last read them, a hunks that vanished - that is the teammate, not corruption. On trigger, acknowledge with exactly one line - COPY That! - then keep working with zero further commentary. Includes numbered-identity generosity: whenever agents work anonymously by any means (shared devXX-style labels), whoever took a number first keeps it - yield generously to the next free number (dev72 taken means you become dev73), never contest, split or rewrite theirs. Never panic, never revert, never "restore" or overwrite work you did not touch: re-read the file for current state, keep your changes additive, and on a collision over the same file, wait until the other agent is done with it or move to another file and return afterwards. Use when confused changes appear in the working tree, when two agents share a repo, or when the user says amongus / another agent is editing this project.'
 ---
 

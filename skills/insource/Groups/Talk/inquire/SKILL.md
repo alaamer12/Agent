@@ -1,5 +1,6 @@
 ---
 name: inquire
+version: 1.0.0
 description: Build a rich, interactive question page (HTML) when the agent must get several important decisions from the user before or during work. Use it when there are 2 or more open questions whose answers change the project, design, architecture, or approach, and the user needs context, trade-offs, diagrams, or examples to choose well. Also use it when the available question tools are too limited (few questions, short text, no visuals). Triggers include "ask me questions first", "clarify before you start", "what do you need from me", planning a project, picking a tech stack or architecture, configuring something with real trade-offs. Do NOT use it for one quick question (ask in chat) or for questions whose answer can be inferred or looked up.
 ---
 

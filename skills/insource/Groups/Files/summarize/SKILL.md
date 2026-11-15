@@ -1,5 +1,6 @@
 ---
 name: summarize
+version: 1.0.0
 description: "Use this skill whenever the user wants to shorten content without losing its meaning — summarize, condense, distill, recap, abridge, or extract key points from an article, report, transcript, thread, email chain, conversation, or document, including TL;DR, executive summary, abstract, digest, or brief requests. Trigger even on a bare \"summarize this\" with no further instruction, and when the user wants the shortest/most extreme version. Also trigger for conversation/Q&A summarization with role-specific instructions (\"keep my questions, summarize the agent's answers\") and for requests specifying a custom output structure (\"put questions on top under headers, answers below\") — this skill decides whether the request preserves the source's shape or needs a new one. Not for line-level copyediting/proofreading at the same length — see process-business-writing."
 license: Apache-2.0
 ---

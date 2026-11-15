@@ -1,5 +1,6 @@
 ---
 name: bleed
+version: 1.0.0
 description: Convert a web UI between layout registers - full-bleed page, framed cards, or hybrid - and fix the "document inside an app" smell where a page wraps itself in a max-width card. Use when a page or mockup "looks like sections inside a page", when asked to make content take the full page or full width, remove the outer box or card around everything, match the layout grammar of sibling files, stop nesting cards, or conversely to contain a page into cards; also when reviewing a screenshot that shows a narrow centered column with dead margins.
 argument-hint: "[page|framed|hybrid] <file>"
 ---

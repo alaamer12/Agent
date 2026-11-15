@@ -1,5 +1,6 @@
 ---
 name: close-topics
+version: 1.0.0
 description: 'Guided, conversational, topic-by-topic technical specification: close one design area before opening the next. Use when a project has undecided architecture (scrapers, workers, pipelines, caching, data models, queues, storage, deployment) and the user wants to work through it sequentially - ask targeted questions with real options and trade-offs, collect the decision, write it into a specification document in the project''s docs, update the index, then hand off to the next topic. Stops at design: no implementation until every agreed topic is resolved and the user says go. Standalone independent skill. Not for choosing a technology stack (techstack), not for deciding how to build something the agent already owns (dtb), not for planning a task list (planner), not for reorganizing or splitting docs (document).'
 when_to_use: The user wants to "work through the design topic by topic", nail down missing architecture decisions, resolve open technical questions before building, review what a project has not specified yet, or invokes /close-topics. Also when a spec is half-written and the gaps need closing one at a time.
 argument-hint: "[topic to close, or 'what is still unspecified?']"
@@ -17,7 +18,7 @@ project keeps such things.
 ```text
 1 triage     what design pillars are still open? pick ONE topic
 2 deep dive  options with pros, cons and trade-offs; targeted questions until the user decides
-3 close      write the decision into a spec document; link it in the index
+3 close      write the decision down (form set by project state); link it in the index
 4 hand off   one-line outcome, then propose the next topic
 ```
 
@@ -45,11 +46,24 @@ project has already decided is **not** reopened for conversation — record wher
 
 ### 3. Close and document
 
+**The project's state decides the form.** Three states:
+
+- **Draft [DR]** — still deciding and refining, before implementing. A close is a **provisional,
+  revisable steering doc**: the current best, marked revisable, alternatives noted lightly. Do **not**
+  cast it into a formal decision record / ADR / `decisions/` folder — that reifies a draft into law
+  (see `thaw`). The decisions folder is premature during drafting.
+- **In-Progress [IP]** — implementation, testing, launching. Drafting has ended; decisions settle into
+  code. A close may now be a **formal decision record (ADR)** with rationale and superseded history.
+- **Post-production [PP]** — first release is live. Decisions are settled history; changes are new
+  records superseding old ones.
+
+The drafting phase ends when implementation begins; formal `decisions/` records belong to IP/PP, not DR.
+
 | Aspect | Rule |
 |---|---|
-| Where | The project's existing convention (`docs/tech/`, `docs/architecture/`, an ADR folder). No new top-level folder when one exists; ask before inventing one |
+| Where | **DR:** a provisional steering doc in the project's tech/docs convention. **IP/PP:** the project's decision-record convention (an ADR / `decisions/` folder). No new top-level folder when one exists; ask before inventing one |
 | Depth | Concrete interfaces, state-transition tables, data flow, error strategy, boundaries of ownership. A summary that a builder could misread is not a spec |
-| Alternatives | Record the options rejected and why, so the next reader does not re-litigate them |
+| Alternatives | **DR:** note alternatives lightly so they can be revisited. **IP/PP:** record rejected options and why, so the next reader does not re-litigate them |
 | Open ends | Anything not decided is listed as open, not quietly omitted |
 | Index | Link the new document from the folder's map or the docs index in the same change |
 | Preserve | Existing docs are merged into, never clobbered; user edits are never reverted |

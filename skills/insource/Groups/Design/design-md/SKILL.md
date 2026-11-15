@@ -1,5 +1,6 @@
 ---
 name: design-md
+version: 1.0.0
 description: "Authors and maintains a project-wide, binding DESIGN.md specification following Google Labs design.md and Stitch conventions. Bridges system architecture and visual UI design: combines machine-readable YAML design tokens (OKLCH color scales, fluid typography, 4/8pt spacing, elevation, radius, component tokens) with prescriptive, human-readable UI rationale and explicit Do's and Don'ts. Use when bootstrapping a project's visual system, formalizing design rules for AI coding agents, auditing UI consistency, or authoring a canonical DESIGN.md. Triggers: design.md, create design.md, design doc, visual design system, brand identity spec, design tokens, ui spec."
 metadata:
   version: "1.0"

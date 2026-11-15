@@ -37,6 +37,7 @@ import json
 import os
 import re
 import shutil
+import sqlite3
 import stat
 import subprocess
 import sys
@@ -80,8 +81,12 @@ except Exception:  # pragma: no cover
 # ---------------------------------------------------------------------------
 
 DEFAULT_DESCRIPTION_LIMIT = 1024
-MANIFEST_NAME = "manager-copies.json"
-LOCKFILE_NAME = "skills-lock.json"
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
+INITIAL_VERSION = "1.0.0"
+DB_APP_DIR = "insource-manager"
+DB_FILE_NAME = "manager.db"
+LEGACY_STORE_FILES = {"copies": "manager-copies.json", "lock": "skills-lock.json",
+                      "versions": "manager-versions.json"}
 SKIP_NAMES = {"Archive", "__pycache__", "node_modules", ".git", ".venv", "venv"}
 MIGRATION_AGENTS = {"qoder", "gemini"}
 
@@ -115,7 +120,7 @@ ALIASES = {
 }
 
 REGISTRY = Path(__file__).resolve().parent
-COMMANDS = {"skill", "agent", "lint", "viber"}
+COMMANDS = {"skill", "agent", "lint", "viber", "report"}
 
 
 class ManagerError(Exception):
@@ -382,7 +387,96 @@ def _make_junction(source: Path, dest: Path) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# hard-copy manifest
+# state database (single SQLite file in the OS platform data dir)
+# ---------------------------------------------------------------------------
+
+
+def platform_data_dir() -> Path:
+    if sys.platform.startswith("win"):
+        base = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
+    elif sys.platform == "darwin":
+        base = str(Path.home() / "Library" / "Application Support")
+    else:
+        base = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
+    return Path(base) / DB_APP_DIR
+
+
+def db_path() -> Path:
+    override = os.environ.get("MANAGER_DB")
+    if override:
+        return Path(override).expanduser()
+    return platform_data_dir() / DB_FILE_NAME
+
+
+def db_connect() -> sqlite3.Connection:
+    path = db_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(path))
+    try:
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS kv ("
+            "registry TEXT NOT NULL, store TEXT NOT NULL, data TEXT NOT NULL, "
+            "updated_at TEXT NOT NULL, PRIMARY KEY (registry, store))"
+        )
+    except sqlite3.Error:
+        conn.close()
+        raise
+    return conn
+
+
+def _registry_key(registry: Path) -> str:
+    return os.path.normcase(os.path.abspath(str(registry)))
+
+
+def kv_get(registry: Path, store: str) -> Any | None:
+    """Read one store blob; a legacy JSON file is imported (and then removed)."""
+    conn = db_connect()
+    try:
+        row = conn.execute(
+            "SELECT data FROM kv WHERE registry = ? AND store = ?",
+            (_registry_key(registry), store),
+        ).fetchone()
+        if row is not None:
+            try:
+                return json.loads(row[0])
+            except json.JSONDecodeError:
+                return None
+    finally:
+        conn.close()
+    legacy = registry / LEGACY_STORE_FILES.get(store, "")
+    if not LEGACY_STORE_FILES.get(store) or not legacy.is_file():
+        return None
+    try:
+        data = json.loads(legacy.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if isinstance(data, dict):
+        kv_set(registry, store, data)
+        try:
+            legacy.unlink()
+        except OSError:
+            pass
+        return data
+    return None
+
+
+def kv_set(registry: Path, store: str, data: Any) -> None:
+    conn = db_connect()
+    try:
+        conn.execute(
+            "INSERT INTO kv (registry, store, data, updated_at) VALUES (?, ?, ?, ?) "
+            "ON CONFLICT(registry, store) DO UPDATE SET data = excluded.data, "
+            "updated_at = excluded.updated_at",
+            (_registry_key(registry), store, json.dumps(data, indent=2, sort_keys=True),
+             datetime.now().isoformat(timespec="seconds")),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+# ---------------------------------------------------------------------------
+# hard-copy manifest (stored in the kv database)
 # ---------------------------------------------------------------------------
 
 
@@ -427,18 +521,8 @@ def _key(path: Path | str) -> str:
     return os.path.normcase(os.path.abspath(str(path)))
 
 
-def manifest_path(registry: Path) -> Path:
-    return registry / MANIFEST_NAME
-
-
 def load_manifest(registry: Path) -> dict[str, Any]:
-    path = manifest_path(registry)
-    if not path.exists():
-        return {"version": 1, "copies": {}}
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {"version": 1, "copies": {}}
+    data = kv_get(registry, "copies")
     if not isinstance(data, dict):
         return {"version": 1, "copies": {}}
     data.setdefault("version", 1)
@@ -449,11 +533,7 @@ def load_manifest(registry: Path) -> dict[str, Any]:
 
 
 def save_manifest(registry: Path, data: dict[str, Any]) -> None:
-    path = manifest_path(registry)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    os.replace(tmp, path)
+    kv_set(registry, "copies", data)
 
 
 def load_records(registry: Path) -> dict[str, CopyRecord]:
@@ -749,13 +829,7 @@ def parse_agents(raw: str) -> list[str]:
 
 
 def load_lockfile(registry_root: Path) -> dict[str, Any]:
-    path = registry_root / LOCKFILE_NAME
-    if not path.exists():
-        return {"version": 1, "locked": {}}
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {"version": 1, "locked": {}}
+    data = kv_get(registry_root, "lock")
     if not isinstance(data, dict):
         return {"version": 1, "locked": {}}
     data.setdefault("version", 1)
@@ -764,8 +838,7 @@ def load_lockfile(registry_root: Path) -> dict[str, Any]:
 
 
 def save_lockfile(registry_root: Path, data: dict[str, Any]) -> None:
-    path = registry_root / LOCKFILE_NAME
-    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    kv_set(registry_root, "lock", data)
 
 
 def record_locks(registry_root: Path, names: Iterable[str], agents: Iterable[str]) -> None:
@@ -1140,7 +1213,7 @@ def cmd_skill(args: argparse.Namespace, registry: Path, jobs: int, invoked: set[
 
     if args.lock and successful and not args.dry_run:
         record_locks(registry, successful, parse_agents(args.agents))
-        display_info(f"[lock] recorded {len(successful)} skill(s) into {LOCKFILE_NAME}")
+        display_info(f"[lock] recorded {len(successful)} skill(s) into the manager database")
     return 1 if failures else 0
 
 
@@ -1717,6 +1790,25 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
         if length > limit:
             warnings.append((name, label, path, length, "over limit"))
 
+    version_warnings: list[tuple[str, str, str, str, str]] = []
+    version_stats: Counter = Counter()
+    if not args.no_version:
+        version_warnings, version_stats = check_versions(registry, jobs)
+
+    if version_warnings:
+        display_table(
+            ["Skill", "Version", "Suggested bump", "Reason", "Path"],
+            [[n, ver, sugg, reason, str(registry / rel / "SKILL.md")]
+             for n, ver, sugg, reason, rel in version_warnings],
+            title=f"version warnings ({len(version_warnings)})",
+            always=True,
+        )
+    if _DISPLAY.verbose and version_stats:
+        display_kv(
+            [(k, str(v)) for k, v in sorted(version_stats.items())],
+            title="version tracking", always=True,
+        )
+
     if warnings:
         rows = []
         for name, label, path, length, reason in warnings:
@@ -1763,15 +1855,353 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
     ]
     if args.readme:
         summary.append(("README issues", str(len(readme_issues))))
+    if not args.no_version:
+        summary.append(("Version warnings", str(len(version_warnings))))
     summary.append(("Description limit", f"{limit} characters"))
     display_kv(summary, title="lint summary", always=True)
-    if not warnings and not issues and not readme_issues:
+    if not warnings and not issues and not readme_issues and not version_warnings:
         tail = " and README.md matches the registry" if args.readme else ""
         display_ok(
             f"all {total_checked} SKILL.md files passed metadata checks and no synchronization issues were found{tail}"
         )
 
-    return 1 if (args.strict and (warnings or issues or readme_issues)) else 0
+    return 1 if (args.strict and (warnings or issues or readme_issues or version_warnings)) else 0
+
+
+# ---------------------------------------------------------------------------
+# Skill versions: git-aware change tracking and bump suggestions
+# ---------------------------------------------------------------------------
+
+
+def load_versions(registry: Path) -> dict[str, Any]:
+    data = kv_get(registry, "versions")
+    if not isinstance(data, dict):
+        return {"version": 1, "skills": {}}
+    data.setdefault("version", 1)
+    if not isinstance(data.get("skills"), dict):
+        data["skills"] = {}
+    return data
+
+
+def save_versions(registry: Path, data: dict[str, Any]) -> None:
+    kv_set(registry, "versions", data)
+
+
+def _git(cwd: Path, *args: str, strip: bool = True) -> str | None:
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(cwd), *args],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0:
+        return None
+    return proc.stdout.strip() if strip else proc.stdout
+
+
+def git_root(registry: Path) -> Path | None:
+    out = _git(registry, "rev-parse", "--show-toplevel")
+    return Path(out) if out else None
+
+
+def git_head(registry: Path) -> str | None:
+    return _git(registry, "rev-parse", "HEAD")
+
+
+def git_status_map(registry: Path) -> dict[str, str]:
+    """Working-tree changes keyed by path relative to the registry."""
+    root = git_root(registry)
+    if root is None:
+        return {}
+    out = _git(root, "status", "--porcelain", strip=False)
+    if not out:
+        return {}
+    try:
+        reg_rel = registry.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        reg_rel = "."
+    prefix = "" if reg_rel == "." else reg_rel.rstrip("/") + "/"
+    changes: dict[str, str] = {}
+    for line in out.splitlines():
+        if len(line) < 4:
+            continue
+        code, path = line[:2], line[3:]
+        if " -> " in path:
+            path = path.split(" -> ", 1)[1]
+        path = path.strip().strip('"')
+        if prefix:
+            if not path.startswith(prefix):
+                continue
+            path = path[len(prefix):]
+        changes[path] = code
+    return changes
+
+
+def git_last_commit(registry: Path, rel: str) -> str | None:
+    out = _git(registry, "log", "-1", "--format=%h %cs", "--", rel)
+    return out or None
+
+
+def skill_git_state(rel: str, status_map: dict[str, str]) -> str:
+    if not status_map:
+        return "clean"
+    prefix = rel.rstrip("/") + "/"
+    codes = [code for path, code in status_map.items() if path == rel or path.startswith(prefix)]
+    if not codes:
+        return "clean"
+    if all(code == "??" for code in codes):
+        return "untracked"
+    if any(code == "??" for code in codes):
+        return "mixed"
+    return "modified"
+
+
+def skill_snapshot(path: Path) -> dict[str, Any]:
+    files: dict[str, str] = {}
+    for file_path in iter_files(path):
+        rel = file_path.relative_to(path).as_posix()
+        files[rel] = hash_file(file_path) or "unreadable"
+    combined = hashlib.sha256(
+        "\n".join(f"{rel}:{files[rel]}" for rel in sorted(files)).encode("utf-8")
+    ).hexdigest()
+    return {"files": files, "fingerprint": combined, "file_count": len(files)}
+
+
+def classify_change(old_files: dict[str, str], new_files: dict[str, str]) -> tuple[str | None, str]:
+    """Suggest a semver bump from a per-file hash diff. Returns (suggestion, reason).
+
+    Rules: edited/renamed files -> patch; new files -> minor; files both added and
+    removed (a merge or rewrite) -> major. Renames are paired by identical hash so
+    they read as patch, not as add+remove. This is a suggestion, never an auto-bump.
+    """
+    old_keys, new_keys = set(old_files), set(new_files)
+    added = new_keys - old_keys
+    deleted = old_keys - new_keys
+    modified = {k for k in old_keys & new_keys if old_files[k] != new_files[k]}
+    added_by_hash: dict[str, list[str]] = {}
+    for k in added:
+        added_by_hash.setdefault(new_files[k], []).append(k)
+    renames: list[tuple[str, str]] = []
+    remaining_deleted: set[str] = set()
+    for k in deleted:
+        bucket = added_by_hash.get(old_files[k])
+        if bucket:
+            renames.append((k, bucket.pop()))
+        else:
+            remaining_deleted.add(k)
+    remaining_added = {k for bucket in added_by_hash.values() for k in bucket}
+    if remaining_added and remaining_deleted:
+        return "major", "files added and removed (possible merge or rewrite)"
+    if remaining_added:
+        return "minor", "new files added"
+    if remaining_deleted:
+        return "minor", "files removed"
+    if renames and not modified:
+        return "patch", "files renamed"
+    if modified or renames:
+        return "patch", "files edited"
+    return None, "no change"
+
+
+def _is_rename(old_files: dict[str, str], new_files: dict[str, str]) -> bool:
+    """True when two snapshots are the same skill under a new name.
+
+    A rename changes the ``name:`` field in SKILL.md, so the tree fingerprint is not
+    identical. Treat it as a rename when the file set matches and every file except
+    SKILL.md is byte-identical (SKILL.md may differ only by its name field).
+    """
+    if not old_files or set(old_files) != set(new_files):
+        return False
+    return all(old_files[k] == new_files[k] for k in old_files if k != "SKILL.md")
+
+
+def _build_entry(name: str, rel: str, version: str | None, snap: dict[str, Any],
+                 head: str | None, files: dict[str, str] | None = None,
+                 fingerprint: str | None = None) -> dict[str, Any]:
+    return {
+        "version": version,
+        "name": name,
+        "path": rel,
+        "commit": head,
+        "fingerprint": fingerprint if fingerprint is not None else snap["fingerprint"],
+        "file_count": snap["file_count"],
+        "files": files if files is not None else snap["files"],
+    }
+
+
+def _norm_version(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def check_versions(registry: Path, jobs: int) -> tuple[list[tuple[str, str, str, str, str]], Counter]:
+    """Track registry skill versions against a stored baseline.
+
+    Warns when a skill changed (committed or working-tree) without a version bump,
+    suggesting patch/minor/major from the change shape. A move (same name, new path,
+    unchanged content) needs no bump; a rename suggests patch. New skills are recorded
+    as a baseline. The state file is updated: bumps and moves rebaseline, unbumped
+    changes keep the old baseline so the warning persists.
+    """
+    skills = registry_skills(registry)
+    state = load_versions(registry)
+    old_entries = state.get("skills", {})
+    head = git_head(registry)
+    names = sorted(skills)
+    snaps = map_concurrent(lambda n: skill_snapshot(skills[n]), names, jobs)
+    frontmatters = map_concurrent(lambda n: read_frontmatter(skills[n] / "SKILL.md"), names, jobs)
+    current: dict[str, dict[str, Any]] = {}
+    for n, snap, (data, _err) in zip(names, snaps, frontmatters):
+        current[n] = {
+            "rel": skills[n].relative_to(registry).as_posix(),
+            "ver": _norm_version(data.get("version") if isinstance(data, dict) else None),
+            "snap": snap,
+        }
+    by_fp: dict[str, str] = {}
+    for n, e in old_entries.items():
+        if e.get("fingerprint"):
+            by_fp.setdefault(e["fingerprint"], n)
+    cur_names = set(current)
+    warnings: list[tuple[str, str, str, str, str]] = []
+    stats: Counter = Counter()
+    new_entries: dict[str, Any] = {}
+    consumed: set[str] = set()
+
+    for n in names:
+        c = current[n]
+        snap, rel, ver = c["snap"], c["rel"], c["ver"]
+        valid = ver is not None and SEMVER_RE.match(ver) is not None
+        if ver is None:
+            warnings.append((n, "-", f"set {INITIAL_VERSION}", "missing version", rel))
+            stats["missing_version"] += 1
+        elif not valid:
+            warnings.append((n, ver, "fix to X.Y.Z", "invalid version (expected semver X.Y.Z)", rel))
+            stats["invalid_version"] += 1
+
+        if n in old_entries:
+            match, kind = n, "name"
+        else:
+            match, kind = None, "new"
+            fp_name = by_fp.get(snap["fingerprint"])
+            if fp_name and fp_name not in cur_names and fp_name not in consumed:
+                match, kind = fp_name, "rename"
+            else:
+                for sn in sorted(old_entries):
+                    if sn in cur_names or sn in consumed:
+                        continue
+                    if _is_rename(old_entries[sn].get("files", {}), snap["files"]):
+                        match, kind = sn, "rename"
+                        break
+
+        if kind == "new":
+            stats["new"] += 1
+            new_entries[n] = _build_entry(n, rel, ver, snap, head)
+            continue
+
+        consumed.add(match)
+        e = old_entries[match]
+        old_ver = _norm_version(e.get("version"))
+        old_files = e.get("files", {})
+        old_fp = e.get("fingerprint")
+        old_path = e.get("path")
+        sugg, reason = classify_change(old_files, snap["files"])
+        path_changed = old_path != rel
+        bumped = valid and ver != old_ver
+
+        if kind == "rename":
+            if bumped:
+                stats["bumped"] += 1
+                sv, sf, sfp = ver, snap["files"], snap["fingerprint"]
+            else:
+                stats["unbumped"] += 1
+                warnings.append((n, ver or "-", "patch", "skill renamed", rel))
+                sv, sf, sfp = old_ver, old_files, old_fp
+        elif sugg is None and path_changed:
+            stats["moved"] += 1
+            sv, sf, sfp = (ver if valid else old_ver), snap["files"], snap["fingerprint"]
+        elif sugg is None:
+            stats["unchanged"] += 1
+            sv, sf, sfp = (ver if valid else old_ver), snap["files"], snap["fingerprint"]
+        elif bumped:
+            stats["bumped"] += 1
+            sv, sf, sfp = ver, snap["files"], snap["fingerprint"]
+        else:
+            stats["unbumped"] += 1
+            extra = f"; moved from {old_path}" if path_changed else ""
+            warnings.append((n, ver or "-", sugg or "patch", reason + extra, rel))
+            sv, sf, sfp = old_ver, old_files, old_fp
+        new_entries[n] = _build_entry(n, rel, sv, snap, head, files=sf, fingerprint=sfp)
+
+    for n in old_entries:
+        if n not in consumed:
+            stats["deleted"] += 1
+
+    new_state = {"version": 1, "skills": new_entries}
+    if new_state != state:
+        save_versions(registry, new_state)
+    return warnings, stats
+
+
+def cmd_report(args: argparse.Namespace, registry: Path, jobs: int) -> int:
+    skills = registry_skills(registry)
+    names = sorted(skills)
+    if args.skills:
+        wanted = set(args.skills)
+        names = [n for n in names if n in wanted]
+        missing = wanted - set(names)
+        for n in sorted(missing):
+            display_warn(f"no registry skill named '{n}'")
+    if not names:
+        display_warn(f"no skills found in {registry}")
+        return 0
+    status_map = git_status_map(registry)
+    head = git_head(registry)
+    frontmatters = map_concurrent(lambda n: read_frontmatter(skills[n] / "SKILL.md"), names, jobs)
+    snaps = map_concurrent(lambda n: skill_snapshot(skills[n]), names, jobs)
+    rows: list[dict[str, Any]] = []
+    for n, (data, _err), snap in zip(names, frontmatters, snaps):
+        ver, desc_len = "-", 0
+        if isinstance(data, dict):
+            v = data.get("version")
+            ver = str(v) if v is not None else "-"
+            d = data.get("description")
+            desc_len = len(d) if isinstance(d, str) else 0
+        rel = skills[n].relative_to(registry).as_posix()
+        row = {
+            "name": n, "version": ver, "files": snap["file_count"],
+            "desc": desc_len, "git": skill_git_state(rel, status_map), "path": rel,
+        }
+        if _DISPLAY.verbose:
+            row["last_commit"] = git_last_commit(registry, rel) or "-"
+        rows.append(row)
+    sort_key = args.sort
+    rows.sort(key=lambda r: r[sort_key] if sort_key != "name" else r["name"].lower(),
+              reverse=args.reverse)
+    if args.json:
+        print(json.dumps({"registry": str(registry), "head": head, "skills": rows}, indent=2))
+        return 0
+    headers = ["Skill", "Version", "Files", "Desc chars", "Git", "Path"]
+    table_rows = [[r["name"], r["version"], str(r["files"]), str(r["desc"]), r["git"], r["path"]] for r in rows]
+    if _DISPLAY.verbose:
+        headers.insert(5, "Last commit")
+        for r, tr in zip(rows, table_rows):
+            tr.insert(5, r.get("last_commit", "-"))
+    display_table(headers, table_rows, title=f"skill report ({len(rows)})", always=True)
+    total_files = sum(r["files"] for r in rows)
+    avg_desc = round(sum(r["desc"] for r in rows) / len(rows)) if rows else 0
+    summary = [
+        ("Skills", str(len(rows))),
+        ("Total files", str(total_files)),
+        ("Avg description chars", str(avg_desc)),
+        ("Sorted by", f"{sort_key}{' (desc)' if args.reverse else ' (asc)'}"),
+        ("Git HEAD", head or "-"),
+    ]
+    display_kv(summary, title="report summary", always=True)
+    return 0
 
 
 # ---------------------------------------------------------------------------
@@ -1820,13 +2250,15 @@ def build_parser() -> argparse.ArgumentParser:
             "  python manager.py agent --agents claude,opencode\n"
             "  python manager.py lint --strict\n"
             "  python manager.py lint --readme\n"
+            "  python manager.py report --sort files --reverse\n"
+            "  python manager.py report techstack --json\n"
             "  python manager.py viber --into ./my-project --hard-copy\n"
         ),
     )
     parser.add_argument(
         "-V", "--version", action="version", version=f"%(prog)s {__version__}"
     )
-    subparsers = parser.add_subparsers(dest="command", metavar="{skill,agent,lint,viber}")
+    subparsers = parser.add_subparsers(dest="command", metavar="{skill,agent,lint,viber,report}")
 
     skill = subparsers.add_parser(
         "skill",
@@ -1839,7 +2271,7 @@ def build_parser() -> argparse.ArgumentParser:
     skill.add_argument("skills", nargs="*", help="skill name(s) or a path to a skill directory")
     skill.add_argument("-a", "--all", action="store_true", help="every skill in the registry")
     skill.add_argument("-A", "--agents", default="all", help="comma-separated agents or 'all'")
-    skill.add_argument("-l", "--lock", action="store_true", help="record installs in skills-lock.json")
+    skill.add_argument("-l", "--lock", action="store_true", help="record installs in the manager database")
     skill.add_argument("-R", "--refresh", action="store_true", help="repair existing and locked entries")
     skill.add_argument("-i", "--into", default=None, help="project folder to install into instead of agent folders")
     skill.add_argument("-c", "--hard-copy", action="store_true", help="copy instead of link and track sync")
@@ -1859,7 +2291,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_deploy_flags(viber)
     add_mode_flag(viber)
     viber.add_argument("-A", "--agents", default="all", help="comma-separated agents or 'all'")
-    viber.add_argument("-l", "--lock", action="store_true", help="record installs in skills-lock.json")
+    viber.add_argument("-l", "--lock", action="store_true", help="record installs in the manager database")
     viber.add_argument("-i", "--into", default=None, help="project folder to install into instead of agent folders")
     viber.add_argument("-c", "--hard-copy", action="store_true", help="copy instead of link and track sync")
     viber.add_argument("-L", "--list", action="store_true", help="list the viber skills and where they resolve, then exit")
@@ -1899,6 +2331,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="also check README.md against the registry: counts, entries, categories, "
              "descriptions, usage, nesting, archive list and links",
     )
+    lint.add_argument(
+        "--no-version", action="store_true",
+        help="skip skill version tracking (missing-version and unbumped-change warnings)",
+    )
+
+    report = subparsers.add_parser(
+        "report",
+        help="report per-skill file count, description length, version and git state",
+        description="Summarize registry skills: file count, description length, version, "
+                    "and git working-tree state. Sortable; optional JSON output.",
+    )
+    add_common(report)
+    report.add_argument("skills", nargs="*", help="optional skill names to filter the report")
+    report.add_argument(
+        "--sort", choices=["name", "files", "desc", "version"], default="name",
+        help="sort column (default: name)",
+    )
+    report.add_argument("--reverse", action="store_true", help="sort descending")
+    report.add_argument("--json", action="store_true", help="emit JSON instead of a table")
 
     return parser
 
@@ -1992,6 +2443,27 @@ def lint_flag_labels(args: argparse.Namespace) -> list[str]:
         labels.append("-S/--strict")
     if args.readme:
         labels.append("--readme")
+    if args.no_version:
+        labels.append("--no-version")
+    if args.quiet:
+        labels.append("-q/--quiet")
+    if args.verbose:
+        labels.append("-v/--verbose")
+    if args.no_color:
+        labels.append("-C/--no-color")
+    return labels
+
+
+def report_flag_labels(args: argparse.Namespace) -> list[str]:
+    labels: list[str] = []
+    if args.skills:
+        labels.append("skills filter")
+    if args.sort != "name":
+        labels.append("--sort")
+    if args.reverse:
+        labels.append("--reverse")
+    if args.json:
+        labels.append("--json")
     if args.quiet:
         labels.append("-q/--quiet")
     if args.verbose:
@@ -2077,6 +2549,18 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ],
                 implicit=implicit,
             )
+        elif command == "report":
+            display_command_report(
+                "report",
+                settings=[
+                    ("Registry", str(registry)),
+                    ("Skills", ", ".join(args.skills) if args.skills else "all registry skills"),
+                    ("Sort", f"{args.sort}{' (desc)' if args.reverse else ' (asc)'}"),
+                ],
+                flags=report_flag_labels(args),
+                implicit=implicit,
+            )
+            return cmd_report(args, registry, jobs)
         else:
             display_command_report(
                 "lint",

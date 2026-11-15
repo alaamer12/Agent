@@ -33,6 +33,7 @@ Notes on classification:
 
 - The tier describes **scope breadth, not quality or popularity**. A meta tool is not better or worse than a specialist by default, and a higher tier is **never better just for having more features** (see "Surplus capability is a cost, not a credit" below).
 - A tool can sit at different tiers for different concerns. Classify it against the concerns *this project* would use it for.
+- **A product's distinct modes are separate candidates.** When one product offers configurations that change a capability answer (a managed SDK layer vs a bring-your-own relational engine, client-rendered vs server-rendered), treat each decision-relevant mode as its own candidate rather than averaging the brand into one row. The yes/no matrix (`capability-matrix.md`) is where this split is made explicit.
 - The distinguishing feature of a meta tool is that it **replaces several independent tools at once** and gives them a single model (one error type, one composition style, one set of conventions), usually at some cost in per-concern depth.
 - **The tiers are scope labels, not a taxonomy to force.** Ecosystems differ: some ship a batteries-included platform and standard library, so one framework may already cover what elsewhere takes a meta-framework, and the boundaries blur. When a candidate doesn't fit a tier cleanly, use the scope question below and say so rather than forcing a label.
 - If a candidate's tier is unclear, decide by asking: how many of the project's needed concerns would this one dependency replace?

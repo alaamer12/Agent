@@ -1,5 +1,6 @@
 ---
 name: display
+version: 1.0.0
 description: Orchestrates and authors an application's Display Architecture specification into <docs>/architecture/display-architecture.md — how values and text are EXPRESSED to users. Owns the notation spectrum (exact 4,982,317 vs grouped 5,000,000 vs compact 5M vs prose "nearly 5 million"; 500_000 stays source-side) and assigns a precision level per surface class; container-fit discipline (every display slot declares a character/width budget; overflow is a defect - fixed-width cards must never let a plain number strike through; fallback ladders and tabular figures); locale display rules via Intl/ICU (separators, Arabic-Indic vs Western numerals, calendars, Arabic plural categories, bidi isolation inside RTL text); and the voice-medium-typeface pairing — not every voice matches every typeface and vice versa, so each surface class declares its (voice register, typeface + figure style, notation level) triple coherently, always under the accessibility pillar's user-override precedence.
 argument-hint: "[project root or app name]"
 ---

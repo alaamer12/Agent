@@ -1,5 +1,6 @@
 ---
 name: dont-stop
+version: 1.0.0
 description: Forces the agent to keep working autonomously until the ENTIRE goal is truly finished, across all phases, with no mid-way stops, no "phase 1 done, ready for phase 2" check-ins, and no premature summaries. The agent only stops when (a) the whole goal is complete and verified, or (b) every technical option is exhausted and the only remaining step needs something from the outside world (e.g. real API keys, credentials, paid accounts, physical access). Use this skill whenever the user says "don't stop", "keep going", "finish it all", "do everything", "end to end", "full project", "until it's done", "autonomous", "don't ask me, just do it", or hands over a large, multi-phase, or long-running task, even if they never mention this skill by name. Also use it for any big build, migration, refactor, or debugging task where stopping early to report progress would waste the user's time.
 ---
 
