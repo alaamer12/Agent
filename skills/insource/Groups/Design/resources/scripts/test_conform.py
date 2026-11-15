@@ -703,6 +703,56 @@ class BandCutTest(unittest.TestCase):
         self.assertEqual(code, 3)
 
 
+class ArbitraryNamesTest(unittest.TestCase):
+    """Slot ids are whatever the project calls them - no numbering, no shared prefix."""
+
+    NAMES = ["welcome", "permissions", "finish", "offline", "empty-state", "error"]
+    COLOURS = [(200, 30, 30), (30, 140, 60), (30, 60, 200),
+               (180, 120, 20), (90, 40, 160), (20, 150, 150)]
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.sheet = self.root / "flow.png"
+        self.out = self.root / "out"
+        # A 3x2 sheet holding six unrelated subjects, one per cell.
+        image = Image.new("RGB", (300, 220), (255, 255, 255))
+        for index, colour in enumerate(self.COLOURS):
+            row, column = divmod(index, 3)
+            image.paste(colour, (column * 100 + 10, row * 110 + 10,
+                                 column * 100 + 90, row * 110 + 100))
+        image.save(self.sheet)
+        self.bom = self.root / "bom.md"
+        self.bom.write_text(
+            "| Slot | Role | Source | Master | Delivery | Status |\n"
+            "|---|---|---|---|---|---|\n"
+            f"| {', '.join(self.NAMES)} | onboarding flow | sheet `raw/flow.png` "
+            "| 300x220 sheet 3x2 | 30x30 1:1 png @1x | pending |\n",
+            encoding="utf-8",
+        )
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_the_bom_order_is_the_sheet_order(self):
+        code = conform.main(["--bom", str(self.bom), "--slots", ",".join(self.NAMES),
+                             "--in", str(self.sheet), "--out", str(self.out)])
+        self.assertEqual(code, 0)
+        for index, name in enumerate(self.NAMES):
+            with Image.open(self.out / f"{name}.png") as written:
+                self.assertEqual(written.size, (30, 30))
+                self.assertEqual(written.convert("RGB").getpixel((15, 15)),
+                                 self.COLOURS[index], name)
+
+    def test_a_subset_keeps_its_own_cell(self):
+        code = conform.main(["--bom", str(self.bom), "--slots", "error, welcome",
+                             "--in", str(self.sheet), "--out", str(self.out)])
+        self.assertEqual(code, 0)
+        for name, colour in (("welcome", self.COLOURS[0]), ("error", self.COLOURS[5])):
+            with Image.open(self.out / f"{name}.png") as written:
+                self.assertEqual(written.convert("RGB").getpixel((15, 15)), colour, name)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
 

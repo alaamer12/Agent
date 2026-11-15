@@ -16,11 +16,16 @@ Two ways to cut a sheet:
 
 Usage:
     python scripts/conform.py --bom bom/home.md --group avatar --in raw/avatars.png --out assets/avatars
-    python scripts/conform.py --bom bom/home.md --group badge --in raw/badges.png --out assets/badges
+    python scripts/conform.py --bom bom/flow.md --slots welcome,permissions,finish \
+        --in raw/flow.png --out assets/flow
     python scripts/conform.py --bom bom/home.md --slots hero-home --in raw/hero-home.png --out assets/home
     python scripts/conform.py --bom bom/home.md --slots avatar-01..10 --in raw.png --out out --dry-run
     python scripts/conform.py --in sheet.png --out out --rows 8,8,8,10 \
         --slots a,b --delivery "128x128 1:1 webp q82 @1x,2x"
+
+Slot ids are whatever the project calls its assets: `avatar-01` and `welcome` are the same kind of
+key. A range is only a shorthand for a numbered family; a sheet of unrelated subjects lists its ids
+in sheet order (row-major), which is the order it is cut in.
 
 Requires: pillow, for the image work only. Parsing and `--dry-run` are standard library.
 
@@ -1130,9 +1135,18 @@ def _print_summary(payload, report_path):
     if payload["region"]:
         print(f"region    {payload['region'][0]},{payload['region'][1]} -> "
               f"{payload['region'][2]},{payload['region'][3]}")
+    seen = set()
     for entry in payload["files"]:
-        print(f"  {entry['slot']:<20} @{entry['dpr']:g}x {entry['width']}x{entry['height']} "
-              f"{entry['format']} -> {entry['path']}")
+        box = entry.get("box") or []
+        # The source cell, once per slot: with arbitrary ids this is how a dry run proves that
+        # `welcome` really is cell 1 and `error` cell 6.
+        where = ""
+        if box and entry["slot"] not in seen:
+            where = (f"cell {box[0]},{box[1]} "
+                     f"{box[2] - box[0]}x{box[3] - box[1]}")
+            seen.add(entry["slot"])
+        print(f"  {entry['slot']:<20} {where:<20} @{entry['dpr']:g}x "
+              f"{entry['width']}x{entry['height']} {entry['format']} -> {entry['path']}")
     for entry in payload["skipped"]:
         print(f"  skip {entry['slot']:<15} {entry['why']}")
     if payload["empty_cells"]:
@@ -1151,12 +1165,14 @@ def _print_summary(payload, report_path):
 
 def build_parser():
     parser = argparse.ArgumentParser(
-        description="Conform a generated sheet or single master into the delivery slot files a BOM describes.",
+        description="Conform a sheet or single master into the delivery slot files a BOM describes.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
     parser.add_argument("--bom", help="BOM markdown file with the slot table")
-    parser.add_argument("--group", help="slot id prefix to conform, e.g. avatar")
+    parser.add_argument("--group", help="select BOM slots by id: an exact id or a `prefix-` "
+                                        "match, e.g. onboarding (slot ids are arbitrary; use "
+                                        "--slots for names with no shared prefix)")
     parser.add_argument("--slots", help="explicit slot ids, ranges allowed (avatar-01..10)")
     parser.add_argument("--in", dest="inp", required=True, help="the generated master image (one file)")
     parser.add_argument("--out", dest="out", required=True, help="output folder")

@@ -59,7 +59,7 @@ python scripts/sheet_probe.py raw/avatars.png --grid 5x2 --delivery "128x128 1:1
 python scripts/sheet_probe.py raw/avatars.png --json
 ```
 
-Measures a generated sheet before it is cut: content bounds and margins, the layout row by row
+Measures a sheet before it is cut: content bounds and margins, the layout row by row
 (per-row column counts, so a staggered or mixed sheet is described honestly instead of as one
 column), the gap widths, which interior cut lines an even split would land on, per-cell subject
 boxes, empty cells, the largest square master the subjects can supply, and which delivery sizes at

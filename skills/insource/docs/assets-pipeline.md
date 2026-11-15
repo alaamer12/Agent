@@ -30,15 +30,15 @@ The pipeline exists to close that gap with four properties:
 ## 2. Three skills, one pipeline
 
 ```
-collection          generate (external)          resources
-BOM + prompts  ──►  masters            ──►       probe ──► conform ──► review
+collection          generate / existing file     resources
+BOM + prompts  ──►  masters                  ──► probe ──► conform ──► review
 bom/<page>.md       raw/*.png                      assets/<slots>      review/*.png
 ```
 
 | Step | Owner | Artifact | Done when |
 |---|---|---|---|
 | 1. Plan | `collection` | `BOM.md`, `bom/<page>.md`, `bom/style.md` | every page listed or marked `no-images`; every generated row has slot id, master, delivery, prompt |
-| 2. Generate | `generate` | raw masters, `usage.jsonl` | the master exists at the BOM's size and grid |
+| 2. Master | `generate`, or the file the user already owns | raw masters, `usage.jsonl` | the master exists at the BOM's size and plan |
 | 3. Conform | `resources` (`sheet_probe.py`, `conform.py`) | slot-named DPR files, `conform-report.json` | `ok: true`, expected file count, no empty cells |
 
 `assets` is the router: it states this order, the shared key and the handoffs, and
@@ -88,8 +88,10 @@ The schema has one owner; `conform.py` reads it and changes nothing about it.
 | `photo-teaser` | card photo | `fahlwy` | — | `640x360 16:9 jpeg q80 @2x` | pending |
 | `icon-search` | nav icon | `resources` icon set | — | `24x24 svg` | shipped |
 
-- **Slot** — one id or a range. The id becomes the filename stem; a range expands
-  row-major across the sheet's cells.
+- **Slot** — one id, a comma list, or a range. Ids are arbitrary (`welcome` is as valid as
+  `avatar-01`); the id becomes the filename stem. A range is shorthand for a numbered family and
+  expands row-major; a sheet of unrelated subjects lists its ids in sheet order, which is the cut
+  order.
 - **Source** — `generate single`, `generate sheet CxR`, `sheet <path>` (an existing sheet to
   cut, no prompt), `reuse <path>`, `fahlwy`, `resources`. Only rows with a master get a
   spec; only generated rows get a prompt. Everything else is still listed, so a later agent
@@ -124,6 +126,10 @@ Ten avatars, one 1536×1024 sheet (5×2, no gutter):
 The same sheet is economical at 2x and impossible at 3x. That arithmetic — not a
 feeling about image count — is what the BOM records, together with a fallback plan so a
 failed render has an answer ready.
+
+A `rows` plan has no single cell size: its limit is the **smallest measured subject**, which
+is what the probe reports as `ceiling`. That is why the badge BOM ships `96@1x` from a sheet
+whose smallest badge is 128px — the plan cannot buy back resolution the reference never had.
 
 **Two qualities, never one word.** *Master quality* is the render: model tier,
 resolution, prompt. *Delivery quality* is the encode: format and `qN` per DPR step.
@@ -332,10 +338,10 @@ that produces different files on every run.
 
 ## 15. Verification
 
-- `resources/scripts/test_conform.py` (68 tests), `test_sheet_probe.py` (11) and
+- `resources/scripts/test_conform.py` (70 tests), `test_sheet_probe.py` (11) and
   `test_contact_sheet.py` (8) cover grammar parsing, rows plans, band cutting, flag overrides,
-  remainder distribution, content-box cuts, keying (including interior whites), empty cells,
-  upscale refusal, naming, edge measurement and the report shape.
+  arbitrary slot ids, remainder distribution, content-box cuts, keying (including interior
+  whites), empty cells, upscale refusal, naming, edge measurement and the report shape.
 - The end-to-end case is a real 1536×1024 RGBA avatar sheet: ten slots, twenty files
   (128 and 256 WebP, RGBA), `ok: true`, zero warnings, ≈191 KB total, region
   `[62, 167, 1475, 822]`, and a reviewed contact sheet with transparent corners and no halo.

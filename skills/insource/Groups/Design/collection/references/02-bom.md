@@ -163,6 +163,22 @@ clips     8 interior cut line(s) of an even split land on content
 An even `8x4` grid would slice ten subjects and produce 32 files for 34 slots. The full worked
 BOM: `examples/badge-catalog-bom.md`.
 
+### A sheet of unrelated subjects
+
+Nothing requires a sheet to hold variations of one thing. Six onboarding frames, a set of store
+categories and thirty-four badges are the same problem: N subjects on one image, N slot ids. Name
+them what the app calls them and list them in sheet order:
+
+| Slot | Role | Source | Master | Delivery | Status |
+|---|---|---|---|---|---|
+| `welcome, permissions, finish, offline, empty-state, error` | onboarding frames | generate sheet 3x2 | `1536x1024 sheet 3x2 gutter 0` | `192x192 1:1 webp q82 @1x,2x` | pending |
+
+Conform cuts row-major: `welcome` is cell 1, `error` is cell 6, and selecting a subset keeps that
+mapping (`--slots error` cuts cell 6, not cell 1). Numbered ids are a convenience, not a
+requirement - the order in the Slot cell is the sheet order. What the pipeline cannot do is infer a
+mapping nobody wrote: if that list order is wrong, the names land on the wrong cells, so order the
+row the way the sheet reads.
+
 
 ---
 
@@ -206,7 +222,7 @@ Every `bom/<page>.md` starts with what a later agent needs before reading the ta
 
 | Column | Grammar | Notes |
 |---|---|---|
-| Slot | `hero-home`, `avatar-01..10` | range = one sheet row; ids become filename stems |
+| Slot | any id (`hero-home`, `welcome`), a comma list, or a range (`avatar-01..10`) | range = shorthand for a numbered family; ids become filename stems; a sheet of unrelated ids is listed in sheet order |
 | Role | free text | what the region needs it for |
 | Source | `generate sheet 5x2` / `generate single` / `sheet <path>` / `reuse <path>` / `fahlwy` / `resources` | producer, not format |
 | Master | `WxH single`, `WxH sheet CxR [gutter N]`, or `WxH sheet rows 8,8,8,10` | required for any row that is cut, `-` otherwise |

@@ -5,13 +5,19 @@ grid of ten faces; the project needs ten files, each the same size, each correct
 cropped where the subject actually is. **Conform** is that step. A `single` master (one hero, one
 texture) goes through the same step as a one-slot run - see §3a.
 
+The master does not have to be generated. A catalog page, a sprite sheet or any image the user
+already owns is cut the same way - it is a BOM row with `sheet <path>` as its source and no prompt.
+Only the pixels and the slot ids matter; what the assets are called or where they came from does
+not change the cut.
+
 ```
-BOM row  ──►  generate      ──►  probe + conform        ──►  delivery files + report
-(collection)  (external)         (this skill)               (named by slot id)
+BOM row  ──►  generate / owned file  ──►  probe + conform        ──►  delivery files + report
+(collection)  (external or existing)      (this skill)               (named by slot id)
 ```
 
-The slot id is the key in all four places: the BOM row, the generation prompt, the raw render and
-the delivered file. Nothing is re-derived by hand.
+The slot id is the key in all four places: the BOM row, the generation prompt (when there is one),
+the raw render and the delivered file. Nothing is re-derived by hand, and an id is any string the
+project uses - `welcome` and `avatar-01` are the same kind of key.
 
 Four files, three of them runnable:
 
@@ -130,6 +136,10 @@ python scripts/conform.py --in sheet.png --out out/ --grid 4x4 --bands \
 - Row-major order: cell 1 is top-left, cell N is bottom-right. A **subset** cuts its own cells:
   `--slots avatar-05..08` produces cells 5-8, not the first four - every slot on the master owns a
   cell, including the ones already shipped.
+- **Ids are arbitrary.** `welcome`, `empty-state` and `avatar-01` are the same kind of key; a range
+  is only shorthand for a numbered family. A sheet of unrelated subjects lists its ids in the BOM
+  in sheet order (row-major), and that is the order they are cut in. `--slots` takes any list;
+  `--group` is a convenience for ids that share a hyphen prefix.
 - `--dry-run` prints the plan without opening the image or writing anything - safe in CI and
   before spending a re-render. In band mode the boxes are an even estimate and the report says so
   (`cut.estimated`); the real gutters are measured at run time.
