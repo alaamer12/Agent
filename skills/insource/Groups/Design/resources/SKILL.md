@@ -1,7 +1,7 @@
 ---
 name: resources
 version: 1.0.0
-description: 'Resource files for any platform: images, icons, fonts, audio, video, documents, color values - the files, not the systems that serve them. Fourteen tools: recolor, convert/fix-extension, rotate/flip/scale/resize/crop, favicon/app icon sets, OG images, splash screens, optimization with before/after sizes, CDN localization, inventory (duplicates, unused, external URLs), CSS Color 4 + WCAG contrast, a Bun.Image variants/ThumbHash script, and conform - probe a generated sheet (row-by-row layout, cut lines, ceiling), cut it into slots on an even grid or the measured gutters, fit each to its BOM delivery spec, review on a checkerboard with alpha-edge facts, verify. Audio/video use ffmpeg; renames are shell moves + reference updates. Rules: names, brand-vs-content, formats by purpose, ask-first splash choices. Triggers: favicon, icons, splash, OG, recolor, convert, optimize, localize, color, rename, unused resources, conform, split a generated image, sprite sheet, staggered sheet, probe sheet.'
+description: 'Resource files for any platform: images, icons, fonts, audio, video, documents, color values - the files, not the systems that serve them. Fourteen tools: recolor, convert/fix-extension, rotate/flip/scale/resize/crop, favicon/app icon sets, OG images, splash screens, optimization with before/after sizes, CDN localization, inventory (duplicates, unused, external URLs), CSS Color 4 + WCAG contrast, a Bun.Image variants/ThumbHash script, and conform - probe a sheet (row-by-row layout, cut lines, ceiling), cut it into slots on an even grid or the measured gutters, fit each to its BOM delivery spec, review on a checkerboard with alpha-edge facts, verify. Audio/video use ffmpeg; renames are shell moves + reference updates. Rules: names, brand-vs-content, formats by purpose, ask-first splash choices. Triggers: favicon, icons, splash, OG, recolor, convert, optimize, localize, color, rename, unused resources, conform, split a generated image, sprite sheet, staggered sheet, probe sheet.'
 when_to_use: The user asks to create, convert, transform, recolor, organize, rename, localize or optimize project resources (images, icons, fonts, video, splash/loading screens, favicons, OG images), to split and fit generated images to their delivery spec, or to audit a resource folder for duplicates and unused files. Also /resources.
 argument-hint: "[the resource, folder or task - icons, favicon, splash, og, optimize, localize, inventory, rename, recolor, convert, transform, conform]"
 ---
@@ -47,8 +47,8 @@ them by looking at the folder.
 | Audit assets: duplicates, unused, external URLs | `scripts/inventory.py` | `--root . --assets assets public` |
 | Convert/compare colors across CSS Color 4 spaces | `scripts/color.py` | `"#3366FF" --to oklch` · `--contrast A B` · `--mix A B --space oklch` |
 | Bun projects: variants + ThumbHash placeholders (built-in, zero deps) | `scripts/bun-image.ts` | `bun run bun-image.ts in.png --out-dir out --variants 320,640 --placeholder` |
-| Conform a generated sheet or single master into slot files fitted to the BOM | `scripts/conform.py` | `--bom bom/page.md --group avatar --in raw/avatars.png --out assets/avatars` · `--slots hero-home --in raw/hero-home.png` · `--rows 8,8,8,10` |
-| Measure a generated sheet before cutting it: content, row-by-row layout, cut lines, ceiling | `scripts/sheet_probe.py` | `sheet.png --grid 5x2 --delivery "128x128 1:1 webp @1x,2x"` · `--json` |
+| Conform a sheet or single master into slot files fitted to the BOM | `scripts/conform.py` | `--bom bom/page.md --group avatar --in raw/avatars.png --out assets/avatars` · `--slots hero-home --in raw/hero-home.png` · `--rows 8,8,8,10` |
+| Measure a sheet before cutting it: content, row-by-row layout, cut lines, ceiling | `scripts/sheet_probe.py` | `sheet.png --grid 5x2 --delivery "128x128 1:1 webp @1x,2x"` · `--json` |
 | Review delivered slots on a checkerboard, with alpha-edge facts | `scripts/contact_sheet.py` | `assets/avatars --out review.png --skip-density` · `--json` |
 
 Full flags, exit codes and examples: `references/07-scripts.md`. Dependencies, installed **in the
@@ -154,9 +154,10 @@ it, then **review** the files the project ships:
   a cell smaller than the required master is an error unless `--allow-upscale`.
 - **Count mismatch stops the run.** If detection finds 9 subjects where the BOM expects 10, it reports
   and exits non-zero instead of guessing which cell is wrong.
-- One run = one master: a sheet group or one single slot; `--group <prefix>` or `--slots <id>`
-  scopes it. A set that needs more than one render is written as one BOM row per sheet
-  (`avatar-01..04`, `avatar-05..08`); each row is its own run.
+- One run = one master: one sheet or one single slot, scoped by `--slots <ids>` (any ids, in sheet
+  order) or `--group <prefix>` when the ids share a hyphen prefix. A set that needs more than one
+  render is written as one BOM row per sheet (`avatar-01..04`, `avatar-05..08`); each row is its own
+  run.
 
 Scale, trimming and padding rules: `references/08-conform.md`. One-off crops with no BOM row stay
 in `transform.py`; every generated BOM row goes through conform so its slot id links the render to

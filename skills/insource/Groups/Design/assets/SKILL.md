@@ -9,7 +9,7 @@ description: >-
   each slot to its delivery spec with a verification report. Fixes the order and the shared key:
   one slot id across BOM row, prompt, raw render and delivered file, so nothing is re-derived by
   hand. Pages marked no-images skip the pipeline. Use when asked what images a page needs, to plan
-  or run an image program end to end, to turn a generated sheet into project assets, or to decide
+  or run an image program end to end, to turn a sheet into project assets, or to decide
   which skill handles a step. Triggers: assets, image pipeline, BOM, image plan, generated sheet,
   conform, split a sheet. Not for one prompt (generate), pure file work (resources), or writing
   illustration prompts and style canon (collection).
@@ -33,12 +33,13 @@ bom/<page>.md       raw/*.png               assets/<slots>      conform-report.j
 | Step | Owner | Artifact | Done when |
 |---|---|---|---|
 | 1. Plan | `collection` | `BOM.md`, `bom/<page>.md`, `bom/style.md` | every page listed (or `no-images`), every generated row has slot id, master, delivery and prompt |
-| 2. Generate | `generate` skill | raw masters, `usage.jsonl` | the master exists at the BOM's size and grid |
+| 2. Master | `generate` skill, or the file the user already owns (a catalog page, a sprite sheet) | raw masters, `usage.jsonl` | the master exists at the BOM's size and plan |
 | 3. Conform | `resources` (`sheet_probe.py`, `conform.py`, `contact_sheet.py`) | slot-named DPR files, `conform-report.json`, review sheet | `ok: true`, expected file count, no empty cells, edges reviewed on a checkerboard |
 
 Order is the contract. A prompt written before the BOM drifts from the delivery spec; conforming
 before the master size is validated produces upscaled files. Steps 2 and 3 are skipped entirely for
-pages marked `no-images`.
+pages marked `no-images`. Step 1 decides which of the two step-2 routes each row takes: `generate`
+rows get a prompt, `sheet <path>` rows do not.
 
 ## Routing
 
@@ -59,7 +60,9 @@ pages marked `no-images`.
 
 One id, four places: the BOM row, the prompt block, the raw render's cell, the delivered filename.
 `avatar-01` is the same string everywhere; ranges (`avatar-01..10`) expand in row-major cell order.
-This is what removes the manual linking step - if two of the four disagree, the pipeline broke.
+The id is a name, not a type: `welcome`, `empty-state`, `store-category-3` work identically, and a
+sheet of unrelated subjects is cut in the order its ids are listed. This is what removes the manual
+linking step - if two of the four disagree, the pipeline broke.
 
 ## Artifact paths
 

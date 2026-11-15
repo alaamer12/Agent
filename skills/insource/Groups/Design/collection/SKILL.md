@@ -12,7 +12,7 @@ description: >-
   renders - compare required master (delivery px x max DPR) against cell size. Regenerate only
   what is missing. Use for an image collection, illustrations for app
   screens, a consistent set of generated art, 'make images for onboarding', planning a page's
-  images, or normalising a generated sheet. Not for one prompt (generate), stock photos (fahlwy),
+  images, or normalising a sheet. Not for one prompt (generate), stock photos (fahlwy),
   file work (resources).
 ---
 
@@ -88,7 +88,10 @@ The schema lives here; `resources conform` reads it and changes nothing about it
 | `photo-teaser` | stock photo | `fahlwy` | — | `640x360 16:9 jpeg q80 @2x` | pending |
 | `icon-search` | icon | `resources` / icon set | — | `24x24 svg` | shipped |
 
-- **Slot**: one id, or a range (`avatar-01..10`) for a sheet. The id becomes the filename stem.
+- **Slot**: one id, a comma list, or a range for a numbered family (`avatar-01..10`). The id
+  becomes the filename stem, and ids are arbitrary - `welcome`, `empty-state`, `hero-home`. For a
+  sheet holding unrelated subjects, list them in the sheet's row-major order; that order is the cut
+  order.
 - **Source**: `generate` (single or sheet), `sheet <path>` (an existing sheet image to cut - a
   reference catalog the user owns), `reuse <path>`, `fahlwy`, `resources`. Only rows with a master
   get a spec and a prompt; only generated rows get a prompt.
