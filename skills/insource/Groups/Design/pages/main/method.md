@@ -45,9 +45,9 @@ decision with reason and user-visible behavior, never a silent bounce.
 
 ## Step 3 — Present and ask in ONE round
 
-One message: the tree with symbols (`✓ ~ ? ✗`), proposed splits and redirects with what
-became what and why, exclusions stated for confirmation, then all open questions as a
-numbered list. Wait for one reply. Never drip questions.
+The shared law applies; the one message carries: the tree with symbols (`✓ ~ ? ✗`), proposed
+splits and redirects with what became what and why, exclusions stated for confirmation, then
+all open questions as a numbered list. Wait for one reply.
 
 ## Step 4 — Resolve and lock
 

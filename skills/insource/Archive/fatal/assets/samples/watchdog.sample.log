@@ -1,0 +1,5 @@
+# ILLUSTRATIVE: out-of-process supervisor log after the fix; this is the SIMULATED crash (Stop-Process -Force).
+[2026-03-12 16:36:10.201] [watchdog] attached to pid 4100 (Local\DemoApp.App.CleanExit.4100)
+[2026-03-12 16:38:04.887] [watchdog] primary pid=4100 exited code=0xFFFFFFFF cleanExit=False uptime=0.00:01:54
+[2026-03-12 16:38:04.912] [watchdog] decision=Relaunch (restarts in window: 1/5) delay=4s
+[2026-03-12 16:38:08.930] [watchdog] relaunched pid=5200 args=--silent-start --supervised

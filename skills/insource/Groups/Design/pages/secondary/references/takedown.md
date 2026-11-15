@@ -25,6 +25,22 @@ belong on one page or two clearly linked ones.
   reporter is notified of the outcome.
 - The enforcement consequence links to `acceptable-use.md` (one owner).
 
+## Must include - EU DSA mechanics (hosting/platforms with EU users)
+
+- **Art. 16 notice-and-action form**: electronic, easy to access, and demanding precisely its
+  fields - substantive grounds of illegality, exact URL, reporter name/email (waived for CSAM
+  referrals), good-faith statement. A conforming notice creates **actual knowledge**: the liability
+  exemption dies if the host then does nothing - so the form is the compliance perimeter, not
+  paperwork.
+- **Statement of reasons** for every decision (Art. 17), sent to the affected user and - for
+  content-moderation decisions - fed to the Commission's public Transparency Database (see
+  `transparency-report.md`).
+- **Free internal complaint handling** (Art. 20) + named certified out-of-court dispute bodies
+  (Art. 21); trusted-flagger priority (Art. 22); repeat-misuser suspension (Art. 23).
+- **Non-consensual intimate imagery [US TAKE IT DOWN Act, live 2025]**: notice route, removal
+  within **48 hours including identical copies**; FTC enforcement since May 2026 - if the product
+  hosts user media, this route is mandatory in the US regardless of the DMCA posture.
+
 ## Writing professionally
 
 - One report form or email beats five addresses. Machine-parseable where volume is plausible.

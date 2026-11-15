@@ -1,0 +1,4 @@
+# ILLUSTRATIVE: Windows Application event log export (US date format), reconstructed from the write-up.
+3/12/2026 1:49:35 PM  Application Error 1000  Faulting application name: DemoApp.exe, version: 1.0.4.0 Faulting module name: Microsoft.UI.Xaml.dll Exception code: 0xc000027b Fault offset: 0x000000000039cde5
+3/12/2026 1:49:39 PM  Windows Error Reporting 1001  APPCRASH P1: DemoApp.exe P7: 8000000e
+3/12/2026 1:49:41 PM  Windows Error Reporting 1001  APPCRASH Fault bucket 1000000000000000001, type 4

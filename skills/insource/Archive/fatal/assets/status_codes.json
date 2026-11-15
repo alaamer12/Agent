@@ -1,0 +1,508 @@
+{
+ "_about": "Lookup data for scripts/decode_status.py and minidump_report.py. 'class' uses the termination classes in references/universal-vocabulary.md. Verify rarely-used entries against winnt.h / ntstatus.h / signal(7) before quoting them as fact.",
+ "classes": {
+  "A": "Deliberate abort (fail-fast): a runtime/OS/library detected a broken invariant and ended the process on purpose. Handlers do not run.",
+  "B": "Hard fault: invalid memory/instruction raised by the CPU/OS (access violation, SIGSEGV, SIGBUS...).",
+  "C": "Unhandled language exception: a managed/C++ exception nobody caught; last-chance handlers CAN run.",
+  "D": "Resource exhaustion: out of memory, stack, handles.",
+  "E": "External kill: something else ended the process (user, script, OOM killer, supervisor, installer).",
+  "F": "Hang-kill: a watchdog/ANR timer ended an unresponsive process.",
+  "G": "Clean/intentional exit.",
+  "H": "Startup/loader failure: the process never really started.",
+  "I": "System-level: kernel panic / bugcheck / power loss took everything down."
+ },
+ "ntstatus": {
+  "C0000005": {
+   "name": "STATUS_ACCESS_VIOLATION",
+   "class": "B",
+   "meaning": "Read/write/execute of memory that is not accessible.",
+   "next": "Params: [0]=0 read,1 write,8 DEP; [1]=address. Address < 0x10000 usually means null pointer + field offset. Find module+offset of the faulting instruction."
+  },
+  "C000001D": {
+   "name": "STATUS_ILLEGAL_INSTRUCTION",
+   "class": "B",
+   "meaning": "CPU hit an undefined instruction (corrupt code, wrong CPU features, or a deliberate trap).",
+   "next": "Check CPU/instruction-set assumptions and whether the image on disk matches the one running."
+  },
+  "C0000006": {
+   "name": "STATUS_IN_PAGE_ERROR",
+   "class": "B",
+   "meaning": "Could not page in a memory-mapped file (image on removed drive/network share, or failing disk).",
+   "next": "Params[2] holds the underlying NTSTATUS. Suspect running from a network/removable location."
+  },
+  "C0000094": {
+   "name": "STATUS_INTEGER_DIVIDE_BY_ZERO",
+   "class": "B",
+   "meaning": "Integer divide by zero.",
+   "next": "Map fault address to source."
+  },
+  "C0000095": {
+   "name": "STATUS_INTEGER_OVERFLOW",
+   "class": "B",
+   "meaning": "Integer overflow trap.",
+   "next": "Map fault address to source."
+  },
+  "C000008C": {
+   "name": "STATUS_ARRAY_BOUNDS_EXCEEDED",
+   "class": "B",
+   "meaning": "Hardware-detected array bounds violation.",
+   "next": "Map fault address to source."
+  },
+  "C0000096": {
+   "name": "STATUS_PRIVILEGED_INSTRUCTION",
+   "class": "B",
+   "meaning": "Privileged instruction in user mode (often jumped into garbage).",
+   "next": "Suspect memory corruption / bad function pointer."
+  },
+  "C00000FD": {
+   "name": "STATUS_STACK_OVERFLOW",
+   "class": "D",
+   "meaning": "A thread exhausted its stack (runaway recursion or huge stack allocation).",
+   "next": "Look for a repeating module+offset pattern at the top of the faulting stack."
+  },
+  "C0000017": {
+   "name": "STATUS_NO_MEMORY",
+   "class": "D",
+   "meaning": "Allocation failed: out of memory/address space.",
+   "next": "Check working set / commit in heartbeat logs."
+  },
+  "C0000374": {
+   "name": "STATUS_HEAP_CORRUPTION",
+   "class": "A",
+   "meaning": "The heap manager detected corruption and fail-fasted. The bad write happened EARLIER than the crash.",
+   "next": "Do not blame the faulting frame. Use PageHeap/Application Verifier (Windows), ASan/Valgrind (Unix) to catch the original write."
+  },
+  "C0000409": {
+   "name": "STATUS_STACK_BUFFER_OVERRUN (__fastfail)",
+   "class": "A",
+   "meaning": "Despite the name this is the general __fastfail code. Params[0] is a FAST_FAIL_* reason: 2 stack-cookie check failure, 3 corrupt list entry, 5 invalid arg (CRT), 7 fatal app exit (abort()), 8 range-check failure, 10 control-flow-guard failure, 14 invalid reference count.",
+   "next": "Read Params[0] first. Verify values against winnt.h."
+  },
+  "C0000417": {
+   "name": "STATUS_INVALID_CRUNTIME_PARAMETER",
+   "class": "A",
+   "meaning": "C runtime invalid-parameter handler fired with no handler installed.",
+   "next": "Look for CRT calls with bad arguments near the top of the stack."
+  },
+  "C0000420": {
+   "name": "STATUS_ASSERTION_FAILURE",
+   "class": "A",
+   "meaning": "An assertion/verify macro failed.",
+   "next": "Assertion text is usually in the app log."
+  },
+  "C0000602": {
+   "name": "STATUS_FAIL_FAST_EXCEPTION",
+   "class": "A",
+   "meaning": "Generic fail-fast exception raised by RaiseFailFastException.",
+   "next": "The caller one or two frames above RaiseFailFastException names the subsystem that gave up."
+  },
+  "C000027B": {
+   "name": "STATUS_STOWED_EXCEPTION",
+   "class": "A",
+   "meaning": "WinRT/WinUI/COM fail-fast carrying one or more 'stowed' (saved) exceptions. Raised via RoFailFastWithErrorContext. No managed or SEH handler can intercept it.",
+   "next": "Read the stowed exception array (needs heap in dump) for the inner HRESULT and its stack. Then check WHICH THREAD fail-fasted (UI vs finalizer/worker): that distinguishes a bad call from a bad release."
+  },
+  "40000015": {
+   "name": "STATUS_FATAL_APP_EXIT",
+   "class": "A",
+   "meaning": "Legacy CRT abort() path.",
+   "next": "Find who called abort()."
+  },
+  "80000003": {
+   "name": "STATUS_BREAKPOINT",
+   "class": "A",
+   "meaning": "int3/__debugbreak executed (assert, DebugBreak, or a deliberate runtime trap) with no debugger.",
+   "next": "Look at the calling frame; usually a deliberate check."
+  },
+  "C0000025": {
+   "name": "STATUS_NONCONTINUABLE_EXCEPTION",
+   "class": "A",
+   "meaning": "Tried to continue after a noncontinuable exception (how RaiseFailFastException shows on stacks).",
+   "next": "Look further down the stack for the real reason."
+  },
+  "E0434352": {
+   "name": "CLR managed exception (SEH wrapper)",
+   "class": "C",
+   "meaning": "An unhandled .NET exception. Unlike fail-fast, AppDomain.UnhandledException runs first.",
+   "next": "Managed stack is in the Application event log (.NET Runtime, ID 1026) and in your logs."
+  },
+  "E06D7363": {
+   "name": "MSVC C++ exception ('msc')",
+   "class": "C",
+   "meaning": "An uncaught C++ throw.",
+   "next": "Recover the thrown type name with a debugger."
+  },
+  "C0000135": {
+   "name": "STATUS_DLL_NOT_FOUND",
+   "class": "H",
+   "meaning": "A required DLL was not found at process start.",
+   "next": "Dependency check; portable layouts and missing VC++ runtimes are common."
+  },
+  "C0000139": {
+   "name": "STATUS_ENTRYPOINT_NOT_FOUND",
+   "class": "H",
+   "meaning": "DLL found but lacks an expected export (version mismatch).",
+   "next": "Compare DLL versions named in the event log."
+  },
+  "C0000142": {
+   "name": "STATUS_DLL_INIT_FAILED",
+   "class": "H",
+   "meaning": "A DLL's initializer failed.",
+   "next": "Check the DLL named in the Application Error event."
+  },
+  "C000007B": {
+   "name": "STATUS_INVALID_IMAGE_FORMAT",
+   "class": "H",
+   "meaning": "Bad image: usually 32/64-bit mismatch with a dependency.",
+   "next": "Check architectures of exe and dependencies."
+  },
+  "C000013A": {
+   "name": "STATUS_CONTROL_C_EXIT",
+   "class": "E",
+   "meaning": "Console process ended by Ctrl+C / console closed.",
+   "next": "Not a crash."
+  }
+ },
+ "hresult": {
+  "8000000E": {
+   "name": "E_ILLEGAL_METHOD_CALL",
+   "meaning": "Method called in a state/time/thread where it is not allowed. In WinUI: wrong thread, object closed, or lifecycle misuse.",
+   "next": "Check which thread raised it and the object's state."
+  },
+  "8000FFFF": {
+   "name": "E_UNEXPECTED",
+   "meaning": "'Catastrophic failure'.",
+   "next": "Generic; read context."
+  },
+  "80004005": {
+   "name": "E_FAIL",
+   "meaning": "Unspecified failure.",
+   "next": "Generic."
+  },
+  "80004004": {
+   "name": "E_ABORT",
+   "meaning": "Operation aborted.",
+   "next": "Often cancellation."
+  },
+  "80004003": {
+   "name": "E_POINTER",
+   "meaning": "Null pointer passed.",
+   "next": "Find the callee."
+  },
+  "80004002": {
+   "name": "E_NOINTERFACE",
+   "meaning": "Interface not supported.",
+   "next": "Marshalling/proxy or version problem."
+  },
+  "80004001": {
+   "name": "E_NOTIMPL",
+   "meaning": "Not implemented.",
+   "next": "-"
+  },
+  "80070057": {
+   "name": "E_INVALIDARG",
+   "meaning": "Invalid argument.",
+   "next": "-"
+  },
+  "8007000E": {
+   "name": "E_OUTOFMEMORY",
+   "meaning": "Out of memory.",
+   "next": "Check memory trends."
+  },
+  "80070005": {
+   "name": "E_ACCESSDENIED",
+   "meaning": "Access denied.",
+   "next": "Permissions/integrity level."
+  },
+  "80070006": {
+   "name": "E_HANDLE",
+   "meaning": "Invalid handle.",
+   "next": "Closed or never valid."
+  },
+  "8007139F": {
+   "name": "ERROR_INVALID_STATE (as HRESULT)",
+   "meaning": "Not in the correct state.",
+   "next": "-"
+  },
+  "8001010E": {
+   "name": "RPC_E_WRONG_THREAD",
+   "meaning": "Interface was marshalled for a different thread/apartment.",
+   "next": "Classic thread-affinity violation signature."
+  },
+  "80010108": {
+   "name": "RPC_E_DISCONNECTED",
+   "meaning": "Object has disconnected from its clients.",
+   "next": "Out-of-process server died or object released."
+  },
+  "800706BA": {
+   "name": "RPC_S_SERVER_UNAVAILABLE",
+   "meaning": "RPC server unavailable.",
+   "next": "Find why the server process died."
+  },
+  "800706BE": {
+   "name": "RPC_S_CALL_FAILED",
+   "meaning": "The RPC failed.",
+   "next": "Same as above."
+  },
+  "80000013": {
+   "name": "RO_E_CLOSED",
+   "meaning": "Object already closed/disposed.",
+   "next": "Use-after-close."
+  },
+  "8000000B": {
+   "name": "E_BOUNDS",
+   "meaning": "Index out of bounds (WinRT).",
+   "next": "-"
+  },
+  "8000000D": {
+   "name": "E_CHANGED_STATE",
+   "meaning": "Collection/state changed during operation.",
+   "next": "-"
+  },
+  "80131623": {
+   "name": "COR_E_FAILFAST",
+   "meaning": "Commonly observed for .NET Environment.FailFast (verify on your runtime).",
+   "next": "Reason string is on stderr and in the Application event log."
+  }
+ },
+ "fast_fail": {
+  "0": "LEGACY_GS_VIOLATION",
+  "1": "VTGUARD_CHECK_FAILURE",
+  "2": "STACK_COOKIE_CHECK_FAILURE",
+  "3": "CORRUPT_LIST_ENTRY",
+  "4": "INCORRECT_STACK",
+  "5": "INVALID_ARG",
+  "6": "GS_COOKIE_INIT",
+  "7": "FATAL_APP_EXIT",
+  "8": "RANGE_CHECK_FAILURE",
+  "9": "UNSAFE_REGISTRY_ACCESS",
+  "10": "GUARD_ICALL_CHECK_FAILURE",
+  "11": "GUARD_WRITE_CHECK_FAILURE",
+  "14": "INVALID_REFERENCE_COUNT"
+ },
+ "signals": {
+  "1": {
+   "name": "SIGHUP",
+   "class": "E",
+   "catchable": true,
+   "core": false,
+   "meaning": "Controlling terminal closed / reload request."
+  },
+  "2": {
+   "name": "SIGINT",
+   "class": "E",
+   "catchable": true,
+   "core": false,
+   "meaning": "Ctrl+C."
+  },
+  "3": {
+   "name": "SIGQUIT",
+   "class": "E",
+   "catchable": true,
+   "core": true,
+   "meaning": "Quit with core dump (JVM: prints a thread dump instead of dying)."
+  },
+  "4": {
+   "name": "SIGILL",
+   "class": "B",
+   "catchable": true,
+   "core": true,
+   "meaning": "Illegal instruction (corrupt code, wrong CPU, or deliberate trap such as ud2)."
+  },
+  "5": {
+   "name": "SIGTRAP",
+   "class": "A",
+   "catchable": true,
+   "core": true,
+   "meaning": "Breakpoint/trap. Runtimes use it for deliberate traps (Swift/Rust on ARM; debuggers)."
+  },
+  "6": {
+   "name": "SIGABRT",
+   "class": "A",
+   "catchable": true,
+   "core": true,
+   "meaning": "abort(): the process (libc, runtime or app) deliberately gave up. glibc heap-corruption messages, assert(), Rust panic=abort, V8 fatal errors end here."
+  },
+  "7": {
+   "name": "SIGBUS",
+   "class": "B",
+   "catchable": true,
+   "core": true,
+   "meaning": "Bad memory access (misaligned, or a mapped file was truncated). Number 7 on Linux, 10 on macOS/BSD."
+  },
+  "8": {
+   "name": "SIGFPE",
+   "class": "B",
+   "catchable": true,
+   "core": true,
+   "meaning": "Arithmetic error (integer divide by zero)."
+  },
+  "9": {
+   "name": "SIGKILL",
+   "class": "E",
+   "catchable": false,
+   "core": false,
+   "meaning": "Uncatchable kill sent by someone ELSE: kill -9, OOM killer, container runtime, iOS jetsam, a supervisor. The process cannot choose it and gets no chance to log. NOT a fail-fast."
+  },
+  "11": {
+   "name": "SIGSEGV",
+   "class": "B",
+   "catchable": true,
+   "core": true,
+   "meaning": "Invalid memory access (null/dangling pointer, stack overflow, bad write)."
+  },
+  "13": {
+   "name": "SIGPIPE",
+   "class": "E",
+   "catchable": true,
+   "core": false,
+   "meaning": "Wrote to a closed pipe/socket; default action terminates silently."
+  },
+  "14": {
+   "name": "SIGALRM",
+   "class": "F",
+   "catchable": true,
+   "core": false,
+   "meaning": "Timer expired (used by some watchdogs)."
+  },
+  "15": {
+   "name": "SIGTERM",
+   "class": "E",
+   "catchable": true,
+   "core": false,
+   "meaning": "Polite termination request (systemd stop, docker stop, kill)."
+  },
+  "31": {
+   "name": "SIGSYS",
+   "class": "B",
+   "catchable": true,
+   "core": true,
+   "meaning": "Bad system call - on Android/containers usually a seccomp policy violation."
+  }
+ },
+ "exit_codes": {
+  "0": {
+   "meaning": "Success / clean exit.",
+   "class": "G"
+  },
+  "1": {
+   "meaning": "Generic failure; also uncaught exception in many runtimes (Python, Node, Java main).",
+   "class": "C"
+  },
+  "2": {
+   "meaning": "Go: panic or fatal runtime error (unrecoverable errors such as 'concurrent map writes' cannot be recover()ed).",
+   "class": "A"
+  },
+  "3": {
+   "meaning": "MSVC CRT abort() in legacy mode.",
+   "class": "A"
+  },
+  "130": {
+   "meaning": "Shell convention 128+2: killed by SIGINT.",
+   "class": "E"
+  },
+  "134": {
+   "meaning": "Shell convention 128+6: SIGABRT (also JVM/Node fatal abort).",
+   "class": "A"
+  },
+  "137": {
+   "meaning": "Shell convention 128+9: SIGKILL. In containers/Kubernetes very often the OOM killer.",
+   "class": "E"
+  },
+  "139": {
+   "meaning": "Shell convention 128+11: SIGSEGV.",
+   "class": "B"
+  },
+  "143": {
+   "meaning": "Shell convention 128+15: SIGTERM.",
+   "class": "E"
+  },
+  "FFFFFFFF": {
+   "meaning": "Windows: -1. Typical of TerminateProcess(-1) from Stop-Process -Force / taskkill /f. With no dump and no event-log crash entry this points at an EXTERNAL kill, not a crash.",
+   "class": "E"
+  },
+  "-N": {
+   "meaning": "Python subprocess/Node child: negative returncode -N means 'killed by signal N' (-11 = SIGSEGV, -9 = SIGKILL).",
+   "class": "?"
+  }
+ },
+ "apple_exceptions": {
+  "EXC_BAD_ACCESS": {
+   "signal": "SIGSEGV/SIGBUS",
+   "class": "B",
+   "meaning": "Invalid memory access. KERN_INVALID_ADDRESS = unmapped; KERN_PROTECTION_FAILURE = permissions. arm64e 'possible pointer authentication failure' = corrupted pointer."
+  },
+  "EXC_BAD_INSTRUCTION": {
+   "signal": "SIGILL",
+   "class": "B",
+   "meaning": "Illegal instruction."
+  },
+  "EXC_ARITHMETIC": {
+   "signal": "SIGFPE",
+   "class": "B",
+   "meaning": "Arithmetic fault."
+  },
+  "EXC_CRASH": {
+   "signal": "SIGABRT (usually)",
+   "class": "A",
+   "meaning": "Process abort: uncaught Objective-C exception, abort(), assertion, or system-initiated termination (read 'Termination Reason')."
+  },
+  "EXC_BREAKPOINT": {
+   "signal": "SIGTRAP",
+   "class": "A",
+   "meaning": "Deliberate trap: Swift runtime failures (force-unwrap nil, index out of range, failed precondition), __builtin_trap, breakpoints."
+  },
+  "EXC_GUARD": {
+   "signal": "-",
+   "class": "A",
+   "meaning": "Guarded resource misuse (e.g. closing a guarded file descriptor)."
+  },
+  "EXC_RESOURCE": {
+   "signal": "-",
+   "class": "D",
+   "meaning": "Exceeded a CPU, memory, wakeups or I/O limit."
+  }
+ },
+ "apple_termination_codes": {
+  "8BADF00D": {
+   "meaning": "'ate bad food': watchdog killed the app for taking too long (launch/resume/scene update); main thread was blocked.",
+   "class": "F"
+  },
+  "DEAD10CC": {
+   "meaning": "'dead lock': app held a file lock or SQLite database while suspended in background.",
+   "class": "E"
+  },
+  "C00010FF": {
+   "meaning": "'cool off': killed for thermal reasons.",
+   "class": "E"
+  },
+  "BAD22222": {
+   "meaning": "VoIP app resumed too frequently.",
+   "class": "E"
+  },
+  "DEADFA11": {
+   "meaning": "'dead fall': force-quit by the user (or system unresponsive).",
+   "class": "E"
+  },
+  "BAADCA11": {
+   "meaning": "App failed to report an incoming call to CallKit in time.",
+   "class": "E"
+  }
+ },
+ "android_exit_reasons": {
+  "0": "REASON_UNKNOWN",
+  "1": "REASON_EXIT_SELF",
+  "2": "REASON_SIGNALED",
+  "3": "REASON_LOW_MEMORY",
+  "4": "REASON_CRASH (Java/Kotlin)",
+  "5": "REASON_CRASH_NATIVE",
+  "6": "REASON_ANR",
+  "7": "REASON_INITIALIZATION_FAILURE",
+  "8": "REASON_PERMISSION_CHANGE",
+  "9": "REASON_EXCESSIVE_RESOURCE_USAGE",
+  "10": "REASON_USER_REQUESTED",
+  "11": "REASON_USER_STOPPED",
+  "12": "REASON_DEPENDENCY_DIED",
+  "13": "REASON_OTHER"
+ }
+}

@@ -5,26 +5,42 @@ The reference example of transparency the user named - this document earns or lo
 
 ## Must include, in this order
 
-1. **Who you are + how to reach the privacy contact** - entity from config; a real channel.
+1. **Who you are + how to reach the privacy contact** - entity from config; a real channel; the
+   **EU representative** (Art. 27, non-EU sellers to EU users) and DPO contact where one exists.
 2. **Plain-language summary at the top** - 4-6 lines answering: what do you collect, why, do you
-   sell it, who hosts it, what can I do about it. The rest is the detail.
+   sell it, who hosts it, what can I do about it. The rest is the detail. Layered form: summary
+   first, per-class tables under it.
 3. **Data collected, grouped by source** - a table per group: what you give us (account, content,
    messages); what we record (usage events, logs, crash reports); what we get from others (OAuth
    providers, payment processors). For EACH class: the PURPOSE tied to it - collection without a
-   stated purpose is the classic failure.
+   stated purpose is the classic failure. **AI training gets its own line**: whether interactions
+   or content train models, on what basis, and how to object - hiding it inside "improve our
+   services" is the 2025-26 regulator's favorite finding.
 4. **Legal bases** [GDPR-shaped] or **category↔purpose disclosure** [CCPA-shaped] - which frame
-   fits depends on the users the project actually has: ASK, don't guess jurisdictions.
+   fits depends on the users the project actually has: ASK, don't guess jurisdictions. US in-scope
+   reach adds the state-notice artifacts (`us-state-privacy.md`) around this page - the policy
+   hosts the state-rights section, the Notice-at-Collection and opt-out pages are separate
+   documents.
 5. **Sharing** - the named list: processors (hosting, email, payments, analytics), "we do not sell
-   personal data" ONLY if literally true; law-enforcement path and policy.
+   or share personal data" ONLY if literally true with the trackers off to match (CalPrivacy's
+   FedEx fine, Nov 2026: that sentence plus running ad trackers and a broken GPC path);
+   law-enforcement path and policy.
 6. **Retention** - explicit period or explicit rule per data class ("deleted within N days of
    account deletion"; "billing records kept N years because law says"). This is the most often
    invented number in all secondary documents - it comes from the user or nothing.
 7. **Cookies and trackers** - the summary line; the per-cookie table lives in `cookie-policy.md`.
 8. **Rights + how to exercise** - access/export/rectify/delete/object/portability per the actual
-   law set; the mechanism is `data-rights.md`; state the real response time.
+   law set; the mechanism is `data-rights.md`; state the real response time; cloud-switching and
+   portability duties where the EU Data Act applies (from 12 Sep 2025).
 9. **Children** - one accurate line, pointer to `child-privacy.md` if the full page exists.
-10. **Transfers** - where data physically lives; the mechanism if cross-border.
-11. **Changes** - dated header; material-change notice channel.
+10. **Transfers** - where data physically lives; the mechanism if cross-border (SCC/adequacy/DPF,
+    as `dpa.md` names them - one owner).
+11. **Other jurisdictions in scope** - India DPDP (staged: notice/consent duties, consent-
+    managers from Nov 2026, grievance route), Brazil LGPD/ANPD, etc. - only the ones the users
+    actually come from (ASK); each gets a short named section, not a boilerplate globe.
+12. **Changes** - dated header; material-change notice channel. Draft to enacted law: the EU
+    Digital Omnibus (Nov 2025) is a **proposal** - useful to know, not something to write pages
+    against.
 
 ## Writing professionally
 
@@ -46,7 +62,9 @@ literal truth; hosting region.
 
 A generic template listing analytics features the product lacks (over-disclosure is still a
 false statement); retention "as long as necessary" everywhere; rights described with no mechanism;
-a "last updated" date older than the code it describes.
+a "last updated" date older than the code it describes; "we don't sell or share" next to live ad
+trackers; AI-training folded into "improve our services"; drafting pages against proposed law as
+if in force.
 
 *Not legal advice: the goal is that a reader can verify every claim against the product; counsel
 checks enforceability.*

@@ -1,5 +1,8 @@
 # Screen Inventory Planning: Professional Methodology Research
 
+> **Provenance archive** behind `../references/data.csv` — read only when extending the
+> catalog. Never load it during planning: the method lives in `../references/sources.md`.
+
 > Research compiled for the agent skill: **page/screen inventory planning for software products**.
 > Seven research areas covering IA methodology, format standards, signal catalogues, common mistakes, platform conventions, multi-role IA, and versioning.
 

@@ -27,15 +27,14 @@ screens (empty results and validation errors belong to their pages, §7).
 2. **Inventory candidates** — walk `references/catalog.md` against the project's real
    evidence: routes, webhook/return wiring, auth middleware, feature flags, entitlement
    checks, mail templates (which tokens actually exist). Present the set; ask which to design.
-3. **Fill the anatomy** (`references/anatomy.md`) before design: trigger as a predicate,
-   condition source, the wayward reachability states (cold deep-link, bookmarked replay,
-   logged-out arrival), primary + fallback exits, continuation ownership, announcement.
+3. **Fill the anatomy** (`references/anatomy.md`) before design - the six-field contract this
+   mode's owner file defines; every page signs all of it.
 4. **Build per the family reference** — each of the nine `references/<family>.md` files owns
    the per-class copy laws and anti-patterns.
-5. **Register in PAGES.md §6** — one row per screen per `../references/output-contract.md`:
-   route, family, trigger, condition source, states handled,
-   exits, status. Exclusions (e.g. a cancel page the failure screen already owns) go to §9
-   with kind=complementary; worked shape in `examples/after-payment/anatomy-sheets.md`.
+5. **Register in PAGES.md §6** — the row shape and its required fields are `anatomy.md`'s
+   decision (mirrored by `../references/pages-md-format.md`'s field rules; a §6 row missing
+   any is an audit defect). Exclusions (e.g. a cancel page the failure screen already owns)
+   go to §9 with kind=complementary; worked shape in `examples/after-payment/anatomy-sheets.md`.
 6. **`audit <routes-dir>`** — sweep real routes for conditional pages that violate a law:
    URL-guessed success, dead-end failure, unregistered §6 absence, relay pages rendering
    content. Report per page with the law cited; fix the map and the page in one change.

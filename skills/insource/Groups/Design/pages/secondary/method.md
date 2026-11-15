@@ -13,6 +13,7 @@ none.
 |---|---|
 | **Never invent facts** | retention days, refund windows, registration numbers, governing law, SLA times — each is a question for the user. A plausible filler in a legal page is a promise the operator may not keep. Unclear + material → ask; never a guess dressed as boilerplate |
 | **No document for what is not true** | no shipping policy without physical delivery, no child-privacy page beyond one statement line for a 13+ gated product, no press kit with fabricated logos. Skipping is correct and said so |
+| **Recommend inside the scale, phase to the act** | documents are proposed for the project's *actual* activity and size — no DPA for consumer-only, no refund policy for a site that earns nothing. Scale gate then phase gate: launch set now, deferrals only with a named trigger recorded in `PAGES.md` (an unnamed deferral is debt), non-applicable with its reason; the trigger is the activity, never "good sites have these" and never the calendar (`references/catalog.md`) |
 | **ONE canon per document** | when a project spans platforms and shares contracts, the text lives once — canonically the web route when one exists; other platforms redirect (system browser) or embed; a bundled offline copy is a DECLARED synced duplicate with same-change duty, not a second original |
 | **Plain language is the standard** | a summary line before every dense section; write for the reader who will quote the page in a dispute — deliberately confusing terms are documented and legislated against |
 | **PII/contract data never hardcoded** | operator identity, address, emails resolve from env/config; message templates live in `.json`/`.txt` files, not source strings (`references/engineering.md`) |
@@ -53,7 +54,7 @@ beyond these pages to `seo`.
 
 | File | Owns |
 |---|---|
-| `references/catalog.md` | the complete document list by family with needs-it? filters |
-| `references/<type>.md` | one per type (25): required blocks, writing rules, questions, failure patterns |
+| `references/catalog.md` | the complete document list by family, the scale gate, needs-it? filters, fact ownership |
+| `references/<type>.md` | one per type (36): required blocks, writing rules, questions, failure patterns |
 | `references/presentation.md` | placement shapes as examples + the reader contract every shape must meet |
 | `references/engineering.md` | config-driven identity, template files, static rendering, SEO/sitemap/robots |

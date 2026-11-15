@@ -16,12 +16,23 @@ countries - which threshold applies is a jurisdiction question, never a guess).
 
 1. **What data we collect from a child account** - the minimum, stated per class; child accounts
    collect LESS by design, and the page should prove it.
-2. **Parental consent** - the mechanism (verified email, payment card, in-person) named truthfully;
-   COPPA-shaped consent flows have a defined list of acceptable verification methods - ASK which
-   the product implements, never claim one.
-3. **No behavioral ads / no selling** - the promise, if true, in one sentence.
-4. **Parent rights** - access, correct, delete, revoke; the route to exercise.
-5. **What the child sees** - default-private settings, contact restrictions.
+2. **Age assurance, not age declaration** - where law now demands a method: UK Online Safety Act
+   (since 25 Jul 2025, porn and services likely accessed by children need *highly effective*
+   age assurance - Ofcom is fining and explicitly rejects birthday self-declaration and paywall
+   tricks); EU DSA Art. 28 (minor protection + no profiling ads to minors); app-store age
+   **signals** the developer must read and act on (US state store-accountability laws: UT, TX,
+   LA, AL, 2025-26; Australia's under-16 platform duty live Dec 2025). The page names the method
+   actually deployed, what the assurance data is used for and **when it is deleted** (verification
+   artifacts reused or retained are a separate scandal waiting to happen).
+3. **Parental consent** - the mechanism (verified email, payment card, in-person) named truthfully;
+   COPPA's amended rule (effective 2025, full compliance Apr 2026): biometrics are now personal
+   information, third-party targeted ads need separate opt-in, retention has limits, mixed-
+   audience services cannot hide behind "not directed at children". COPPA-shaped consent flows
+   have a defined list of acceptable verification methods - ASK which the product implements.
+4. **No behavioral ads / no selling** - the promise, if true, in one sentence.
+5. **Parent rights** - access, correct, delete, revoke; the route to exercise.
+6. **What the child sees** - default-private settings, contact restrictions, and a reporting route
+   a child can actually use.
 
 ## Writing professionally
 
@@ -32,5 +43,14 @@ countries - which threshold applies is a jurisdiction question, never a guess).
 
 ## Ask the user - never invent
 
-Whether minors arrive; the age threshold(s) by market; consent verification actually implemented;
-data classes for child accounts; the delete-on-discovery path.
+Whether minors arrive; the age threshold(s) by market; the **age-assurance method actually
+deployed** where law demands one (and its data's lifecycle); consent verification actually
+implemented; data classes for child accounts; the delete-on-discovery path; which store age
+signals the product reads.
+
+## Failure patterns
+
+Birthday self-declaration presented as compliance (explicitly rejected by Ofcom enforcement);
+"not directed at children" on a mixed-audience service (the amended COPPA definition closes that
+door); reusing verification artifacts for other purposes; promising store-grade defaults the app
+does not set; silence on behavioral ads while the analytics SDK serves them.

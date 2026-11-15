@@ -12,7 +12,9 @@ The money-expectation document: what gets money back, by when, how, and what nev
 3. **The withdrawal right** [EU/UK consumer contracts] - the statutory 14 days plus the
    digital-content exception (immediate access + explicit waiver + acknowledgment, which the
    checkout must implement to be true); which jurisdictions the product's customers are in is an
-   ASK, not a template field.
+   ASK, not a template field. The **exit mechanics** (how the customer cancels/withdraws, the
+   confirmation, the button itself) belong to `cancellation-withdrawal.md` - this page owns the
+   money, that page owns the door; each links, neither restates.
 4. **How to request** - channel, what evidence helps, one-click where the product can.
 5. **Processing time** - "reviewed within N, returned within M" - both real numbers (ASK).
 6. **Non-refundables, explicit** - consumed usage, prorated periods, sale items, the list with

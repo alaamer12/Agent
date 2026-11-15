@@ -20,7 +20,9 @@ starts here because signup flows on ALL platforms accept it.
 5. **Content** - who owns what users bring, what license the operator takes over it (the minimum
    needed, said plainly), and the takedown path (`takedown.md`).
 6. **Payments** (if paid) - price changes, billing cycle, cancellation, refund policy pointer
-   (the window itself lives in `refund-policy.md`, never restated).
+   (the window itself lives in `refund-policy.md`, the exit mechanics in
+   `cancellation-withdrawal.md`, per-purchase sales terms in `terms-of-sale.md` - never restated
+   here).
 7. **Disclaimers + liability limits** - with a plain-language summary line above the clause.
 8. **Termination effects** - what dies, what survives (billing records with retention from the
    Privacy document), how to appeal.
@@ -30,6 +32,9 @@ starts here because signup flows on ALL platforms accept it.
 
 ## Writing professionally
 
+- **Precedence chain for purchases** (e-commerce): the ToS names the **Terms of Sale** as
+  controlling per order, and order confirmations cite both - ToS → Terms of Sale → confirmation;
+  the chain is stated once, in the ToS.
 - Second person, short sections, a one-line summary ABOVE each dense clause ("In short: we can
   pause the account for confirmed abuse; you can appeal."). Deliberately confusing ToS is
   documented research territory and legislated against - plain language is the standard, not a

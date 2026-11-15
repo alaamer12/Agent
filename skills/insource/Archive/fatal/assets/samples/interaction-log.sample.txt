@@ -1,0 +1,12 @@
+# ILLUSTRATIVE sample, reconstructed from the DemoApp write-up (times partly invented). Event-only log: quiet periods write nothing.
+[2026-03-12 12:26:42.101] [Startup] App launched v1.0.4.0 (silent-start=false)
+[2026-03-12 12:26:58.412] [UI] Window shown
+[2026-03-12 12:28:32.899] [FirstChanceException] Missing file: '' (Unable to find the specified file.)
+[2026-03-12 12:31:04.220] [Tray] Window hidden to tray
+[2026-03-12 12:36:00.003] [Poll] cycle ok (items=12)
+[2026-03-12 12:51:00.010] [Poll] cycle ok (items=12)
+[2026-03-12 13:06:00.007] [Poll] cycle ok (items=12)
+[2026-03-12 13:21:11.712] [FirstChanceException] Missing file: '' (Unable to find the specified file.)
+[2026-03-12 13:21:15.003] [Poll] cycle ok (items=13)
+[2026-03-12 13:21:16.130] [FirstChanceException] Missing file: '' (Unable to find the specified file.)
+[2026-03-12 13:21:16.374] [FirstChanceException] Missing file: '' (Unable to find the specified file.)

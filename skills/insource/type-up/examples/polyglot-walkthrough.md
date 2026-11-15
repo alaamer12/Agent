@@ -1,3 +1,5 @@
+> **Preserved original**, kept intact with terminology updated to [terminology](../references/terminology.md). The tiered version lives in `/tier-up`.
+
 # type-up — Polyglot Walkthroughs
 
 ## Example 1: Configuration Shape
@@ -36,7 +38,7 @@ type Step struct {
 }
 ```
 
-### After (semantic + layered)
+### After (brands + variants)
 
 **TypeScript**
 ```ts
@@ -60,7 +62,7 @@ interface StepConfig {
  * Loaded from chekr.config.js (or equivalent) at project root.
  * @example
  * ```js
- * /** @type {import('pkg').Config} */
+ * // @type {import('pkg').Config}
  * export default { checksDir: "./checks", scanMode: "changed" };
  * ```
  */
@@ -164,7 +166,7 @@ pub struct Config {
 
 ## Example 2: Runtime Validation (lightweight, production-safe)
 
-Keep validators free of heavy schema libraries in the core package.
+Keep creation points free of heavy validation libraries in the core package.
 
 **TypeScript / JavaScript**
 ```js
@@ -221,7 +223,7 @@ func assertPositiveInt(v int, path string) error {
 
 ---
 
-## Example 3: Schema Layer (dev / CI)
+## Example 3: Schema and Property Tests (dev / CI)
 
 Use the ecosystem’s preferred schema library only in the types/contracts package or test suite.
 
@@ -230,15 +232,15 @@ Use the ecosystem’s preferred schema library only in the types/contracts packa
 - Go: go-playground/validator, or custom + property tests
 - Rust: serde + custom validation or validator crate
 
-The schema should mirror the same constraints enforced by the lightweight runtime validator.
+The schema should mirror the same constraints enforced by the lightweight creation points.
 
 ---
 
 ## Example 4: Adding a New Field (process)
 
-1. Add the semantic type (or reuse an existing one).
+1. Add the brand (or reuse an existing one).
 2. Add the field to the public config / API shape with documentation.
-3. Extend the lightweight runtime validator.
+3. Extend the lightweight creation points.
 4. Extend the schema / property tests.
 5. Update the sync table and any user-facing docs.
-6. Prefer a single PR/commit that keeps all layers consistent.
+6. Prefer a single PR/commit that keeps all checks consistent.

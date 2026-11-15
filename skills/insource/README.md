@@ -2,7 +2,7 @@
 
 This repository contains a comprehensive collection of modular Agent Skills. Each skill provides specialized domain instructions, operational workflows, patterns, and best practices for agents.
 
-Total active skills: **123** — 24 standalone at the repository root and the rest organized under 16 topic groups. 27 archived skills are listed at the end.
+Total active skills: **127** — 27 standalone at the repository root and the rest organized under 16 topic groups. 26 archived skills are listed at the end.
 
 ## Quick Index
 
@@ -70,8 +70,9 @@ Total active skills: **123** — 24 standalone at the repository root and the re
 - [denoise](./Groups/Design/denoise/SKILL.md) — Transforms crowded, noisy, visually overwhelming UIs into calm, readable, professional interfaces that are easier to use, not just nicer to look at, at one of t…
 - [design-md](./Groups/Design/design-md/SKILL.md) — Authors and maintains a project-wide, binding DESIGN.md specification following Google Labs design.md and Stitch conventions. Bridges system architecture and vi…
 - [diverge](./Groups/Design/diverge/SKILL.md) — Previews genuinely different design directions for an existing UI before committing a whole project or batch of pages to one of them. Two commands: /diverge tas…
-- [pages](./Groups/Design/pages/SKILL.md) — A product's complete page universe: one skill, three modes, ONE artifact. /pages main plans the core-screen inventory, pruning a researched 492-row 30-disciplin…
+- [pages](./Groups/Design/pages/SKILL.md) — A product's complete page universe: one skill, three modes, ONE artifact. /pages main plans the core-screen inventory, pruning a 492-row 30-discipline candidate…
 - [parity](./Groups/Design/parity/SKILL.md) — Framework for closing the gap between a design mockup (HTML/CSS, Figma export, or reference image) and what actually renders on a real device/emulator, for any…
+- [playfile](./Groups/Design/playfile/SKILL.md) — Lightweight design-review files: one self-contained HTML screen per file, real <a href> links between them, every meaningful state forced by URL query params (?…
 - [prototype](./Groups/Design/prototype/SKILL.md) — Interactive JS-rendered design prototypes with URL-driven states and component stories. Supports single apps and multi-app suites. Features: clean-URL dev serve…
 - [resources](./Groups/Design/resources/SKILL.md) — Resource files for any platform: images, icons, fonts, audio, video, documents, color values - the files, not the systems that serve them. Fourteen tools: recol…
 - [scss](./Groups/Design/Style/scss/SKILL.md) — SCSS/Sassy CSS best practices and coding guidelines for maintainable, scalable stylesheets
@@ -161,9 +162,11 @@ Total active skills: **123** — 24 standalone at the repository root and the re
   - [svg](./animation/svg/SKILL.md) — Animate a static, flat SVG logo or icon (solid-fill <path> elements) with one of twenty-five animation styles: chrome-liquid, draw-fill, loading-loop, elastic-e…
 - [avatar](./avatar/SKILL.md) — Creates avatars without defaulting to one style. An avatar is a stand-in for an absent entity, so the skill first reads the request on four axes - medium, sourc…
 - [benchmark](./benchmark/SKILL.md) — Benchmark candidates on task-derived dimensions, in normal or ultra mode. Think first: which decision is being made (faster, more accurate, less memory) and how…
+- [calibrate](./calibrate/SKILL.md) — Universal framework for extracting the complete design, visual, and interaction DNA of a confirmed 'North Star' reference implementation and systematically prop…
 - [caution](./caution/SKILL.md) — Informed-consent gate on the user's answers: screen every reply (chat, AskUserQuestion, command flags, hook or server input) for a decision whose cost the answe…
 - [close-topics](./close-topics/SKILL.md) — Guided, conversational, topic-by-topic technical specification: close one design area before opening the next. Use when a project has undecided architecture (sc…
 - [compare](./compare/SKILL.md) — Write professional, well-reasoned comparisons between two or more subjects of any kind — technologies, files, projects, code modules, books, documents, biologic…
+- [design](./design/SKILL.md) — One skill, 15 product design modes: assets (image pipeline: BOM, masters, conform), bleed (layout registers - full-bleed vs framed cards), collection (image BO…
 - [dont-stop](./dont-stop/SKILL.md) — Forces the agent to keep working autonomously until the ENTIRE goal is truly finished, across all phases, with no mid-way stops, no "phase 1 done, ready for pha…
 - [generate](./generate/SKILL.md) — Universal image AND video generation via RESTful providers (xAI, OpenAI, Gemini, KovAPI/NezhaGate) through registry data.csv: vendors and media types are data r…
 - [learning-test](./learning-test/SKILL.md) — Write and run a "learning test" (term coined by Jim Newkirk, popularized by Robert C. Martin/Uncle Bob in Clean Code ch.8 "Boundaries") to empirically discover…
@@ -178,7 +181,8 @@ Total active skills: **123** — 24 standalone at the repository root and the re
 - [take-a-breath](./take-a-breath/SKILL.md) — Force a deliberate pause before implementing. Stop the urge to code from scratch, calm the overwhelmed engineering impulse, and apply sober judgment about wheth…
 - [techstack](./techstack/SKILL.md) — Recommend a technology/framework/library/tech stack (mobile, web, backend, desktop, infra) in any language or platform via rigorous, current, requirements-drive…
 - [theskills](./theskills/SKILL.md) — Pin skills as fixed, auto-apply behavior and persist that into the agent's memory context, so future sessions run them without being asked. Run at the start of…
-- [type-up](./type-up/SKILL.md) — Converts plain primitive types (string, number, boolean, etc.) into a professional typing system with semantic aliases, documentation, runtime validation, and t…
+- [tier-up](./tier-up/SKILL.md) — Installs and runs the three-tier type architecture in a project: the raw type is named in exactly one file per primitive family, every domain meaning becomes a…
+- [type-up](./type-up/SKILL.md) — Enhances a codebase's type system so bugs surface at check time instead of runtime, in any language: brands for raw types, creation points, and boundary checks…
 
 ## Skill Details
 
@@ -563,7 +567,7 @@ Total active skills: **123** — 24 standalone at the repository root and the re
 #### `pages`
 
 - **Path:** [`Groups/Design/pages/SKILL.md`](./Groups/Design/pages/SKILL.md)
-- **Description:** A product's complete page universe: one skill, three modes, ONE artifact. /pages main plans the core-screen inventory, pruning a researched 492-row 30-discipline candidate catalog against project evidence, splitting mixed concerns and recording redirects and exclusions with reasons. /pages secondary writes the always-present trust documents (ToS, Privacy, Cookies, Contact, Status, DPA, delete-account; one reference per type, ONE canon per document, never invented legal facts). /pages complementary designs the conditional screens that appear only when a trigger fires and the app runs normally without them (onboarding, transaction success/failure, HTTP 404/500/offline, session gates, maintenance, access gates, token handoffs, OAuth/SSO callback relays). Every page registers in PAGES.md tagged by kind; nothing a product lacks gets invented. Triggers: plan my pages, legal pages, onboarding flow, error page, callback URL. Not for designing/building screens (prototype, impeccable) or implementation order (planner).
+- **Description:** A product's complete page universe: one skill, three modes, ONE artifact. /pages main plans the core-screen inventory, pruning a 492-row 30-discipline candidate catalog against project evidence, splitting mixed concerns and recording redirects and exclusions with reasons. /pages secondary writes the trust documents (ToS, Privacy, Cookies, Contact, Status, DPA, delete-account; one reference per type, scale- and phase-gated - launch set now, the rest on triggers - one canon per document, never invented legal facts). /pages complementary designs the conditional screens that fire only on a trigger, the app running normally without them (onboarding, transaction outcomes, HTTP errors, session gates, maintenance, access gates, token handoffs, callback relays). Every page registers in PAGES.md by kind; nothing a product lacks gets invented. Triggers: plan my pages, legal pages, onboarding flow, error page, callback URL. Not for designing/building screens (prototype, impeccable) or implementation order (planner).
 - **Use-case:** Any question of which pages a product has, needs, or must not have — core inventory, trust documents, conditional screens — or when a change touches PAGES.md territory.
 - **Usage:** `/pages [main|secondary|complementary] [plan|list|new <x>|audit]`
 
@@ -576,10 +580,19 @@ Total active skills: **123** — 24 standalone at the repository root and the re
 
 ---
 
+#### `playfile`
+
+- **Path:** [`Groups/Design/playfile/SKILL.md`](./Groups/Design/playfile/SKILL.md)
+- **Description:** Lightweight design-review files: one self-contained HTML screen per file, real <a href> links between them, every meaningful state forced by URL query params (?state=error&theme=dark&step=3), organized in iteration folders (mvp/, v2-theme/) each with a README review dossier - Files table of force-params, dated decisions, open questions. No build, no server, no dock, no component system: double-click opens it, refresh and shared links reproduce exactly. Trigger on "/playfile", "playfile this screen/flow", "quick linked HTML mockups", "lighter prototype". The quirk kept from /prototype: the URL is the state - param names ASCII, values any language via URLSearchParams only, invalid values fall to defaults. Screens cross-link to the previous version instead of copying until changed. Not for app-shaped prototype systems with docks, story catalogs or deep state trees (prototype).
+- **Use-case:** A wave of design proposals needs review fast - screens as linked HTML files with URL-forceable states and a README dossier, without the prototype machinery. Also for running an iteration folder - copy the screen this version changes, link the rest, record the decisions.
+- **Usage:** `/playfile [screen or flow] [milestone/version folder]`
+
+---
+
 #### `prototype`
 
 - **Path:** [`Groups/Design/prototype/SKILL.md`](./Groups/Design/prototype/SKILL.md)
-- **Description:** Interactive JS-rendered design prototypes with URL-driven states and component stories. Supports single apps and multi-app suites. Features: clean-URL dev server, thin HTML with JS DOM generation, per-component state trees via query params (Unicode-safe, Arabic values included), ?filled seeded stress testing, in-page story isolation (?story_id=), multi-state component catalogs (/stories), a unified floating Dev Dock owning every prototype control (declared state pickers, story/component picker, stage tools, 10-font picker, theme switch, live palette token browser with adaptive brand accent, cross-app switching, viewport readout) so screens stay chrome-free, designed empty/loading/error surfaces, and zero-duplication guards enforcing tokens, component classes, and a shared ui.js builder catalog. Triggers: prototype this, make this a prototype, /prototype components, stories gallery, dev dock, dedupe prototype styles.
+- **Description:** Interactive JS-rendered design prototypes with URL-driven states and component stories. Supports single apps and multi-app suites. Features: clean-URL dev server, thin HTML with JS DOM generation, per-component state trees via query params (Unicode-safe, Arabic values included), ?filled seeded stress testing, in-page story isolation (?story_id=), multi-state component catalogs (/stories), a unified floating Dev Dock owning every prototype control (declared state pickers, story/component picker, stage tools, 10-font picker, theme switch, live palette token browser with adaptive brand accent, cross-app switching, viewport readout) so screens stay chrome-free, designed empty/loading/error surfaces, and zero-duplication guards enforcing tokens, component classes, and a shared ui.js builder catalog. Triggers: prototype this, make this a prototype, /prototype components, stories gallery, dev dock, dedupe prototype styles. Not a throwaway review wave of linked HTML files - that is playfile.
 - **Use-case:** Build or extend interactive, URL-driven prototypes, audit existing mockups for dead controls, or generate multi-state component catalogs and story isolation links.
 - **Usage:** `/prototype [screen or app name] [topology or mode]`
 
@@ -1046,6 +1059,13 @@ Total active skills: **123** — 24 standalone at the repository root and the re
 
 ---
 
+#### `calibrate`
+
+- **Path:** [`calibrate/SKILL.md`](./calibrate/SKILL.md)
+- **Description:** Universal framework for extracting the complete design, visual, and interaction DNA of a confirmed 'North Star' reference implementation and systematically propagating it across all sibling pages, components, or screens. Operates across any UI stack (Web, React, Vue, Svelte, Mobile Flutter/React Native/SwiftUI, Desktop, HTML/Tailwind) without loss of subtle layers like atmosphere, iconography, micro-visualizations, typography hierarchy, or data simulation contracts. Triggers: calibrate, /calibrate, make all pages match this one, spread the design, North Star alignment, propagate design system.
+
+---
+
 #### `caution`
 
 - **Path:** [`caution/SKILL.md`](./caution/SKILL.md)
@@ -1068,6 +1088,15 @@ Total active skills: **123** — 24 standalone at the repository root and the re
 
 - **Path:** [`compare/SKILL.md`](./compare/SKILL.md)
 - **Description:** Write professional, well-reasoned comparisons between two or more subjects of any kind — technologies, files, projects, code modules, books, documents, biological processes, products, strategies, or any named options. Use whenever the user asks to compare, evaluate trade-offs, distinguish, or choose between things, including "which is better," "what's the difference," or "help me decide." Supports open-ended discovery of relevant aspects and dimension-based comparison on user-specified or researched criteria. Enforces real differentiators only, "why it matters" reasoning, independent research, graded quantitative claims, and neutral context-driven conclusions.
+
+---
+
+#### `design`
+
+- **Path:** [`design/SKILL.md`](./design/SKILL.md)
+- **Description:** One skill, 15 product design modes: assets (image pipeline: BOM, masters, conform), bleed (layout registers - full-bleed vs framed cards), collection (image BOM, style canon, prompts), denoise (calm a crowded UI: lite/medium/ultra), design-md (canonical DESIGN.md: tokens + rationale), diverge (n genuinely different directions before committing), pages (page universe into PAGES.md: inventory, legal docs, conditional screens), parity (mockup-to-device gap closed autonomously), playfile (linked HTML review screens, URL-forced states), prototype (URL-driven prototype systems: dock, stories, guards), resources (favicons, icons, splash, OG, optimize, localize, conform), stateful (derive, gate and implement every screen state), scss (SCSS best practices), styling (new styling: tokens, layer chain, naming), styleup (retrofit styling into enforced tokens). Triggers: prototype, mockup, legal pages, error pages, denoise UI, pixel parity, image plan, favicon, splash, design tokens, state coverage, CSS architecture.
+- **Use-case:** Any design-family task - prototypes and review files, page inventory and trust documents, UI cleanup or direction previews, layout framing, state completeness, mockup parity, image planning and resource files, design-system docs, styling systems. Also /design <mode>.
+- **Usage:** `/design <mode> [command] [target]`
 
 ---
 
@@ -1182,10 +1211,18 @@ Total active skills: **123** — 24 standalone at the repository root and the re
 
 ---
 
+#### `tier-up`
+
+- **Path:** [`tier-up/SKILL.md`](./tier-up/SKILL.md)
+- **Description:** Installs and runs the three-tier type architecture in a project: the raw type is named in exactly one file per primitive family, every domain meaning becomes a brand with one creation point and a stated policy, and every record is a shape assembled from brands; imports follow tier order and never skip. Opt-in — chosen by the project or the user, never imposed. Includes the conversion path for existing code (raw → tier 1 → tier 2 → tier 3 → boundary) with per-stage steps and a migration done-list. Trigger on "tier-up", "tiered types", "the tier system", "primitives brands shapes", "no raw types outside one file", "adopt the tier architecture", "promote this to a brand", converting a module to full typing rigor. The general craft — brands in any idiom, the compiler-first ladder, validation libraries, database constraints, the master vocabulary — is owned by /type-up; say so and stop rather than reinventing it. "Tier" here means the type-system tiers only, never architecture layers.
+- **Use-case:** The project or user chose the three-tier type system, or code must be converted to it; also maintaining one tier in a project that already has the folders (primitives/, brands/, shapes/).
+- **Usage:** `/tier-up [surface or module] [new | convert]`
+
+---
 #### `type-up`
 
 - **Path:** [`type-up/SKILL.md`](./type-up/SKILL.md)
-- **Description:** Converts plain primitive types (string, number, boolean, etc.) into a professional typing system with semantic aliases, documentation, runtime validation, and tests. Use when the user asks for better types, semantic types, branded/NewType types, config typing, API contracts, PathLike-style aliases, schema validation, or professional typing for public surfaces.
+- **Description:** Enhances a codebase's type system so bugs surface at check time instead of runtime, in any language: brands for raw types, creation points, and boundary checks that turn untrusted data into typed values. Use when the user asks to improve, tighten or audit types, remove stringly-typed or primitive-obsessed code, add branded/NewType/opaque types, validate config or API contracts, make wrong values an error (compile-time and runtime), use the project's validation library (Zod, Valibot, Pydantic, Hypothesis, serde…), or convert a raw-typed surface. Compiler first: rejection is moved to compile time wherever possible. Golden rule: reuse existing types, never reinvent them. The opt-in three-tier architecture (primitives, brands, shapes) and its conversion path are a separate skill, /tier-up; do not impose naming schemes or that architecture unless the project or user chooses them.
 
 ---
 

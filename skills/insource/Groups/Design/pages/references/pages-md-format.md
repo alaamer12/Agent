@@ -78,7 +78,8 @@ Purpose: identity, access, and account recovery.
 
 ## 5. Secondary documents
 
-Always-present trust documents (`/pages secondary` writes them; this section owns the list).
+Trust documents (`/pages secondary` writes them; this section owns the list) - once written they
+are always reachable; *which* exist follows the catalog's scale and phase gates.
 Canon per document — one row, platforms point at it.
 
 | Document | Type family | Canon route | Surfaces | Status | Notes |
@@ -180,7 +181,7 @@ kind column says which universe it was rejected from.
 | `Confidence` | Confidence in existence, not design. `high` needs evidence. |
 | `Evidence` | File path, doc section, route file, ticket, or `domain logic`. No vague "common". |
 | `Family` (§6) | One of the nine complementary families — must match a `complementary/references/` doc. |
-| `Trigger`/`Condition source`/`States handled`/`Exits` (§6) | Per `../complementary/references/anatomy.md`; a §6 row missing any is an audit defect. `States handled` names every reachability state the page answers (cold deep-link, bookmarked replay, logged-out arrival, fresh in-flow). Continuation ownership and announcement stay in the anatomy sheet, not the row. |
+| `Trigger`/`Condition source`/`States handled`/`Exits` (§6) | Per `../complementary/references/anatomy.md` - the row-shape owner; a §6 row missing any field is an audit defect. |
 | `Notes` | Scope caveat, split pointer, state note, redirect target. Keep short. |
 
 ### Status rules

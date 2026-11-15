@@ -12,17 +12,24 @@ products this page is over-engineering, said as a skip.
    purpose of processing, data categories, data subjects - as a real table, not adjectives.
 2. **Processing instructions** - the processor acts on documented instructions; what that means
    operationally.
-3. **Subprocessors** - the named list (or a stable URL to it) + change-notice channel and the
-   customer's objection window. The hosting/email/analytics vendors the Privacy Policy names are
-   usually THE same list - one owner: the list is canon here, linked from Privacy.
+3. **Subprocessors** - the named list with roles/locations/data categories, versioned and dated,
+   change-notice subscription, objection window and its consequence. The EDPB's Opinion 22/2024
+   raised the floor: a webpage alone is *not* "informing" - pair the page with active alerts, and
+   depth is risk-based (minimalist "we added Vendor X" no longer passes). The full page practice:
+   `subprocessors.md`; the DPA incorporates it **by URL** so the annex never goes stale.
 4. **Security measures** - reference to the actual measures document/section (`security.md`),
-   specific enough to audit.
-5. **Breach notification** - the committed window ("without undue delay" or a real number): ASK -
+   specific enough to audit (Annex III with the real TOMs, not adjectives).
+5. **Breach notification** - the committed window ("without undue delay" or a real number -
+   24-48h is the common processor promise beside the controller's own 72h Art. 33 clock): ASK -
    it is a contractual promise.
 6. **Assistance** - how the processor helps controllers answer data-subject requests
    (mechanism: `data-rights.md`) and regulator questions.
-7. **International transfers** - the mechanism named and cited (the standard-contract-clause sets
-   and the module; cite the source, do not paste or paraphrase clauses into the body).
+7. **International transfers** - the mechanism named and cited: SCC 2021/914 **with the module
+   chosen by role** (C2P module 2, P2P module 3) and its annexes filled, UK Addendum/IDTA where
+   UK data moves, Swiss where Swiss; EU-US DPF reliance stated as a **layer with SCC fallback**
+   (the Framework survived its first General Court challenge in Sep 2025 but sits under active
+   political/legal scrutiny after the 2026 FTC-independence ruling - DPF-only is the fragile
+   configuration). Cite the source; do not paste or paraphrase clauses into the body.
 8. **Deletion or return on termination** - period and method.
 9. **Audit** - what evidence is provided instead of onsite inspection, if that is the product's
    stance.
