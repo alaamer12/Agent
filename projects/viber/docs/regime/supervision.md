@@ -37,7 +37,7 @@ Viber supervision is active when the project's `AGENTS.md` carries a **Viber dec
 
 The wording is **flexible** — any clear declaration counts:
 
-- `## Viber` section (the canonical form `init` writes — see `init.md` section 3).
+- `## Viber` section (the canonical form `init` writes — see `../commands/init.md` section 3).
 - "This project uses Viber."
 - "Vibe Mode On."
 - any equivalent sentence that states the project follows Viber.
@@ -79,7 +79,7 @@ excluded from the umbrella, and **clarifies the consequence** of each choice:
 | **In the deck / under the umbrella** | Viber reroutes the Skill's relocatable output into `.viber`, and remembers it (the memory files, the Router's tracking). The Skill's work is part of the project's disciplined record. |
 | **Excluded / out of the deck** | Viber does **not** guarantee control or always-remembering. The Skill writes to its normal path; its output is not gathered under `.viber` and not tracked as part of the umbrella. |
 
-The user decides per Skill. `init` records the exclusions in the registry (section 4 of `init.md`) so the
+The user decides per Skill. `init` records the exclusions in the registry (section 4 of `../commands/init.md`) so the
 Router and every later session honor them. Excluding a Skill is never silent — the consequence is stated first.
 
 ---
@@ -250,7 +250,7 @@ supervision's outputs to their homes.
 
 ## 10. Flow
 
-The supervision decision path is diagrammed in [`diagrams/supervision-flow.mmd`](diagrams/supervision-flow.mmd): declaration → participation → the root-file test → `.viber` or root.
+The supervision decision path is diagrammed in [`diagrams/supervision-flow.mmd`](../diagrams/supervision-flow.mmd): declaration → participation → the root-file test → `.viber` or root.
 
 ---
 

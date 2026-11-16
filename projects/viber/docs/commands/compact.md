@@ -4,7 +4,7 @@
 
 ## 1. Overview
 
-`vcompact` is Viber's compaction Skill and a Viber **command** (`lifecycle.md` 7.8 — a real Skill whose
+`vcompact` is Viber's compaction Skill and a Viber **command** (`../regime/lifecycle.md` 7.8 — a real Skill whose
 name carries the `v` prefix). It takes the resources a project accumulates — settled memory rows that
 became history, superseded doc iterations, finished task trails, artifact batches worth keeping — and
 moves them into a timestamped, indexed archive under `.viber/.compact/<id>/`, freeing the active workspace
@@ -19,7 +19,7 @@ The command:
 ```
 
 Once implemented, its `SKILL.md` carries `viber: part` — and as a Viber Skill it always participates under
-supervision (`supervision.md` 3).
+supervision (`../regime/supervision.md` 3).
 
 ### Core Principle
 
@@ -62,7 +62,7 @@ needed" is a human call.
 | Anything the user marks inactive | per the user's word | everything not named |
 
 **Never compacted:** open `memory.md` questions, current specs, in-progress work, code, root-files. An
-ambiguous target is **asked, with a recommendation** — the supervision pattern (`supervision.md` 5.3),
+ambiguous target is **asked, with a recommendation** — the supervision pattern (`../regime/supervision.md` 5.3),
 never a silent judgment call.
 
 ---
@@ -77,7 +77,7 @@ never a silent judgment call.
     └── …the moved files…          original relative layout preserved; browsable, never zip-buried
 ```
 
-- The archive lives under `.viber` like all Viber state (`structure.md` 3.7).
+- The archive lives under `.viber` like all Viber state (`../regime/structure.md` 3.7).
 - Files **move**, they do not merge, rewrite, or compress — the archive is the same tree, just cold.
 - The slug names the compaction (`lean-memory`, `phase2-closeout`) so the index reads like a diary, not a
   dump.
@@ -125,7 +125,7 @@ name.
 
 `.viber/.compact/` is **committed by default** — preserved knowledge, exactly what the umbrella is for.
 The judgment case is size: an archive batch heavy in binaries (screenshots, builds) gets the standing
-question — **keep (commit) or purge** — because artifacts are disposable by design (`structure.md` 3.5)
+question — **keep (commit) or purge** — because artifacts are disposable by design (`../regime/structure.md` 3.5)
 and `vcompact` never silently inflates the repository.
 
 ---
@@ -145,8 +145,8 @@ and `vcompact` never silently inflates the repository.
 | Component | Relationship |
 |---|---|
 | `memory` | Settled rows that became history are the prime target; open rows are protected. The memory files stay lean ledgers. |
-| **Router** | Flags bloated areas (`router.md`); never compacts anything itself. |
-| `lifecycle` | Shared/intermediate Skill (`lifecycle.md` 7.7) — accumulation is phase-blind, so compaction runs in any phase. |
+| **Router** | Flags bloated areas (`../regime/router.md`); never compacts anything itself. |
+| `lifecycle` | Shared/intermediate Skill (`../regime/lifecycle.md` 7.7) — accumulation is phase-blind, so compaction runs in any phase. |
 | `supervision` | Lives wholly under the umbrella; ambiguous targets follow the ask-and-recommend rule. |
 | `structure` | Keeper artifacts graduate (structure 3.5) into the archive; disposable ones purge instead — the user's call on binary-heavy batches. |
 
@@ -156,7 +156,7 @@ and `vcompact` never silently inflates the repository.
 
 - **Move, never destroy; write the manifest first.**
 - **Active is never compacted** — open questions, current specs, in-progress work stay hot.
-- **Ambiguous → ask and recommend**, never assume (`supervision.md` 5.3).
+- **Ambiguous → ask and recommend**, never assume (`../regime/supervision.md` 5.3).
 - **Every origin keeps a pointer; every compaction keeps an index line.**
 - **Id format `YYYYMMDD-HHmm-<slug>`, unique and never reused.**
 - **Restore uses the manifest; collisions ask; nothing is overwritten.**
@@ -185,7 +185,7 @@ and `vcompact` never silently inflates the repository.
 
 ## 14. Flow
 
-The compaction pipeline is diagrammed in [`diagrams/compact-flow.mmd`](diagrams/compact-flow.mmd): trigger → select → protect
+The compaction pipeline is diagrammed in [`diagrams/compact-flow.mmd`](../diagrams/compact-flow.mmd): trigger → select → protect
 active → id → manifest → move → pointers → (keep-or-purge on binaries) → done, with restore looping back.
 
 ---

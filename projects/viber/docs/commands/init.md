@@ -4,7 +4,7 @@
 
 ## 1. Overview
 
-`init` is the entry command of the Viber Skill — a Viber **command** (`lifecycle.md` 7.8): a real Skill
+`init` is the entry command of the Viber Skill — a Viber **command** (`../regime/lifecycle.md` 7.8): a real Skill
 whose name carries the `v` prefix (`vinit`):
 
 ```text
@@ -44,7 +44,7 @@ For the author of Viber, the deck is **Amr's Deck**: the Skills registered in Am
   - **`<USERNAME>`'s Deck** — every other registered or extension-source Skill.
 - **Each Skill records its scope**: global, project-level (with its project path), or extension source.
 - **Each Skill gets an area**, such as design, audit, code, research or media, so the Router can find candidates for a need quickly.
-- **Each Skill records its `viber` tag** — `part`, `separated`, or untagged — read from the `SKILL.md` frontmatter. It declares whether the Skill joins the supervision umbrella (see `supervision.md`).
+- **Each Skill records its `viber` tag** — `part`, `separated`, or untagged — read from the `SKILL.md` frontmatter. It declares whether the Skill joins the supervision umbrella (see `../regime/supervision.md`).
 - **Conflicts are noted.** When the same Skill name appears in more than one source with different content, both are recorded and the user is told.
 
 The Opensource Deck — every published Skill that is not registered — is **not** scanned by `init`. It is open-ended, so its Skills are discovered when they are needed, with `find-skills` or a web search. A Skill the user registers later joins the user's deck on the next `init`.
@@ -100,7 +100,7 @@ When the registry already exists, `init` rescans and reports what changed since 
 ### 2.6. The Project Memory Files
 
 Alongside the registry, `init` creates the project's three memory files in the same `.viber` directory, each
-with its empty template (see `memory.md`):
+with its empty template (see `../regime/memory.md`):
 
 - `memory.md` — open and deferred questions.
 - `settled.md` — answered questions, with reasons.
@@ -111,7 +111,7 @@ project's durable conversational ledger. If a memory file already exists, `init`
 
 ### 2.7. Deck Exclusions and the Umbrella
 
-Because deck membership decides which Skills fall under Viber's supervision umbrella (see `supervision.md`),
+Because deck membership decides which Skills fall under Viber's supervision umbrella (see `../regime/supervision.md`),
 `init` asks the user whether any deck Skills should be **excluded**, and states the consequence of each choice:
 
 - **Under the umbrella** — Viber reroutes the Skill's relocatable output into `.viber` and remembers it.
@@ -123,18 +123,18 @@ regardless. The user's exclusions are honored on every later run.
 
 ### 2.8. The Project Layout
 
-`init` aligns the project with the canonical layout (`structure.md`): it ensures the `.gitignore` carries the
+`init` aligns the project with the canonical layout (`../regime/structure.md`): it ensures the `.gitignore` carries the
 layout duties (`artifacts/` and `scratch/` fully ignored, plus language env and build outputs), and creates a
 layout folder the first time something needs to live there — no empty scaffolding. Existing folders are
 adopted as-is; relocating a project's files to match the layout follows supervision's migration rule — ask the
-user, recommend the move (`supervision.md` 5.3).
+user, recommend the move (`../regime/supervision.md` 5.3).
 
 ---
 
 ## 3. Step 2 — Mention It in `AGENTS.md`
 
 `init` makes sure the project's `AGENTS.md` has a **Viber section** that points to the registry. This section is
-also the **activation marker** for Viber supervision (see `supervision.md`): when it is present, participating
+also the **activation marker** for Viber supervision (see `../regime/supervision.md`): when it is present, participating
 Skills' relocatable output is rerouted under `.viber`.
 
 ```markdown
@@ -188,13 +188,13 @@ Running `/viber init` is the user's go-ahead to begin. `init` shows where the pr
 - **Extending is the user's choice.** `init` adds an extension repository to the deck only when the user asks for it.
 - **Safe to repeat.** Running `init` again refreshes; it does not reset the project or erase its history.
 - **No secrets.** Nothing private from Skill sources or the project is written into the registry or the memory files.
-- **Supervision umbrella.** `init` reads each Skill's `viber` tag and asks about deck exclusions; under supervision, participating Skills' relocatable output goes to `.viber` (see `supervision.md`).
+- **Supervision umbrella.** `init` reads each Skill's `viber` tag and asks about deck exclusions; under supervision, participating Skills' relocatable output goes to `.viber` (see `../regime/supervision.md`).
 
 ---
 
 ## 6. Flow
 
-The init flow is diagrammed in [`diagrams/init-flow.mmd`](diagrams/init-flow.mmd): understand the deck (scan · classify · registry · exclusions · memory files) → mention it in `AGENTS.md` → start the flow.
+The init flow is diagrammed in [`diagrams/init-flow.mmd`](../diagrams/init-flow.mmd): understand the deck (scan · classify · registry · exclusions · memory files) → mention it in `AGENTS.md` → start the flow.
 
 ---
 

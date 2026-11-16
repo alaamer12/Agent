@@ -83,6 +83,26 @@ except Exception:  # pragma: no cover
 
 DEFAULT_DESCRIPTION_LIMIT = 1024
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
+SPECIALIZED_GENERAL = "none"
+SPECIALIZED_RE = re.compile(r"[a-z0-9][a-z0-9.+#-]*")
+SPECIALIZED_REJECTED = {"general", "generic", "any", "all"}
+SPECIALIZED_ALIASES = {
+    "tailwindcss": "tailwind", "tw": "tailwind",
+    "react native": "react-native", "rn": "react-native",
+    "nextjs": "next.js",
+    "vuejs": "vue", "vue.js": "vue",
+    "nodejs": "node.js", "node": "node.js",
+    "ts": "typescript", "js": "javascript",
+    "postgres": "postgresql",
+    "mmd": "mermaid", "gh": "github",
+    "windows": "win32", "winapi": "win32",
+    ".net": "dotnet", "csharp": "c#",
+}
+LINT_RULE_IDS = {
+    "mixed-composition", "frontmatter", "version", "specialized",
+    "name", "name-mismatch", "duplicate-name",
+    "description", "description-multiline", "description-length",
+}
 INITIAL_VERSION = "1.0.0"
 DB_APP_DIR = "insource-manager"
 DB_FILE_NAME = "manager.db"
@@ -684,7 +704,7 @@ def map_concurrent(func: Callable[[Any], Any], items: Iterable[Any], jobs: int) 
 
 @dataclass
 class SyncIssue:
-    kind: str  # "hard-copy" or "link"
+    kind: str  # "hard-copy", "link" or "folder"
     skill: str
     target: str
     state: str
@@ -753,9 +773,15 @@ def audit_all(registry: Path, agents: Sequence[str], jobs: int) -> list[SyncIssu
         if not root.is_dir():
             continue
         for direct in sorted(root.iterdir()):
-            if not is_link_like(direct):
-                continue
             name = direct.name
+            if not is_link_like(direct):
+                if (direct.is_dir() and name not in SKIP_NAMES and not name.startswith(".")
+                        and not has_skill(direct)):
+                    nested = sorted(p.relative_to(direct).as_posix() for p in walk_skills(direct))
+                    detail = ("folder has no top-level SKILL.md"
+                              + (f"; nested skill(s) below it: {', '.join(nested)}" if nested else ""))
+                    add("folder", name, direct, "missing-skill", detail)
+                continue
             source = known.get(name)
             if not direct.exists():
                 detail = f"link target is gone (expected {source})" if source else "link target is gone; name is not in the registry"
@@ -1329,7 +1355,7 @@ VIBER_MANIFEST = Path("../../projects/viber/viber.json")
 
 
 def viber_plan(registry: Path) -> list[dict[str, Any]]:
-    """Resolve the viber manifest into rows: phase, name, status, entry label, path (None = not in registry)."""
+    """Resolve the viber census into rows: phase, name, status, entry label, path (None = not in registry)."""
     manifest_file = registry / VIBER_MANIFEST
     if not manifest_file.is_file():
         raise ManagerError(f"viber manifest not found: {manifest_file}")
@@ -1339,25 +1365,29 @@ def viber_plan(registry: Path) -> list[dict[str, Any]]:
         raise ManagerError(f"cannot read {manifest_file}: {exc}") from exc
     known = registry_skills(registry)
     manifest_dir = manifest_file.resolve().parent
+    step_info: dict[str, dict[str, str]] = {}
+    for step in manifest.get("lifecycle", []):
+        for name in step.get("skills", []):
+            step_info[name] = {"phase": step.get("step", "-"), "status": "mandatory"}
+        for name in step.get("commands", []):
+            step_info[name] = {"phase": step.get("step", "-"), "status": "command"}
     rows: list[dict[str, Any]] = []
-    for phase in manifest.get("phases", []):
-        for entry in phase.get("skills", []):
-            label = entry.get("as") or entry["name"]
-            base = {"phase": phase.get("phase", "-"), "status": entry.get("status", "-"), "entry": label}
-            if "path" in entry:
-                group = (manifest_dir / entry["path"]).resolve()
-                if has_skill(group):
-                    members = [group]
-                elif group.is_dir():
-                    members = sorted(walk_skills(group), key=lambda p: p.name)
-                else:
-                    members = []
-                if not members:
-                    rows.append({**base, "name": entry["name"], "path": None})
-                for member in members:
+    for name, entry in manifest.get("skills", {}).items():
+        info = step_info.get(name, {"phase": "-", "status": "-"})
+        base = {"phase": info["phase"], "status": info["status"], "entry": name}
+        path_str = entry.get("path")
+        if path_str:
+            base_dir = manifest_dir if entry.get("owned") else registry
+            resolved = (base_dir / path_str).resolve()
+            if has_skill(resolved):
+                rows.append({**base, "name": name, "path": resolved})
+            elif resolved.is_dir():
+                for member in sorted(walk_skills(resolved), key=lambda p: p.name):
                     rows.append({**base, "name": member.name, "path": member})
             else:
-                rows.append({**base, "name": entry["name"], "path": known.get(entry["name"])})
+                rows.append({**base, "name": name, "path": None})
+        else:
+            rows.append({**base, "name": name, "path": known.get(name)})
     return rows
 
 
@@ -1857,6 +1887,43 @@ def check_readme(registry: Path) -> list[tuple[str, str, str]]:
     return issues
 
 
+def specialized_problem(data: dict[str, Any]) -> str | None:
+    if "specialized" not in data or data["specialized"] is None:
+        return "missing specialized (one technology, or none)"
+    value = data["specialized"]
+    items = [item.strip() for item in value.split(",")] if isinstance(value, str) else []
+    if (not items or any(not SPECIALIZED_RE.fullmatch(item) or item in SPECIALIZED_REJECTED
+                         for item in items)
+            or (len(items) > 1 and SPECIALIZED_GENERAL in items)):
+        return (f"invalid specialized {value!r} (one lowercase technology such as "
+                f"'scss' or 'react-native', or '{SPECIALIZED_GENERAL}')")
+    if len(items) > 1:
+        return f"specialized lists {len(items)} technologies; prefer one per skill"
+    canonical = SPECIALIZED_ALIASES.get(items[0])
+    if canonical:
+        return f"specialized {items[0]!r} is an alias; use {canonical!r}"
+    return None
+
+
+def lint_acceptances(data: dict[str, Any] | None) -> tuple[dict[str, str], list[str]]:
+    """Parse `lint-accept` (rule id -> reason). Returns (accepted, problems)."""
+    raw = (data or {}).get("lint-accept")
+    if raw is None:
+        return {}, []
+    if not isinstance(raw, dict):
+        return {}, ["lint-accept must be a mapping of rule id to reason"]
+    accepted: dict[str, str] = {}
+    problems: list[str] = []
+    for rule, reason in raw.items():
+        if rule not in LINT_RULE_IDS:
+            problems.append(f"lint-accept names unknown rule '{rule}'")
+        elif not isinstance(reason, str) or not reason.strip():
+            problems.append(f"lint-accept for '{rule}' needs a non-empty reason")
+        else:
+            accepted[rule] = reason.strip()
+    return accepted, problems
+
+
 def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequence[SyncIssue]) -> int:
     limit = args.max_description
     if limit <= 0:
@@ -1871,6 +1938,7 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
         lambda item: read_frontmatter(item[1] / "SKILL.md"), skills, jobs
     )
     warnings: list[tuple[str, str, Path, int | None, str]] = []
+    accepted: list[tuple[str, str, Path, str, str, str]] = []
     checked_rows: list[list[str]] = []
     registry_names: dict[str, Path] = {}
     type_counts: Counter[str] = Counter()
@@ -1883,38 +1951,52 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
         structure = inspect_directory(path)
         skill_type = SKILL_TYPES[structure.kind]
         type_counts[structure.kind] += 1
+        accept, accept_problems = lint_acceptances(data)
+
+        def emit(rule: str, reason: str, length: int | None = None) -> None:
+            if rule in accept:
+                accepted.append((name, label, path, reason, rule, accept[rule]))
+            else:
+                warnings.append((name, label, path, length, reason))
+
+        for problem in accept_problems:
+            warnings.append((name, label, path, None, problem))
         for issue in structure.issues:
-            warnings.append((name, label, path, None, issue))
+            emit("mixed-composition", issue)
         if data is not None and not args.no_version and path not in tracked_paths:
             version = _norm_version(data.get("version"))
             if version is None or SEMVER_RE.fullmatch(version) is None:
-                warnings.append((name, label, path, None, "missing or invalid version (expected semver X.Y.Z)"))
+                emit("version", "missing or invalid version (expected semver X.Y.Z)")
         if data is None:
-            warnings.append((name, label, path, None, error or "missing frontmatter"))
+            emit("frontmatter", error or "missing frontmatter")
             checked_rows.append([name, skill_type, label, "missing", "missing", str(path)])
             continue
+        if label == "registry":
+            problem = specialized_problem(data)
+            if problem:
+                emit("specialized", problem)
         skill_name = data.get("name")
         if not isinstance(skill_name, str) or not re.fullmatch(r"[a-z0-9-]+", skill_name):
-            warnings.append((name, label, path, None, "missing or invalid name (use lowercase letters, digits and hyphens)"))
+            emit("name", "missing or invalid name (use lowercase letters, digits and hyphens)")
         else:
             if skill_name != path.name:
-                warnings.append((name, label, path, None, f"name '{skill_name}' does not match folder '{path.name}'"))
+                emit("name-mismatch", f"name '{skill_name}' does not match folder '{path.name}'")
             if label == "registry":
                 previous = registry_names.setdefault(skill_name, path)
                 if previous != path:
-                    warnings.append((name, label, path, None, f"duplicate name '{skill_name}' also at {previous}"))
+                    emit("duplicate-name", f"duplicate name '{skill_name}' also at {previous}")
         description = data.get("description")
         if not isinstance(description, str) or not description.strip():
-            warnings.append((name, label, path, None, "missing description"))
+            emit("description", "missing description")
             checked_rows.append([name, skill_type, label, "missing", "missing", str(path)])
             continue
         if "\n" in description.strip() or "\r" in description.strip():
-            warnings.append((name, label, path, None, "description must be a single-line string"))
+            emit("description-multiline", "description must be a single-line string")
         length = len(description)
         state = "over" if length > limit else "ok"
         checked_rows.append([name, skill_type, label, str(length), state, str(path)])
         if length > limit:
-            warnings.append((name, label, path, length, "over limit"))
+            emit("description-length", "over limit", length)
 
     version_warnings: list[tuple[str, str, str, str, str]] = []
     version_stats: Counter = Counter()
@@ -1943,6 +2025,13 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
             ["Skill", "Location", "Chars", "Issue", "Path"],
             rows,
             title=f"skill warnings ({len(warnings)})",
+            always=True,
+        )
+    if _DISPLAY.verbose and accepted:
+        display_table(
+            ["Skill", "Location", "Rule", "Finding", "Accepted because"],
+            [[n, lab, rule, reason, why] for n, lab, _p, reason, rule, why in accepted],
+            title=f"accepted findings ({len(accepted)})",
             always=True,
         )
     if _DISPLAY.verbose and checked_rows:
@@ -1978,6 +2067,7 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
         *[(title, str(type_counts[kind])) for kind, title in SKILL_TYPES.items()],
         ("Hard copies tracked", str(hard_copies)),
         ("Skill warnings", str(len(warnings))),
+        ("Accepted findings", str(len(accepted))),
         ("Synchronization issues", str(len(issues))),
     ]
     if args.readme:

@@ -1,5 +1,5 @@
 # Router — Workflow Awareness & Guidance
-> How the Router tracks progress and guides — the awareness layer over `lifecycle.md`, reading the registry (`init.md`), the memory files (`memory.md`) and the supervision state (`supervision.md`).
+> How the Router tracks progress and guides — the awareness layer over `lifecycle.md`, reading the registry (`../commands/init.md`), the memory files (`memory.md`) and the supervision state (`supervision.md`).
 
 
 ## 1. Overview
@@ -351,7 +351,7 @@ Suggest it when:
 - The user wants room for a new phase and the old work is finished, not forgotten.
 
 The Router only flags the bloat; `vcompact` asks what to include (active work is never compacted) and
-moves, never deletes (`compact.md`).
+moves, never deletes (`../commands/compact.md`).
 
 ### 5.7. `vflow`
 
@@ -365,7 +365,7 @@ Suggest it when:
 - The user asks to capture "how we always do X".
 
 The Router also runs the suggestion in reverse: when current work matches an existing flow, it points the
-agent at that flow's `sequence.md` (`flow.md`).
+agent at that flow's `sequence.md` (`../commands/flow.md`).
 
 ---
 

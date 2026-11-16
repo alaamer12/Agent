@@ -18,7 +18,7 @@ holding three files. The command:
 /viber flow edit <name>      # revise one
 ```
 
-As a Viber command (`lifecycle.md` 7.8), its real Skill name carries the `v` prefix: `vflow`.
+As a Viber command (`../regime/lifecycle.md` 7.8), its real Skill name carries the `v` prefix: `vflow`.
 
 ### Core Principle
 
@@ -61,19 +61,19 @@ its steps.
 ```
 
 - **Folder name** = the class of work, slugified (`create-new-page`, `hotfix`, `deck-authoring`).
-- Lives under `.viber` like all project knowledge (`structure.md` 3.7): committed, visible, restorable.
+- Lives under `.viber` like all project knowledge (`../regime/structure.md` 3.7): committed, visible, restorable.
 
 ### Truth order
 
 When the three files disagree, **`sequence.md` is the source** — it carries the step contracts.
-`lifecycle.md` is the readable map, `lifecycle.mmd` the picture. Fix a disagreement by editing the prose and
+`../regime/lifecycle.md` is the readable map, `lifecycle.mmd` the picture. Fix a disagreement by editing the prose and
 the diagram to match the sequence, or revising the sequence itself if the sequence is what changed.
 
 ---
 
 ## 4. The Three Files
 
-### 4.1. `lifecycle.md`
+### 4.1. `../regime/lifecycle.md`
 
 The flow's small version of Viber's lifecycle: one paragraph on what the flow is for, the ordered stages with
 one line each, and the gate that ends each stage. Written so a new agent can read it in ten seconds and know
@@ -103,7 +103,7 @@ row must answer its column, or the step is not executable, just described.
 
 ## 5. How a Flow Runs
 
-1. Work matches a flow's trigger (the user names it, or the Router suggests it — `router.md` 5.7).
+1. Work matches a flow's trigger (the user names it, or the Router suggests it — `../regime/router.md` 5.7).
 2. The agent reads `sequence.md` and walks the rows in order: run the step through its Skill, check the
    done-gate, follow the on-fail route on a miss.
 3. Findings and decisions that surface during the run go where Viber says — `.viber/memory.md` while open,
@@ -117,7 +117,7 @@ row must answer its column, or the step is not executable, just described.
 
 | Component | Relationship |
 |---|---|
-| `vflow` | Viber command (`lifecycle.md` 7.8): grills the steps, writes the three files, registers the flow. |
+| `vflow` | Viber command (`../regime/lifecycle.md` 7.8): grills the steps, writes the three files, registers the flow. |
 | `lifecycle` | A flow is a subset of it — stages speak the project's existing step names, never invent a parallel vocabulary. |
 | **Router** | Suggests a flow when current work matches one; tracks its steps like any workflow state. |
 | `adapt` | A flow step no Skill owns is a recurring-need signal — adapt closes the gap; the flow then references what adapt settled. |
@@ -159,7 +159,7 @@ row must answer its column, or the step is not executable, just described.
 
 ## 9. Flow
 
-The vflow pipeline is diagrammed in [`diagrams/flow-flow.mmd`](diagrams/flow-flow.mmd): create → grill steps → write the three
+The vflow pipeline is diagrammed in [`diagrams/flow-flow.mmd`](../diagrams/flow-flow.mmd): create → grill steps → write the three
 files → a run walks the sequence with gates → findings land in memory.
 
 ---
@@ -167,7 +167,7 @@ files → a run walks the sequence with gates → findings land in memory.
 ## 10. Open Items
 
 1. **Trigger matching.** How the Router decides "this work matches `create-new-page`" — a trigger line in
-   `lifecycle.md`, keywords from the flow's name, or the user's word only.
+   `../regime/lifecycle.md`, keywords from the flow's name, or the user's word only.
 2. **Flow self-refinement.** Beyond write-back of missed steps: whether a finished run should propose gate or
    order edits (sequence.md evolution with evidence).
 3. **Flow-of-flows.** Whether one flow may call another (a commit step that runs the `hotfix` flow) — allowed,

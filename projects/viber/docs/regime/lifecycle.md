@@ -22,7 +22,7 @@ Beside the lifecycle sit two **Skill Decks** — **`<USERNAME>`'s Deck** (every 
 
 Viber has **fixed foundations**, but no two projects are the same. Each project therefore has its **own Viber version**: the fixed lifecycle plus what that project adds to it. The project version is recorded in the Viber section of the project's `AGENTS.md` and is maintained by the `adapt` Skill (see section 7.3).
 
-Work with Viber starts with **`/viber init`**: it indexes every registered Skill into the project's `.viber/registry.md`, creates the project's memory files (`.viber/memory.md`, `settled.md`, `learnt.md`), points to the registry from the project's `AGENTS.md`, and starts the lifecycle at the right step (see `init.md`).
+Work with Viber starts with **`/viber init`**: it indexes every registered Skill into the project's `.viber/registry.md`, creates the project's memory files (`.viber/memory.md`, `settled.md`, `learnt.md`), points to the registry from the project's `AGENTS.md`, and starts the lifecycle at the right step (see `../commands/init.md`).
 
 Viber can run in **supervision mode**: when the project's `AGENTS.md` declares Viber, the relocatable documentation and procedure outputs of every participating Skill are gathered under the project's `.viber` directory, while production code and root-files (`README.md`, `AGENTS.md`) stay put. Participation follows deck membership and a per-Skill `viber: part | separated` frontmatter tag. This is disciplined vibe-engineering — Viber owns the knowledge around the code, never the code (see `supervision.md`). The canonical project layout — root-files, code, `tools/`, `scripts/`, `artifacts/`, `scratch/`, and `.viber` — is defined in `structure.md`.
 
@@ -744,7 +744,7 @@ task trails, keeper artifact batches — into a timestamped, manifest-indexed ar
 the user asks or when the Router flags a bloated area, never on its own; active work is never compacted,
 and ambiguous targets are asked with a recommendation.
 
-It is specified in `compact.md`, and like the other shared capabilities it can be invoked during any
+It is specified in `../commands/compact.md`, and like the other shared capabilities it can be invoked during any
 phase — accumulation is phase-blind.
 
 ## 7.8. Viber Commands — the `v` prefix
@@ -755,10 +755,10 @@ phase output of their own; they serve Viber itself and the project's state acros
 and refreshing the setup, keeping the workspace lean, and whatever maintenance the need earns later.
 
 - `vinit` — the Skill behind `/viber init`: indexes the deck, creates the `.viber` state and its memory
-  files, marks the activation in `AGENTS.md`, starts the flow (`init.md`).
-- `vcompact` — compaction with no losses (`compact.md`).
+  files, marks the activation in `AGENTS.md`, starts the flow (`../commands/init.md`).
+- `vcompact` — compaction with no losses (`../commands/compact.md`).
 - `vflow` — builds flows: task-scale lifecycles under `.viber/flow/`, mini-Vibers for recurring work
-  (`flow.md`).
+  (`../commands/flow.md`).
 - A new command registers itself here (section 7 listing + the Skills inventory), gets its own spec file
   beside the others, and declares `viber: part` in its `SKILL.md` frontmatter.
 
@@ -800,7 +800,7 @@ The deck is named after the user: `<USERNAME>` is the user running Viber.
 
 Examples from Amr's Deck, not a closed list: `seo`, `scraper-optimizer`, `watch-video`, `capture`, `fahlwy`, `mine`, `benchmark`, `pdf`, and open-source Skills Amr has registered, such as `impeccable`.
 
-- **Where to find them:** the registry written by `/viber init` (see `init.md`), which indexes every registered Skill and every extension source.
+- **Where to find them:** the registry written by `/viber init` (see `../commands/init.md`), which indexes every registered Skill and every extension source.
 - **Note:** the Viber lifecycle Skills are registered too, but they belong to Viber, not to the deck.
 
 ## 8.3. Opensource Deck
@@ -852,7 +852,7 @@ Shared Skills such as `grill-me`, `close-topics`, `adapt`, `thaw` and `vcompact`
 
 ## 9.1. Mermaid Flowchart
 
-The complete lifecycle flowchart lives in [`diagrams/lifecycle-flow.mmd`](diagrams/lifecycle-flow.mmd) — one renderable diagram file, so the lifecycle document and its graph each have a single owner. The graph mirrors sections 3–6: the four phases with their mandatory and optional Skills (carried by node color, see the diagram legend), the milestones between them, the intermediate Skills (`grill-me`, `close-topics`, `adapt`, `thaw`) reachable from any step, the two Skill Decks pulled in by relevance, and the project-phase bands DRAFT [DR] and IN-PROGRESS [IP] (section 1.2).
+The complete lifecycle flowchart lives in [`diagrams/lifecycle-flow.mmd`](../diagrams/lifecycle-flow.mmd) — one renderable diagram file, so the lifecycle document and its graph each have a single owner. The graph mirrors sections 3–6: the four phases with their mandatory and optional Skills (carried by node color, see the diagram legend), the milestones between them, the intermediate Skills (`grill-me`, `close-topics`, `adapt`, `thaw`) reachable from any step, the two Skill Decks pulled in by relevance, and the project-phase bands DRAFT [DR] and IN-PROGRESS [IP] (section 1.2).
 
 ## 9.2. Phase Summary
 

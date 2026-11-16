@@ -170,7 +170,7 @@ purge?* (if no → `artifacts/` or `scratch/`).
 
 ## 5. Git Treatment
 
-The `.gitignore` must carry, at minimum (the `init` duty — see `init.md` 2.8):
+The `.gitignore` must carry, at minimum (the `init` duty — see `../commands/init.md` 2.8):
 
 ```gitignore
 artifacts/

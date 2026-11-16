@@ -265,7 +265,7 @@ the spec's body.
 
 ## 8. Flow
 
-The memory pipeline is diagrammed in [`diagrams/memory-flow.mmd`](diagrams/memory-flow.mmd): knowledge arriving from Skills and sessions feeds the three files, and the Router surfaces a deferred question when its blocker clears.
+The memory pipeline is diagrammed in [`diagrams/memory-flow.mmd`](../diagrams/memory-flow.mmd): knowledge arriving from Skills and sessions feeds the three files, and the Router surfaces a deferred question when its blocker clears.
 
 ---
 
