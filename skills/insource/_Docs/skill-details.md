@@ -267,6 +267,7 @@
 - **Path:** [`Groups/Crawl/fahlwy/SKILL.md`](../Groups/Crawl/fahlwy/SKILL.md)
 - **Description:** Over-smart asset-source hunter. Find and PROVE a required number of working free asset sources (images, avatars, video, audio, icons, fonts, PDF books, brand logos) by fetching real bytes and validating magic signatures - never stopping at a guessed URL. Keeps its catalog as queryable CSV (data.csv: category, provider, family, url_form, kind, status, last_proven, access, rights, coverage, notes) plus an append-only growth ledger (log.csv), read and written through scripts/catalog.py. Use whenever asked to "find N sources", build an asset/placeholder source list, wire mockup media, or hunt down reliable hotlink/direct-download endpoints, then keep going until every slot is verified.
 - **Use-case:** The user wants a countable list of working external asset URLs (images/avatars/video/audio/icons/fonts/PDF books/brand logos), asks to "find a way" to source media for a mockup/demo, wants verified placeholder/stock endpoints, or asks what the catalog already knows (`catalog.py list/search/stale`).
+- **Usage:** `/fahlwy [<N asset kinds to source> | catalog <list|search|stats|get|stale>]`
 
 ---
 
@@ -323,15 +324,6 @@
 
 ### Design
 
-#### `assets`
-
-- **Path:** [`Groups/Design/assets/SKILL.md`](../Groups/Design/assets/SKILL.md)
-- **Description:** Battery-Skill for a project's imagery pipeline: plan the bill of materials, generate the masters, conform them into delivery files. Three internal modules - collection dissects a page or reference into BOM.md, bom/<page>.md and bom/style.md and writes the prompts; generate produces masters; conform (the resource-files module) probes a sheet, splits it and fits each slot to its delivery spec with a verification report. The router fixes the order and the shared key: one slot id across BOM row, prompt, raw render and delivered file, so nothing is re-derived by hand. Pages marked no-images skip the pipeline. Use when asked what images a page needs, to plan or run an image program end to end, to turn a sheet into project assets, or to decide which module handles a step. Triggers: assets, image pipeline, BOM, image plan, generated sheet, conform, split a sheet.
-- **Use-case:** The user asks what images a page needs, wants a project's imagery planned, generated and delivered end to end, needs a generated sheet turned into project asset files, or asks which module owns a step. Also /assets.
-- **Usage:** `/assets [the page, image plan, sheet or pipeline step]`
-
----
-
 #### `bleed`
 
 - **Path:** [`Groups/Design/bleed/SKILL.md`](../Groups/Design/bleed/SKILL.md)
@@ -340,53 +332,11 @@
 
 ---
 
-#### `colors`
-
-- **Path:** [`Groups/Design/Style/styling/specialized/daisyui/colors/SKILL.md`](../Groups/Design/Style/styling/specialized/daisyui/colors/SKILL.md)
-- **Parent:** `daisyui`
-- **Description:** Color rules that you must use with daisyUI 5
-
----
-
-#### `config`
-
-- **Path:** [`Groups/Design/Style/styling/specialized/daisyui/config/SKILL.md`](../Groups/Design/Style/styling/specialized/daisyui/config/SKILL.md)
-- **Parent:** `daisyui`
-- **Description:** Configuration options for daisyUI 5
-
----
-
-#### `daisyui`
-
-- **Path:** [`Groups/Design/Style/styling/specialized/daisyui/SKILL.md`](../Groups/Design/Style/styling/specialized/daisyui/SKILL.md)
-- **Parent:** `styling`
-- **Description:** Official daisyUI 5 component library for Tailwind CSS 4 — class names for 76 components, semantic colors, themes, and the component discovery protocol. Use whenever a project uses daisyUI: installing it, configuring themes, applying usage and color rules, selecting a component before writing markup. Triggers: daisyUI, daisy ui, daisyUI component, daisyUI theme, install daisyUI, semantic colors, navbar drawer modal dropdown, component class names. For plain Tailwind without daisyUI use /tailwind; for platform-neutral styling architecture use /styling. Borrowed from https://daisyui.com/SKILL.md (content verbatim; frontmatter and when-to-use lightly adapted to this registry).
-- **Sub-skills:** `colors`, `config`, `install`, `usage`
-
----
-
 #### `denoise`
 
 - **Path:** [`Groups/Design/denoise/SKILL.md`](../Groups/Design/denoise/SKILL.md)
-- **Description:** Transforms crowded, noisy, visually overwhelming UIs into calm, readable, professional interfaces that are easier to use, not just nicer to look at, at one of three intensities: lite (type/spacing in place), medium (redistributes content, designs forms and states), ultra (full re-theme, re-structure, re-derived information architecture and interaction layer). Use when someone shares an existing UI — HTML/CSS, React, Vue, a screenshot, a mockup, an admin panel, a dashboard — and asks to make it cleaner, more readable, less cluttered or noisy, more professional, easier on the eyes, or denoise/calm; or names a lite/medium/ultra pass. Also handles whole-codebase work: rolling a pass across many pages with a generated map and an audited ledger, verifying nothing broke against a real pre-redesign build, and grading which mode was actually delivered so an Ultra request is never quietly answered with a re-skin. For variations before a rollout, use diverge. Refactor/redesign only, not from-scratch. Framework-agnostic.
+- **Description:** Transforms crowded, noisy, visually overwhelming UIs into calm, readable, professional interfaces that are easier to use, not just nicer to look at, at one of three intensities: lite (type/spacing in place), medium (redistributes content, designs forms and states), ultra (full re-theme, re-structure, re-derived information architecture and interaction layer). Use when someone shares an existing UI — HTML/CSS, React, Vue, a screenshot, a mockup, an admin panel, a dashboard — and asks to make it cleaner, more readable, less cluttered or noisy, more professional, easier on the eyes, or denoise/calm; or names a lite/medium/ultra pass. Also handles whole-codebase work: rolling a pass across many pages with a generated map and an audited ledger, verifying nothing broke against a real pre-redesign build, and grading which mode was actually delivered so an Ultra request is never quietly answered with a re-skin. For variations, use design diverge mode. Refactor/redesign only, not from-scratch. Framework-agnostic.
 - **Usage:** `/denoise [lite|medium|ultra] <target>`
-
----
-
-#### `diverge`
-
-- **Path:** [`Groups/Design/diverge/SKILL.md`](../Groups/Design/diverge/SKILL.md)
-- **Description:** Previews genuinely different design directions for an existing UI before committing a whole project or batch of pages to one of them. Two commands: /diverge taste [n] builds n complete, genuinely different directions and delivers them side by side in a picker page whose "Use this one" button copies a ready-to-paste prompt; /diverge snippet proves one direction on a single representative file with mockup data, never touching source, in a like/dislike loop. Use when someone wants to see real options before a redesign rollout, asks for variations, directions, tastes, or design options side by side, says "show me a few different takes before we commit", names /diverge taste or /diverge snippet, or wants a fast go/no-go proof of a redesign feel on one file. Directions must differ on structural judgment calls, not paint. Not for applying one decided redesign pass (denoise or any redesign skill does that), and not from-scratch design.
-- **Use-case:** The person is about to commit a project or many pages to one redesign direction and wants real options first, asks for variations/directions/tastes side by side, or wants a one-file mockup proof before rollout.
-- **Usage:** `/diverge [taste [n]|snippet] <file-or-project>`
-
----
-
-#### `install`
-
-- **Path:** [`Groups/Design/Style/styling/specialized/daisyui/install/SKILL.md`](../Groups/Design/Style/styling/specialized/daisyui/install/SKILL.md)
-- **Parent:** `daisyui`
-- **Description:** Installation instructions for daisyUI 5
 
 ---
 
@@ -406,46 +356,10 @@
 
 ---
 
-#### `scss`
-
-- **Path:** [`Groups/Design/Style/styling/specialized/scss/SKILL.md`](../Groups/Design/Style/styling/specialized/scss/SKILL.md)
-- **Parent:** `styling`
-- **Description:** SCSS/Sassy CSS best practices and coding guidelines for maintainable, scalable stylesheets
-
----
-
 #### `stateful`
 
 - **Path:** [`Groups/Design/stateful/SKILL.md`](../Groups/Design/stateful/SKILL.md)
 - **Description:** Derive every state a user-visible screen can enter, then implement the approved ones — pending, empty, stale, partial; provider down, degraded, throttled, maintenance; no connection at launch; extreme latency; expired session; refused entitlement; unknown values; device suspended, killed, storage-full; races; integrity and breach conditions. Platform-neutral: web, mobile, desktop, terminal, kiosk, embedded, any stack, and prototypes. Never a fixed checklist: states derive from the screen's own dependencies through nine condition axes, each candidate passes four evidence gates and a severity triage, and unknown input gets a designed rendering rather than the happy path. Use for "handle all the states", "what states can this screen have", "make it state-complete", "audit for missing states", "this breaks when the network is slow or gone", "it hangs or shows nothing when the server is down", "/stateful <file|screen|app>". Not for polishing existing states, from-scratch screens, or headless state machines.
-
----
-
-#### `styling`
-
-- **Path:** [`Groups/Design/Style/styling/SKILL.md`](../Groups/Design/Style/styling/SKILL.md)
-- **Description:** Styling experience, one skill, two levels: build (write NEW styling right on any stack — per-module stylesheets, no monolith, role-named tokens as single source of truth, a downward-only layer chain, expressive names, conditional styling as a lookup not a build, runtime values through a dynamic channel) and retrofit (take an EXISTING project's hardcoded/duplicated styling into a token-driven system: inventory, incumbent gate, one evidence-based native-vs-library decision, pixel-safe migration slices, no-hardcoding guards, before/after parity evidence). The router picks ONE level and reads only its method.md. New work or styling structure is yours → build; existing mess to centralize and prove parity → retrofit. Triggers: organize CSS/XAML/QML, design tokens, style layer chain, inline dumps, built class strings, styleup, style-up, make styles maintainable or professional, remove hardcoded styles, centralize colors/typography/spacing. Not for visual redesign (denoise) or component galleries (components).
-- **Use-case:** The user asks how to organize or write new styling (build), or to make an existing project's styling maintainable, token-driven and enforced with parity evidence (retrofit).
-- **Usage:** `/styling [build|retrofit] <target>`
-- **Sub-skills:** `daisyui`, `scss`, `tailwind`
-
----
-
-#### `tailwind`
-
-- **Path:** [`Groups/Design/Style/styling/specialized/tailwind/SKILL.md`](../Groups/Design/Style/styling/specialized/tailwind/SKILL.md)
-- **Parent:** `styling`
-- **Description:** Tailwind CSS v4 (v3-compatible), one battery, six modules: design-system (token scales, oklch/P3, theme namespaces), config (CSS-first directives @theme/@source/@plugin/@utility/@custom-variant, @apply/@layer/@reference scoped-style fix), migration (v3-to-v4 decision, audit-codemod-verify, single breaking-change catalog, traps and shims), dynamic-classes (runtime bg-${x}-500 never generates: four ranked fixes, @source inline grammar), utility-soup (3-use extraction, component-vs-@apply, prettier/eslint sorting, clsx/twMerge), validator (cross-module review rules, v3/v4 detection, advisory CI). The router picks ONE module and reads only its method.md. Triggers: Tailwind setup or @theme tokens, v3 to v4 upgrade, classes work in dev but not production, safelist or @source inline, too many utility classes one line, Cannot apply unknown utility class, tailwind-merge, audit or review a Tailwind codebase. Not for general styling architecture (styling build/retrofit levels).
-- **Use-case:** Any Tailwind CSS task — configuring v4, defining theme tokens, migrating v3 to v4, fixing classes missing in production, refactoring utility soup, or auditing a Tailwind codebase.
-- **Usage:** `/tailwind [design-system|config|migration|dynamic-classes|utility-soup|validator] <target>`
-
----
-
-#### `usage`
-
-- **Path:** [`Groups/Design/Style/styling/specialized/daisyui/usage/SKILL.md`](../Groups/Design/Style/styling/specialized/daisyui/usage/SKILL.md)
-- **Parent:** `daisyui`
-- **Description:** Usage rules that you must use with daisyUI 5
 
 ---
 
@@ -797,6 +711,15 @@
 
 ---
 
+#### `assets`
+
+- **Path:** [`assets/SKILL.md`](../assets/SKILL.md)
+- **Description:** Battery-Skill for a project's imagery pipeline: plan the bill of materials, generate the masters, conform them into delivery files. Three internal modules - collection dissects a page or reference into BOM.md, bom/<page>.md and bom/style.md and writes the prompts; generate produces masters; conform (the resource-files module) probes a sheet, splits it and fits each slot to its delivery spec with a verification report. The router fixes the order and the shared key: one slot id across BOM row, prompt, raw render and delivered file, so nothing is re-derived by hand. Pages marked no-images skip the pipeline. Use when asked what images a page needs, to plan or run an image program end to end, to turn a sheet into project assets, or to decide which module handles a step. Triggers: assets, image pipeline, BOM, image plan, generated sheet, conform, split a sheet.
+- **Use-case:** The user asks what images a page needs, wants a project's imagery planned, generated and delivered end to end, needs a generated sheet turned into project asset files, or asks which module owns a step. Also /assets.
+- **Usage:** `/assets [the page, image plan, sheet or pipeline step]`
+
+---
+
 #### `avatar`
 
 - **Path:** [`avatar/SKILL.md`](../avatar/SKILL.md)
@@ -841,6 +764,14 @@
 
 ---
 
+#### `colors`
+
+- **Path:** [`styling/specialized/daisyui/colors/SKILL.md`](../styling/specialized/daisyui/colors/SKILL.md)
+- **Parent:** `daisyui`
+- **Description:** Color rules that you must use with daisyUI 5
+
+---
+
 #### `compare`
 
 - **Path:** [`compare/SKILL.md`](../compare/SKILL.md)
@@ -849,12 +780,29 @@
 
 ---
 
+#### `config`
+
+- **Path:** [`styling/specialized/daisyui/config/SKILL.md`](../styling/specialized/daisyui/config/SKILL.md)
+- **Parent:** `daisyui`
+- **Description:** Configuration options for daisyUI 5
+
+---
+
+#### `daisyui`
+
+- **Path:** [`styling/specialized/daisyui/SKILL.md`](../styling/specialized/daisyui/SKILL.md)
+- **Parent:** `styling`
+- **Description:** Official daisyUI 5 component library for Tailwind CSS 4 — class names for 76 components, semantic colors, themes, and the component discovery protocol. Use whenever a project uses daisyUI: installing it, configuring themes, applying usage and color rules, selecting a component before writing markup. Triggers: daisyUI, daisy ui, daisyUI component, daisyUI theme, install daisyUI, semantic colors, navbar drawer modal dropdown, component class names. For plain Tailwind without daisyUI use /tailwind; for platform-neutral styling architecture use /styling. Borrowed from https://daisyui.com/SKILL.md (content verbatim; frontmatter and when-to-use lightly adapted to this registry).
+- **Sub-skills:** `colors`, `config`, `install`, `usage`
+
+---
+
 #### `design`
 
 - **Path:** [`design/SKILL.md`](../design/SKILL.md)
-- **Description:** Design work, one skill, four modes: design-md (author the project's canonical DESIGN.md: machine-readable tokens + human rationale, Google Labs design.md conventions - "/design DESIGN.md <file>"), playfile (throwaway design-review waves: self-contained linked HTML screens, URL-forced states, README dossiers - "/design a playfile"), prototype (interactive URL-driven prototype system: dev dock, component stories, per-component state trees, dedup guards - "/design prototype <screen>"), calibrate (extract the full design, visual and interaction DNA of a North-Star reference implementation and apply it to a project - "calibrate the /design of X to Y"). The router picks ONE mode and reads only its method.md. Triggers: DESIGN.md, design tokens, playfile, quick linked HTML mockups, prototype this, dev dock, stories gallery, calibrate design, match this app's design to a reference. Not for UI redesign passes, page inventories or mockup-to-device parity - those stay separate skills (denoise, pages, parity).
-- **Use-case:** The user asks to author a DESIGN.md, run a wave of linked HTML review screens, build or extend an interactive URL-driven prototype, or calibrate a project's design to a reference implementation.
-- **Usage:** `/design [design-md|playfile|prototype|calibrate] <target>`
+- **Description:** Design work, one skill, five modes: design-md (author the project's canonical DESIGN.md: machine-readable tokens + human rationale), playfile (throwaway design-review waves: self-contained linked HTML screens, URL-forced states, README dossiers), prototype (interactive URL-driven prototype system: dev dock, component stories, per-component state trees, dedup guards), calibrate (extract a North-Star reference's full visual and interaction DNA and apply it to this project - "calibrate the /design of X to Y"), diverge (preview n genuinely different redesign directions side by side in a picker that hands back a paste-ready prompt, or prove one direction on a single file). The router picks ONE mode and reads only its method.md. Triggers: DESIGN.md, design tokens, playfile, prototype this, dev dock, stories gallery, calibrate design, design directions, show me different takes. Not for UI redesign passes, page inventories or mockup-to-device parity - those stay separate skills (denoise, pages, parity).
+- **Use-case:** The user asks to author a DESIGN.md, run a wave of linked HTML review screens, build or extend an interactive URL-driven prototype, or calibrate a project's design to a reference implementation, or preview genuinely different design directions before committing a redesign.
+- **Usage:** `/design [design-md|playfile|prototype|calibrate|diverge] <target>`
 
 ---
 
@@ -865,10 +813,27 @@
 
 ---
 
+#### `install`
+
+- **Path:** [`styling/specialized/daisyui/install/SKILL.md`](../styling/specialized/daisyui/install/SKILL.md)
+- **Parent:** `daisyui`
+- **Description:** Installation instructions for daisyUI 5
+
+---
+
 #### `learning-test`
 
 - **Path:** [`learning-test/SKILL.md`](../learning-test/SKILL.md)
 - **Description:** Write and run a "learning test" (term coined by Jim Newkirk, popularized by Robert C. Martin/Uncle Bob in Clean Code ch.8 "Boundaries") to empirically discover how a third-party library/framework/API actually behaves, instead of guessing, relying on stale training knowledge, or trusting docs that may be incomplete, outdated, ambiguous, or missing the exact case. Use whenever the Agent or the user is uncertain about real behavior/limits of an external dependency — "how does X actually behave", "what happens if...", "does X support...", "what's the limit of...", docs contradict themselves or don't cover the scenario, or before writing production code against an unfamiliar API. Also trigger on "write a learning test for X" or "figure out the limits of X". The test is small, real, executable code calling the actual API the way production code would, to characterize true behavior — not a mock or doc summary. Trigger this instead of guessing at or fabricating claims about library behavior.
+
+---
+
+#### `libcheck`
+
+- **Path:** [`libcheck/SKILL.md`](../libcheck/SKILL.md)
+- **Description:** Resolve what a library actually ships TODAY - latest stable, release date, prerelease-ahead?, deprecated? - through a six-layer evidence cascade: the project's own package manager (npm/bun/pip/dotnet/cargo/go, honoring the registry it resolves against), Context7 or equivalent MCP when connected, official registries (npm, PyPI, crates.io, Go, NuGet, RubyGems, Packagist) via scripts/probe_registries.py, GitHub releases and tags, vendor docs and changelogs, then web search for discovery only. Reads full version lists and filters prereleases per ecosystem dialect, so a dist-tag 'latest' beta is never mistaken for stable. Never answers from training memory. Use before pinning a dependency, or as the version-evidence step inside techstack, thebest, pick, packages. Triggers: latest version, version check, still maintained, is X deprecated, what does npm say about X. Not for choosing the stack itself (techstack) or authoring code.
+- **Use-case:** Any question whose honest answer changes with time - what version is current, whether a prerelease is newest-but-unstable, whether a package is deprecated - before writing version pins, stack advisories, or dependency recommendations.
+- **Usage:** `/libcheck [ecosystem:name (npm:sass, github:ionic-team/ionic-framework, ...) or a library question]`
 
 ---
 
@@ -878,13 +843,6 @@
 - **Description:** Mermaid flowchart authoring discipline — a diagram shows what exists and how things connect; documents carry the policy and sentences. Use when writing or editing any .mmd or embedded mermaid flowchart, when a diagram "looks trash" or reads crowded, when adding nodes/legends/panels, or when extracting a diagram out of a document. Node labels are a name plus at most 1-2 words; status is color, not text; legends are swatches, not sentences; one node per entity; no placeholder nodes.
 - **Use-case:** Creating or editing a mermaid flowchart, reviewing a cluttered diagram, moving a diagram into its own .mmd file, adding a legend, naming a subgraph.
 - **Usage:** `/mermaid [the diagram file or node block]`
-
----
-
-#### `no-framework`
-
-- **Path:** [`no-framework/SKILL.md`](../no-framework/SKILL.md)
-- **Description:** Build Single Page Applications using NoF (No Frameworks) — Navigo (~4KB routing) plus a choice of small UI libraries (Preact by default, or VanJS / Nano JSX via `--ui`), no React/Vue/Angular runtime or mandated structure. Use whenever scaffolding a small-to-medium SPA that should stay framework-free. Requires verifying current library versions/API (chosen UI library, Navigo, @preact/signals or Nano Stores) before writing code — pinned versions, especially fast-moving ones like @preact/signals, can go stale; the `updated` field above is a staleness signal, not a guarantee. Any vanilla-JS-compatible library is fair game, including Tailwind/Sass (`--styler`) and Nano Stores for cross-library state; StyleX is excluded (tied to React). Covers scaffolding, state/signals/derive patterns, routing, components, rendering, debugging, and production paths (no-bundler htm, and Vite JSX). Not a fit for very large multi-page apps, large teams, or heavy animation needs — see "when to use".
 
 ---
 
@@ -923,6 +881,14 @@
 
 ---
 
+#### `scss`
+
+- **Path:** [`styling/specialized/scss/SKILL.md`](../styling/specialized/scss/SKILL.md)
+- **Parent:** `styling`
+- **Description:** SCSS/Sassy CSS best practices and coding guidelines for maintainable, scalable stylesheets
+
+---
+
 #### `seam`
 
 - **Path:** [`seam/SKILL.md`](../seam/SKILL.md)
@@ -948,10 +914,23 @@
 
 ---
 
-#### `surprise-me`
+#### `styling`
 
-- **Path:** [`surprise-me/SKILL.md`](../surprise-me/SKILL.md)
-- **Description:** Create a delightful, unexpected "wow" experience for the user by dynamically discovering and creatively combining other enabled skills. Triggers when the user says "surprise me" or any request expressing a desire for an unexpected creative showcase. Also triggers when the user is bored, wants inspiration, or asks for "something interesting".
+- **Path:** [`styling/SKILL.md`](../styling/SKILL.md)
+- **Description:** Styling experience, one skill, two levels: build (write NEW styling right on any stack — per-module stylesheets, no monolith, role-named tokens as single source of truth, a downward-only layer chain, expressive names, conditional styling as a lookup not a build, runtime values through a dynamic channel) and retrofit (take an EXISTING project's hardcoded/duplicated styling into a token-driven system: inventory, incumbent gate, one evidence-based native-vs-library decision, pixel-safe migration slices, no-hardcoding guards, before/after parity evidence). The router picks ONE level and reads only its method.md. New work or styling structure is yours → build; existing mess to centralize and prove parity → retrofit. Triggers: organize CSS/XAML/QML, design tokens, style layer chain, inline dumps, built class strings, styleup, style-up, make styles maintainable or professional, remove hardcoded styles, centralize colors/typography/spacing. Not for visual redesign (denoise) or component galleries (components).
+- **Use-case:** The user asks how to organize or write new styling (build), or to make an existing project's styling maintainable, token-driven and enforced with parity evidence (retrofit).
+- **Usage:** `/styling [build|retrofit] <target>`
+- **Sub-skills:** `daisyui`, `scss`, `tailwind`
+
+---
+
+#### `tailwind`
+
+- **Path:** [`styling/specialized/tailwind/SKILL.md`](../styling/specialized/tailwind/SKILL.md)
+- **Parent:** `styling`
+- **Description:** Tailwind CSS v4 (v3-compatible), one battery, six modules: design-system (token scales, oklch/P3, theme namespaces), config (CSS-first directives @theme/@source/@plugin/@utility/@custom-variant, @apply/@layer/@reference scoped-style fix), migration (v3-to-v4 decision, audit-codemod-verify, single breaking-change catalog, traps and shims), dynamic-classes (runtime bg-${x}-500 never generates: four ranked fixes, @source inline grammar), utility-soup (3-use extraction, component-vs-@apply, prettier/eslint sorting, clsx/twMerge), validator (cross-module review rules, v3/v4 detection, advisory CI). The router picks ONE module and reads only its method.md. Triggers: Tailwind setup or @theme tokens, v3 to v4 upgrade, classes work in dev but not production, safelist or @source inline, too many utility classes one line, Cannot apply unknown utility class, tailwind-merge, audit or review a Tailwind codebase. Not for general styling architecture (styling build/retrofit levels).
+- **Use-case:** Any Tailwind CSS task — configuring v4, defining theme tokens, migrating v3 to v4, fixing classes missing in production, refactoring utility soup, or auditing a Tailwind codebase.
+- **Usage:** `/tailwind [design-system|config|migration|dynamic-classes|utility-soup|validator] <target>`
 
 ---
 
@@ -1002,5 +981,13 @@
 - **Description:** Type-hinting experience, one skill, two levels: harden (the general craft — brands for raw types, creation points, boundary checks that turn untrusted data into typed values, compiler-first rejection, validation libraries and database constraints, in any language) and tiers (the opt-in three-tier architecture — primitives, brands, shapes — with its conversion path). The router picks ONE level and reads only its method.md. Default to harden; reach for tiers only when the project or user chose it (detect primitives/, brands/, shapes/ folders or the word tiers) — never impose the architecture or a naming scheme. Triggers: improve/tighten/audit types, stringly-typed or primitive-obsessed code, branded/NewType/opaque types, validate config or API contracts, make wrong values an error, type-up, tier-up, tiered types, primitives brands shapes, adopt the tier architecture, promote this to a brand. Golden rule: reuse existing types, never reinvent them. Tier means type-system tiers only, never architecture layers.
 - **Use-case:** The user asks to improve, tighten or audit a codebase's types (harden), or the project or user chose the three-tier type architecture and code must be built or converted to it (tiers).
 - **Usage:** `/typing [harden|tiers] <target>`
+
+---
+
+#### `usage`
+
+- **Path:** [`styling/specialized/daisyui/usage/SKILL.md`](../styling/specialized/daisyui/usage/SKILL.md)
+- **Parent:** `daisyui`
+- **Description:** Usage rules that you must use with daisyUI 5
 
 ---

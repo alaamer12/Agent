@@ -1,20 +1,10 @@
----
-name: diverge
-version: 1.0.2
-author: Amr
-specialized: none
-description: 'Previews genuinely different design directions for an existing UI before committing a whole project or batch of pages to one of them. Two commands: /diverge taste [n] builds n complete, genuinely different directions and delivers them side by side in a picker page whose "Use this one" button copies a ready-to-paste prompt; /diverge snippet proves one direction on a single representative file with mockup data, never touching source, in a like/dislike loop. Use when someone wants to see real options before a redesign rollout, asks for variations, directions, tastes, or design options side by side, says "show me a few different takes before we commit", names /diverge taste or /diverge snippet, or wants a fast go/no-go proof of a redesign feel on one file. Directions must differ on structural judgment calls, not paint. Not for applying one decided redesign pass (denoise or any redesign skill does that), and not from-scratch design.'
-when_to_use: The person is about to commit a project or many pages to one redesign direction and wants real options first, asks for variations/directions/tastes side by side, or wants a one-file mockup proof before rollout.
-argument-hint: "[taste [n]|snippet] <file-or-project>"
----
+# diverge — real design directions, side by side, before the commitment
 
-# Diverge
-
-Don't commit a whole project to one design direction sight-unseen. This skill produces the
+Don't commit a whole project to one design direction sight-unseen. This mode produces the
 options: either **several genuinely different directions at once** for a side-by-side choice
 (`taste`), or **one direction proven on a single file** in a fast yes/no loop (`snippet`).
 It never rolls anything out itself — once a direction is picked, its judgment-call answers
-become the standing defaults for whatever redesign work follows, in this skill's session or
+become the standing defaults for whatever redesign work follows, in this mode's session or
 any other.
 
 ## Read the right reference before you act
@@ -58,7 +48,7 @@ Listing the axes is not the same as picking real values on them. Three steps, in
    product could plausibly ship. Where two axes' options interact awkwardly, let that rule
    out combinations rather than presenting all of them as equally coherent.
 3. **Push for real spread.** Don't pick the n combinations closest to the input's current
-   choices — that reproduces the under-delivery this skill exists to avoid. At least one
+   choices — that reproduces the under-delivery this mode exists to avoid. At least one
    direction should represent a genuinely different overall feel, provided step 1 didn't
    rule it out. Not the n most extreme combinations for shock value either; that fails
    step 2 as often as it passes it.
@@ -84,7 +74,7 @@ or a full re-theme and re-structure. If they haven't said, ask — one line, don
 over-explain. A direction preview is **not a lower-fidelity sketch**: it is the real work at
 that depth, done n times with different judgment-call answers. If the person names a
 redesign skill's intensity vocabulary (e.g. lite/medium/ultra), honor it as the depth of
-each build; this skill does not own that vocabulary and works without it.
+each build; this mode does not own that vocabulary and works without it.
 
 ## Verify by rendering — every direction, before delivery
 
@@ -98,8 +88,8 @@ unmet rather than quietly showing it.
 
 ## Commands
 
-Both are triggered explicitly — `/diverge taste [n]` and `/diverge snippet` — and neither is
-the default. Without one of these keywords, a multi-file input is not this skill's job:
+Both are triggered explicitly — `/design diverge taste [n]` and `/design diverge snippet` — and neither is
+the default. Without one of these keywords, a multi-file input is not this mode's job:
 hand it to the redesign skill the person is actually using.
 
 - **`taste [n]`** — build n directions (default **3**), each a complete self-contained file

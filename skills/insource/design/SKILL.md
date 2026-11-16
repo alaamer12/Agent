@@ -1,11 +1,11 @@
 ---
 name: design
-version: 1.0.2
+version: 1.1.0
 author: Amr
 specialized: none
-description: 'Design work, one skill, four modes: design-md (author the project''s canonical DESIGN.md: machine-readable tokens + human rationale, Google Labs design.md conventions - "/design DESIGN.md <file>"), playfile (throwaway design-review waves: self-contained linked HTML screens, URL-forced states, README dossiers - "/design a playfile"), prototype (interactive URL-driven prototype system: dev dock, component stories, per-component state trees, dedup guards - "/design prototype <screen>"), calibrate (extract the full design, visual and interaction DNA of a North-Star reference implementation and apply it to a project - "calibrate the /design of X to Y"). The router picks ONE mode and reads only its method.md. Triggers: DESIGN.md, design tokens, playfile, quick linked HTML mockups, prototype this, dev dock, stories gallery, calibrate design, match this app''s design to a reference. Not for UI redesign passes, page inventories or mockup-to-device parity - those stay separate skills (denoise, pages, parity).'
-when_to_use: The user asks to author a DESIGN.md, run a wave of linked HTML review screens, build or extend an interactive URL-driven prototype, or calibrate a project's design to a reference implementation.
-argument-hint: "[design-md|playfile|prototype|calibrate] <target>"
+description: 'Design work, one skill, five modes: design-md (author the project''s canonical DESIGN.md: machine-readable tokens + human rationale), playfile (throwaway design-review waves: self-contained linked HTML screens, URL-forced states, README dossiers), prototype (interactive URL-driven prototype system: dev dock, component stories, per-component state trees, dedup guards), calibrate (extract a North-Star reference''s full visual and interaction DNA and apply it to this project - "calibrate the /design of X to Y"), diverge (preview n genuinely different redesign directions side by side in a picker that hands back a paste-ready prompt, or prove one direction on a single file). The router picks ONE mode and reads only its method.md. Triggers: DESIGN.md, design tokens, playfile, prototype this, dev dock, stories gallery, calibrate design, design directions, show me different takes. Not for UI redesign passes, page inventories or mockup-to-device parity - those stay separate skills (denoise, pages, parity).'
+when_to_use: The user asks to author a DESIGN.md, run a wave of linked HTML review screens, build or extend an interactive URL-driven prototype, or calibrate a project's design to a reference implementation, or preview genuinely different design directions before committing a redesign.
+argument-hint: "[design-md|playfile|prototype|calibrate|diverge] <target>"
 ---
 
 # design — one skill, four ways to operate
@@ -22,6 +22,7 @@ never run two modes' machinery for a one-mode job.
 | `playfile` | "quick linked HTML mockups of these screens", "review wave", "lighter prototype", "playfile this flow" | [`playfile/method.md`](./playfile/method.md) |
 | `prototype` | "prototype this", "dev dock", "component stories", "make the mockups behave like the app" | [`prototype/method.md`](./prototype/method.md) |
 | `calibrate` | "calibrate the design of X to Y", "make our app look like <reference>", "extract this reference's design DNA" | [`calibrate/method.md`](./calibrate/method.md) |
+| `diverge` | "show me a few different takes before we commit", "design directions side by side", "prove this direction on one file first" | [`diverge/method.md`](./diverge/method.md) |
 
 ## Disambiguation — the pairs that get confused
 
@@ -35,6 +36,9 @@ never run two modes' machinery for a one-mode job.
   DESIGN.md — calibrate feeds design-md, it does not replace it.
 - **"calibrate the /design of X to Y" is calibrate mode**, never design-md: the word "design"
   there is the object of calibration, not a document request.
+- **diverge vs denoise.** Deciding *which* direction to take — seeing genuine options before a
+  rollout commits to one: `diverge`. Applying one already-decided redesign pass at a chosen
+  intensity: `denoise`. The picked direction's answers become the defaults the rollout runs on.
 
 ## Shared laws
 
@@ -54,8 +58,9 @@ design/
 ├── design-md/          # method.md + references/ + templates/ + examples/
 ├── playfile/           # method.md + references/ + assets/
 ├── prototype/          # method.md + references/ + assets/ + scripts/ + examples/
-└── calibrate/          # method.md + references/ + examples/
+├── calibrate/          # method.md + references/ + examples/
+└── diverge/            # method.md + references/ + assets/ + examples/
 ```
 
-The four modes were previously standalone skills (`/design-md`, `/playfile`, `/prototype`,
-`/calibrate`); those entry points are gone — everything runs through `/design <mode>`.
+The five modes were previously standalone skills (`/design-md`, `/playfile`, `/prototype`,
+`/calibrate`, `/diverge`); those entry points are gone — everything runs through `/design <mode>`.

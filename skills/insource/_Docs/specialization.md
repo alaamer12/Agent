@@ -76,12 +76,13 @@ A specialized skill is an independent, technology-bound skill (`specialized: <te
 platform-neutral parent battery, inside the parent's `specialized/` folder. It keeps its own `SKILL.md`,
 so it is a **Meta-Skill child, not a battery module**. The parent's own method stays platform-neutral, so
 the parent keeps `specialized: none` — hosting specialized children does not bind the parent to a
-technology. Live example: [`styling`](../Groups/Design/Style/styling/SKILL.md) (`none`) hosts
-[`scss`](../Groups/Design/Style/styling/specialized/scss/SKILL.md) (`specialized: scss`).
+technology. Live example: [`styling`](../styling/SKILL.md) (`none`) hosts
+[`scss`](../styling/specialized/scss/SKILL.md) (`specialized: scss`).
 
 1. **Create the child as a real skill.** `<battery>/specialized/<name>/SKILL.md` with full frontmatter:
    `name`, `version`, `specialized: <canonical value from the table above>`, `description`, plus
-   `when_to_use` / `argument-hint` when user-invoked. Do **not** rename it to `method.md` — that demotes it
+   `when_to_use`, and `argument-hint` whenever the child presents commands or modes (required by the
+   argument-hint rule, see [argument-hint.md](argument-hint.md)). Do **not** rename it to `method.md` — that demotes it
    to an internal module. Give it its own references/examples/scripts as the technology needs.
 2. **Split ownership, one owner per fact.** The parent owns the universal, platform-neutral laws; the child
    owns its technology's mechanics and applies those laws in its idiom. The child defers to the parent on
@@ -93,7 +94,8 @@ technology. Live example: [`styling`](../Groups/Design/Style/styling/SKILL.md) (
    skills' junctions break path links between them.
 4. **Install the child on its own.** Nesting does not install it. The child is an independent skill and needs
    its own junction so `/<name>` resolves (`python manager.py skill <name>`); the parent's junction only
-   exposes the files.
+   exposes the files. If the parent tree later moves inside the registry, `python manager.py skill --refresh`
+   repoints nested children's junctions too — resolution falls through to a unique nested match.
 5. **Catalog and version.** Add the child's Quick Index bullet and detail block at its real path
    `<battery>/specialized/<name>/SKILL.md`; keep the parent's row. The child carries its own `version`; bump
    the parent for the router change. Regenerate the README and run `lint`.

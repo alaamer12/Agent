@@ -28,7 +28,14 @@ Value rules: double-quote whenever the hint starts with `[` or contains `: ` (bo
 **Weak signals (two are needed together):**
 
 - Enumeration phrases: "three commands - micro, component, transition", "both modes", "several subcommands".
-- Bold/plain `Commands:` or `Modes:` labels.
+- Bold/plain `Commands:` or `Modes:` line labels.
+
+**What does NOT count** (verified against real inventory hits):
+
+- Commands of the *target project*, not the skill: a ripgrep cheatsheet heading in `update/references`, git vocabulary, or "shell commands in CI" prose — the rule polices the skill's own interface.
+- A bundled script's CLI inside `references/` (`scripts/catalog.py list/search`) is the skill's tooling; it becomes an argument surface only when `when_to_use` exposes it to the user — which is why `fahlwy` declares its hint.
+- `method.md` module files inside a battery: modules are never invoked on their own, so the battery's router-side `argument-hint` covers the whole tree — the detector reads `SKILL.md` bodies on purpose.
+- Template and pattern headings — "Sweep mode" in a `assets/` mockup template, "Failure Modes Table" in a study template, "Dark mode" in a style-knowledge file — content, not interface.
 
 ### When a skill has commands/modes in substance but not by these shapes
 

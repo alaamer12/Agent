@@ -10,7 +10,7 @@ specific answers below into an unrelated product; derive your own from its own e
 A build-operations console: a persistent dark side rail with text labels (~8 items across
 two labeled sections), a dense single-column list of source rows (one source per row, each
 with independent state), a light working surface, dark chrome, a red brand accent. The
-person asks for `/diverge taste 3` before rolling a redesign across the project.
+person asks for `/design diverge taste 3` before rolling a redesign across the project.
 
 ## Step 1 — what does this input rule in or out, axis by axis?
 

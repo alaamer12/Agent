@@ -52,7 +52,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Sequence
 from urllib.parse import unquote
 
-__version__ = "2.6.0"
+__version__ = "2.7.0"
 
 # ---------------------------------------------------------------------------
 # optional dependencies
@@ -707,7 +707,7 @@ def map_concurrent(func: Callable[[Any], Any], items: Iterable[Any], jobs: int) 
 
 @dataclass
 class SyncIssue:
-    kind: str  # "hard-copy", "link" or "folder"
+    kind: str  # "hard-copy", "link", "folder" or "agent-md"
     skill: str
     target: str
     state: str
@@ -769,9 +769,23 @@ def audit_all(registry: Path, agents: Sequence[str], jobs: int) -> list[SyncIssu
                 "copy was edited locally; `skill --refresh --force` overwrites it")
 
     known = registry_skills(registry)
+    nested = nested_skill_index(registry)
     locked = load_lockfile(registry).get("locked", {})
     record_keys = set(load_records(registry))
+    expected_md = registry / AGENT_SOURCE
     for agent in agents:
+        for md_target in agent_md_targets(agent):
+            if is_link_like(md_target):
+                if not md_target.exists():
+                    add("agent-md", "AGENTS.md", md_target, "broken-link",
+                        f"instruction link target is gone (expected {expected_md})")
+                elif not same_path(md_target, expected_md):
+                    add("agent-md", "AGENTS.md", md_target, "wrong-target",
+                        f"points at {os.path.realpath(md_target)} instead of {expected_md}")
+            elif md_target.is_file() and expected_md.is_file():
+                if md_target.read_bytes() != expected_md.read_bytes():
+                    add("agent-md", "AGENTS.md", md_target, "stale-copy",
+                        f"content differs from {AGENT_SOURCE.as_posix()}; run `agent` to relink")
         root = agent_skill_dir(agent)
         if not root.is_dir():
             continue
@@ -780,12 +794,12 @@ def audit_all(registry: Path, agents: Sequence[str], jobs: int) -> list[SyncIssu
             if not is_link_like(direct):
                 if (direct.is_dir() and name not in SKIP_NAMES and not name.startswith(".")
                         and not has_skill(direct)):
-                    nested = sorted(p.relative_to(direct).as_posix() for p in walk_skills(direct))
+                    nested_skills = sorted(p.relative_to(direct).as_posix() for p in walk_skills(direct))
                     detail = ("folder has no top-level SKILL.md"
-                              + (f"; nested skill(s) below it: {', '.join(nested)}" if nested else ""))
+                              + (f"; nested skill(s) below it: {', '.join(nested_skills)}" if nested_skills else ""))
                     add("folder", name, direct, "missing-skill", detail)
                 continue
-            source = known.get(name)
+            source = known.get(name) or nested.get(name)
             if not direct.exists():
                 detail = f"link target is gone (expected {source})" if source else "link target is gone; name is not in the registry"
                 add("link", name, direct, "broken-link", detail)
@@ -859,6 +873,25 @@ def registry_skills(root: Path) -> dict[str, Path]:
         if previous is None or len(path.relative_to(root).parts) < len(previous.relative_to(root).parts):
             best[name] = path
     return best
+
+
+def nested_skill_index(root: Path) -> dict[str, Path]:
+    """Uniquely-nested skills (meta-children): name -> path.
+
+    registry_skills() lists only what an install can address by name; children
+    installed as their own junction (scss under styling, ...) resolve here.
+    Ambiguous names are left out so nothing is ever relinked to a guessed
+    location. Used by the sync audit and `skill --refresh` to detect and repair
+    links when a skill's tree moved inside the registry.
+    """
+    top = set(registry_skills(root))
+    index: dict[str, list[Path]] = {}
+    for path in walk_skills(root, prune=False):
+        name = path.name
+        if name in top:
+            continue
+        index.setdefault(name, []).append(path)
+    return {name: paths[0] for name, paths in index.items() if len(paths) == 1}
 
 
 @dataclass(frozen=True)
@@ -1458,6 +1491,9 @@ def cmd_refresh(args: argparse.Namespace, registry: Path, jobs: int, into: Path 
     known = registry_skills(registry)
     if not known:
         raise ManagerError(f"no skills found in registry {registry}")
+    # Children installed as their own junction resolve through the nested
+    # index, so a skill tree moved inside the registry is still repairable.
+    repairable = {**nested_skill_index(registry), **known}
 
     if into is not None:
         roots: list[tuple[str, Path, str | None]] = [(f"into {into}", into, None)]
@@ -1477,6 +1513,30 @@ def cmd_refresh(args: argparse.Namespace, registry: Path, jobs: int, into: Path 
     failures = 0
 
     for label, root, agent in roots:
+        if agent is not None:
+            expected = registry / AGENT_SOURCE
+            for md_target in agent_md_targets(agent):
+                if not is_link_like(md_target):
+                    continue
+                if md_target.exists() and same_path(md_target, expected):
+                    continue
+                if not expected.is_file():
+                    rows.append([label, "AGENTS.md", "failed", f"source missing: {expected}"])
+                    counts["failed"] += 1
+                    failures += 1
+                    continue
+                if not args.dry_run:
+                    try:
+                        remove_entry(md_target)
+                        make_link(expected, md_target)
+                    except OSError as exc:
+                        rows.append([label, str(md_target), "failed", str(exc)])
+                        counts["failed"] += 1
+                        failures += 1
+                        continue
+                rows.append([label, "AGENTS.md", "would relink" if args.dry_run else "relinked",
+                             f"{md_target} -> {expected}"])
+                counts["would relink" if args.dry_run else "relinked"] += 1
         if not root.exists():
             rows.append([label, "-", "skipped", "skills folder is missing"])
             counts["skipped"] += 1
@@ -1511,11 +1571,11 @@ def cmd_refresh(args: argparse.Namespace, registry: Path, jobs: int, into: Path 
                              f"locked -> {known[name]}"])
                 counts["restored"] += 1
 
-        for name, places in scan_existing(root, set(known)).items():
+        for name, places in scan_existing(root, set(repairable)).items():
             direct = root / name
             if _key(direct) in records:
                 continue
-            source = known[name]
+            source = repairable[name]
             if is_link_like(direct):
                 if same_path(direct, source) and direct.exists():
                     rows.append([label, name, "unchanged", f"-> {source}"])

@@ -1,9 +1,9 @@
 ---
 name: denoise
-version: 1.0.3
+version: 1.0.4
 author: Amr
 specialized: none
-description: 'Transforms crowded, noisy, visually overwhelming UIs into calm, readable, professional interfaces that are easier to use, not just nicer to look at, at one of three intensities: lite (type/spacing in place), medium (redistributes content, designs forms and states), ultra (full re-theme, re-structure, re-derived information architecture and interaction layer). Use when someone shares an existing UI — HTML/CSS, React, Vue, a screenshot, a mockup, an admin panel, a dashboard — and asks to make it cleaner, more readable, less cluttered or noisy, more professional, easier on the eyes, or denoise/calm; or names a lite/medium/ultra pass. Also handles whole-codebase work: rolling a pass across many pages with a generated map and an audited ledger, verifying nothing broke against a real pre-redesign build, and grading which mode was actually delivered so an Ultra request is never quietly answered with a re-skin. For variations before a rollout, use diverge. Refactor/redesign only, not from-scratch. Framework-agnostic.'
+description: 'Transforms crowded, noisy, visually overwhelming UIs into calm, readable, professional interfaces that are easier to use, not just nicer to look at, at one of three intensities: lite (type/spacing in place), medium (redistributes content, designs forms and states), ultra (full re-theme, re-structure, re-derived information architecture and interaction layer). Use when someone shares an existing UI — HTML/CSS, React, Vue, a screenshot, a mockup, an admin panel, a dashboard — and asks to make it cleaner, more readable, less cluttered or noisy, more professional, easier on the eyes, or denoise/calm; or names a lite/medium/ultra pass. Also handles whole-codebase work: rolling a pass across many pages with a generated map and an audited ledger, verifying nothing broke against a real pre-redesign build, and grading which mode was actually delivered so an Ultra request is never quietly answered with a re-skin. For variations, use design diverge mode. Refactor/redesign only, not from-scratch. Framework-agnostic.'
 argument-hint: "[lite|medium|ultra] <target>"
 ---
 
@@ -36,7 +36,7 @@ This file is the decision procedure. The reasoning that makes each step correct 
 
 **Multi-direction previews are not this skill.** When the person wants several genuinely
 different directions side by side before committing a rollout, or a one-file mockup proof
-of a direction, that is the `diverge` skill (`/diverge taste`, `/diverge snippet`) — hand it
+of a direction, that is `design`'s diverge mode (`/design diverge taste`, `/design diverge snippet`) — hand it
 over rather than improvising a preview here. Once a direction is picked, its judgment-call
 answers arrive as standing defaults and this skill applies them like any named mode.
 
