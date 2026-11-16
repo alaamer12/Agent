@@ -1,0 +1,23 @@
+flowchart TD
+    T(["/viber compact · Router flag"]) --> SEL["Select targets<br/>settled rows · superseded docs · finished trails · keeper artifacts"]
+    SEL --> AMB{"Active or ambiguous?"}
+    AMB -- "yes" --> ASK["Ask the user · recommend first<br/>active work is never compacted"]
+    AMB -- "no" --> ID["Create id: YYYYMMDD-HHmm-slug<br/>unique · never reused"]
+    ASK --> ID
+    ID --> MAN["Write manifest.md FIRST<br/>moved paths · origins · reason · restore"]
+    MAN --> MOVE["Move files into .viber/.compact/&lt;id&gt;/<br/>preserve relative layout"]
+    MOVE --> PTR["Leave pointer at each origin<br/>add index.md line"]
+    PTR --> BIN{"Binary-heavy batch?"}
+    BIN -- "yes" --> KEEP["Ask: keep (commit) or purge<br/>artifacts are disposable"]
+    BIN -- "no" --> DONE(["Active area slim<br/>history reachable"])
+    KEEP --> DONE
+
+    RST(["/viber compact restore &lt;id&gt;"]) -. "manifest → move back · collisions ask" .-> PTR
+
+    classDef step fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef endpoint fill:#f3e8ff,stroke:#9333ea,color:#581c87
+
+    class SEL,ID,MAN,MOVE,PTR,ASK,KEEP step
+    class AMB,BIN decision
+    class T,RST,DONE endpoint

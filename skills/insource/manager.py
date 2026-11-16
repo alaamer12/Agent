@@ -50,7 +50,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Sequence
 from urllib.parse import unquote
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
 # ---------------------------------------------------------------------------
 # optional dependencies
@@ -88,6 +88,9 @@ DB_FILE_NAME = "manager.db"
 LEGACY_STORE_FILES = {"copies": "manager-copies.json", "lock": "skills-lock.json",
                       "versions": "manager-versions.json"}
 SKIP_NAMES = {"Archive", "__pycache__", "node_modules", ".git", ".venv", "venv"}
+SKILL_SUPPORT_DIRS = {"references", "examples", "assets", "scripts", "templates",
+                      "research", "docs", "tests", "fixtures", "data", "resources"}
+SKILL_TYPES = {"skill": "Skill", "meta-skill": "Meta-Skill", "battery-skill": "Battery-Skill"}
 MIGRATION_AGENTS = {"qoder", "gemini"}
 
 AGENT_SKILL_SUBDIRS: dict[str, Path] = {
@@ -791,21 +794,26 @@ def display_sync_banner(issues: Sequence[SyncIssue]) -> None:
 def walk_skills(root: Path, *, prune: bool = True) -> list[Path]:
     """Return directories containing SKILL.md without following links."""
     found: list[Path] = []
+    owned: set[Path] = set()
     for dirpath, dirnames, _ in os.walk(root):
         current = Path(dirpath)
-        rel_parts = current.relative_to(root).parts
-        if any(part in SKIP_NAMES or part.startswith(".") for part in rel_parts):
-            dirnames[:] = []
-            continue
-        dirnames[:] = [
-            name
-            for name in dirnames
-            if name not in SKIP_NAMES and not name.startswith(".") and not is_link_like(current / name)
-        ]
-        if current != root and has_skill(current):
-            found.append(current)
-            if prune:
-                dirnames[:] = []
+        if has_skill(current):
+            owned.add(current)
+            if current != root:
+                found.append(current)
+                if prune:
+                    dirnames[:] = []
+                    continue
+        inside_skill = current in owned or current.parent in owned
+        if inside_skill:
+            owned.add(current)
+        dirnames[:] = sorted(
+            name for name in dirnames
+            if name not in SKIP_NAMES and not name.startswith(".")
+            and not is_link_like(current / name)
+            and (not inside_skill or name.lower() not in SKILL_SUPPORT_DIRS
+                 or has_skill(current / name))
+        )
     return found
 
 
@@ -818,6 +826,53 @@ def registry_skills(root: Path) -> dict[str, Path]:
         if previous is None or len(path.relative_to(root).parts) < len(previous.relative_to(root).parts):
             best[name] = path
     return best
+
+
+@dataclass(frozen=True)
+class SkillStructure:
+    kind: str
+    children: tuple[Path, ...] = ()
+    modules: tuple[Path, ...] = ()
+    issues: tuple[str, ...] = ()
+
+
+def inspect_directory(path: Path) -> SkillStructure:
+    if not path.is_dir():
+        return SkillStructure("broken-link" if is_link_like(path) else "plain")
+    children = tuple(walk_skills(path))
+    if not has_skill(path):
+        return SkillStructure("group" if children else "plain", children)
+
+    modules: list[Path] = []
+
+    def visit(parent: Path) -> None:
+        for branch in sorted(parent.iterdir()):
+            if (not branch.is_dir() or is_link_like(branch) or has_skill(branch)
+                    or branch.name in SKIP_NAMES or branch.name.startswith(".")
+                    or branch.name.lower() in SKILL_SUPPORT_DIRS):
+                continue
+            if any(is_under(child, branch) for child in children):
+                visit(branch)
+            elif any(file.suffix.lower() == ".md" for file in iter_files(branch)):
+                modules.append(branch)
+
+    visit(path)
+    kind = "meta-skill" if children else "battery-skill" if modules else "skill"
+    issues = ()
+    if children and modules:
+        names = ", ".join(p.relative_to(path).as_posix() for p in modules)
+        issues = (f"mixed composition: independent sub-skills and internal modules ({names}); "
+                  "choose meta children with SKILL.md or battery modules without it",)
+    return SkillStructure(kind, children, tuple(modules), issues)
+
+
+def classify_directory(path: Path) -> str:
+    return inspect_directory(path).kind
+
+
+def skill_parent(path: Path, skills: Iterable[Path]) -> Path | None:
+    parents = [parent for parent in skills if parent != path and is_under(path, parent)]
+    return max(parents, key=lambda parent: len(parent.parts)) if parents else None
 
 
 def resolve_skill(name: str, cwd: Path, registry_root: Path) -> Path:
@@ -1807,14 +1862,25 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
     warnings: list[tuple[str, str, Path, int | None, str]] = []
     checked_rows: list[list[str]] = []
     registry_names: dict[str, Path] = {}
+    type_counts: Counter[str] = Counter()
+    tracked_paths = set(registry_skills(registry).values())
     total_checked = 0
     if yaml is None:
         warnings.append(("-", "environment", registry, None, "YAML validation unavailable; install PyYAML for full validation"))
     for (name, path, label), (data, error) in zip(skills, frontmatters):
         total_checked += 1
+        structure = inspect_directory(path)
+        skill_type = SKILL_TYPES[structure.kind]
+        type_counts[structure.kind] += 1
+        for issue in structure.issues:
+            warnings.append((name, label, path, None, issue))
+        if data is not None and not args.no_version and path not in tracked_paths:
+            version = _norm_version(data.get("version"))
+            if version is None or SEMVER_RE.fullmatch(version) is None:
+                warnings.append((name, label, path, None, "missing or invalid version (expected semver X.Y.Z)"))
         if data is None:
             warnings.append((name, label, path, None, error or "missing frontmatter"))
-            checked_rows.append([name, label, "missing", "missing", str(path)])
+            checked_rows.append([name, skill_type, label, "missing", "missing", str(path)])
             continue
         skill_name = data.get("name")
         if not isinstance(skill_name, str) or not re.fullmatch(r"[a-z0-9-]+", skill_name):
@@ -1829,13 +1895,13 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
         description = data.get("description")
         if not isinstance(description, str) or not description.strip():
             warnings.append((name, label, path, None, "missing description"))
-            checked_rows.append([name, label, "missing", "missing", str(path)])
+            checked_rows.append([name, skill_type, label, "missing", "missing", str(path)])
             continue
         if "\n" in description.strip() or "\r" in description.strip():
             warnings.append((name, label, path, None, "description must be a single-line string"))
         length = len(description)
         state = "over" if length > limit else "ok"
-        checked_rows.append([name, label, str(length), state, str(path)])
+        checked_rows.append([name, skill_type, label, str(length), state, str(path)])
         if length > limit:
             warnings.append((name, label, path, length, "over limit"))
 
@@ -2256,12 +2322,17 @@ def cmd_report(args: argparse.Namespace, registry: Path, jobs: int) -> int:
 def cmd_find(args: argparse.Namespace, registry: Path, jobs: int) -> int:
     """Locate a skill everywhere it could live: the registry inventory, the agent
     folders (live junctions and hard copies), the recorded --into installs, and the
-    lockfile. Stale --into records are pruned on sight. Exit 0 when any name resolves."""
+    lockfile. A name that is not a skill may still resolve as a GROUP or a plain
+    folder and is answered as such. Stale --into records are pruned on sight."""
     names: list[str] = []
+    explicit: list[Path] = []
     for item in args.skills:
         candidate = Path(item).expanduser()
-        if candidate.is_dir() and has_skill(candidate):
-            names.append(candidate.name)
+        if candidate.is_dir():
+            if has_skill(candidate):
+                names.append(candidate.name)
+            else:
+                explicit.append(candidate)
         else:
             names.append(item)
     registry_real = os.path.normcase(os.path.realpath(str(registry))) + os.sep
@@ -2271,15 +2342,38 @@ def cmd_find(args: argparse.Namespace, registry: Path, jobs: int) -> int:
         installs = load_installs(registry)
         display_info(f"[installs] pruned {len(removed)} stale --into record(s)")
     locked = load_lockfile(registry).get("locked", {})
+    skill_paths = walk_skills(registry, prune=False)
     found_any = False
+
+    def render(name: str, rows: list[list[str]]) -> None:
+        nonlocal found_any
+        if rows:
+            found_any = True
+            display_table(["Where", "Kind", "Path / target", "Note"], rows,
+                          title=f"find: {name} ({len(rows)} location(s))", always=True)
+        else:
+            display_warn(
+                f"find: '{name}' not in the registry, any agent folder, or any recorded "
+                f"--into install; nothing else is known about it"
+            )
+
+    def registry_kind(path: Path) -> tuple[str, str]:
+        rel = path.relative_to(registry)
+        parents = [p for p in skill_paths if p != path and is_under(path, p)]
+        if parents:
+            outer = min(parents, key=lambda p: len(p.parts))
+            return "sub-skill", f"nested inside skill '{outer.name}'"
+        if len(rel.parts) > 1:
+            group = rel.parts[1] if rel.parts[0] == "Groups" else rel.parts[0]
+            return "group skill", f"member of group '{group}'"
+        return "inventory", ""
+
     for name in dict.fromkeys(names):
         rows: list[list[str]] = []
-        for path in walk_skills(registry, prune=False):
+        for path in skill_paths:
             if path.name == name:
-                rel = path.relative_to(registry).as_posix()
-                depth = len(path.relative_to(registry).parts)
-                rows.append(["registry", "sub-skill" if depth > 1 else "inventory",
-                             rel, ""])
+                kind, note = registry_kind(path)
+                rows.append(["registry", kind, path.relative_to(registry).as_posix(), note])
         for agent in DEFAULT_AGENTS:
             directory = agent_skill_dir(agent)
             if not directory.is_dir():
@@ -2298,8 +2392,12 @@ def cmd_find(args: argparse.Namespace, registry: Path, jobs: int) -> int:
                 else:
                     note = "live, points elsewhere"
                 rows.append([f"agent:{agent}", kind, tgt, note])
-            elif dest.is_dir() and has_skill(dest):
-                rows.append([f"agent:{agent}", "hard copy", str(dest), "real folder"])
+            elif dest.is_dir():
+                if has_skill(dest):
+                    rows.append([f"agent:{agent}", "hard copy", str(dest), "real folder"])
+                elif walk_skills(dest):
+                    rows.append([f"agent:{agent}", "group", str(dest),
+                                 "holds skills, no SKILL.md of its own"])
         for entry in installs.get("into", {}).values():
             if entry.get("skill") != name:
                 continue
@@ -2308,21 +2406,31 @@ def cmd_find(args: argparse.Namespace, registry: Path, jobs: int) -> int:
             rows.append(["into (recorded)", entry.get("mode", "link"), str(target),
                          f"installed {entry.get('installed_at', '-')}" if alive
                          else "STALE on disk"])
+        if not rows:
+            groups = {p.parent for p in skill_paths
+                      if p.parent.name == name and classify_directory(p.parent) == "group"}
+            for group in sorted(groups):
+                members = sorted(p.name for p in walk_skills(group))
+                rows.append(["registry", "group",
+                             group.relative_to(registry).as_posix(),
+                             f"not a skill; holds {len(members)} skill(s): "
+                             f"{', '.join(members[:8])}{' ...' if len(members) > 8 else ''}"])
         if name in locked:
             rows.append(["lockfile", "locked", ", ".join(sorted(locked[name])), ""])
-        if rows:
-            found_any = True
-            display_table(
-                ["Where", "Kind", "Path / target", "Note"],
-                rows,
-                title=f"find: {name} ({len(rows)} location(s))",
-                always=True,
-            )
+        render(name, rows)
+
+    for path in dict.fromkeys(explicit):
+        kind = classify_directory(path)
+        if kind == "group":
+            members = sorted(p.name for p in walk_skills(path))
+            note = f"not a skill; holds {len(members)} skill(s): " \
+                   f"{', '.join(members[:8])}{' ...' if len(members) > 8 else ''}"
+        elif kind == "plain":
+            note = "no SKILL.md and no skills inside; a folder of things, not a skill"
         else:
-            display_warn(
-                f"find: '{name}' not in the registry, any agent folder, or any recorded "
-                f"--into install; nothing else is known about it"
-            )
+            note = "has SKILL.md"
+        render(str(path), [["path argument", kind, str(path), note]])
+
     return 0 if found_any else 1
 
 

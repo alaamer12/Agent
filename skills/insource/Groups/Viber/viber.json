@@ -1,7 +1,7 @@
 {
   "name": "viber",
   "description": "Every skill the Viber project lifecycle uses, by phase. `python manager.py viber` installs this whole list in one shot.",
-  "source": "Viber Project Lifecycle, section 9 (Skills Inventory)",
+  "source": "viber skill references/lifecycle.md, section 10 (Skills Inventory)",
   "notes": {
     "steering": "steering-perception and steering-tech are the perception and tech tiers of the one steering skill",
     "FULL CODE": "a skill group, not a skill: every skill under Groups/Code is installed",
@@ -57,9 +57,19 @@
     {
       "phase": "Shared",
       "skills": [
+        {"name": "viber", "status": "mandatory"},
         {"name": "grill-me", "status": "intermediate"},
         {"name": "close-topics", "status": "intermediate"},
+        {"name": "adapt", "status": "intermediate"},
         {"name": "mistakes", "status": "optional"}
+      ]
+    },
+    {
+      "phase": "Commands",
+      "skills": [
+        {"name": "vinit", "status": "command · entry"},
+        {"name": "vcompact", "status": "command · any phase"},
+        {"name": "vflow", "status": "command · any phase"}
       ]
     }
   ],

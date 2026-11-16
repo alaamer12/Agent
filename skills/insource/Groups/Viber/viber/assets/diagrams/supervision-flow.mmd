@@ -1,0 +1,30 @@
+flowchart TD
+    AG{"AGENTS.md<br/>declares Viber?"}
+    AG -- "no" --> OFF["Supervision OFF"]
+    AG -- "yes" --> ON(["Supervision ON"])
+
+    ON --> SK["artifact produced"]
+    SK --> PART{"Participates?"}
+    PART -- "no" --> NORM["normal path"]
+    PART -- "yes" --> LAYOUT{"Layout home?"}
+    LAYOUT -- "yes" --> STAY["go to that home"]
+    LAYOUT -- "no" --> UMB["write to .viber/&lt;path&gt;"]
+
+    INIT(["vinit"]) -. "configures" .-> AG
+
+    subgraph LG["LEGEND"]
+        LU["umbrella"]
+        LD["decision"]
+        LS["root · normal"]
+        LE["flow"]
+    end
+
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef umb fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef stay fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+    classDef endpoint fill:#f3e8ff,stroke:#9333ea,color:#581c87
+
+    class AG,PART,LAYOUT,LD decision
+    class UMB,LU umb
+    class OFF,NORM,STAY,LS stay
+    class INIT,ON,SK,LE endpoint
