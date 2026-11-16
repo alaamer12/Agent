@@ -392,9 +392,9 @@ were skipped, and which cell does each id own* - before touching pixels.
 | **3** | the image does not show what the plan claims: subject counts, empty cells, or band counts | re-probe and compare `rows ...` / `columns` against the plan | a touch/gap problem is a re-render; a wrong plan is a BOM edit; `--allow-empty` only when you intend to fill the hole |
 | **4** | files were written but verification failed | `errors` in the report, then `conform-report.json`'s `files` for the offending slot | a size/aspect failure means the delivery spec or the cut is wrong, not the file |
 
-Exit 3 is a *finding*, not a crash: the run refuses to guess which cell belongs to which id. Exit 4
-is the only code that leaves files on disk from a failed run - delete the output folder before
-re-running if the report shows partial writes.
+Exit 3 is a *finding*, not a crash: the run refuses to guess which cell belongs to which id. An
+empty-cell failure is the one case that leaves files on disk - the non-empty cells are written before
+the run stops - so when `empty_cells` is non-empty, delete the output folder before re-running.
 
 ### 9c. Probe finding → what to write → which cut
 

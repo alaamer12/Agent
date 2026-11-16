@@ -1,11 +1,12 @@
 # Generated imagery — the BOM → generate → conform pipeline
 
 Status: implemented as one Battery-Skill — `assets` (router) with internal modules
-`collection` (BOM + prompts), `generate` (masters) and `conform` (probe + conform) — backed
-by `sheet_probe.py`, `conform.py`, `contact_sheet.py` and the `sheet_geometry.py` module they share.
+`collection` (BOM + prompts), `generate` (masters) and `resources` (the resource-files module,
+which owns the conform step) — backed by `sheet_probe.py`, `conform.py`, `contact_sheet.py`
+and the `sheet_geometry.py` module they share.
 Scope: a project's *generated* imagery, plus an existing sheet the user owns and needs cut
 (a catalog page, a sprite sheet). Stock photography (`fahlwy`) keeps its own flow;
-plain file work runs through the `conform` module directly, outside the BOM order.
+plain file work runs through the `resources` module directly, outside the BOM order.
 
 
 ## 1. Goals
@@ -30,7 +31,7 @@ The pipeline exists to close that gap with four properties:
 ## 2. One battery, three modules
 
 ```
-collection          generate / existing file     conform
+collection          generate / existing file     resources
 BOM + prompts  ──►  masters                  ──► probe ──► conform ──► review
 bom/<page>.md       raw/*.png                      assets/<slots>      review/*.png
 ```
@@ -39,7 +40,7 @@ bom/<page>.md       raw/*.png                      assets/<slots>      review/*.
 |---|---|---|---|
 | 1. Plan | `collection` | `BOM.md`, `bom/<page>.md`, `bom/style.md` | every page listed or marked `no-images`; every generated row has slot id, master, delivery, prompt |
 | 2. Master | `generate`, or the file the user already owns | raw masters, `usage.jsonl` | the master exists at the BOM's size and plan |
-| 3. Conform | `conform` (`sheet_probe.py`, `conform.py`) | slot-named DPR files, `conform-report.json` | `ok: true`, expected file count, no empty cells |
+| 3. Conform | `resources` (`sheet_probe.py`, `conform.py`) | slot-named DPR files, `conform-report.json` | `ok: true`, expected file count, no empty cells |
 
 `assets/SKILL.md` is the router: it states this order, the shared key and the handoffs,
 and owns none of the laws inside a module. Pages marked `no-images` skip steps 2 and 3.
@@ -317,6 +318,12 @@ that produces different files on every run.
 | Filenames do not match the code | slot id renamed in one place | fix the BOM row; the BOM is the source |
 | `slot range … must end in a number` | wrote `avatar-01..avatar-10` | `avatar-01..10` |
 
+Diagnosing a run beyond this table — the five-step loop, what exit 2/3/4 asks you to check
+first, the probe-finding → Master → cut-mode table, how to read `conform-report.json` and the
+review sheet — is §9 of
+[`../assets/resources/references/08-conform.md`](../assets/resources/references/08-conform.md).
+This document owns the laws and the spec; §9 owns operating them.
+
 ## 14. Limits
 
 - A subject **partially outside the canvas** cannot be recovered; the probe's band count
@@ -338,7 +345,7 @@ that produces different files on every run.
 
 ## 15. Verification
 
-- `../Groups/Design/assets/conform/scripts/test_conform.py` (70 tests), `test_sheet_probe.py` (11) and
+- `../assets/resources/scripts/test_conform.py` (71 tests), `test_sheet_probe.py` (11) and
   `test_contact_sheet.py` (8) cover grammar parsing, rows plans, band cutting, flag overrides,
   arbitrary slot ids, remainder distribution, content-box cuts, keying (including interior
   whites), empty cells, upscale refusal, naming, edge measurement and the report shape.

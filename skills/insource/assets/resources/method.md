@@ -1,11 +1,13 @@
-# conform - the project's resource files, managed once
+# resources - the project's resource files, managed once
 
 This module owns **resource files and their references**: how they are named, where they live, how they
 are produced, converted, localized, optimized, and how the code points at them. It operates at the
-resource-file level - it is not a pipeline, storage layer, or delivery system.
+resource-file level - it is not a pipeline, storage layer, or delivery system. **Conform** - probing
+a sheet, cutting it into slots, fitting each to its delivery spec - is one section of it (§Conform);
+the same module owns the other file operations.
 
 ```
-project files ──► conform module ──► correct file, correct name, correct place, correct reference
+project files ──► resources module ──► correct file, correct name, correct place, correct reference
                  (no application-level processing, no database design, no infrastructure)
 ```
 
@@ -137,10 +139,11 @@ it, then **review** the files the project ships:
   spec (size, aspect, format, quality, DPR) written by `collection`. Encoding and quality stay with
   `optimize.py` - conform computes the widths and hands them over; it does not own a second quality
   vocabulary. BOM format: `collection`'s template (one schema owner, linked not copied).
-- **Never invent geometry.** Grid and cell size come from the BOM. Without a BOM, `--grid/--cell` or
-  `--rows` is required. When the sheet's gutters are not even, the run says so and points at
-  `--bands` instead of cutting through subjects; when the image does not show the rows or columns the
-  plan claims, it stops with the counts rather than guessing.
+- **Never invent geometry.** Grid and cell size come from the BOM. Without a BOM the geometry is on
+  the command line: `--rows` or `--bands` measure the image, and a bare `--grid COLSxROWS` also needs
+  `--cell <px>`. When the sheet's gutters are not even, the run says so and points at `--bands`
+  instead of cutting through subjects; when the image does not show the rows or columns the plan
+  claims, it stops with the counts rather than guessing.
 
 - **Never distort, never silently upscale.** Mismatched aspect is padded (transparent or `--pad-color`);
   a cell smaller than the required master is an error unless `--allow-upscale`.
@@ -151,9 +154,11 @@ it, then **review** the files the project ships:
   render is written as one BOM row per sheet (`avatar-01..04`, `avatar-05..08`); each row is its own
   run.
 
-Scale, trimming and padding rules: `references/08-conform.md`. One-off crops with no BOM row stay
-in `transform.py`; every generated BOM row goes through conform so its slot id links the render to
-the shipped files.
+Scale, trimming and padding rules: `references/08-conform.md` §1-§8. **Operating it** - the five-step
+loop (measure, plan, cut, review, record), what exit 2/3/4 asks you to check first, how to read
+`conform-report.json` and the review sheet, the probe-finding-to-plan table, and the symptom table -
+is §9 of the same file. One-off crops with no BOM row stay in `transform.py`; every generated BOM row
+goes through conform so its slot id links the render to the shipped files.
 
 ## References and the small code changes
 
@@ -185,5 +190,6 @@ restructure code. Reference styles per stack and the rename protocol: `reference
 | Localizing CDN assets: manifests, licensing, webfont CSS | `references/04-localization.md` |
 | Optimization for images, fonts and video, with budgets | `references/05-optimization.md` |
 | How each stack references assets; rename and inventory protocol | `references/06-references-and-code.md` |
-| Splitting a generated sheet into slots, padding, DPR ladder, report | `references/08-conform.md` |
+| Splitting a generated sheet into slots, padding, DPR ladder, report | `references/08-conform.md` §1-§8 |
+| Running conform, reading its report, diagnosing a stop (exit 2/3/4, symptom table) | `references/08-conform.md` §9 |
 | Exact commands and flags for all fourteen scripts | `references/07-scripts.md` |

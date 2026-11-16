@@ -5,7 +5,7 @@ large each master has to be, how the masters are produced, and what each deliver
 It is written **before** prompts, because the plan decides the prompt's composition and size.
 
 ```
-pages tree ──► dissect ──► BOM.md + bom/<page>.md ──► prompts ──► generate ──► resources conform
+pages tree ──► dissect ──► BOM.md + bom/<page>.md ──► prompts ──► generate ──► resources
                             ▲
                        bom/style.md (one canon)
 ```
@@ -120,7 +120,7 @@ quote that.
 
 ## 3. Measuring a sheet that already exists
 
-Before trusting a BOM row, measure the render with `resources`' probe:
+Before trusting a BOM row, measure the render with `resources`' `sheet_probe.py`:
 
 ```bash
 python scripts/sheet_probe.py raw/avatars.png --grid 5x2 --delivery "128x128 1:1 webp @1x,2x"
@@ -129,7 +129,9 @@ python scripts/sheet_probe.py raw/avatars.png --grid 5x2 --delivery "128x128 1:1
 It reports content bounds, the layout row by row, gutter widths, per-cell subject sizes, empty
 cells, the interior cut lines an even split would land on, and the delivery ceiling. If `ceiling`
 is smaller than `required_master`, the plan fails **before** writing prompts - fix the delivery
-spec or the sheet size then.
+spec or the sheet size then. Which finding changes the Master column, and which one means "do not
+plan this sheet": `../../resources/references/08-conform.md` §1 (read the output) and §9c (finding →
+Master → cut mode).
 
 Worked example (a real 1536×1024 RGBA sheet, five columns, two rows):
 
@@ -213,7 +215,7 @@ Every `bom/<page>.md` starts with what a later agent needs before reading the ta
 - Source: `<docs>/pages/home.md`
 - Style canon: `bom/style.md`
 - Placement: `public/images/home/`, resolved by slot id in `Home.tsx`
-- Regeneration: `resources conform` reads this table; do not rename slots without updating code
+- Regeneration: `resources` reads this table; do not rename slots without updating code
 ```
 
 ---
@@ -232,7 +234,7 @@ Every `bom/<page>.md` starts with what a later agent needs before reading the ta
 `sheet rows` is for a master whose rows hold different subject counts. `conform` cuts it on the
 measured gutters, so it takes no `gutter` and no `CxR` - writing both is a spec error, not a hint.
 
-Both spec grammars are executed by `resources conform`; it reads this table directly. Do not write
+Both spec grammars are executed by `resources`' `conform.py`; it reads this table directly. Do not write
 a private variant of them in a project - if the grammar is missing something, change it here.
 
 **An existing sheet is a BOM row too.** When the user already owns the pixels (a catalog page, a

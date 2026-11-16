@@ -15,7 +15,7 @@
   an existing slot = a same-named file dropped in; renaming or adding a slot is the only change
   that touches code.
 - **Sheet plan:** <e.g. one 1536x1024 5x2 render for the avatar set; fallback: two 2x2 sheets>
-- **Regeneration recipe:** `resources conform` reads the table below - do not rename slots there
+- **Regeneration recipe:** `resources` reads the table below - do not rename slots there
   without updating the code.
 
 ## Slots
@@ -30,7 +30,7 @@
 | `<step-3>` | <permissions step> | none - the sheet UI is the illustration | — | — | <no-image> |
 | `<photo-teaser>` | <pricing card photo> | fahlwy | — | `<640x360 16:9 jpeg q80 @2x>` | <pending> |
 
-<Any row with a Master is cut by `conform`; generated rows also get a prompt block. `sheet rows
+<Any row with a Master is cut by `resources` (conform); generated rows also get a prompt block. `sheet rows
 8,8,8,10` is for a master whose rows hold different counts - only measurable, never guessed. Slot
 ids are arbitrary (`welcome` is as valid as `avatar-01`); a range is shorthand for a numbered
 family, and a sheet of unrelated subjects lists its ids in sheet order (row-major), which is the

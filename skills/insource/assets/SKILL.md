@@ -1,14 +1,15 @@
 ---
 name: assets
-version: 2.0.1
+version: 3.0.1
 author: Amr
 specialized: none
 description: >-
   Battery-Skill for a project's imagery pipeline: plan the bill of materials, generate the masters,
   conform them into delivery files. Three internal modules - collection dissects a page or reference
   into BOM.md, bom/<page>.md and bom/style.md and writes the prompts; generate produces masters;
-  conform (the resource-files module) probes a sheet, splits it and fits each slot to its delivery
-  spec with a verification report. The router fixes the order and the shared key: one slot id across
+  resources (the resource-files module) probes a sheet through its conform step, splits it and fits
+  each slot to its delivery spec with a verification report. The router fixes the order and the
+  shared key: one slot id across
   BOM row, prompt, raw render and delivered file, so nothing is re-derived by hand. Pages marked
   no-images skip the pipeline. Use when asked what images a page needs, to plan or run an image
   program end to end, to turn a sheet into project assets, or to decide which module handles a step.
@@ -23,7 +24,7 @@ A Battery-Skill: three steps, three internal modules, one shared key. This root 
 the handoffs**; each module owns the laws inside its step. Read only the module the current step needs.
 
 ```
-collection          generate            conform
+collection          generate            resources
 BOM + prompts  ──►  masters  ──►  probe ──►  conform  ──►  delivery files + report
 bom/<page>.md       raw/*.png               assets/<slots>      conform-report.json
 ```
@@ -32,7 +33,7 @@ bom/<page>.md       raw/*.png               assets/<slots>      conform-report.j
 |---|---|---|
 | `collection/` | Plan: BOM + prompts | `collection/method.md` |
 | `generate/` | Master: render the images | `generate/method.md` |
-| `conform/` | Conform + delivery: probe, split, fit, report (the resource-files module) | `conform/method.md` |
+| `resources/` | The resource-files module: probe, split, fit, report (conform), plus convert/optimize/icon/splash/localize/inventory work | `resources/method.md` |
 
 ## The pipeline
 
@@ -40,7 +41,7 @@ bom/<page>.md       raw/*.png               assets/<slots>      conform-report.j
 |---|---|---|---|
 | 1. Plan | `collection/` | `BOM.md`, `bom/<page>.md`, `bom/style.md` | every page listed (or `no-images`), every generated row has slot id, master, delivery and prompt |
 | 2. Master | `generate/`, or the file the user already owns (a catalog page, a sprite sheet) | raw masters, `usage.jsonl` | the master exists at the BOM's size and plan |
-| 3. Conform | `conform/` (`sheet_probe.py`, `conform.py`, `contact_sheet.py`) | slot-named DPR files, `conform-report.json`, review sheet | `ok: true`, expected file count, no empty cells, edges reviewed on a checkerboard |
+| 3. Conform | `resources/` (`sheet_probe.py`, `conform.py`, `contact_sheet.py`) | slot-named DPR files, `conform-report.json`, review sheet | `ok: true`, expected file count, no empty cells, edges reviewed on a checkerboard |
 
 Order is the contract. A prompt written before the BOM drifts from the delivery spec; conforming
 before the master size is validated produces upscaled files. Steps 2 and 3 are skipped entirely for
@@ -54,11 +55,11 @@ rows get a prompt, `sheet <path>` rows do not.
 | Which images does this page need? What should we generate? | `collection/` (BOM phase) |
 | Write the prompts / keep the illustrations consistent | `collection/` |
 | Generate the images | `generate/` |
-| Cut this generated sheet into project files / normalise sizes and names | `conform/` |
-| Cut a reference sheet I already own into project files (catalog page, sprite sheet) | `conform/` - BOM row `sheet <path>`, no prompt |
-| Measure a sheet before cutting it | `conform/` (`sheet_probe.py`) |
-| Check delivered edges and transparency by eye | `conform/` (`contact_sheet.py`) |
-| Convert, optimize, rename, localize, inventory files | `conform/` |
+| Cut this generated sheet into project files / normalise sizes and names | `resources/` (conform) |
+| Cut a reference sheet I already own into project files (catalog page, sprite sheet) | `resources/` (conform) - BOM row `sheet <path>`, no prompt |
+| Measure a sheet before cutting it | `resources/` (`sheet_probe.py`) |
+| Check delivered edges and transparency by eye | `resources/` (`contact_sheet.py`) |
+| Convert, optimize, rename, localize, inventory files | `resources/` |
 | Real photos, avatars from a library | `fahlwy` (external skill) |
 | Which pages exist at all | `pages` (external skill) - the BOM consumes the `pages` tree (`<docs>/pages/`) |
 
@@ -79,12 +80,12 @@ linking step - if two of the four disagree, the pipeline broke.
 | `bom/style.md` | `collection/` | Style DNA, character canon, hard/soft rules - the only canon |
 | `raw/` | `generate/` | untouched masters; never edited by hand |
 | delivery folder | project | slot-named files written by conform; the code reads these |
-| `conform-report.json` | `conform/` | what was written, skipped, warned, failed |
-| review sheet | `conform/` | checkerboard of the delivered files, with measured alpha edges |
+| `conform-report.json` | `resources/` | what was written, skipped, warned, failed |
+| review sheet | `resources/` | checkerboard of the delivered files, with measured alpha edges |
 
 ## What the router does not own
 
-- **Naming, formats, optimization, icon/splash specs** - the `conform/` module. Do not restate them here.
+- **Naming, formats, optimization, icon/splash specs** - the `resources/` module. Do not restate them here.
 - **Style DNA, character canon, prompt anatomy, economy math** - the `collection/` module. One canon, one owner.
 - **Generation execution, providers, cost ledger** - the `generate/` module.
 - **Page inventory** - `pages` (external).
@@ -102,3 +103,7 @@ should be cut back to routing.
 | A page has no images and nobody noticed | page missing from `BOM.md` | list it and mark `no-images` explicitly |
 | A generated sheet has 9 subjects for 10 slots | step 2 / seed drift | re-render; conform already refuses to guess |
 | 32 files for 34 slots, or cut crowns | plan: rows hold 8,8,8,10 but the BOM says `CxR` | probe it and plan `sheet rows 8,8,8,10`; conform cuts on the measured gutters |
+
+A conform run that stops is diagnosed, not re-planned from the symptom: `resources/references/08-conform.md`
+§9 has the five-step loop, what exit 2/3/4 asks you to check first, the probe-finding-to-plan table,
+how to read `conform-report.json` and the review sheet, and the symptom table.
