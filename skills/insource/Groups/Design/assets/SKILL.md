@@ -1,41 +1,45 @@
 ---
 name: assets
-version: 1.0.1
+version: 2.0.0
 specialized: none
 description: >-
-  Pipeline contract for a project's imagery: plan the bill of materials, generate the masters,
-  conform them into delivery files. Routes the three steps to the skills that execute them -
-  collection dissects a page or reference into BOM.md, bom/<page>.md and bom/style.md and writes
-  the prompts; the generate skill produces masters; resources probes a sheet, splits it and fits
-  each slot to its delivery spec with a verification report. Fixes the order and the shared key:
-  one slot id across BOM row, prompt, raw render and delivered file, so nothing is re-derived by
-  hand. Pages marked no-images skip the pipeline. Use when asked what images a page needs, to plan
-  or run an image program end to end, to turn a sheet into project assets, or to decide
-  which skill handles a step. Triggers: assets, image pipeline, BOM, image plan, generated sheet,
-  conform, split a sheet. Not for one prompt (generate), pure file work (resources), or writing
-  illustration prompts and style canon (collection).
-when_to_use: The user asks what images a page needs, wants a project's imagery planned, generated and delivered end to end, needs a generated sheet turned into project asset files, or asks which skill owns a step. Also /assets.
+  Battery-Skill for a project's imagery pipeline: plan the bill of materials, generate the masters,
+  conform them into delivery files. Three internal modules - collection dissects a page or reference
+  into BOM.md, bom/<page>.md and bom/style.md and writes the prompts; generate produces masters;
+  conform (the resource-files module) probes a sheet, splits it and fits each slot to its delivery
+  spec with a verification report. The router fixes the order and the shared key: one slot id across
+  BOM row, prompt, raw render and delivered file, so nothing is re-derived by hand. Pages marked
+  no-images skip the pipeline. Use when asked what images a page needs, to plan or run an image
+  program end to end, to turn a sheet into project assets, or to decide which module handles a step.
+  Triggers: assets, image pipeline, BOM, image plan, generated sheet, conform, split a sheet.
+when_to_use: The user asks what images a page needs, wants a project's imagery planned, generated and delivered end to end, needs a generated sheet turned into project asset files, or asks which module owns a step. Also /assets.
 argument-hint: "[the page, image plan, sheet or pipeline step]"
 ---
 
 # assets - the image pipeline
 
-Three steps, three owners, one shared key. This skill owns the **order and the handoffs**, not the
-laws inside each step.
+A Battery-Skill: three steps, three internal modules, one shared key. This root owns the **order and
+the handoffs**; each module owns the laws inside its step. Read only the module the current step needs.
 
 ```
-collection          generate (external)      resources
+collection          generate            conform
 BOM + prompts  ──►  masters  ──►  probe ──►  conform  ──►  delivery files + report
 bom/<page>.md       raw/*.png               assets/<slots>      conform-report.json
 ```
 
+| Module | Role | Read |
+|---|---|---|
+| `collection/` | Plan: BOM + prompts | `collection/method.md` |
+| `generate/` | Master: render the images | `generate/method.md` |
+| `conform/` | Conform + delivery: probe, split, fit, report (the resource-files module) | `conform/method.md` |
+
 ## The pipeline
 
-| Step | Owner | Artifact | Done when |
+| Step | Module | Artifact | Done when |
 |---|---|---|---|
-| 1. Plan | `collection` | `BOM.md`, `bom/<page>.md`, `bom/style.md` | every page listed (or `no-images`), every generated row has slot id, master, delivery and prompt |
-| 2. Master | `generate` skill, or the file the user already owns (a catalog page, a sprite sheet) | raw masters, `usage.jsonl` | the master exists at the BOM's size and plan |
-| 3. Conform | `resources` (`sheet_probe.py`, `conform.py`, `contact_sheet.py`) | slot-named DPR files, `conform-report.json`, review sheet | `ok: true`, expected file count, no empty cells, edges reviewed on a checkerboard |
+| 1. Plan | `collection/` | `BOM.md`, `bom/<page>.md`, `bom/style.md` | every page listed (or `no-images`), every generated row has slot id, master, delivery and prompt |
+| 2. Master | `generate/`, or the file the user already owns (a catalog page, a sprite sheet) | raw masters, `usage.jsonl` | the master exists at the BOM's size and plan |
+| 3. Conform | `conform/` (`sheet_probe.py`, `conform.py`, `contact_sheet.py`) | slot-named DPR files, `conform-report.json`, review sheet | `ok: true`, expected file count, no empty cells, edges reviewed on a checkerboard |
 
 Order is the contract. A prompt written before the BOM drifts from the delivery spec; conforming
 before the master size is validated produces upscaled files. Steps 2 and 3 are skipped entirely for
@@ -46,16 +50,16 @@ rows get a prompt, `sheet <path>` rows do not.
 
 | The user asks | Go to |
 |---|---|
-| Which images does this page need? What should we generate? | `collection` (BOM phase) |
-| Write the prompts / keep the illustrations consistent | `collection` |
-| Generate the images | `generate` |
-| Cut this generated sheet into project files / normalise sizes and names | `resources` (conform) |
-| Cut a reference sheet I already own into project files (catalog page, sprite sheet) | `resources` (conform) - BOM row `sheet <path>`, no prompt |
-| Measure a sheet before cutting it | `resources` (`sheet_probe.py`) |
-| Check delivered edges and transparency by eye | `resources` (`contact_sheet.py`) |
-| Convert, optimize, rename, localize, inventory files | `resources` |
-| Real photos, avatars from a library | `fahlwy` |
-| Which pages exist at all | `pages` - the BOM consumes the `pages` tree (`<docs>/pages/`) |
+| Which images does this page need? What should we generate? | `collection/` (BOM phase) |
+| Write the prompts / keep the illustrations consistent | `collection/` |
+| Generate the images | `generate/` |
+| Cut this generated sheet into project files / normalise sizes and names | `conform/` |
+| Cut a reference sheet I already own into project files (catalog page, sprite sheet) | `conform/` - BOM row `sheet <path>`, no prompt |
+| Measure a sheet before cutting it | `conform/` (`sheet_probe.py`) |
+| Check delivered edges and transparency by eye | `conform/` (`contact_sheet.py`) |
+| Convert, optimize, rename, localize, inventory files | `conform/` |
+| Real photos, avatars from a library | `fahlwy` (external skill) |
+| Which pages exist at all | `pages` (external skill) - the BOM consumes the `pages` tree (`<docs>/pages/`) |
 
 ## The slot id
 
@@ -67,24 +71,24 @@ linking step - if two of the four disagree, the pipeline broke.
 
 ## Artifact paths
 
-| Path | Owner | Purpose |
+| Path | Module | Purpose |
 |---|---|---|
-| `bom/BOM.md` | `collection` | index: page, image count, generated count, `no-images` |
-| `bom/<page>.md` | `collection` | slot table + prompts for generated slots |
-| `bom/style.md` | `collection` | Style DNA, character canon, hard/soft rules - the only canon |
-| `raw/` | `generate` | untouched masters; never edited by hand |
+| `bom/BOM.md` | `collection/` | index: page, image count, generated count, `no-images` |
+| `bom/<page>.md` | `collection/` | slot table + prompts for generated slots |
+| `bom/style.md` | `collection/` | Style DNA, character canon, hard/soft rules - the only canon |
+| `raw/` | `generate/` | untouched masters; never edited by hand |
 | delivery folder | project | slot-named files written by conform; the code reads these |
-| `conform-report.json` | `resources` | what was written, skipped, warned, failed |
-| review sheet | `resources` | checkerboard of the delivered files, with measured alpha edges |
+| `conform-report.json` | `conform/` | what was written, skipped, warned, failed |
+| review sheet | `conform/` | checkerboard of the delivered files, with measured alpha edges |
 
-## What this skill does not own
+## What the router does not own
 
-- **Naming, formats, optimization, icon/splash specs** - `resources`. Do not restate them here.
-- **Style DNA, character canon, prompt anatomy, economy math** - `collection`. One canon, one owner.
-- **Generation execution, providers, cost ledger** - `generate`.
-- **Page inventory** - `pages`.
+- **Naming, formats, optimization, icon/splash specs** - the `conform/` module. Do not restate them here.
+- **Style DNA, character canon, prompt anatomy, economy math** - the `collection/` module. One canon, one owner.
+- **Generation execution, providers, cost ledger** - the `generate/` module.
+- **Page inventory** - `pages` (external).
 
-If this file starts growing tables of sizes or naming rules, it has begun duplicating a child and
+If this file starts growing tables of sizes or naming rules, it has begun duplicating a module and
 should be cut back to routing.
 
 ## When the pipeline breaks

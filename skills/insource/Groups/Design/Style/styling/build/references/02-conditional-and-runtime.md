@@ -27,7 +27,11 @@ and platform-native equivalents are fine.
    within the component whose closed union and per-member rules live in the same file is a
    mapping wearing shorter clothes — exhaustive and greppable. The banned form is interpolation
    *over token fragments at consumption sites*, where no layer guarantees the produced name
-   exists. See `04-layer-chain-and-naming.md` §"Variants can do the work of layering".
+   exists. Compile-time **generation** over a fixed token map is the same legal case: a Sass
+   `@each $name, $color in $colors { .bg-#{$name} { … } }` emits an exhaustive, owned set of literal
+   selectors at build time, and consumers use the complete class (`.bg-primary`) — a lookup, not a
+   runtime build. That is how a utility system is legitimately generated, not the banned assembly.
+   See `04-layer-chain-and-naming.md` §"Variants can do the work of layering".
 
 2. **Hundreds of conditional utility classes at the call site.** A `class` attribute containing
    `dark:`, `hover:`, `md:` permutations for one button is the component's visual spec pasted into

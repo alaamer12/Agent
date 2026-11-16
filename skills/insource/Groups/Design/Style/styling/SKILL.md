@@ -1,6 +1,6 @@
 ---
 name: styling
-version: 1.0.1
+version: 1.0.2
 specialized: none
 lint-accept:
   mixed-composition: "Intentional hybrid: build/retrofit are internal platform-neutral levels; specialized/scss is an independent technology-bound child skill. Keep as-is."

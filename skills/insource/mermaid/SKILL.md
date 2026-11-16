@@ -1,13 +1,13 @@
 ---
-name: use-mmd
-version: 1.0.0
+name: mermaid
+version: 1.0.1
 specialized: mermaid
 description: Mermaid flowchart authoring discipline — a diagram shows what exists and how things connect; documents carry the policy and sentences. Use when writing or editing any .mmd or embedded mermaid flowchart, when a diagram "looks trash" or reads crowded, when adding nodes/legends/panels, or when extracting a diagram out of a document. Node labels are a name plus at most 1-2 words; status is color, not text; legends are swatches, not sentences; one node per entity; no placeholder nodes.
 when_to_use: Creating or editing a mermaid flowchart, reviewing a cluttered diagram, moving a diagram into its own .mmd file, adding a legend, naming a subgraph.
 argument-hint: "[the diagram file or node block]"
 ---
 
-# use-mmd — draw the graph, not the story
+# mermaid — draw the graph, not the story
 
 The one test for every mark on a diagram: **does it say *what exists / how it connects* (belongs), or *why / under what rule / what comes later* (document)?** A diagram that explains is a document that got arrows.
 

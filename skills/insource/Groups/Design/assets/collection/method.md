@@ -1,22 +1,3 @@
----
-name: collection
-version: 1.0.1
-specialized: none
-description: >-
-  Method for a project's generated imagery: dissect a reference or page set into a bill of
-  materials (BOM), fix the style canon once, write the prompts, plan generation economically. Per
-  page, every visual is classified (generated / reused / stock / icon) with slot id, role, master
-  and a delivery spec (size, aspect, format, quality, DPR); pages needing no
-  images are marked no-images in BOM.md. Style DNA, character canon, hard rules (no text, no
-  logos) and soft rules live in one file, copied verbatim into every prompt; prompts use
-  fixed sections and chain from a style anchor. Economy: one sheet cut into N slots versus N
-  renders - compare required master (delivery px x max DPR) against cell size. Regenerate only
-  what is missing. Use for an image collection, illustrations for app
-  screens, a consistent set of generated art, 'make images for onboarding', planning a page's
-  images, or normalising a sheet. Not for one prompt (generate), stock photos (fahlwy),
-  file work (resources).
----
-
 # Collection
 
 One style, one character, many frames - delivered as a bill of materials the project keeps and the

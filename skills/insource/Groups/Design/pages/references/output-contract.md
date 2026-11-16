@@ -11,7 +11,7 @@ canon location (one place the content lives) → build (the linked engineering o
 | step | owner | rule |
 |---|---|---|
 | **Register** | `pages-tree-format.md` | every page gets exactly one file under `<docs>/pages/` and one entry in its shard index; the root index map carries its kind (main / secondary / complementary) and status. No page exists that the tree does not hold; no file exists without its decision trail (status, evidence, reason-on-exclusion) on the map. |
-| **Canon** | this contract | one canonical location per page or document — the page file's `url` names it. Other surfaces link/redirect/embed it; a bundled or mirrored copy is a DECLARED synced duplicate, never a second original. |
+| **Canon** | this contract | one canonical location per page or document — the page file's `url` names it (or, when frontmatter is omitted, the route its path implies). Other surfaces link/redirect/embed it; a bundled or mirrored copy is a DECLARED synced duplicate, never a second original. |
 | **Build** | the mode's linked engineering owner | `main` → the project's own stack conventions (the tree decides routes; the implementation skill builds); `secondary` → `../secondary/references/engineering.md` (identity from config, templates as files, static rendering, SEO on web canons); `complementary` → `../complementary/references/anatomy.md` (the six-field contract) plus the project's build. |
 
 ## What the contract forbids

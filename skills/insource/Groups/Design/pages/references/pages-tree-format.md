@@ -7,6 +7,14 @@ page. This tree is the contract every downstream skill reads — `prototype`, `i
 `planner`, `seo`, `collection` — and updates in the same change it adds, removes, or renames a
 page. Nothing outside the tree maintains a screen list.
 
+**Inspiration — the OKF directory model.** This tree adapts the Open Knowledge Format (OKF,
+Google Cloud): one concept per file, the file's path *is* its identity, `index.md` is a
+progressive-disclosure map (never a concept), ordinary links turn the tree into a graph, and
+frontmatter is lenient and extensible. Here a *concept* is a page and its identity is its route.
+OKF reserves `index.md` and `log.md`; this tree keeps `index.md` as the map and records the
+history/decisions story in the root index's sections (§5) rather than a separate `log.md`.
+Walkthrough: <https://alaamer12.github.io/amr-tech/blogs/okf-directory-model/okf-directory-model/>.
+
 ## 1. The tree convention
 
 | Form | Means | Route |
@@ -91,7 +99,7 @@ forbidden. A one-component page may be a few lines; a complex page may describe 
 machinery, its decomposition, and an illustrative layout. Nothing here is mandatory boilerplate,
 and nothing caps what the agent may express when the project calls for it.
 
-**Frontmatter (the core fields):**
+**Frontmatter — encouraged on every page, neither fixed nor required:**
 
 ```yaml
 ---
@@ -107,7 +115,12 @@ access: public            # public | protected | private
 | `private` | sign-in required, no special role — the signed-in user's own space (profile, settings, my dashboard); a user sees their own data, never another's |
 | `protected` | sign-in **plus a privilege/role gate** — admin, staff, a verified-investor area |
 
-These three are the core; add frontmatter fields when the project needs them.
+`name`, `url`, and `access` are the common core this skill reads — but the set is **open**: add
+any fields or `tags` the project needs (owner, locale, status, seo, provenance…), and a page may
+carry no frontmatter at all. Frontmatter is **encouraged**, not mandated: it powers the shard
+indexes, the root map, and downstream reads, and the route is always recoverable from the path
+even when `url` is absent (OKF's identity-by-path). This is OKF's lenient model — unknown extra
+keys are welcome, never a reason to reject a page.
 
 **Body:** a description of what the page is for, then a sketch of how it looks **from inside** —
 its internal composition, not its visual UI. The sketch may be as light or as full as the page

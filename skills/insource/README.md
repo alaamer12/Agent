@@ -427,6 +427,7 @@ The first command previews the deployment; the other two write to the selected a
 - [dont-stop](./dont-stop/SKILL.md) — Forces the agent to keep working autonomously until the ENTIRE goal is truly finished, across all phases, with no mid-way stops, no "phase 1 done, ready for pha…
 - [generate](./generate/SKILL.md) — Universal image AND video generation via RESTful providers (xAI, OpenAI, Gemini, KovAPI/NezhaGate) through registry data.csv: vendors and media types are data r…
 - [learning-test](./learning-test/SKILL.md) — Write and run a "learning test" (term coined by Jim Newkirk, popularized by Robert C. Martin/Uncle Bob in Clean Code ch.8 "Boundaries") to empirically discover…
+- [mermaid](./mermaid/SKILL.md) — Mermaid flowchart authoring discipline — a diagram shows what exists and how things connect; documents carry the policy and sentences. Use when writing or editi…
 - [no-framework](./no-framework/SKILL.md) — Build Single Page Applications using NoF (No Frameworks) — Navigo (~4KB routing) plus a choice of small UI libraries (Preact by default, or VanJS / Nano JSX via…
 - [parallelize](./parallelize/SKILL.md) — Plan and run parallel work: the main agent decides in chat how to fan out a large or newly approved job, keeps the most sensitive work for itself, and hands bou…
 - [personalize](./personalize/SKILL.md) — Updates the user's GLOBAL agent instruction file (the personal AGENTS.md every project loads) so settled questions never get re-asked - an agent asking "which p…
@@ -1309,6 +1310,15 @@ The first command previews the deployment; the other two write to the selected a
 
 - **Path:** [`learning-test/SKILL.md`](./learning-test/SKILL.md)
 - **Description:** Write and run a "learning test" (term coined by Jim Newkirk, popularized by Robert C. Martin/Uncle Bob in Clean Code ch.8 "Boundaries") to empirically discover how a third-party library/framework/API actually behaves, instead of guessing, relying on stale training knowledge, or trusting docs that may be incomplete, outdated, ambiguous, or missing the exact case. Use whenever the Agent or the user is uncertain about real behavior/limits of an external dependency — "how does X actually behave", "what happens if...", "does X support...", "what's the limit of...", docs contradict themselves or don't cover the scenario, or before writing production code against an unfamiliar API. Also trigger on "write a learning test for X" or "figure out the limits of X". The test is small, real, executable code calling the actual API the way production code would, to characterize true behavior — not a mock or doc summary. Trigger this instead of guessing at or fabricating claims about library behavior.
+
+---
+
+#### `mermaid`
+
+- **Path:** [`mermaid/SKILL.md`](./mermaid/SKILL.md)
+- **Description:** Mermaid flowchart authoring discipline — a diagram shows what exists and how things connect; documents carry the policy and sentences. Use when writing or editing any .mmd or embedded mermaid flowchart, when a diagram "looks trash" or reads crowded, when adding nodes/legends/panels, or when extracting a diagram out of a document. Node labels are a name plus at most 1-2 words; status is color, not text; legends are swatches, not sentences; one node per entity; no placeholder nodes.
+- **Use-case:** Creating or editing a mermaid flowchart, reviewing a cluttered diagram, moving a diagram into its own .mmd file, adding a legend, naming a subgraph.
+- **Usage:** `/mermaid [the diagram file or node block]`
 
 ---
 

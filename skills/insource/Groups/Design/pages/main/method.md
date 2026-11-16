@@ -61,7 +61,8 @@ sees. Nothing stays `uncertain` past this step without becoming an Open Decision
 ## Step 5 — Write the pages tree
 
 Produce/update the `<docs>/pages/` tree per `../references/pages-tree-format.md`: one file
-per confirmed page (frontmatter `name`/`url`/`access`, a purpose description, an internal sketch
+per confirmed page (encouraged frontmatter — commonly `name`/`url`/`access`, extensible with any
+fields/tags the project needs — a purpose description, an internal sketch
 — simple by default, as full as the page requires; the format's §3), a shard `index.md` in every
 directory, and the root index's typed map carrying kind,
 access, status and the decision sections. Every page's canon location and build story follow

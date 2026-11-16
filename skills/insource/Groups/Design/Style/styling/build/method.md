@@ -18,9 +18,13 @@ menu; a hybrid or an unlisted mechanism is always acceptable when it fits the pl
 3. **Utilities are minimal and layered.** Only common, small patterns. Build `card` once, then
    `primary-card` / `secondary-card` as thin layers on top — by extension/composition, not by
    copy-pasting the base.
-4. **Conditional styling is a lookup, not a build.** State maps to a named variant or a class
-   from a mapping table. Interpolating class-name fragments (`bg-${x}-500`) is banned: it breaks
-   build-time extraction and makes the rendered style unsearchable in source.
+4. **Conditional styling is a lookup, not a build.** State maps to a named variant or a class from a
+   mapping table. **Runtime class-name construction at consumption sites** (`bg-${x}-500` assembled in
+   a call site) is banned: it breaks build-time extraction and is unsearchable in source. Interpolation
+   *inside the layer that owns the names* is legal — a closed variant union, or compile-time generation
+   over a fixed token map (Sass `@each` emitting `.bg-#{$name}`): exhaustive, owned, greppable through the
+   map. The ban is on **where** names are built (runtime call sites), not on interpolation itself.
+   `references/02-conditional-and-runtime.md`.
 5. **Runtime values go through a dynamic channel.** A measured percentage, a user-chosen color, a
    computed offset: pass it as a runtime variable/token and reference it from the style layer.
    Inline styles are legitimate only for genuinely calculated values, never as a styling escape
