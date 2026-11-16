@@ -462,6 +462,15 @@
 
 ---
 
+#### `merge`
+
+- **Path:** [`Groups/Git/merge/SKILL.md`](../Groups/Git/merge/SKILL.md)
+- **Description:** Merge any two histories safely - merge, rebase, cherry-pick, revert-of-merge, recovery - verified by scripts/merge_lab.sh (47 scenarios plus real replays). Answers 'which side is correct' via a 12-step procedure: correctness = merge base + both intents, union-of-intents default, tests as arbiter, incompatible intents escalated. Preflights integrations with git merge-tree (worktree untouched). Captures nested multi-base blocks (>2 candidates) via scripts/conflict_blocks.py. Covers file-vs-directory, case-collision, submodule and LFS-pointer conflict classes. Silent-destruction catalog (-X ours/theirs invert under rebase; merge=union duplicates with exit 0; merge-revert is not un-merge; rerere keeps the index unmerged; --cc evil-merge triage) and nine-rung ladder for formatted-vs-minified content. Use for conflicted merges, lockfile/JSON/i18n conflicts, bad rebase or cherry-pick recovery, force-push decisions, auditing merge commits. Not branch strategy (branch), commit prose (commit), diff review (diffs).
+- **Use-case:** Two lines of development must become one - resolving a conflict, doing or undoing a merge/rebase/cherry-pick, deciding which side of a both-ahead conflict is correct, merging formatted-vs-minified or generated files, or auditing a merge commit that looks wrong.
+- **Usage:** `/merge [resolve|choose|rebase|cherry-pick|recover|audit|ladder|lab] <refs or situation>`
+
+---
+
 ### Prospecting
 
 #### `mine`

@@ -224,14 +224,18 @@ S17_rerere_reuse() {
   git checkout -q main; echo "MAIN" > k.txt; git commit -qam m
   git merge feat >/dev/null 2>&1
   echo "UNION-RESOLVED" > k.txt; git add k.txt; git commit -qmm
-  # reproduce the same conflict content between fresh tips (base=commit c1, sides MAIN/FEAT)
+  # reproduce the same conflict in the same orientation: base=c1, ours=MAIN, theirs=FEAT
   feat_tip=$(git rev-parse feat); main_tip=$(git rev-parse HEAD^1)
-  git checkout -qbx newmain "$main_tip"; git checkout -qbx newfeat "$feat_tip"
-  out=$(git merge newmain 2>/dev/null)
-  if [ "$(git ls-files -u | wc -l)" -eq 0 ] && grep -q "UNION-RESOLVED" k.txt; then
-    info S17 "rerere auto-applied cached resolution (index unmerged by default unless --rerere-autoupdate)"
+  git branch newfeat "$feat_tip"
+  git checkout -q -b newmain "$main_tip"
+  git merge newfeat >/dev/null 2>&1
+  # rerere applies the cached resolution to the WORKTREE but leaves the index unmerged
+  if grep -q "UNION-RESOLVED" k.txt && [ "$(git ls-files -u | wc -l)" -gt 0 ]; then
     ok S17
-  else bad S17 "rerere did not reuse identical conflict"; fi
+  elif grep -q "UNION-RESOLVED" k.txt && [ "$(git ls-files -u | wc -l)" -eq 0 ]; then
+    info S17 "reused AND staged (rerere.autoupdate active)"; ok S17
+  else bad S17 "rerere did not reuse identical conflict (same orientation)"; fi
+  git merge --abort 2>/dev/null || git reset -q --hard HEAD
 }
 
 S18_unrelated_histories() {
@@ -334,7 +338,10 @@ S27_cherry_patchid_dedup() {
   newrepo "$LABROOT/s27"
   commit k.txt "base" "c1"; git checkout -qb feat
   commit a.txt "feature-A" "A"; commit b.txt "feature-B" "B"
-  git checkout -q main; git cherry-pick -q "$(git rev-parse feat~1)" 2>/dev/null || git cherry-pick "$(git rev-parse feat~1)" >/dev/null 2>&1
+  git checkout -q main
+  # a.txt/b.txt carried over as untracked would block the pick; remove them
+  git clean -qfd
+  git cherry-pick -x "$(git rev-parse feat~1)" >/dev/null 2>&1 || { bad S27 "cherry-pick failed"; return; }
   out=$(git cherry -v main feat)
   echo "$out" | grep -q "^- $(git rev-parse feat~1)" || { bad S27 "already-applied commit not marked '-' by git cherry"; return; }
   echo "$out" | grep -q "^+ $(git rev-parse feat)" || { bad S27 "pending commit not marked '+'"; return; }
@@ -344,7 +351,7 @@ S27_cherry_patchid_dedup() {
 S28_force_push_protection() {
   newrepo "$LABROOT/s28a"
   commit k.txt "seed" "c1"
-  git init -q --bare "$LABROOT/s28remote"
+  git init -q --bare -b main "$LABROOT/s28remote"
   git remote add origin "$LABROOT/s28remote"; git push -q -u origin main
   git clone -q "$LABROOT/s28remote" "$LABROOT/s28b"
   cd "$LABROOT/s28b"
@@ -390,17 +397,175 @@ S34_rename_delete() {
 S35_rerere_nearmiss_noreuse() {
   newrepo "$LABROOT/s35"
   git config rerere.enabled true
-  c1=$( { commit k.txt "base" "c1"; git rev-parse HEAD; } )
-  git checkout -qbx sideA "$c1"; echo FEAT > k.txt; git commit -qam fa
-  git checkout -qbx sideB "$c1"; echo MAIN > k.txt; git commit -qam fb
-  git merge -q sideA >/dev/null 2>&1; echo RESOLVED > k.txt; git add k.txt; git commit -qmm
+  commit k.txt "base" "c1"; c1=$(git rev-parse HEAD)
+  git checkout -q -b sideA "$c1"; echo FEAT > k.txt; git commit -qam fa
+  git checkout -q -b sideB "$c1"; echo MAIN > k.txt; git commit -qam fb
+  git merge -q --no-ff sideA >/dev/null 2>&1
+  [ "$(git ls-files -u | wc -l)" -gt 0 ] || { bad S35 "setup: first merge did not conflict"; return; }
+  echo RESOLVED > k.txt; git add k.txt; git commit -qmm
   # DIFFERENT preimage pair: base c1, sides MAIN2 vs FEAT2 -> cache must NOT apply
-  git checkout -qbx newB "$c1"; echo MAIN2 > k.txt; git commit -qam b2
-  git checkout -qbx newA "$c1"; echo FEAT2 > k.txt; git commit -qam a2
+  git checkout -q -b newB "$c1"; echo MAIN2 > k.txt; git commit -qam b2
+  git branch -q newA "$c1"
+  git checkout -q newA; echo FEAT2 > k.txt; git commit -qam a2
+  git checkout -q newB
   git merge newA >/dev/null 2>&1
   if [ "$(git ls-files -u | wc -l)" -gt 0 ] && ! grep -q "RESOLVED" k.txt; then ok S35
   else bad S35 "rerere reused a cache entry for a different preimage"; fi
   git merge --abort
+}
+
+# --- nested multi-base conflicts + conflict_blocks.py capture --------------
+CBLOCK="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/conflict_blocks.py"
+PYBIN=python; command -v python >/dev/null 2>&1 || PYBIN=python3
+
+S36_nested_multi_base_blocks() {
+  newrepo "$LABROOT/s36"
+  git config merge.conflictStyle diff3
+  printf 'line1\nline2\nline3\n' > f.txt; git add -A; git commit -qm C
+  git checkout -qb A; printf 'line1\nA-EDIT\nline3\n' > f.txt; git commit -qam A1
+  git checkout -qb B main; printf 'line1\nB-EDIT\nline3\n' > f.txt; git commit -qam B1
+  git checkout -q -b M1 A; git merge -q --no-ff B -m M1AB 2>/dev/null
+  printf 'line1\nM1-RESOLVED\nline3\n' > f.txt; git add -A; git commit -qm m1
+  git checkout -q -b M2 B; git merge -q --no-ff A -m M2BA 2>/dev/null
+  printf 'line1\nM2-RESOLVED\nline3\n' > f.txt; git add -A; git commit -qm m2
+  nbase=$(git merge-base --all M1 M2 | wc -l)
+  [ "$nbase" -ge 2 ] || { bad S36 "criss-cross has $nbase merge bases"; return; }
+  git checkout -q -b X M1; printf 'line1\nX-EDIT\nline3\n' > f.txt; git commit -qam X
+  git checkout -q -b Y M2; printf 'line1\nY-EDIT\nline3\n' > f.txt; git commit -qam Y
+  git checkout -q X; git merge Y >/dev/null 2>&1
+  # the conflicted virtual base must appear as NESTED, wider markers
+  grep -q "^<\{9\}" f.txt || { bad S36 "no escalated nested markers (width 9) in worktree"; return; }
+  out=$("$PYBIN" "$CBLOCK" list f.txt)
+  grep -q "region 1.1.*width 9" <<<"$out" || { bad S36 "script missed nested region: $out"; return; }
+  cand=$("$PYBIN" "$CBLOCK" extract f.txt --region 1.1 --candidate ours)
+  [ "$cand" = "A-EDIT" ] || { bad S36 "nested candidate wrong: $cand"; return; }
+  "$PYBIN" "$CBLOCK" assemble f.txt --set 1=theirs --out f-res.txt >/dev/null \
+    || { bad S36 "assemble of clean selection failed"; return; }
+  [ "$(cat f-res.txt)" = "$(printf 'line1\nY-EDIT\nline3')" ] \
+    || { bad S36 "assembled content wrong: $(tr '\n' '|' < f-res.txt)"; return; }
+  # partial: resolving only the nested child must leave the outer region marked
+  "$PYBIN" "$CBLOCK" assemble f.txt --set 1.1=ours --out f-nest.txt >/dev/null
+  [ $? -eq 1 ] || { bad S36 "assemble should exit 1 with markers remaining"; return; }
+  ok S36
+}
+
+S37_two_regions_capture() {
+  newrepo "$LABROOT/s37"
+  printf '<<<<<<< HEAD\nkeep-mine\n=======\nkeep-yours\n>>>>>>> other\nmid\n<<<<<<< HEAD\nA2\n||||||| C\nA1\n=======\nB2\n>>>>>>> other\n' > h.txt
+  out=$("$PYBIN" "$CBLOCK" list h.txt)
+  grep -q "region 1.*style merge" <<<"$out" && grep -q "region 2.*style diff3" <<<"$out" \
+    || { bad S37 "region styles misdetected: $out"; return; }
+  b=$("$PYBIN" "$CBLOCK" extract h.txt --region 2 --candidate base)
+  [ "$b" = "A1" ] || { bad S37 "base candidate wrong: $b"; return; }
+  "$PYBIN" "$CBLOCK" assemble h.txt --set 1=ours --set 2=theirs --out r.txt >/dev/null \
+    || { bad S37 "assemble failed"; return; }
+  [ "$(cat r.txt)" = "$(printf 'keep-mine\nmid\nB2')" ] \
+    || { bad S37 "assembled wrong: $(tr '\n' '|' < r.txt)"; return; }
+  ok S37
+}
+
+S38_merge_tree_preflight() {
+  newrepo "$LABROOT/s38"
+  commit k.txt "base" c1
+  git checkout -qb feat; commit k.txt "f" f1
+  git checkout -q main; commit k.txt "m" m1
+  out=$(git merge-tree --write-tree HEAD feat 2>&1); code=$?
+  [ $code -eq 1 ] || { bad S38 "conflicting merge-tree exit $code"; return; }
+  grep -q "CONFLICT" <<<"$out" || { bad S38 "no CONFLICT line: $out"; return; }
+  head -1 <<<"$out" | grep -Eq "^[0-9a-f]{40}" || { bad S38 "first line not result tree oid"; return; }
+  [ -z "$(git status --porcelain)" ] || { bad S38 "merge-tree touched the worktree"; return; }
+  git checkout -qb feat2 main; commit q.txt "n" n1; git checkout -q main
+  out2=$(git merge-tree --write-tree main feat2 2>&1); code2=$?
+  [ $code2 -eq 0 ] && [ "$(wc -l <<<"$out2")" -eq 1 ] && ok S38 \
+    || bad S38 "clean preflight: exit $code2, $(wc -l <<<"$out2") line(s)"
+}
+
+S39_dir_file_conflict() {
+  newrepo "$LABROOT/s39"
+  mkdir x; commit x/file "content" c1
+  git checkout -qb feat; git rm -q x/file; rm -rf x; echo "i-am-a-file" > x; git add -A; git commit -qm "x becomes file"
+  git checkout -q main; commit x/other "more" m1
+  out=$(git merge feat 2>&1); code=$?
+  [ $code -eq 1 ] || { bad S39 "D/F merge exit $code"; return; }
+  grep -qi "file/directory" <<<"$out" || { bad S39 "no file/directory verdict: $out"; return; }
+  grep -q "moving it to x~" <<<"$out" || { bad S39 "no x~<side> rescue in message: $out"; return; }
+  git status --porcelain | grep -Eq "^(AU|UA) x~" && ok S39 \
+    || bad S39 "AU/UA status for rescued file missing: $(git status --porcelain | head -3)"
+  git merge --abort
+}
+
+S40_case_only_collision() {
+  newrepo "$LABROOT/s40"
+  commit File.txt "v" c1
+  git checkout -qb feat
+  git mv -f File.txt FILE.TXT; echo W > FILE.TXT; git add -A; git commit -qm caserename
+  git checkout -q main
+  commit File.txt "M" edit
+  out=$(git merge feat 2>&1); code=$?
+  if [ $code -eq 1 ] && git ls-files | grep -q "^FILE.TXT$" \
+     && [ "$(git ls-files | grep -icE '^file\.txt$')" -ge 2 ] \
+     && git status --porcelain | grep -Eq "^(UD|DU)"; then
+    ok S40   # both spellings in the index, ONE file on disk - the collision signature
+  else bad S40 "case collision not as documented (exit $code): $(git status --porcelain | head -3)"; fi
+  git merge --abort
+}
+
+S41_submodule_gitlink_conflict() {
+  local d="$LABROOT/s41"; rm -rf "$d"; mkdir -p "$d"; cd "$d"
+  git init -q --bare -b main submod.git
+  git init -q -b main sm; cd sm
+  git config user.name lab; git config user.email lab@test; git config core.autocrlf false
+  echo s1 > a.txt; git add -A; git commit -qm s1
+  git remote add origin ../submod.git; git push -q origin main; cd ..
+  git init -q -b main top; cd top
+  git config user.name lab; git config user.email lab@test; git config core.autocrlf false
+  git -c protocol.file.allow=always submodule add -q ../submod.git sm 2>/dev/null
+  git commit -qm add-sub
+  git checkout -qb feat
+  git -C sm checkout -qb featside main
+  echo s2b >> sm/a.txt; git -C sm commit -qam s2b; git -C sm push -q origin featside
+  git add -A; git commit -qm "sub advanced (feat)"
+  git checkout -q main
+  git -C sm checkout -q main
+  echo s1x >> sm/a.txt; git -C sm commit -qam s1x
+  git add -A; git commit -qm "sub advanced (main)"
+  out=$(git merge feat 2>&1); code=$?
+  if [ $code -eq 1 ] && grep -q "CONFLICT (submodule)" <<<"$out" \
+     && [ "$(git ls-files -u | grep -c '^160000')" -eq 3 ]; then
+    ok S41
+  else bad S41 "gitlink conflict not as documented (exit $code): $(head -2 <<<"$out")"; fi
+  git merge --abort
+}
+
+S42_lfs_pointer_conflict() {
+  command -v git-lfs >/dev/null 2>&1 || { info S42 "git-lfs absent - skipped"; return; }
+  newrepo "$LABROOT/s42"
+  git lfs install --local >/dev/null 2>&1
+  git lfs track data.bin >/dev/null 2>&1; git add .gitattributes
+  printf 'AAAA' > data.bin; git add data.bin; git commit -qm base
+  git checkout -qb feat; printf 'BBBB' > data.bin; git commit -qam featbin
+  git checkout -q main; printf 'CCCC' > data.bin; git commit -qam mainbin
+  out=$(git merge feat 2>&1); code=$?
+  p2=$(git show :2:data.bin 2>/dev/null | head -1)
+  if [ $code -eq 1 ] && [ "${p2#version https://git-lfs}" != "$p2" ] \
+     && grep -q "^<<<<<<<" data.bin 2>/dev/null; then
+    ok S42   # stages carry POINTER TEXT, and ort line-merged it with markers
+  else bad S42 "lfs conflict not as documented (exit $code, stage2='$p2')"; fi
+  git merge --abort
+}
+
+S43_halfresolved_recovery_fsck() {
+  newrepo "$LABROOT/s43"
+  commit k.txt "base" c1
+  git checkout -qb feat; commit k.txt "F" f
+  git checkout -q main; commit k.txt "M" m
+  git merge feat >/dev/null 2>&1
+  printf 'HAND-RESOLVED-UNIQUE-TEXT\n' > k.txt; git add k.txt
+  git reset -q --hard HEAD
+  if git fsck --lost-found 2>/dev/null | grep -q "dangling blob" \
+     && grep -rqs "HAND-RESOLVED-UNIQUE-TEXT" .git/lost-found/ 2>/dev/null; then
+    ok S43
+  else bad S43 "half-resolved blob unrecoverable via lost-found"; fi
 }
 
 # -------------------------------------------------------------- real replays
@@ -587,7 +752,7 @@ R5_zdiff3_on_real_conflict() {
 
 # ------------------------------------------------------------------------ run
 
-ALL="S01_fast_forward S02_3way_clean S03_same_line_conflict_stages S04_conflict_styles S05_add_add S06_modify_delete S07_rename_follow S08_rename_rename S09_rename_not_detected S10_binary_conflict S11_union_driver_danger S12_X_ours_theirs_silent_destroy S13_rebase_side_flip S14_cherry_pick_provenance S15_rebase_drops_merge_topology S16_merge_revert_noop_trap S17_rerere_reuse S18_unrelated_histories S19_octopus_conflict_abort S20_state_machine S21_checkout_m_restore S22_no_commit_precheck S23_log_merge_p S24_eol_renormalize S25_filemode_conflict S26_up_to_date_merge S27_cherry_patchid_dedup S28_force_push_protection S32_restore_conflict_flag S33_delete_delete S34_rename_delete S35_rerere_nearmiss_noreuse R1_json_s2_replay R2_both_ahead_replay R3_evil_resolution_detection R4_lockfile_policy_replay R5_zdiff3_on_real_conflict R6_true_evil_payload R7_format_ladder_on_real_pair"
+ALL="S01_fast_forward S02_3way_clean S03_same_line_conflict_stages S04_conflict_styles S05_add_add S06_modify_delete S07_rename_follow S08_rename_rename S09_rename_not_detected S10_binary_conflict S11_union_driver_danger S12_X_ours_theirs_silent_destroy S13_rebase_side_flip S14_cherry_pick_provenance S15_rebase_drops_merge_topology S16_merge_revert_noop_trap S17_rerere_reuse S18_unrelated_histories S19_octopus_conflict_abort S20_state_machine S21_checkout_m_restore S22_no_commit_precheck S23_log_merge_p S24_eol_renormalize S25_filemode_conflict S26_up_to_date_merge S27_cherry_patchid_dedup S28_force_push_protection S32_restore_conflict_flag S33_delete_delete S34_rename_delete S35_rerere_nearmiss_noreuse S36_nested_multi_base_blocks S37_two_regions_capture S38_merge_tree_preflight S39_dir_file_conflict S40_case_only_collision S41_submodule_gitlink_conflict S42_lfs_pointer_conflict S43_halfresolved_recovery_fsck R1_json_s2_replay R2_both_ahead_replay R3_evil_resolution_detection R4_lockfile_policy_replay R5_zdiff3_on_real_conflict R6_true_evil_payload R7_format_ladder_on_real_pair"
 
 for fn in $ALL; do
   if [ -n "$FILTER" ] && ! [[ "$fn" == ${FILTER}* ]]; then continue; fi
