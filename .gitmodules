@@ -1,0 +1,3 @@
+[submodule "projects/viber"]
+	path = projects/viber
+	url = ./projects/viber
