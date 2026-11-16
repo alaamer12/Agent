@@ -1,8 +1,9 @@
 # main — core screen inventory (`/pages main`)
 
-Owns `PAGES.md` §4 (categories), §7 (states), §8 (splits), §9 (exclusions, kind=main),
-§10 (redirects), and the §3 role/surface table. The shared laws and the file schema live in
-the skill root (`SKILL.md`, `../references/pages-md-format.md`) — this file is the workflow.
+Owns the main pages of the `<docs>/pages/` tree, the root index's main map (categories), and
+the cross-page decision sections — states, splits, exclusions (kind=main), redirects — plus the
+role/surface notes. The shared laws and the tree schema live in the skill root (`SKILL.md`,
+`../references/pages-tree-format.md`) — this file is the workflow.
 
 **The output is a decision document, not a list.** Each entry records *why* the screen exists
 (or doesn't).
@@ -39,8 +40,9 @@ conjunction titles, support docs explaining tabs). Split when **two or more** of
 tests pass (back-button, deep-link, mental-model, complexity, audience, lifecycle) — full
 tests, canonical settings split, and route conventions: `references/split-and-redirect.md`.
 
-Not-a-page decisions recorded explicitly: transient conditions are **states** (§7); one short
-decision is a **modal**; a route that only hands off is a **redirect** (§10) — a recorded
+Not-a-page decisions recorded explicitly: transient conditions are **states** (the root index's
+States section, or depth inside the owning page); one short decision is a **modal**; a route
+that only hands off is a **redirect** (the root index's Redirects section) — a recorded
 decision with reason and user-visible behavior, never a silent bounce.
 
 ## Step 3 — Present and ask in ONE round
@@ -54,23 +56,26 @@ all open questions as a numbered list. Wait for one reply.
 Apply answers: confirmed exclusions get their written reason; added screens land in the right
 category; removed screens become exclusions with the user's stated reason; accepted splits
 record old route, new routes, tests, date; accepted redirects record type and what the user
-sees. Nothing stays `uncertain` past this step without becoming an Open Decision row.
+sees. Nothing stays `uncertain` past this step without becoming an Open Decision entry.
 
-## Step 5 — Write PAGES.md
+## Step 5 — Write the pages tree
 
-Produce/update `PAGES.md` per `../references/pages-md-format.md`, with every row's canon
-location and build story following `../references/output-contract.md` — the whole file schema,
-including the §5 secondary handoff (documents this pass defers to `/pages secondary` are
-listed there, not duplicated here) and §6 complementary registration (conditional screens
-discovered here — "what happens after payment?" — enter §6 with family pointers; their
-anatomy is `/pages complementary`'s job). The file is the contract: any later skill adding a
-screen updates it in the same change.
+Produce/update the `<docs>/pages/` tree per `../references/pages-tree-format.md`: one file
+per confirmed page (frontmatter `name`/`url`/`access`, a purpose description, an internal sketch
+— simple by default, as full as the page requires; the format's §3), a shard `index.md` in every
+directory, and the root index's typed map carrying kind,
+access, status and the decision sections. Every page's canon location and build story follow
+`../references/output-contract.md`. Documents this pass defers to `/pages secondary` are noted
+on the map for that mode, not written here; conditional screens discovered here — "what happens
+after payment?" — get a page file with a family pointer on the map, their anatomy
+`/pages complementary`'s job. The tree is the contract: any later skill adding a page updates
+its file and the indexes in the same change.
 
 ## Step 6 — Report
 
-Counts by section; which screens are new against existing route files; splits and redirects
-recorded; exclusions recorded; what's next (`/pages secondary` for trust docs, `/pages
-complementary` for conditional surfaces, then `/prototype` or `/planner`).
+Counts by kind and segment; which screens are new against existing route files; splits and
+redirects recorded; exclusions recorded; what's next (`/pages secondary` for trust docs,
+`/pages complementary` for conditional surfaces, then `/prototype` or `/planner`).
 
 ## The catalog — `references/data.csv`
 
@@ -86,7 +91,7 @@ names before inventing one. Prevalence method, sources, and how to extend rows:
 |---|---|
 | **Split on concerns, not tables** | users think in jobs, not schemas — settings split by scope, not by database entity |
 | **A redirect is a recorded decision** | `/reset-password` → `/forgot-password` must carry reason + what the user sees, or it becomes a broken link later |
-| **States are planned, not implied** | empty/loading/error/filtered-empty get §7 rows; unplanned states are how blank screens ship |
+| **States are planned, not implied** | empty/loading/error/filtered-empty get a States entry (root index) or depth in their page; unplanned states are how blank screens ship |
 | **Discipline rows never enter the map without project fit** | the catalog is the strongest guessing tool there is, and guessing is what the exclusion record exists to stop |
 
 ## References (this mode)
@@ -98,6 +103,6 @@ names before inventing one. Prevalence method, sources, and how to extend rows:
 | `references/category-patterns.md` | category families, universal baseline, screen-implying signals, coverage checks | Step 1 |
 | `references/split-and-redirect.md` | the six split tests, settings split, redirect types | Step 2 |
 | `references/decision-recording.md` | decision classes, exclusion anatomy, evidence hierarchy, supersession | Steps 4–5 |
-| `../references/pages-md-format.md` | the PAGES.md schema itself | Step 5 |
+| `../references/pages-tree-format.md` | the pages tree schema itself | Step 5 |
 | `../references/output-contract.md` | register → canon → build: the one output story | Step 5 |
 | `research/screen-inventory-research.md` | how the catalog was built (provenance) | extending the catalog |

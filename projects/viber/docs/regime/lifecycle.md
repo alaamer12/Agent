@@ -398,19 +398,11 @@ It helps establish consistency in state management across the project.
 
 **Status:** Mandatory
 
-Defines the project's styling foundation and conventions.
+The styling battery — one skill, two levels. `build` defines the project's styling foundation and conventions for new work (structure, layer chain, tokens, naming); `retrofit` takes an existing project's hardcoded or duplicated styling into a token-driven system with before/after parity evidence.
 
-It helps ensure a consistent visual implementation.
+It helps ensure a consistent visual implementation and contributes to the project's overall styling quality.
 
-#### 8. styleup
-
-**Status:** Mandatory
-
-Establishes additional styling-related standards and improvements.
-
-It contributes to the project's overall visual and styling quality.
-
-#### 9. typing
+#### 8. typing
 
 **Status:** Mandatory
 
@@ -418,7 +410,7 @@ Establishes type-related conventions and standards.
 
 It helps improve consistency and clarity in the project's type definitions.
 
-#### 10. antipattern
+#### 9. antipattern
 
 **Status:** Mandatory
 
@@ -434,7 +426,7 @@ This is a project documentation and guidance responsibility, not simply a code-r
 
 These Skills create important documentation files that help maintain project knowledge.
 
-#### 11. readme-md
+#### 10. readme-md
 
 **Status:** Mandatory
 
@@ -442,7 +434,7 @@ Creates or maintains the project's `README.md`.
 
 It provides an accessible introduction to the project and its important information.
 
-#### 12. commitments-md
+#### 11. commitments-md
 
 **Status:** Mandatory
 
@@ -450,7 +442,7 @@ Creates the project's commitments documentation.
 
 It records important commitments and agreed project principles.
 
-#### 13. glossary-md
+#### 12. glossary-md
 
 **Status:** Mandatory
 
@@ -458,7 +450,7 @@ Creates the project's glossary.
 
 It documents important terminology and definitions to maintain consistent language across the project.
 
-#### 14. system-md
+#### 13. system-md
 
 **Status:** Mandatory
 
@@ -466,7 +458,7 @@ Creates the project's system documentation.
 
 It provides a reference for understanding the system and its important characteristics.
 
-#### 15. units-md
+#### 14. units-md
 
 **Status:** Mandatory
 
@@ -476,13 +468,13 @@ It indexes the project's reusable units (components, rules, clients, helpers), s
 
 ### D. Optional Foundation Skills
 
-#### 16. packages
+#### 15. packages
 
 **Status:** Optional
 
 Helps investigate, select, or manage packages and dependencies that may be useful for the project.
 
-#### 17. personalize
+#### 16. personalize
 
 **Status:** Optional
 
@@ -490,7 +482,7 @@ Provides additional project-specific personalization and customization.
 
 It can help adapt agent context and instructions to the project's needs.
 
-#### 18. mistakes
+#### 17. mistakes
 
 **Status:** Optional
 
@@ -886,7 +878,6 @@ The following table summarizes the current Skill classification.
 | pvc | Project Foundation | Mandatory |
 | states | Project Foundation | Mandatory |
 | styling | Project Foundation | Mandatory |
-| styleup | Project Foundation | Mandatory |
 | typing | Project Foundation | Mandatory |
 | antipattern | Project Foundation | Mandatory |
 | readme-md | Project Foundation | Mandatory |

@@ -1,7 +1,8 @@
 # secondary — trust documents (`/pages secondary`)
 
-Owns `PAGES.md` §5 (document rows), exclusions with kind=secondary, and the documents'
-canon/placement decisions. The list lives in §5; the *content method* lives here.
+Owns the secondary pages of the `<docs>/pages/` tree (kind=secondary on the root index map),
+exclusions with kind=secondary, and the documents' canon/placement decisions. The map lists
+them; the *content method* lives here.
 **"Page" is shorthand — the unit is a document**: it may render as a web route, an in-app
 surface, a system-browser sheet, or a terminal `--license` output. These documents are read
 rarely and trusted completely, which is exactly why a wrong or fabricated one is worse than
@@ -13,7 +14,7 @@ none.
 |---|---|
 | **Never invent facts** | retention days, refund windows, registration numbers, governing law, SLA times — each is a question for the user. A plausible filler in a legal page is a promise the operator may not keep. Unclear + material → ask; never a guess dressed as boilerplate |
 | **No document for what is not true** | no shipping policy without physical delivery, no child-privacy page beyond one statement line for a 13+ gated product, no press kit with fabricated logos. Skipping is correct and said so |
-| **Recommend inside the scale, phase to the act** | documents are proposed for the project's *actual* activity and size — no DPA for consumer-only, no refund policy for a site that earns nothing. Scale gate then phase gate: launch set now, deferrals only with a named trigger recorded in `PAGES.md` (an unnamed deferral is debt), non-applicable with its reason; the trigger is the activity, never "good sites have these" and never the calendar (`references/catalog.md`) |
+| **Recommend inside the scale, phase to the act** | documents are proposed for the project's *actual* activity and size — no DPA for consumer-only, no refund policy for a site that earns nothing. Scale gate then phase gate: launch set now, deferrals only with a named trigger recorded on the root index map (an unnamed deferral is debt), non-applicable with its reason; the trigger is the activity, never "good sites have these" and never the calendar (`references/catalog.md`) |
 | **ONE canon per document** | when a project spans platforms and shares contracts, the text lives once — canonically the web route when one exists; other platforms redirect (system browser) or embed; a bundled offline copy is a DECLARED synced duplicate with same-change duty, not a second original |
 | **Plain language is the standard** | a summary line before every dense section; write for the reader who will quote the page in a dispute — deliberately confusing terms are documented and legislated against |
 | **PII/contract data never hardcoded** | operator identity, address, emails resolve from env/config; message templates live in `.json`/`.txt` files, not source strings (`references/engineering.md`) |
@@ -40,8 +41,9 @@ none.
    document renders scripts-off / network-off; `curl` of the canon URL returns the full text
    in the first packet; sitemap contains the route; the "last updated" date is real; and no
    second platform carries its own copy of canon-owned text.
-7. **Register** every created document as a §5 row in `PAGES.md` — one row, one canon, one
-   build per `../references/output-contract.md`; declines as kind=secondary exclusions with reasons.
+7. **Register** every created document as a page file under `<docs>/pages/` with a
+   kind=secondary entry on the root index map — one file, one canon, one build per
+   `../references/output-contract.md`; declines as kind=secondary exclusions with reasons.
 
 ## Scope boundary
 

@@ -1,6 +1,7 @@
 ---
 name: pick
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: "Pick the right PRODUCTION library for a development task instead of hand-rolling it - answers lookup questions from data.csv, a verified catalog across UI pieces, TypeScript correctness, data layer, backend runtime, testing, tooling and CLI. Core stance: a maintained production library beats self-implementation for anything an agent would otherwise build twice (vaul for bottom sheets instead of a DIY sheet; typia/zod for narrowing-validating instead of type gymnastics). Recommends one library with task, why, when_not, and alternatives; records only what was verified against npm/docs, never memory. Triggers: pick a library for X, what should I use for toasts/bottom sheets/drag-drop/validation/jobs, is there a library for this, don't hand-roll this, /pick. Not for deciding a tech stack (techstack), nor for inventing new categories the catalog does not cover without saying so."
 when_to_use: A task calls for a component or mechanism a library probably already owns — before writing custom code for UI pieces, validation, state, fetching, jobs, CLI UX, tests, or tooling.
 argument-hint: "[<task or keyword>|list|categories|refresh]"

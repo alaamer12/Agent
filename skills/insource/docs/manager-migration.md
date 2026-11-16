@@ -158,7 +158,11 @@ prints a warning banner if anything is missing or stale:
 - hard-copy states: `missing-source`, `missing-target`, `target-replaced`,
   `source-changed`, `target-modified`, `both-changed`, `source-unreadable`,
   `target-unreadable`;
-- link states: `broken-link`, `wrong-target`, `missing-locked`.
+- link states: `broken-link`, `wrong-target`, `missing-skill` (link target
+  has no `SKILL.md`), `missing-locked`;
+- folder state: `missing-skill` for a real, non-hidden folder in an agent's
+  skills root with no top-level `SKILL.md`; the detail names any nested skill
+  installed one level too deep.
 
 The audit hashes recorded copies concurrently (`-j/--jobs`).
 

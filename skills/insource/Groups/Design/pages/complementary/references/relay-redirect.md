@@ -1,6 +1,6 @@
 # Relay redirects — the pages designed not to be seen
 
-**Output contract:** this file owns content laws only. Registration is one PAGES.md §6 row per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
+**Output contract:** this file owns content laws only. Registration is one page file + root-index entry per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
 
 **Trigger:** a return path landed on by machinery, not by navigation — the OAuth/SSO
 callback, the payment provider's return URL, the post-logout landing, a token-scoped

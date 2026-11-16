@@ -48,7 +48,7 @@ styles) and which layer may import which: `04-layer-chain-and-naming.md`.
 
 ## 2. The token layer as single source of truth
 
-Adopted from the same model `styleup` enforces for migrations; when writing new styling you get to
+Adopted from the same model the `retrofit` level enforces for migrations; when writing new styling you get to
 do it right on day one.
 
 - **Role names, not value names.** `surface-raised`, `text-secondary`, `border-strong` — not
@@ -68,7 +68,7 @@ do it right on day one.
   lookups], [QML property access]) — never re-typing the literal.
 
 The token file is the only place a raw value may appear. Everything else references it. That is
-the one-line version of this whole skill; `styleup` exists to retrofit projects that broke it.
+the one-line version of this whole level; the `retrofit` level exists to fix projects that broke it.
 
 ## 3. Utilities: minimal, common, layered
 

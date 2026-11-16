@@ -1,6 +1,7 @@
 ---
 name: postmortem
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Blameless, self-contained incident documents: postmortem, incident report, RCA, bug write-up, "what went wrong". Modes: file (default) or folder. FILE: one Markdown doc, commands quoted inline, repo files cited by path + commit SHA. FOLDER: a package named "Postmortem - [Component] - [What broke] - [YYYY-MM-DD]" (sanitized) with index.md, the bundled reader index.html, and evidence/, investigation/, fix/, verification/ holding every artifact copied in, SHA256-indexed, secrets redacted, plus a Files and Artifacts Index and a "How we reached this conclusion" narrative with dead ends, so the folder alone re-runs the reasoning. Its 18-section template covers symptom, build and environment traceability, exposure window, timing interval, blast radius, causal chain, cause category, investigation log, fix, evidence level V0-V5, verification, rare-bug soak math, prevention with owner/due/ticket/DoD. Full SHAs, UTC timestamps, quantified claims, never "human error" as a root cause. Prose follows the /document skill.'
 when_to_use: The user asks for a postmortem, incident report, RCA, root-cause analysis, bug write-up, "what went wrong", or a blameless review of an outage, crash or regression.
 argument-hint: "[file|folder] [one-line incident hint]"

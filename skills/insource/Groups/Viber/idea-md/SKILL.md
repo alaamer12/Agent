@@ -1,6 +1,7 @@
 ---
 name: idea-md
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Turns a raw project prompt - any language, any mess - into IDEA.md: the project''s complete idea document, readable by anyone, technical or not. First the idea''s inspiration - a SET of sources: name every product it draws from (Medium, Dev.to…), what each contributes, its relationship (instance of / similar to / a slice of - mixed is normal), what is its own invention, and what it refuses per source. If the prompt never names one, the agent ASKS (''Is this project similar to X?'') instead of guessing. Then plain prose: what it is, its audience and audience types, everything it includes and explicitly does not - written as free-form paragraphs, not fixed bullet sections. Unclear points become idea-level questions only (name, scope boundaries, access rules, editorial stance) - never platform, stack or hosting, which belong to later stages. No system analysis. Triggers: ''write the idea file'', ''turn this into IDEA.md'', a spoken project vision. Feeds the lifecycle''s first phase.'
 when_to_use: The user describes a project idea - however rough, in any language - and wants it written as IDEA.md or a project overview, or asks to sharpen/update an existing IDEA.md. Also /idea-md.
 argument-hint: "[the project prompt, or the path to update]"

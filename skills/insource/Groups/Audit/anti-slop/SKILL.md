@@ -1,6 +1,7 @@
 ---
 name: anti-slop
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Review UI and product-design quality for a page, selected routes, an application, or a repository. Use when asked to find, explain, prioritize, or guide correction of design anti-patterns using visual/contextual evidence, source inspection, or both. Routes through a 67-pattern catalog and keeps findings evidence-based; it does not infer AI authorship or treat style matches as violations.
 compatibility: Python 3.10+ is required for bundled validation and structural-scanner scripts. Browser rendering, screenshot capture, and parallel subagent support depend on the host and are optional.
 metadata:

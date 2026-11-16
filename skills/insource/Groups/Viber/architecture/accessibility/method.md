@@ -1,15 +1,8 @@
----
-name: accessibility
-version: 1.0.0
-description: Orchestrates and authors an application's Accessibility Architecture specification into <docs>/architecture/accessibility-architecture.md. Moves beyond compliance checklists to design a comprehensive system spanning visual adaptation (high-contrast mode, eye-comfort presets like warm-cream/slate, user-tunable themes), typographic flexibility (multi-font selection, dyslexia-friendly fonts like Lexend/OpenDyslexic, fluid rem scaling without clipping), cognitive density tiers (compact vs standard vs spacious/verbose), comfort-reading modes, user autonomy and permission hygiene (contextual permissions, zero unexpected modals or popups), reduced motion, and assistive operability.
-argument-hint: "[project root or app name]"
----
-
-# Accessibility Architecture Skill
+# Accessibility Architecture Pillar
 
 ## 1. Overview & Philosophy
 
-The **accessibility** skill defines the comprehensive sensory, cognitive, autonomy, and reading architecture for applications.
+The **accessibility** pillar defines the comprehensive sensory, cognitive, autonomy, and reading architecture for applications.
 
 Accessibility is treated not merely as an automated markup audit (WCAG/ARIA), but as an **architectural user empowerment system**:
 - Giving users control over **visual contrast and eye comfort** (high contrast, warm-cream, low blue-light, slate dark modes).
@@ -24,7 +17,7 @@ Accessibility is treated not merely as an automated markup audit (WCAG/ARIA), bu
 
 ```text
 accessibility/
-├── SKILL.md                                                # Entry point, doctrine, and workflow
+├── method.md                                               # Pillar doctrine and workflow
 ├── assets/
 │   └── templates/
 │       └── accessibility-architecture-template.md          # Binding document template
@@ -39,7 +32,7 @@ accessibility/
 
 ## 3. Workflow & Conversational Discovery
 
-When invoked (either standalone or via the parent `architecture` skill):
+When the parent `architecture` skill routes to this pillar:
 
 1. **Pre-Analysis**: Inspect the codebase, styling system, component libraries, and target user personas.
 2. **Contextual Interview** (`references/discovery-interview.md`):

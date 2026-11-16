@@ -1,6 +1,7 @@
 ---
 name: scraper-optimizer
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Universal systems engineering standards, architectural patterns, and cross-runtime playbooks for high-throughput, memory-bounded web scrapers and data ingestion pipelines across Python, Go, Node.js, Rust, C#, and Java.
 ---
 

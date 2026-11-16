@@ -1,6 +1,6 @@
 # Transaction failure
 
-**Output contract:** this file owns content laws only. Registration is one PAGES.md §6 row per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
+**Output contract:** this file owns content laws only. Registration is one page file + root-index entry per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
 
 **Trigger:** server/provider-confirmed failure, decline, or timeout on the consequential
 action — *plus the unresolved middle*: a timeout where the outcome is unknown is its own state

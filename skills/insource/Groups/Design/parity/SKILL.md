@@ -1,6 +1,7 @@
 ---
 name: parity
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: "Framework for closing the gap between a design mockup (HTML/CSS, Figma export, or reference image) and what actually renders on a real device/emulator, for any UI framework. Covers the full pipeline (mockup + on-device capture, frame/chrome-noise normalization, similarity scoring, regional diagnosis) and an autonomous convergence loop that iterates capture→compare→diagnose→fix→rebuild without pausing for check-ins until threshold is met. Also covers: inventorying ItC (interact-to-change) components like dropdowns/drawers/modals and forcing their states via query params; dummy/placeholder mockup data needing fixtures so content mismatches don't masquerade as layout bugs; transition/animation ('smoothing') parity beyond static screenshots; and navigating past obstacle screens (splash/onboarding/permissions) without getting stuck. Use for pixel/visual parity with a design, automated visual regression, or an agent iterating to a similarity score. Triggers: parity, visual parity, pixel parity."
 ---
 

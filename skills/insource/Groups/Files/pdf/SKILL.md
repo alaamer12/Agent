@@ -1,6 +1,7 @@
 ---
 name: pdf
-version: 1.0.0
+version: 1.0.1
+specialized: pdf
 description: "Use this skill whenever the user wants to do anything with PDF files, in either of its two modes. READ mode: extract text from a PDF into .txt with scripts/pdf_extract.py - page ranges, layout vs raw engines, page markers, cleaning, a quality report (textless pages, font damage), and export as numbered module files (e.g. --module-lines 200) with a manifest, so long documents can be read selectively instead of dumped into context; also tables, images, OCR for scans, metadata, encrypted files. WRITE mode: create new PDFs, merge, split, rotate, watermark, fill and validate PDF forms, encrypt/decrypt, fix glyphs. If the user mentions a .pdf file - to read it, to search it, or to produce one - use this skill."
 license: Proprietary. LICENSE.txt has complete terms
 ---

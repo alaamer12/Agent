@@ -1,7 +1,7 @@
 # Category patterns — deriving the screen tree
 
 The catalog is a **starting point ranked by how often real products ship a screen**, not a
-checklist to reproduce. Evidence from the project decides what enters `PAGES.md`; prevalence
+checklist to reproduce. Evidence from the project decides what enters the pages tree; prevalence
 only decides what to look at first. A 95% screen the product does not need is still excluded, with
 the reason written down.
 
@@ -197,6 +197,6 @@ Apply the full page-vs-state-vs-modal-vs-redirect tests in
 - Every async surface has loading, empty, error and filtered-empty states planned.
 - Every form has validation, success and unsaved-changes behaviour.
 - Every external or policy document has an owner (this skill or `/pages secondary`).
-- Every "no" has an entry in the exclusions table.
+- Every "no" has an entry in the root index's exclusions section.
 
 A map that passes these is complete enough to build from.

@@ -1,6 +1,7 @@
 ---
 name: avatar
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Creates avatars without defaulting to one style. An avatar is a stand-in for an absent entity, so the skill first reads the request on four axes - medium, source of truth (reference image, name, seed, brief, photo), determinism, and parts-ness (one fixed picture vs a swappable system) - then picks an approach from a living catalog (data.csv). Full lifecycle: brief, approach choice, build, parts contract (boundary, anchor, independence, style, overlap, combination-tested - any medium), a universal debugging taxonomy, delivery, and mandatory catalog write-back so every new approach and built resource is recorded. One verified approach today - the modular explodable SVG rig (approaches/modular-svg-rig/) - as one row among many, not the identity of the skill. Use for a profile picture, character portrait, avatar family, swappable/mix-and-match parts, monogram/identicon/dicebear-style defaults, an avatar from a reference image, or how to build any of it.'
 when_to_use: The user asks for an avatar, profile picture, character or portrait to be created, varied, modularized, debugged or systematized - including "make me an avatar", "recreate this character", "give me 4 haircuts that swap", "default avatars for our users", "why does my part swap break the face".
 argument-hint: "[who/what it represents] + [source: reference image / name / brief] + [fixed vs swappable, sizes, count]"

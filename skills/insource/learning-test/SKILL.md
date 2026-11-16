@@ -1,6 +1,7 @@
 ---
 name: learning-test
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Write and run a "learning test" (term coined by Jim Newkirk, popularized by Robert C. Martin/Uncle Bob in Clean Code ch.8 "Boundaries") to empirically discover how a third-party library/framework/API actually behaves, instead of guessing, relying on stale training knowledge, or trusting docs that may be incomplete, outdated, ambiguous, or missing the exact case. Use whenever the Agent or the user is uncertain about real behavior/limits of an external dependency — "how does X actually behave", "what happens if...", "does X support...", "what's the limit of...", docs contradict themselves or don't cover the scenario, or before writing production code against an unfamiliar API. Also trigger on "write a learning test for X" or "figure out the limits of X". The test is small, real, executable code calling the actual API the way production code would, to characterize true behavior — not a mock or doc summary. Trigger this instead of guessing at or fabricating claims about library behavior.
 ---
 

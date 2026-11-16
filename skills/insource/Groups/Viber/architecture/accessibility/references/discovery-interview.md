@@ -1,6 +1,6 @@
 # Accessibility Architecture Interview Guide
 
-> **What this owns:** The discovery interview conducted by the `architecture` skill (or invoked standalone) to design the project's `<docs>/architecture/accessibility-architecture.md` specification.
+> **What this owns:** The discovery interview conducted by the `architecture` skill's accessibility pillar to design the project's `<docs>/architecture/accessibility-architecture.md` specification.
 
 ---
 

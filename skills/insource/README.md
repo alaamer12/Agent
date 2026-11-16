@@ -83,6 +83,155 @@ python -m unittest test_manager_structure
 
 `report` includes nested independent skills, type, parent, and composition evidence (`children`, `modules`, and `issues` in JSON). Internal modules are not independent report rows. Per-skill file counts include descendants, while the summary counts unique files to avoid counting a meta-child's files twice. `find` uses the same classification across the registry, agent folders, and recorded `--into` installations. `lint` checks actual skill entrypoints and flags mixed structures; `--strict` makes findings fail the command.
 
+## Specialization: `specialized` frontmatter
+
+Every independent skill in this registry declares, next to `name` and `version`, whether it is bound to one framework, library, language, or file format, or applies in general:
+
+```yaml
+---
+name: scss
+version: 1.0.0
+specialized: scss
+description: ...
+---
+```
+
+```yaml
+---
+name: dtb
+version: 1.0.0
+specialized: none
+description: ...
+---
+```
+
+| Value | Meaning | Examples |
+|---|---|---|
+| `none` | A general skill: a method, posture, or workflow that works across technologies. Polyglot examples inside it do not make it specialized. | `dtb`, `iwts`, `planner`, `update`, `readme-md` |
+| one technology | The skill's rules only make sense inside that technology. | `scss` → `scss`, `gh` → `github`, `pdf` → `pdf` |
+
+Rules:
+
+- **Name the umbrella technology, not its toolkit.** A Tailwind skill that recommends `cva` or `clsx` is `specialized: tailwind`; helper libraries used *inside* that technology are not listed.
+- **One value.** A comma list such as `specialized: react-native, expo` is accepted, but lint warns on it: a skill should focus on one technology. Split the skill, or name the technology that actually owns the rules.
+- **Format.** Lowercase, no spaces: letters, digits, and `-`, `.`, `+`, `#` (for example `react-native`, `next.js`, `c#`). Blank values, `general`, `n/a`, or YAML lists are invalid; general skills use exactly `none`.
+- **Where it applies.** Required on every independent skill's `SKILL.md` in this registry: plain skills, Meta-Skill parents, and each Meta-Skill child. Battery-Skill modules (`method.md` or no file) carry no frontmatter and inherit the battery's value. Skills installed into agent folders from other sources are not checked.
+
+`python manager.py lint` reports a missing, invalid, multi-value, or non-canonical `specialized` as a skill warning; `lint --strict` fails on it.
+
+### Naming conventions for `specialized` values
+
+One spelling per technology, chosen from how this inventory already writes it. Lint rejects known aliases and points at the canonical form.
+
+**Dialect: American English.** The inventory overwhelmingly uses `color` (677 vs 298), `behavior` (676 vs 159), `organize`/`organization`, `optimize`, `catalog` (739 vs 19), `center`, `gray`, and `license`. New prose, values, and keys follow American spelling; the frontmatter key is `specialized`, not `specialised`.
+
+**Canonical technology names** (lowercase; the official project name as its own docs write it, with spaces become hyphens and abbreviations expanded):
+
+| Canonical | Rejected aliases |
+|---|---|
+| `tailwind` | `tailwindcss`, `tw` |
+| `react-native` | `react native`, `rn` |
+| `next.js` | `nextjs` |
+| `vue` | `vuejs`, `vue.js` |
+| `node.js` | `nodejs`, `node` |
+| `typescript` | `ts` |
+| `javascript` | `js` |
+| `postgresql` | `postgres` |
+| `scss` | `sass` is a *different* syntax; use `sass` only for a skill that targets the indented Sass syntax |
+| `mermaid` | `mmd` |
+| `github` | `gh` |
+| `git` | — |
+| `win32` | `windows`, `winapi` (the OS is not the API) |
+| `dotnet` | `.net` (a leading dot is not a valid value) |
+| `c#` | `csharp` |
+| `svelte` | `sveltekit` is a separate framework; use it only for a SvelteKit-specific skill |
+| `svg`, `pdf`, `hyperframes`, `navigo` | — |
+
+Rules for picking a name not in the table:
+
+1. Lowercase the official name (`PostgreSQL` → `postgresql`, `Next.js` → `next.js`).
+2. Prefer the full name over an abbreviation (`typescript`, not `ts`; `github`, not `gh`).
+3. Multi-word official names use hyphens (`react-native`); never spaces.
+4. A framework and its meta-framework are different values (`vue` vs `nuxt`, `svelte` vs `sveltekit`, `react` vs `next.js`).
+5. A file format or platform API counts as a technology when the skill's rules are specific to it (`pdf`, `svg`, `win32`); a broad platform like "web" or "mobile" does not — those skills are `none`.
+
+### Adding a specialized skill to a battery
+
+A specialized skill is an independent, technology-bound skill (`specialized: <tech>`) grouped under a
+platform-neutral parent battery, inside the parent's `specialized/` folder. It keeps its own `SKILL.md`,
+so it is a **Meta-Skill child, not a battery module**. The parent's own method stays platform-neutral, so
+the parent keeps `specialized: none` — hosting specialized children does not bind the parent to a
+technology. Live example: [`styling`](./Groups/Design/Style/styling/SKILL.md) (`none`) hosts
+[`scss`](./Groups/Design/Style/styling/specialized/scss/SKILL.md) (`specialized: scss`).
+
+1. **Create the child as a real skill.** `<battery>/specialized/<name>/SKILL.md` with full frontmatter:
+   `name`, `version`, `specialized: <canonical value from the table above>`, `description`, plus
+   `when_to_use` / `argument-hint` when user-invoked. Do **not** rename it to `method.md` — that demotes it
+   to an internal module. Give it its own references/examples/scripts as the technology needs.
+2. **Split ownership, one owner per fact.** The parent owns the universal, platform-neutral laws; the child
+   owns its technology's mechanics and applies those laws in its idiom. The child defers to the parent on
+   architecture; the parent defers to the child on language specifics. Never restate the parent's laws
+   inside the child.
+3. **Wire the parent router.** In `<battery>/SKILL.md`: keep `specialized: none`; add a "Specialized skills"
+   section with a table naming each child and when to reach for it; add `specialized/<name>` to the Layout
+   tree. Reference the child **by name** (`/<name>`), not by a cross-skill file path — separately installed
+   skills' junctions break path links between them.
+4. **Install the child on its own.** Nesting does not install it. The child is an independent skill and needs
+   its own junction so `/<name>` resolves (`python manager.py skill <name>`); the parent's junction only
+   exposes the files.
+5. **Catalog and version.** Add the child's Quick Index bullet and detail block at its real path
+   `<battery>/specialized/<name>/SKILL.md`; keep the parent's row. The child carries its own `version`; bump
+   the parent for the router change. Regenerate the README and run `lint`.
+6. **Accept the hybrid finding.** A battery that keeps internal `method.md` modules *and* hosts an
+   independent specialized child is a mixed-composition hybrid (part Battery-Skill, part Meta-Skill). Record
+   the decision on the parent with `lint-accept: { mixed-composition: "<reason>" }` (see
+   [Accepting lint findings](#accepting-lint-findings-lint-accept)) rather than leaving a warning or deleting
+   the child's `SKILL.md`. `styling` carries this acceptance.
+
+**Moving an existing standalone skill in** is the same procedure with a `git mv` into
+`<battery>/specialized/<name>` first: then retarget the child's junctions to the new path, update every
+README path pointer, wire the parent router, and add the acceptance. Leave no stale copy of the old location.
+
+## Accepting lint findings (`lint-accept`)
+
+Sometimes a skill intentionally breaks a lint rule and should stay that way — for example a genuine hybrid that is part Battery-Skill and part Meta-Skill. Rather than weakening the rule for every skill, mark the exception on that skill with a `lint-accept` frontmatter mapping of **rule id → reason**:
+
+```yaml
+---
+name: architecture
+version: 2.0.0
+specialized: none
+lint-accept:
+  mixed-composition: "Intentional hybrid: accessibility/display/plugin are independent pillars; the other five are internal methods. Keep as-is."
+description: ...
+---
+```
+
+The reason is required and non-empty: an acceptance is a recorded decision, not a silent mute. `lint-accept` is a nested mapping, so it needs PyYAML (the same dependency full lint validation already uses).
+
+**Rule ids you can accept:**
+
+| Rule id | Finding it waives |
+|---|---|
+| `mixed-composition` | Independent sub-skills and internal modules in one parent (the hybrid case) |
+| `frontmatter` | Missing / unreadable / invalid YAML frontmatter |
+| `version` | Missing or invalid `version` on a non-tracked skill |
+| `specialized` | Missing, invalid, multi-value, or non-canonical `specialized` |
+| `name` | Missing or invalid `name` |
+| `name-mismatch` | `name` does not match the folder name |
+| `duplicate-name` | Another registry skill already uses this `name` |
+| `description` | Missing description |
+| `description-multiline` | Description is not a single line |
+| `description-length` | Description over the character limit |
+
+**Behavior:**
+
+- An accepted finding is removed from the skill-warning count and no longer fails `lint --strict`. It is still shown under `--verbose` in an **accepted findings** table with its reason, and counted in the summary, so the waiver stays auditable.
+- Acceptance waives only the named rule, only for that skill. Every other rule still applies.
+- A malformed acceptance is itself a warning: an unknown rule id, an empty/missing reason, or a `lint-accept` value that is not a mapping. A typo therefore cannot silently mute nothing.
+- Scope is the skill-level metadata/structure findings above. Synchronization issues, version-bump suggestions, and README findings are separate subsystems and are not waivable here.
+- `report` and `find` still show the skill's real structure and composition issues; acceptance is a lint decision, not a reclassification.
+
 ## Manager crossreferences and agent instructions
 
 ### Discover references between skills
@@ -185,13 +334,12 @@ The first command previews the deployment; the other two write to the selected a
 - [collection](./Groups/Design/collection/SKILL.md) — Method for a project's generated imagery: dissect a reference or page set into a bill of materials (BOM), fix the style canon once, write the prompts, plan gene…
 - [denoise](./Groups/Design/denoise/SKILL.md) — Transforms crowded, noisy, visually overwhelming UIs into calm, readable, professional interfaces that are easier to use, not just nicer to look at, at one of t…
 - [diverge](./Groups/Design/diverge/SKILL.md) — Previews genuinely different design directions for an existing UI before committing a whole project or batch of pages to one of them. Two commands: /diverge tas…
-- [pages](./Groups/Design/pages/SKILL.md) — A product's complete page universe: one skill, three modes, ONE artifact. /pages main plans the core-screen inventory, pruning a 492-row 30-discipline candidate…
+- [pages](./Groups/Design/pages/SKILL.md) — A product's complete page universe: one skill, three modes, one route tree. /pages main plans the core-screen inventory, pruning a 492-row 30-discipline…
 - [parity](./Groups/Design/parity/SKILL.md) — Framework for closing the gap between a design mockup (HTML/CSS, Figma export, or reference image) and what actually renders on a real device/emulator, for any…
 - [resources](./Groups/Design/resources/SKILL.md) — Resource files for any platform: images, icons, fonts, audio, video, documents, color values - the files, not the systems that serve them. Fourteen tools: recol…
-- [scss](./Groups/Design/Style/scss/SKILL.md) — SCSS/Sassy CSS best practices and coding guidelines for maintainable, scalable stylesheets
+- [scss](./Groups/Design/Style/styling/specialized/scss/SKILL.md) — SCSS/Sassy CSS best practices and coding guidelines for maintainable, scalable stylesheets
 - [stateful](./Groups/Design/stateful/SKILL.md) — Derive every state a user-visible screen can enter, then implement the approved ones — pending, empty, stale, partial; provider down, degraded, throttled, maint…
-- [styleup](./Groups/Design/Style/styleup/SKILL.md) — Turns an existing project's styling into a maintainable, professional system on any stack: inventories every hardcoded or duplicated style, works inside the sty…
-- [styling](./Groups/Design/Style/styling/SKILL.md) — Platform-neutral rules for writing NEW styling on any stack (HTML/Web, Blazor, MAUI, Qt): per-module stylesheets, no monolith; role-named tokens as single sourc…
+- [styling](./Groups/Design/Style/styling/SKILL.md) — Styling experience, one skill, two levels: build (write NEW styling right on any stack — per-module stylesheets, no monolith, role-named tokens as single source of truth, a downward-only layer chain…
 
 ### Favor
 
@@ -251,9 +399,6 @@ The first command previews the deployment; the other two write to the selected a
 - [adapt](./Groups/Viber/adapt/SKILL.md) — Grows a project's own Viber version. Viber has fixed foundations, but no two projects walk the same path. When the journey needs a capability nothing covers, ad…
 - [agents-md](./Groups/Viber/agents-md/SKILL.md) — Creates/audits AGENTS.md - agent rulebook: obligations+references not docs, rules/ per-topic referenced is the recommendation, inline stays valid; one owner per…
 - [architecture](./Groups/Viber/architecture/SKILL.md) — Orchestrates and drafts an application's complete technical architecture documentation suite across its core pillars (language conventions, error handling, visu…
-  - [accessibility](./Groups/Viber/architecture/accessibility/SKILL.md) — Orchestrates and authors an application's Accessibility Architecture specification into <docs>/architecture/accessibility-architecture.md. Moves beyond complian…
-  - [display](./Groups/Viber/architecture/display/SKILL.md) — Orchestrates and authors an application's Display Architecture specification into <docs>/architecture/display-architecture.md — how values and text are EXPRESSE…
-  - [plugin](./Groups/Viber/architecture/plugin/SKILL.md) — Authors an application's plugin and settings architecture as one extensibility system. Settings and plugins are the same family: a closed host exposes a small e…
 - [commitments-md](./Groups/Viber/commitments-md/SKILL.md) — Creates and maintains COMMITMENTS.md - the project's declared goals, priorities and trade-offs - or a small Commitments section in AGENTS.md when tiny. Premise:…
 - [glossary-md](./Groups/Viber/glossary-md/SKILL.md) — Maintains one unambiguous project vocabulary in alphabetical letter blocks. Golden rule for what earns a block: the word as used here carries more than the dict…
 - [idea-md](./Groups/Viber/idea-md/SKILL.md) — Turns a raw project prompt - any language, any mess - into IDEA.md: the project's complete idea document, readable by anyone, technical or not. First the idea's…
@@ -671,8 +816,8 @@ The first command previews the deployment; the other two write to the selected a
 #### `pages`
 
 - **Path:** [`Groups/Design/pages/SKILL.md`](./Groups/Design/pages/SKILL.md)
-- **Description:** A product's complete page universe: one skill, three modes, ONE artifact. /pages main plans the core-screen inventory, pruning a 492-row 30-discipline candidate catalog against project evidence, splitting mixed concerns and recording redirects and exclusions with reasons. /pages secondary writes the trust documents (ToS, Privacy, Cookies, Contact, Status, DPA, delete-account; one reference per type, scale- and phase-gated - launch set now, the rest on triggers - one canon per document, never invented legal facts). /pages complementary designs the conditional screens that fire only on a trigger, the app running normally without them (onboarding, transaction outcomes, HTTP errors, session gates, maintenance, access gates, token handoffs, callback relays). Every page registers in PAGES.md by kind; nothing a product lacks gets invented. Triggers: plan my pages, legal pages, onboarding flow, error page, callback URL. Not for designing/building screens (prototype, impeccable) or implementation order (planner).
-- **Use-case:** Any question of which pages a product has, needs, or must not have — core inventory, trust documents, conditional screens — or when a change touches PAGES.md territory.
+- **Description:** A product's complete page universe: one skill, three modes, one route tree. /pages main plans the core-screen inventory, pruning a 492-row 30-discipline catalog against evidence, splitting mixed concerns, recording redirects/exclusions with reasons. /pages secondary writes the trust documents (ToS, Privacy, Cookies, Contact, Status, DPA, delete-account; scale/phase-gated, one canon each, never invented legal facts). /pages complementary designs the conditional screens that fire only on a trigger, the app fine without them (onboarding, transaction outcomes, HTTP errors, session/access gates, maintenance, token handoffs, relays). Every page is one lean file in a <docs>/pages/ route tree (path = route, _.md root, [param].md dynamic), a shard index.md per directory; kind/access/decisions on the map; nothing a product lacks gets invented. Triggers: plan my pages, legal pages, onboarding flow, error page, callback URL. Not for designing/building screens (prototype, impeccable) or implementation order (planner).
+- **Use-case:** Any question of which pages a product has, needs, or must not have — core inventory, trust documents, conditional screens — or when a change touches the <docs>/pages/ tree.
 - **Usage:** `/pages [main|secondary|complementary] [plan|list|new <x>|audit]`
 
 ---
@@ -695,7 +840,7 @@ The first command previews the deployment; the other two write to the selected a
 
 #### `scss`
 
-- **Path:** [`Groups/Design/Style/scss/SKILL.md`](./Groups/Design/Style/scss/SKILL.md)
+- **Path:** [`Groups/Design/Style/styling/specialized/scss/SKILL.md`](./Groups/Design/Style/styling/specialized/scss/SKILL.md)
 - **Description:** SCSS/Sassy CSS best practices and coding guidelines for maintainable, scalable stylesheets
 
 ---
@@ -707,17 +852,12 @@ The first command previews the deployment; the other two write to the selected a
 
 ---
 
-#### `styleup`
-
-- **Path:** [`Groups/Design/Style/styleup/SKILL.md`](./Groups/Design/Style/styleup/SKILL.md)
-- **Description:** Turns an existing project's styling into a maintainable, professional system on any stack: inventories every hardcoded or duplicated style, works inside the styling system the project already uses (or makes one evidence-based build-vs-library decision only when it has none), builds a semantic token layer as the single source of truth, migrates all consumers in pixel-safe slices, and locks the result with no-hardcoding guards plus before/after parity evidence. Use when asked to styleup/style-up a project, make styles maintainable or professional, centralize colors/typography/ spacing/radii, remove hardcoded or duplicated styles, introduce design tokens, or decide whether to adopt a styling library versus staying framework-native.
-
----
-
 #### `styling`
 
 - **Path:** [`Groups/Design/Style/styling/SKILL.md`](./Groups/Design/Style/styling/SKILL.md)
-- **Description:** Platform-neutral rules for writing NEW styling on any stack (HTML/Web, Blazor, MAUI, Qt): per-module stylesheets, no monolith; role-named tokens as single source of truth; styling as a chain of layers, downward-only imports (values -> tokens -> mixins/utilities/functions -> composed styles -> module scope; layer count is the project's call, not this skill's); expressive names over ambiguous ones - the ambiguity trap: do not call everything 'card' and patch it per site; thin bases fine, expressive layers chosen not mandated; module classes are file-private; conditional/runtime discipline: states as class mappings or state attributes, runtime values as dynamic tokens, inline only for calculated numbers; composition helpers (joiner, merge-on-conflict, variant registry). Use when styling structure is yours, when it sprawls into inline dumps or built class strings, or asked how to organize CSS/XAML/QML. Not for retrofitting projects into tokens (styleup), redesign (denoise), or component galleries (components).
+- **Description:** Styling experience, one skill, two levels: build (write NEW styling right on any stack — per-module stylesheets, no monolith, role-named tokens as single source of truth, a downward-only layer chain, expressive names, conditional styling as a lookup not a build, runtime values through a dynamic channel) and retrofit (take an EXISTING project's hardcoded/duplicated styling into a token-driven system: inventory, incumbent gate, one evidence-based native-vs-library decision, pixel-safe migration slices, no-hardcoding guards, before/after parity evidence). The router picks ONE level and reads only its method.md. New work or styling structure is yours → build; existing mess to centralize and prove parity → retrofit. Triggers: organize CSS/XAML/QML, design tokens, style layer chain, inline dumps, built class strings, styleup, style-up, make styles maintainable or professional, remove hardcoded styles, centralize colors/typography/spacing. Not for visual redesign (denoise) or component galleries (components).
+- **Use-case:** The user asks how to organize or write new styling (build), or to make an existing project's styling maintainable, token-driven and enforced with parity evidence (retrofit).
+- **Usage:** `/styling [build|retrofit] <target>`
 
 ---
 
@@ -981,34 +1121,6 @@ The first command previews the deployment; the other two write to the selected a
 - **Path:** [`Groups/Viber/architecture/SKILL.md`](./Groups/Viber/architecture/SKILL.md)
 - **Description:** Orchestrates and drafts an application's complete technical architecture documentation suite across its core pillars (language conventions, error handling, visual UI/interaction, relational/SQL data modeling, plugin and settings extensibility under the Open/Closed Principle, cross-platform multi-device mechanics, accessibility/sensory adaptation, and display/notation architecture (how values are expressed - precision levels, container fit, locale display, voice-typeface pairings)), invoking each specialized sub-pillar to author binding specifications into the project's documentation suite (<docs>/ or <docs>/architecture/).
 - **Usage:** `/architecture <project root or app name>`
-- **Sub-skills:** `accessibility`, `display`, `plugin`
-
----
-
-#### `accessibility`
-
-- **Path:** [`Groups/Viber/architecture/accessibility/SKILL.md`](./Groups/Viber/architecture/accessibility/SKILL.md)
-- **Parent:** `architecture`
-- **Description:** Orchestrates and authors an application's Accessibility Architecture specification into <docs>/architecture/accessibility-architecture.md. Moves beyond compliance checklists to design a comprehensive system spanning visual adaptation (high-contrast mode, eye-comfort presets like warm-cream/slate, user-tunable themes), typographic flexibility (multi-font selection, dyslexia-friendly fonts like Lexend/OpenDyslexic, fluid rem scaling without clipping), cognitive density tiers (compact vs standard vs spacious/verbose), comfort-reading modes, user autonomy and permission hygiene (contextual permissions, zero unexpected modals or popups), reduced motion, and assistive operability.
-- **Usage:** `/accessibility [project root or app name]`
-
----
-
-#### `display`
-
-- **Path:** [`Groups/Viber/architecture/display/SKILL.md`](./Groups/Viber/architecture/display/SKILL.md)
-- **Parent:** `architecture`
-- **Description:** Orchestrates and authors an application's Display Architecture specification into <docs>/architecture/display-architecture.md — how values and text are EXPRESSED to users. Owns the notation spectrum (exact 4,982,317 vs grouped 5,000,000 vs compact 5M vs prose "nearly 5 million"; 500_000 stays source-side) and assigns a precision level per surface class; container-fit discipline (every display slot declares a character/width budget; overflow is a defect - fixed-width cards must never let a plain number strike through; fallback ladders and tabular figures); locale display rules via Intl/ICU (separators, Arabic-Indic vs Western numerals, calendars, Arabic plural categories, bidi isolation inside RTL text); and the voice-medium-typeface pairing — not every voice matches every typeface and vice versa, so each surface class declares its (voice register, typeface + figure style, notation level) triple coherently, always under the accessibility pillar's user-override precedence.
-- **Usage:** `/display [project root or app name]`
-
----
-
-#### `plugin`
-
-- **Path:** [`Groups/Viber/architecture/plugin/SKILL.md`](./Groups/Viber/architecture/plugin/SKILL.md)
-- **Parent:** `architecture`
-- **Description:** Authors an application's plugin and settings architecture as one extensibility system. Settings and plugins are the same family: a closed host exposes a small extension contract, and an open set of contributions adds behavior without editing shared code. Use when designing, reviewing or refactoring settings pages, configuration catalogs, feature flags, per-tenant or per-platform preferences, extension points, module systems, or plugin hosts. Decides build-time versus runtime loading per axis, enforces an Open/Closed growth gate, and specifies descriptor data, contribution registries, layered composition, scope and storage, renderer shapes, consumer authorities, migration, versioning, trust and failure isolation.
-- **Usage:** `/plugin [project root or app name]`
 
 ---
 

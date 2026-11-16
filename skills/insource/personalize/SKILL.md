@@ -1,6 +1,7 @@
 ---
 name: personalize
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Updates the user''s GLOBAL agent instruction file (the personal AGENTS.md every project loads) so settled questions never get re-asked - an agent asking "which package manager?" when the global file answers is the idiot-agent this skill kills. Modes: "/personalize that i like bun and bunx" distills a statement into an enforceable preference line (behavior not transcript, explicit exception boundary); bare /personalize asks what to set, showing existing lines; "/personalize the section X in current AGENTS.md into global" promotes it - personal defaults up, project decisions stay, machine-specific routed out; copy unless told "move". Ladder: current prompt > project AGENTS.md (respects the global; overrides only explicitly) > global preference. Dedupe and refine over append; vague statements sharpened or refused, never written. Triggers: personalize, remember I always prefer, never ask me about X again, set my global default.'
 argument-hint: "[preference statement | promotion: the section X in current AGENTS.md into global | empty to be asked]"
 ---

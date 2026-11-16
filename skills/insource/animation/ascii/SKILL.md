@@ -1,6 +1,7 @@
 ---
 name: ascii
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Build ASCII and character-based animations for web, terminal, or CLI. Use when the user asks for an ASCII animation, terminal intro or loader, image or video to ASCII, retro or hacker text motion, generative plasma or wave fields, character-art shaders, Three.js AsciiEffect, per-character cascade or domino effects, gradient or masked coloring on glyphs, or interactive ASCII. Always clarify the desired kind of animation with the user before coding. Supports Bun.Image as the preferred image pipeline when Bun is available.
 license: MIT
 metadata:

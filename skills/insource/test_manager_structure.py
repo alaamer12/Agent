@@ -27,10 +27,12 @@ class ManagerFixture(unittest.TestCase):
         path.write_text(text, encoding="utf-8")
         return path
 
-    def skill(self, relative: str, *, base: Path | None = None, version: bool = True) -> Path:
+    def skill(self, relative: str, *, base: Path | None = None, version: bool = True,
+              specialized: str | None = "none") -> Path:
         path = (self.registry if base is None else base) / relative
         version_field = "version: 1.0.0\n" if version else ""
-        self.write(path / "SKILL.md", f"---\nname: {path.name}\n{version_field}"
+        specialized_field = "" if specialized is None else f"specialized: {specialized}\n"
+        self.write(path / "SKILL.md", f"---\nname: {path.name}\n{version_field}{specialized_field}"
                    "description: Instructions for the fixture.\n---\n\n# Fixture\n")
         return path
 
@@ -395,6 +397,169 @@ class CrossreferenceTests(ManagerFixture):
         self.assertEqual(set(opened), expected)
         self.assertEqual(len(opened), len(expected))
         self.assertEqual(result["stats"]["files_scanned"], len(expected))
+
+
+class SpecializedLintTests(ManagerFixture):
+    def lint(self) -> subprocess.CompletedProcess:
+        return self.cli("lint", "--strict", "--no-version")
+
+    def test_general_and_single_technology_values_pass(self):
+        self.skill("dtb", specialized="none")
+        self.skill("scss", specialized="scss")
+        self.skill("native", specialized="react-native")
+        self.skill("next", specialized="next.js")
+        self.skill("sharp", specialized="c#")
+        result = self.lint()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("specialized", result.stdout)
+
+    def test_missing_value_fails_strict_lint(self):
+        self.skill("bare", specialized=None)
+        result = self.lint()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("missing specialized", result.stdout)
+
+    def test_invalid_values_fail_strict_lint(self):
+        for value in ('""', "General", "general", "n/a", "[scss]", "react native", "none, scss"):
+            with self.subTest(value=value):
+                skill = self.skill("odd", specialized=value)
+                result = self.lint()
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn("invalid specialized", result.stdout)
+                (skill / "SKILL.md").unlink()
+
+    def test_comma_list_is_discouraged(self):
+        self.skill("mobile", specialized="react-native, expo")
+        result = self.lint()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("specialized lists 2 technologies", result.stdout)
+        self.assertNotIn("invalid specialized", result.stdout)
+
+    def test_meta_children_are_checked_but_battery_modules_are_not(self):
+        self.skill("meta")
+        self.skill("meta/child", specialized=None)
+        battery = self.skill("battery")
+        self.write(battery / "mode" / "method.md", "No frontmatter in a module.\n")
+        result = self.lint()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertEqual(result.stdout.count("missing specialized"), 1)
+        self.assertIn("child", result.stdout)
+
+    def test_foreign_agent_skills_are_not_checked(self):
+        self.skill("vendor", base=Path(self.env["MANAGER_HOME"]) / ".qoder" / "skills", specialized=None)
+        result = self.lint()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_aliases_are_rejected_with_the_canonical_name(self):
+        for alias, canonical in (("tailwindcss", "tailwind"), ("tw", "tailwind"), ("gh", "github"),
+                                 ("ts", "typescript"), ("postgres", "postgresql"), ("csharp", "c#")):
+            with self.subTest(alias=alias):
+                skill = self.skill("odd", specialized=alias)
+                result = self.lint()
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(f"use '{canonical}'", result.stdout)
+                (skill / "SKILL.md").unlink()
+
+    def test_canonical_names_pass(self):
+        for value in ("tailwind", "github", "typescript", "postgresql", "c#", "next.js", "node.js", "win32"):
+            with self.subTest(value=value):
+                skill = self.skill("odd", specialized=value)
+                result = self.lint()
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                (skill / "SKILL.md").unlink()
+
+
+class LintAcceptTests(ManagerFixture):
+    def hybrid(self, accept_yaml: str = "", *, specialized: bool = True) -> Path:
+        root = self.skill("hybrid")
+        self.skill("hybrid/child")
+        self.write(root / "mode" / "method.md")
+        spec = "specialized: none\n" if specialized else ""
+        self.write(root / "SKILL.md",
+                   f"---\nname: hybrid\nversion: 1.0.0\n{spec}{accept_yaml}"
+                   "description: Fixture.\n---\n\n# Fixture\n")
+        return root
+
+    def test_accepted_hybrid_passes_strict_lint(self):
+        self.hybrid('lint-accept:\n  mixed-composition: "Intentional hybrid battery+meta."\n')
+        result = self.cli("lint", "--strict", "--no-version")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("mixed composition", result.stdout)
+        self.assertIn("Accepted findings", result.stdout)
+
+    def test_accepted_finding_is_auditable_in_verbose(self):
+        self.hybrid('lint-accept:\n  mixed-composition: "Keep as-is."\n')
+        result = self.cli("lint", "--strict", "--no-version", "--verbose")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("accepted findings (1)", result.stdout)
+        self.assertIn("Keep as-is.", result.stdout)
+
+    def test_unaccepted_hybrid_still_fails(self):
+        self.hybrid()
+        result = self.cli("lint", "--strict", "--no-version")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("mixed composition", result.stdout)
+
+    def test_empty_reason_is_rejected_and_finding_still_fires(self):
+        self.hybrid('lint-accept:\n  mixed-composition: ""\n')
+        result = self.cli("lint", "--strict", "--no-version")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("needs a non-empty reason", result.stdout)
+        self.assertIn("mixed composition", result.stdout)
+
+    def test_unknown_rule_is_rejected(self):
+        self.hybrid('lint-accept:\n  bogus-rule: "why"\n')
+        result = self.cli("lint", "--strict", "--no-version")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("unknown rule 'bogus-rule'", result.stdout)
+        self.assertIn("mixed composition", result.stdout)
+
+    def test_non_mapping_value_is_rejected(self):
+        self.hybrid("lint-accept: mixed-composition\n")
+        result = self.cli("lint", "--strict", "--no-version")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("must be a mapping", result.stdout)
+
+    def test_acceptance_only_waives_the_named_rule(self):
+        self.hybrid('lint-accept:\n  mixed-composition: "Hybrid is intentional."\n', specialized=False)
+        result = self.cli("lint", "--strict", "--no-version")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("missing specialized", result.stdout)
+        self.assertNotIn("mixed composition", result.stdout)
+
+
+class SyncAuditTests(ManagerFixture):
+    def agent_root(self) -> Path:
+        return Path(self.env["MANAGER_HOME"]) / ".qoder" / "skills"
+
+    def sync_issues(self) -> str:
+        result = self.cli("lint", "--verbose", "--no-version")
+        self.assertNotIn("Traceback", result.stderr)
+        start = result.stdout.find("synchronization issues (")
+        return result.stdout[start:] if start >= 0 else ""
+
+    def test_real_folder_without_entrypoint_is_reported(self):
+        self.skill("wrapped", base=self.agent_root() / "wrapper")
+        issues = self.sync_issues()
+        self.assertIn("missing-skill", issues)
+        self.assertIn("wrapper", issues)
+        self.assertIn("wrapped", issues)
+
+    def test_dangling_link_is_reported(self):
+        target = self.skill("gone", base=self.root / "other")
+        self.link(target, self.agent_root() / "gone")
+        target.rename(target.with_name("moved"))
+        self.assertIn("broken-link", self.sync_issues())
+
+    def test_link_to_folder_without_entrypoint_is_reported(self):
+        module = self.write(self.root / "other" / "module" / "method.md").parent
+        self.link(module, self.agent_root() / "module")
+        self.assertIn("missing-skill", self.sync_issues())
+
+    def test_healthy_copies_and_hidden_folders_are_not_reported(self):
+        self.skill("healthy", base=self.agent_root())
+        self.write(self.agent_root() / ".system" / "notes.md")
+        self.assertEqual(self.sync_issues(), "")
 
 
 class AgentSourceTests(ManagerFixture):

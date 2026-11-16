@@ -1,6 +1,7 @@
 ---
 name: explain
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Explain things in the easiest way to understand, defining any heavy or technical word the moment it's used — e.g. "zero-day (a security flaw nobody has fixed yet)". Use this whenever the user asks you to explain, simplify, clarify, break down, or "explain like I'm new to this", or says a previous answer was too technical, confusing, full of jargon, or hard to follow. Also use it proactively whenever your own answer is about to use a specialized or industry-specific term (security, finance, medicine, law, engineering, programming, etc.) and the user hasn't signaled expert familiarity with that field.
 ---
 

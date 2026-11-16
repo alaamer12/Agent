@@ -1,6 +1,7 @@
 ---
 name: dig-binary
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Universal software reverse engineering and black-box system inspection across all layers: web/JS bundles, runtime tracing, network protocols, native binaries (PE, ELF, Mach-O), bytecode (JVM, Dalvik, Python, .NET), archives (ZIP, JAR, APK, TAR, ASAR), and local data stores. Use when source code is missing, obfuscated, or partial and internal models, APIs, hidden behaviors, or error causes must be uncovered.'
 ---
 

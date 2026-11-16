@@ -90,7 +90,7 @@ def stop_process(proc: subprocess.Popen) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run a styleup capture matrix with a manifest.")
+    parser = argparse.ArgumentParser(description="Run a styling retrofit capture matrix with a manifest.")
     parser.add_argument("--config", required=True)
     parser.add_argument("--out", required=True)
     parser.add_argument("--only", default=None, help="comma-separated state names")

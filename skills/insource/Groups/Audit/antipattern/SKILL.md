@@ -1,6 +1,7 @@
 ---
 name: antipattern
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Investigates a software project, researches the engineering anti-patterns that matter for its stack, gathers evidence from code, architecture, business rules and dependencies, and documents which anti-patterns agents must avoid (usually as ANTIPATTERN.md). Use whenever the user asks about anti-patterns, code smells, AI slop, "what should we avoid in this codebase", wants project rules against bad patterns, wants an anti-pattern audit or report, or asks to create or update ANTIPATTERN.md, even if they never say "anti-pattern". Findings are rated for impact and confidence separately, kept to what project evidence supports, and a clean audit is a valid result. Identifies, investigates, recommends and documents only. Do NOT use to fix, refactor or enforce rules, for general code review, or to change application behavior.
 when_to_use: The user asks what anti-patterns, code smells, or bad practices to avoid in a project; requests an anti-pattern audit, report, or rules document; mentions AI slop in a codebase; or asks to create or update ANTIPATTERN.md.
 argument-hint: "[a pattern, an area, or 'audit this repo']"

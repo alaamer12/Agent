@@ -1,6 +1,7 @@
 ---
 name: flush
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Agent continuity capture, manual — persist working state before session end, environment change, loss, milestone, handoff, or when the conversation grew too large: CONTEXT.md (how we got here — decisions, reversals, what worked/failed, open questions), PLAN.md (the ACTUAL plan, not the original), SNAPSHOT.md (facts verified against the project, not memory), STATUS.md (assessment) — one job per note; compression, never transcript or continuation. Each flush carries an agent-chosen kebab-case session name with a sequence number in every note header and appends one entry to the append-only SESSIONS.md journal, so later sessions see each session''s record; past entries are never rewritten and git owns old note content — no hand-rolled archives. Uncertainty stays Unknown, partial work is never written as done, stale notes are replaced not accumulated, cross-note consistency checked before completion. The companion context skill reads these back. Triggers: flush, save/persist state, hand off the project.'
 ---
 

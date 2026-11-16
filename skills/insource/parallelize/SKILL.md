@@ -1,6 +1,7 @@
 ---
 name: parallelize
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Plan and run parallel work: the main agent decides in chat how to fan out a large or newly approved job, keeps the most sensitive work for itself, and hands bounded slices to subagents in waves that respect the harness concurrency cap. Use when the job is large enough to split, a plan was just approved, the user says "parallelize the work", "run agents in parallel", "fan this out", "use a worker pool", "split this across agents", "parallelize with staggering", or the agent sees three or more independent chunks. Core rules: no two agents write the same file; interfaces and naming decided before launch; the main agent never idles while subagents work; wave size follows dependencies and review load; a failed slice re-runs alone; staggering delays start times and never replaces dependency ordering. Not for deciding what to build (planner), writing the brief (subagent), or the pre-code gates (implement).'
 when_to_use: A job is large or an approved plan is about to be executed, or the user asks to parallelize/fan out/spawn workers — including "/parallelize with staggering <spec>" — also self-initiated when a task has several genuinely independent chunks.
 argument-hint: "[the plan, task, or scope to parallelize] [with staggering <spec>]"

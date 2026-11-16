@@ -5,7 +5,7 @@ large each master has to be, how the masters are produced, and what each deliver
 It is written **before** prompts, because the plan decides the prompt's composition and size.
 
 ```
-PAGES.md ──► dissect ──► BOM.md + bom/<page>.md ──► prompts ──► generate ──► resources conform
+pages tree ──► dissect ──► BOM.md + bom/<page>.md ──► prompts ──► generate ──► resources conform
                             ▲
                        bom/style.md (one canon)
 ```
@@ -210,7 +210,7 @@ Every `bom/<page>.md` starts with what a later agent needs before reading the ta
 ```markdown
 # home - image BOM
 
-- Source: `PAGES.md` §home
+- Source: `<docs>/pages/home.md`
 - Style canon: `bom/style.md`
 - Placement: `public/images/home/`, resolved by slot id in `Home.tsx`
 - Regeneration: `resources conform` reads this table; do not rename slots without updating code
@@ -247,7 +247,7 @@ assets without regenerating art that already exists.
 
 Before leaving the plan:
 
-- [ ] Every page in `PAGES.md` appears in `BOM.md`, including `no-images` ones.
+- [ ] Every page in the `pages` tree appears in `BOM.md`, including `no-images` ones.
 - [ ] Every generated slot has slot id, master, delivery, prompt, save path, reference.
 - [ ] Every non-generated slot has a source route and **no** prompt.
 - [ ] `required_master <= cell` for every sheet row (probe the sheet if it exists).

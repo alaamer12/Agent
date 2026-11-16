@@ -39,5 +39,5 @@ Two traps that fail the test in disguise:
 
 When a page straddles (onboarding ends by navigating into the app), the boundary is drawn per
 *screen*, not per *journey*: each step that only the condition produces is one page of this
-family, each step reachable normally belongs to `/pages main` — and PAGES.md records both
-sides of the seam.
+family, each step reachable normally belongs to `/pages main` — and the tree records both
+sides of the seam (each step its own page file, its kind on the map).

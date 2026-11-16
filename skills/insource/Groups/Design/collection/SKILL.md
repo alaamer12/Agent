@@ -1,6 +1,7 @@
 ---
 name: collection
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: >-
   Method for a project's generated imagery: dissect a reference or page set into a bill of
   materials (BOM), fix the style canon once, write the prompts, plan generation economically. Per
@@ -71,7 +72,7 @@ as `no-images`, so "this page has no artwork" is a recorded decision instead of 
 
 | File | Contents |
 |---|---|
-| `BOM.md` | index: every page in `PAGES.md`, image count, `no-images` marker, shared assets |
+| `BOM.md` | index: every page in the `pages` tree (`<docs>/pages/`), image count, `no-images` marker, shared assets |
 | `bom/<page>.md` | that page's slot table + prompts for its generated slots |
 | `bom/style.md` | Style DNA, character canon, hard and soft rules - the single canon |
 
@@ -169,7 +170,7 @@ is what makes "nothing pending" a provable statement instead of a vibe.
 # Image BOM - <project>
 
 Style canon: `bom/style.md`. Shared assets: `bom/shared.md`.
-Every page in `PAGES.md` is listed; `no-images` is a decision, not a gap.
+Every page in the `pages` tree is listed; `no-images` is a decision, not a gap.
 
 | Page | Images | Generated | File | Status |
 |---|---|---|---|---|
@@ -200,7 +201,7 @@ The BOM and manifest are the deliverable; images are the second act.
 | Real photos, avatars from a library, proven free sources | `fahlwy` |
 | Splitting a generated sheet, fitting delivery sizes, naming, verifying | `resources` (conform) |
 | Renaming/organizing/converting files after they exist | `resources` |
-| Deciding which pages a product has | `pages` - the BOM consumes `PAGES.md`, never invents pages |
+| Deciding which pages a product has | `pages` - the BOM consumes the `pages` tree, never invents pages |
 | UI states needing illustrations designed for them | `stateful` (the states) → this skill (their art) |
 
 ## Resources

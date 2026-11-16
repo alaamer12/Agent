@@ -1,6 +1,7 @@
 ---
 name: contract
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Documents who owns what across architectural layers as tiny, precise contract files in <docs>/contract/: one responsibility per file, ownership either OoU (exactly one layer owns it) or AoU (all defined layers share it — never dual), with the reason and trade-offs recorded as a durable micro-decision. Use when the user asks where a responsibility belongs ("where should filtering/validation/retries/caching happen", "who owns X", "should the frontend or backend do this"), asks to write, update, list, or check a contract, runs /contract, or when implementing would silently scatter the same logic across layers; also when a scenario needs an explicit exception to an existing rule (hot-path vs default). Layers default to Database(0), Backend(1), Frontend(2), extensible per project; "application-side" always means Backend or Frontend, not Backend alone. Not for full architecture documentation (architecture), goals and priorities (commitments-md), vocabulary (glossary-md), or general prose documents (document).'
 when_to_use: A cross-layer responsibility is being decided (filtering, retry, validation, authorization, caching, formatting), a decision contradicts or extends an existing contract, or the user types /contract.
 argument-hint: "[list|new <responsibility>|update <file>|check]"

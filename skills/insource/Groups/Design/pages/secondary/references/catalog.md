@@ -42,7 +42,7 @@ duties, a checkout created a withdrawal right. Phase is bound to acts, not to ca
 | **P2 - trigger-driven** | a named growth event makes it owed; build on the event, never on a date | DPA + Sub-processor list (first EU/B2B deal), US state notices (first crossed state threshold - run the per-state check), Transparency report (past the DSA micro/small line), supply-chain statements (their own revenue gates), Promotions rules (only while a campaign runs), Warranty/RMA (first deliberate warranty) |
 
 **The balance rule:** a deferral must name its trigger and be recorded as an exclusion with that
-trigger in `PAGES.md`; an unnamed deferral is debt - users accumulate faster than pages, and
+trigger on the root index map; an unnamed deferral is debt - users accumulate faster than pages, and
 retroactive re-consent/re-acceptance costs what day-one honesty did not. Even a YouTube-clone
 scale plan ships P0 before its first real signup and defers DPA to its first enterprise trial:
 big ambition does not pull P2 forward.

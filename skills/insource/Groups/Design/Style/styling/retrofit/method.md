@@ -1,24 +1,10 @@
----
-name: styleup
-version: 1.0.0
-description: >-
-  Turns an existing project's styling into a maintainable, professional system on any stack:
-  inventories every hardcoded or duplicated style, works inside the styling system the project
-  already uses (or makes one evidence-based build-vs-library decision only when it has none), builds
-  a semantic token layer as the single source of truth, migrates all consumers in pixel-safe slices,
-  and locks the result with no-hardcoding guards plus before/after parity evidence. Use when asked to
-  styleup/style-up a project, make styles maintainable or professional, centralize colors/typography/
-  spacing/radii, remove hardcoded or duplicated styles, introduce design tokens, or decide whether to
-  adopt a styling library versus staying framework-native.
----
-
-# styleup
+# retrofit — systematizing existing styling
 
 Make an existing project's styling **token-driven, single-sourced, and enforced** — on whatever
 framework the project actually uses — without changing what users see, unless a visual change is
 explicitly in scope.
 
-This is an up-skill: one purpose, a fixed procedure, no clarifying questions. The only judgment it
+This level has one purpose, a fixed procedure, no clarifying questions. The only judgment it
 makes is the library decision below.
 
 ## When to use
@@ -32,10 +18,10 @@ makes is the library decision below.
   chart code), and native/OS chrome
 
 **Not for:** greenfield design-system creation, pure visual redesigns, or one-off component tweaks.
-For those, use `styling` — both skills aim to enhance the styling experience at different layers:
-`styleup` takes action to update code that already exists (inventory, migrate, guard, prove
-parity); `styling` constructs the project so a true design system can exist (structure, layer
-chain, naming, getting the decisions right the first time).
+For those, use the `build` level (`/styling build`) — the two levels aim to enhance the styling
+experience at different layers: `retrofit` takes action to update code that already exists
+(inventory, migrate, guard, prove parity); `build` constructs the project so a true design system
+can exist (structure, layer chain, naming, getting the decisions right the first time).
 
 ## First gate: is a styling system already in use?
 
@@ -107,7 +93,7 @@ Full criteria, evidence sources, case notes, and a decision-record template:
    typography, spacing, radii, shadows, motion — per file. Default scope: the entire project.
 1. **Incumbent gate → decision.** If a styling system is already in use, adapt to it (the library
    question is closed). Only for plain styling, run the five tests and write the decision record.
-   This is the skill's only branch.
+   This is the level's only branch.
 2. **Baseline BEFORE edits.** Capture the real app in every state that matters with the project's own
    tooling (browser screenshots and/or DOM + computed-style snapshots, emulator/desktop capture,
    platform screenshot harness). Freeze theme, locale, data seed, and tenant/source. Run the capture

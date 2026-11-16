@@ -1,6 +1,7 @@
 ---
 name: readme-md
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Create, review, and update professional README files grounded in the actual project, never in assumptions or nonexistent features. Use when asked to write, fix, or refresh a README or project introduction. It inspects real sources (manifests, entry points, scripts, tests) before writing, separates implemented from planned, identifies the primary audience and picks a project-appropriate structure, asks the README voice/style (minimal / engineering / deep-DX / showcase / hybrid) with facts identical in any veoice, writes motivation without fabricated origin stories, uses only real commands verified against project config, refuses to fabricate badges/links/screenshots, offers motivation-phrasing options when positioning is open, asks only about intent-dependent decisions, and honestly reports what was tested vs reviewed. Preserves useful existing structure when updating; targeted edits; respects git state; draft mode. Triggers: readme, write/update the readme, README is outdated, document this project/repo.'
 
 ---

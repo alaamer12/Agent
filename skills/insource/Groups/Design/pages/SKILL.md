@@ -1,12 +1,13 @@
 ---
 name: pages
-version: 1.2.0
-description: 'A product''s complete page universe: one skill, three modes, ONE artifact. /pages main plans the core-screen inventory, pruning a 492-row 30-discipline candidate catalog against project evidence, splitting mixed concerns and recording redirects and exclusions with reasons. /pages secondary writes the trust documents (ToS, Privacy, Cookies, Contact, Status, DPA, delete-account; one reference per type, scale- and phase-gated - launch set now, the rest on triggers - one canon per document, never invented legal facts). /pages complementary designs the conditional screens that fire only on a trigger, the app running normally without them (onboarding, transaction outcomes, HTTP errors, session gates, maintenance, access gates, token handoffs, callback relays). Every page registers in PAGES.md by kind; nothing a product lacks gets invented. Triggers: plan my pages, legal pages, onboarding flow, error page, callback URL. Not for designing/building screens (prototype, impeccable) or implementation order (planner).'
-when_to_use: Any question of which pages a product has, needs, or must not have — core inventory, trust documents, conditional screens — or when a change touches PAGES.md territory.
+version: 2.0.1
+specialized: none
+description: 'A product''s complete page universe: one skill, three modes, one route tree. /pages main plans the core-screen inventory, pruning a 492-row 30-discipline catalog against evidence, splitting mixed concerns, recording redirects/exclusions with reasons. /pages secondary writes the trust documents (ToS, Privacy, Cookies, Contact, Status, DPA, delete-account; scale/phase-gated, one canon each, never invented legal facts). /pages complementary designs the conditional screens that fire only on a trigger, the app fine without them (onboarding, transaction outcomes, HTTP errors, session/access gates, maintenance, token handoffs, relays). Every page is one lean file in a <docs>/pages/ route tree (path = route, _.md root, [param].md dynamic), a shard index.md per directory; kind/access/decisions on the map; nothing a product lacks gets invented. Triggers: plan my pages, legal pages, onboarding flow, error page, callback URL. Not for designing/building screens (prototype, impeccable) or implementation order (planner).'
+when_to_use: Any question of which pages a product has, needs, or must not have — core inventory, trust documents, conditional screens — or when a change touches the <docs>/pages/ tree.
 argument-hint: "[main|secondary|complementary] [plan|list|new <x>|audit]"
 ---
 
-# pages — one inventory, three kinds of page, one artifact
+# pages — one inventory, three kinds of page, one route tree
 
 A product's pages fall into exactly three kinds, and the old three skills are now one:
 
@@ -18,9 +19,9 @@ A product's pages fall into exactly three kinds, and the old three skills are no
 
 The kind boundary is defined once — in `complementary/references/boundary-test.md` (the three
 questions that separate signup [main] from a payment-success screen [complementary] from the
-ToS [secondary]) — and every entry in **`PAGES.md`** carries its kind tag. Adding any page to
-the project means adding its row to `PAGES.md` in the same change; the format is owned by
-`references/pages-md-format.md` and nothing else restates it.
+ToS [secondary]) — and every entry in the **root index map** carries its kind tag. Adding any
+page to the project means adding its file under `<docs>/pages/` and its index entry in the same
+change; the format is owned by `references/pages-tree-format.md` and nothing else restates it.
 
 ## Shared laws (mode methods inherit these — they do not repeat them)
 
@@ -35,12 +36,12 @@ the project means adding its row to `PAGES.md` in the same change; the format is
 - **Status vocabulary everywhere:** `confirmed` (evidence) / `inferred` (domain logic) /
   `uncertain` (ask) / `excluded(reason)`. Labels matter: calling a guess confirmed corrupts
   the map.
-- **One owner per fact.** Pages are listed once in `PAGES.md`; document content canon lives
-  in one place; the catalog row does not restate the method, the method does not restate the
-  catalog.
-- **The artifact is a file, not chat.** `PAGES.md` at the project root (or the docs location
-  the project uses) is the contract every downstream skill (`prototype`, `planner`,
-  `impeccable`, `seo`) reads and must update in the same change it adds or removes a page.
+- **One owner per fact.** A page lives once in the tree (one file per page); the shard indexes
+  map it; document content canon lives in one place; the catalog row does not restate the
+  method, the method does not restate the catalog.
+- **The artifact is a tree, not chat.** `<docs>/pages/` (the docs location the project uses) is
+  the contract every downstream skill (`prototype`, `planner`, `impeccable`, `seo`,
+  `collection`) reads and must update in the same change it adds or removes a page.
 
 ## Routing — load only the mode you are in
 
@@ -49,15 +50,15 @@ the project means adding its row to `PAGES.md` in the same change; the format is
 | planning/auditing the core screen set, splits, redirects | `main/method.md`, then its `references/` per its steps |
 | drafting any trust document (ToS, privacy, contact, status…) | `secondary/method.md`, then `secondary/references/<type>.md` |
 | deciding/designing a conditional screen, callback relay, gate | `complementary/method.md`, then its family reference |
-| writing or updating the artifact itself | `references/pages-md-format.md` (the only schema owner) |
-| asking where a page's content canon lives and how it gets built | `references/output-contract.md` (the only output story — one row, one canon, one build; type and family docs never own one) |
+| writing or updating the artifact itself | `references/pages-tree-format.md` (the only schema owner) |
+| asking where a page's content canon lives and how it gets built | `references/output-contract.md` (the only output story — one file, one canon, one build; type and family docs never own one) |
 
 ## Layout
 
 ```
 pages/
 ├── SKILL.md                        # this map: kinds, shared laws, routing
-├── references/pages-md-format.md   # the unified PAGES.md schema (single owner)
+├── references/pages-tree-format.md # the pages tree schema: route tree, shard indexes, page files (single owner)
 ├── references/output-contract.md   # the one output story: register → canon → build (single owner)
 ├── main/          method.md + references/ (data.csv catalog, patterns, splits,
 │                  decision-recording, sources) + research/

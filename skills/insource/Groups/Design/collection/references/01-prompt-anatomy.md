@@ -88,7 +88,7 @@ slot, is the only event that edits code. Two consequences:
 
 ## Brand hexes belong in the Style DNA
 
-Unlike application styling (where `styling`/`styleup` demand token indirection), a generation
+Unlike application styling (where the `styling` battery demands token indirection), a generation
 prompt IS the source — spelling colors as brand literals ("warm cream #FDF6EC, blue #2386C8,
 orange #FFA200") is correct there, taken once from the project's palette and copied verbatim
 everywhere. The single-source rule still applies: hexes are edited in the Style DNA block, never

@@ -1,6 +1,7 @@
 ---
 name: steering
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: >-
   Interactive documentation architecture and steering taxonomy skill. Transforms project requirements
   or legacy documentation into the Two-Tier Steering Taxonomy (.steering/ with perception/ [product,

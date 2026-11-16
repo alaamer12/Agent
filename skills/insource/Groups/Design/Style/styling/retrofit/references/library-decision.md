@@ -10,7 +10,7 @@ example, never a mandate.
 
 ## Step 0 — Is there an incumbent? (before the five tests)
 
-| What the project already uses | What styleup does |
+| What the project already uses | What the retrofit level does |
 |---|---|
 | A professional styling library (e.g. Emotion, styled-components, Tamagui, Tailwind/UnoCSS theme config, a component/design-system suite) | **No library question.** Extend that library's token/theme model, replace arbitrary values with its tokens, enforce its usage. Replacing the stack is a separate project. |
 | A framework-native token mechanism (CSS custom properties, MAUI/WinUI resources, Compose theme, RN theme context, SwiftUI environment) | **No library question.** Centralize the remaining values into that mechanism. |
@@ -65,7 +65,7 @@ bus factor and the desktop packaging path were unproven. Eligible only for an is
 pilot.
 
 **CSS-in-JS theme provider, web (e.g. styled-components, Emotion, Tamagui — illustrative).** When one
-is **already adopted**, Step 0 closes the question: styleup works inside its theme model. When the
+is **already adopted**, Step 0 closes the question: the retrofit level works inside its theme model. When the
 project is on plain CSS, these do centralize tokens (typed theme, SSR support), so Necessity can pass
 where custom properties are insufficient (typed contracts, runtime interpolation, SSR theming); on a
 plain custom-property-capable stack they usually lose on Necessity/Fit (runtime cost, build coupling),

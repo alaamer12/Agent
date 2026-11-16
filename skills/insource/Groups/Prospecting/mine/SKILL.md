@@ -1,6 +1,7 @@
 ---
 name: mine
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Runs a deep, budgeted, multi-source dig to understand not just what a class of thing looks like but WHY - and, when asked to decide, runs the options through a fair trial and ranks them. Three modes: read-mining (census repos, docs, papers, datasets, talks and chase their why) ends in a distilled document; run-mining (one identical hard-case trial per candidate) ends in a ranked verdict with a score table; case-mining (a topic''s distinct concrete situations, each attested or labeled derived) ends in a coverage-mapped catalog where the count is a target, never padding. The user can direct the how ("/mine this PDF, 100 pages per subagent" is honored literally). Long artifacts get a noise-and-density map first; reach pipelines (PDF to text, OCR, transcription) are gated on one real sample. Resumes from plan.md. Trigger on "/mine", mining a topic, resuming a dig, "find the best 5 libraries for X and test them on hard cases", or "enumerate the cases of X". Approve a verified source plan first.'
 ---
 

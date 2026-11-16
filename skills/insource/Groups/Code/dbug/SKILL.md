@@ -1,6 +1,7 @@
 ---
 name: dbug
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Debug any problem in any codebase, any language — bug, error, exception, crash, 500, timeout, wrong/missing/duplicate data, regression, "worked before", "works on my machine", flaky, prod-only, or a pasted stack trace — even if the user never says "debug". One loop everywhere: see the problem → understand it → form a falsifiable hypothesis → run the cheapest experiment that can refute it → narrow → repeat; negative results delete search-space, so narrowing IS getting closer. Opens the mind with duck debugging: say the full traceback out loud, hop by hop (what enters, what must leave, what actually left) — it exposes the problem before any tooling runs. Stances: root cause not symptom, fix the source of truth, minimal-but-complete across every layer, every bug is a chance to test, controlled observation, honest escalation. Domain playbooks (backend, database, frontend, production), investigation engine, escalation ladder, git forensics, instrumentation, regression-testing load on demand from references/.'
 when_to_use: 'Something is broken, wrong, failing, unexpected, regressed, or hard to reproduce — the moment you feel the urge to "just change code until the error disappears" is the moment to load this skill.'
 argument-hint: "[problem description | pasted error/traceback]"

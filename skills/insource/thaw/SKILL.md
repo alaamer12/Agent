@@ -1,5 +1,7 @@
 ---
 name: thaw
+version: 1.0.0
+specialized: none
 description: Anti-rigidity posture for drafting and design sessions. Hold docs, doctrines, and the user's prior answers as provisional material, not law; separate stable invariants from draft mechanisms; keep re-validating and aim for iteratively better. Use when an agent reifies a draft into a hard constraint, prunes options by citing draft docs, anchors on its own earlier recommendation, or settles at "good enough" — or when the user says "thaw", "thaw this", "we're drafting", "don't treat the docs as law", "question my answer", "aim for better", or "re-validate yourself". Pairs with close-topics, techstack, grill-me, and steering.
 when_to_use: During drafting/design, when a draft doc, doctrine, or prior answer is being treated as fixed law, options are pruned by draft constraints, or improvement stops at "good enough"; or on an explicit "thaw" / "we're drafting" / "aim for better" / "re-validate".
 argument-hint: "[the doc, decision, or recommendation to thaw]"

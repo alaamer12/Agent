@@ -1,6 +1,6 @@
 # Maintenance & outage
 
-**Output contract:** this file owns content laws only. Registration is one PAGES.md §6 row per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
+**Output contract:** this file owns content laws only. Registration is one page file + root-index entry per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
 
 **Trigger:** operator-controlled truth — a flag, a feature kill-switch, a deployment window,
 or a degradation the backend knows about. Without such a switch there is no page in this

@@ -1,8 +1,10 @@
 # Recording decisions
 
-`PAGES.md` is valuable because of its **reasons**, not its rows. A list of screens can be
+The pages tree is valuable because of its **reasons**, not its files. A list of screens can be
 rebuilt by anyone; the memory of why a screen was rejected cannot. Every inclusion, exclusion,
-split, merge and redirect gets a record.
+split, merge and redirect gets a record. Records live in the root index's decision sections
+(`../../references/pages-tree-format.md` §5); each page file carries its own spec, not the
+cross-page decision cargo.
 
 ---
 
@@ -10,7 +12,7 @@ split, merge and redirect gets a record.
 
 | Class | Meaning | Lives in |
 |---|---|---|
-| **Include** | The product needs this screen | Category table |
+| **Include** | The product needs this screen | Main map (root index) |
 | **Exclude** | Considered and deliberately not built | Exclusions |
 | **Defer** | Plausible later; not in this scope | Exclusions (`deferred`) or Open Decisions |
 | **Redirect** | Route exists only to hand off | Redirects + Exclusions |
@@ -75,7 +77,7 @@ Open Decisions; do not silently pick one.
 
 ## Recording exclusions
 
-The exclusion table is the most important part of the map. It has five required fields:
+The exclusion record is the most important part of the map. It has five required fields:
 
 | Field | Rule |
 |---|---|
@@ -209,5 +211,5 @@ Before the map is considered done:
 - [ ] Every redirect names its type and what the user sees.
 - [ ] Every "owned elsewhere" names the owning skill or surface.
 - [ ] Conflicts are recorded, not resolved silently.
-- [ ] Counts in Coverage match the tables.
+- [ ] Counts computed from the tree match the map.
 - [ ] No row depends on a fact the user never gave.

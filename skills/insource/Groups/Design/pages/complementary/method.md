@@ -1,14 +1,15 @@
 # complementary — conditional screens (`/pages complementary`)
 
-Owns `PAGES.md` §6 rows (registered conditional screens with their anatomy), §7 state-vs-page
-calls, exclusions with kind=complementary, and the boundary test that decides what this mode
-may touch at all. Family content lives in `references/`; this file is the workflow.
+Owns the complementary pages of the `<docs>/pages/` tree (kind=complementary on the root index
+map, with their anatomy), the state-vs-page calls, exclusions with kind=complementary, and the
+boundary test that decides what this mode may touch at all. Family content lives in
+`references/`; this file is the workflow.
 
 **The family:** screens that appear only when a triggering condition fires and whose absence
 never breaks normal operation — onboarding, transaction outcomes, HTTP errors, session gates,
 maintenance/outage, access gates, token handoffs, and relay redirects. Not: prerequisites
 ("must have an account" describes every authenticated main page), and not states inside
-screens (empty results and validation errors belong to their pages, §7).
+screens (empty results and validation errors belong to their pages).
 
 ## Laws specific to this mode
 
@@ -23,7 +24,7 @@ screens (empty results and validation errors belong to their pages, §7).
 ## Workflow
 
 1. **Boundary first** — every candidate passes `references/boundary-test.md`'s three
-   questions. Failures get named and handed: main (§4), secondary (§5), or states (§7).
+   questions. Failures get named and handed: main, secondary, or states (the owning page).
 2. **Inventory candidates** — walk `references/catalog.md` against the project's real
    evidence: routes, webhook/return wiring, auth middleware, feature flags, entitlement
    checks, mail templates (which tokens actually exist). Present the set; ask which to design.
@@ -31,13 +32,16 @@ screens (empty results and validation errors belong to their pages, §7).
    mode's owner file defines; every page signs all of it.
 4. **Build per the family reference** — each of the nine `references/<family>.md` files owns
    the per-class copy laws and anti-patterns.
-5. **Register in PAGES.md §6** — the row shape and its required fields are `anatomy.md`'s
-   decision (mirrored by `../references/pages-md-format.md`'s field rules; a §6 row missing
-   any is an audit defect). Exclusions (e.g. a cancel page the failure screen already owns)
-   go to §9 with kind=complementary; worked shape in `examples/after-payment/anatomy-sheets.md`.
+5. **Register in the tree** — a page file under `<docs>/pages/` plus a kind=complementary entry
+   on the root index map; the anatomy fields are recorded in the page file at the depth it
+   needs (`anatomy.md` owns the contract; `../references/pages-tree-format.md` owns the file
+   shape). Exclusions (e.g. a cancel page the failure screen already owns) go to the root
+   index's Exclusions section with kind=complementary; worked shape in
+   `examples/after-payment/anatomy-sheets.md`.
 6. **`audit <routes-dir>`** — sweep real routes for conditional pages that violate a law:
-   URL-guessed success, dead-end failure, unregistered §6 absence, relay pages rendering
-   content. Report per page with the law cited; fix the map and the page in one change.
+   URL-guessed success, dead-end failure, an unregistered conditional page (no file or index
+   entry), relay pages rendering content. Report per page with the law cited; fix the tree and
+   the page in one change.
 
 ## References (this mode)
 
@@ -45,6 +49,6 @@ screens (empty results and validation errors belong to their pages, §7).
 |---|---|---|
 | `references/boundary-test.md` | the three questions + the misfit table (signup, dashboard, checkout, status-page seam) | deciding whether anything belongs here at all |
 | `references/catalog.md` | the nine families with triggers, exits, detection evidence | presenting candidates |
-| `references/anatomy.md` | the six-field contract every page signs + the §6 row shape | designing any page |
+| `references/anatomy.md` | the six-field contract every page signs + how it lands in the page file | designing any page |
 | `references/onboarding.md` · `transaction-success.md` · `transaction-failure.md` · `http-errors.md` · `session-gates.md` · `maintenance-outage.md` · `access-gates.md` · `token-handoff.md` · `relay-redirect.md` | per-family copy laws, states, anti-patterns | working that family |
 | `examples/after-payment/anatomy-sheets.md` | a filled-in success/failure/pending trio with one recorded exclusion | seeing the method end to end |

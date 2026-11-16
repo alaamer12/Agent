@@ -1,6 +1,7 @@
 ---
 name: assets
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: >-
   Pipeline contract for a project's imagery: plan the bill of materials, generate the masters,
   conform them into delivery files. Routes the three steps to the skills that execute them -
@@ -54,7 +55,7 @@ rows get a prompt, `sheet <path>` rows do not.
 | Check delivered edges and transparency by eye | `resources` (`contact_sheet.py`) |
 | Convert, optimize, rename, localize, inventory files | `resources` |
 | Real photos, avatars from a library | `fahlwy` |
-| Which pages exist at all | `pages` - the BOM consumes `PAGES.md` |
+| Which pages exist at all | `pages` - the BOM consumes the `pages` tree (`<docs>/pages/`) |
 
 ## The slot id
 

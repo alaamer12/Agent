@@ -5,7 +5,7 @@ generated as one sheet. Every number below was measured, not guessed.
 
 ## bom/home.md
 
-- **Source:** `PAGES.md` §home
+- **Source:** `<docs>/pages/home.md`
 - **Style canon:** `bom/style.md` (flat 2D vector, warm off-white UI, rounded shapes)
 - **Placement:** `public/images/home/avatars/`, resolved by slot id in `Home.tsx`; replacing an
   avatar is dropping a same-named file

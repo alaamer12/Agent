@@ -1,6 +1,7 @@
 ---
 name: search-deeply
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Perform multi-pass deep technical research and produce implementation-oriented architecture studies for complex systems problems. Use when the user requests very deep research, production-grade architecture analysis, lifecycle design, formal state machines, ownership models, race-condition handling, resource pools, platform constraints, failure-mode analysis, anti-patterns, or any study that must go far beyond shallow answers. Triggers include deep research, architecture study, implementation-oriented, formal state machine, ownership analysis, failure modes, anti-patterns, decision matrix.
 ---
 

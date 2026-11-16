@@ -1,6 +1,7 @@
 ---
 name: ladder
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Find, design and harden ladders: ordered decision structures where rungs (a condition paired with an outcome) are evaluated in one order until something wins. Built for asks such as whether the code already has tiers, layers or fallbacks between its parts, whether errors escalate instead of being swallowed, and whether a guarantee is actually guaranteed: it audits the code for the precedence chains already in it, reports findings with file:line evidence, presents the fitting shapes with trade-offs and asks which to take, then records the decision in the project''s own doc format and implements to it. Names the twelve shapes and four semantics (first-match, all-strictest, all-permissive, exactly-one) and the defects it detects (shadows, unreachable rungs, missing terminal rung, severity inversion, swallowed failures). Writes them without nested conditionals: pure decide over data, effects at the boundary, in the repo''s own paradigm.'
 when_to_use: The user asks whether tiers/ladders/layers or fallbacks exist in the code, wants code made more robust or a guarantee guaranteed, wants errors or information escalated instead of swallowed, asks to design classification/routing/authorization/escalation/state-resolution logic, wants an if-else chain replaced, or asks why one rule never fires.
 ---

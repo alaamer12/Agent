@@ -48,8 +48,8 @@ A candidate is a state, not a page, when:
 - it disappears on refresh because it was transient feedback (`success toast`, `saved`);
 - it is a conditional variant of the same job (`permission denied` inline, `upgrade prompt`).
 
-States still belong in `PAGES.md` — under a **States** column or a shared states table — because
-an unplanned state is how empty screens ship.
+States still belong in the map — the root index's **States** section, or depth inside the
+owning page — because an unplanned state is how empty screens ship.
 
 ---
 
@@ -197,14 +197,14 @@ compatibility, naming or flow reasons but must not render its own surface.
 
 ### Recording redirects
 
-Every redirect gets a row in the **Redirects** table of `PAGES.md`:
+Every redirect gets an entry in the root index's **Redirects** section:
 
 | From | To | Type | Reason | Source |
 |---|---|---|---|---|
 | `/reset-password` | `/forgot-password` | alias + notice | Passwordless product; no reset screen | `DECISIONS.md` §auth |
 | `/settings` | `/settings/profile` | 302 | Settings hub has no standalone content | this session |
 
-If the redirect replaces a screen the user asked for, the **Exclusions** table also carries the
+If the redirect replaces a screen the user asked for, the **Exclusions** section also carries the
 decision, with the same reason. One decision, two views: the redirect tells the router what to
 do; the exclusion tells the next agent why not to build it.
 
@@ -249,6 +249,6 @@ For every split or redirect, write:
 - **The old route** and its redirect, if any.
 - **What was deliberately not split** and why.
 
-Then add the split to the **Splits** section of `PAGES.md` and the redirect to the
-**Redirects** table. If the split changes a previously recorded decision, supersede it with a
+Then add the split to the root index's **Splits** section and the redirect to its
+**Redirects** section. If the split changes a previously recorded decision, supersede it with a
 date and a link — never silently rewrite history.

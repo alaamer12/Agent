@@ -1,6 +1,6 @@
 # Access gates
 
-**Output contract:** this file owns content laws only. Registration is one PAGES.md §6 row per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
+**Output contract:** this file owns content laws only. Registration is one page file + root-index entry per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
 
 **Trigger:** the person reached a real door that is currently locked *to them* — account
 locked, verification outstanding, plan/seat/region not entitled, consent not yet given. The

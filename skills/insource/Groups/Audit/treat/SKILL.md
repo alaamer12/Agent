@@ -1,6 +1,7 @@
 ---
 name: treat
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Evaluate how adopted tools and libraries want to be used and recommend structure or adaptations that respect their model - concepts, patterns, constraints. Reviews a named tool, or discovers model-heavy candidates from the dependency manifests when none is named. Version-aware: the model comes from docs for the installed version, and previous-major idioms are findings. Produces a diagnostic report (in chat by default, as TREAT.md on request) and never edits code. Use when adopting a library or checking whether a project forces a tool into an unnatural shape (Zod, Effect, io-ts). Triggers include treat, respect the tool, tool-aware structure, library model, adapt project to library, zod v3 vs v4, library migration, are we using this library correctly.'
 ---
 

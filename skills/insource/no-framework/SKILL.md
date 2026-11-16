@@ -1,6 +1,7 @@
 ---
 name: no-framework
-version: 1.0.0
+version: 1.0.1
+specialized: navigo
 updated: 2026-10-08
 description: >
   Build Single Page Applications using NoF (No Frameworks) — Navigo (~4KB routing) plus a choice of small UI libraries (Preact by default, or VanJS / Nano JSX via `--ui`), no React/Vue/Angular runtime or mandated structure. Use whenever scaffolding a small-to-medium SPA that should stay framework-free. Requires verifying current library versions/API (chosen UI library, Navigo, @preact/signals or Nano Stores) before writing code — pinned versions, especially fast-moving ones like @preact/signals, can go stale; the `updated` field above is a staleness signal, not a guarantee. Any vanilla-JS-compatible library is fair game, including Tailwind/Sass (`--styler`) and Nano Stores for cross-library state; StyleX is excluded (tied to React). Covers scaffolding, state/signals/derive patterns, routing, components, rendering, debugging, and production paths (no-bundler htm, and Vite JSX). Not a fit for very large multi-page apps, large teams, or heavy animation needs — see "when to use".

@@ -1,6 +1,7 @@
 ---
 name: pvc
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Role-based UI construction (Page → View → Component, plus Decoration, Aligner, UI Element, Rendition) — framework-agnostic architecture for building or auditing UI code in React, Vue, Solid, Svelte, Blazor, Dioxus or any component system. Use when designing a screen or feature folder, deciding what a piece of UI actually is, separating loading/error/offline handling, placing a shared Component, naming a unit, or when a codebase has become "everything is a component". Also use for `scripts/check_pvc.py` audits and `scripts/scaffold_feature.py` skeletons. Classifying a fact as a State or a Condition, and deciding who owns it, is the companion /states skill — invoke both for screen design; this skill needs only whether a unit reads a fact source.
 argument-hint: "<feature or screen being designed, or a path to audit>"
 ---

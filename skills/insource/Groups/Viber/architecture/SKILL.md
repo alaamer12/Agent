@@ -1,6 +1,7 @@
 ---
 name: architecture
-version: 1.0.0
+version: 2.0.1
+specialized: none
 description: Orchestrates and drafts an application's complete technical architecture documentation suite across its core pillars (language conventions, error handling, visual UI/interaction, relational/SQL data modeling, plugin and settings extensibility under the Open/Closed Principle, cross-platform multi-device mechanics, accessibility/sensory adaptation, and display/notation architecture (how values are expressed - precision levels, container fit, locale display, voice-typeface pairings)), invoking each specialized sub-pillar to author binding specifications into the project's documentation suite (<docs>/ or <docs>/architecture/).
 argument-hint: "<project root or app name>"
 ---
@@ -12,6 +13,8 @@ argument-hint: "<project root or app name>"
 The **architecture** skill provides a unified, production-grade framework for establishing an application's technical architecture across 8 specialized pillars: **Language**, **Error**, **UI**, **Accessibility**, **Display**, **Database**, **Plugin & Settings**, and **Cross-Platform**.
 
 Rather than dividing into fragmented independent tools, **architecture** serves as the single unified authority. Its internal sub-directories (`language/`, `error/`, `ui/`, `accessibility/`, `display/`, `db/`, `plugin/`, and `cross-platform/`) provide modular, self-contained reference guides, templates, and polyglot examples that are invoked selectively based on project needs.
+
+The pillars are internal modules, not independent skills. `accessibility/`, `display/`, and `plugin/` each carry a `method.md` with that pillar's workflow; read it first when routing there. The other pillars are driven directly from this file through their `references/`, `assets/`, and `examples/`.
 
 ---
 
@@ -172,5 +175,5 @@ The generated artifacts are written to the project's documentation root as confi
 4. **No Hardcoded Paths:** Always use relative or user-configured `<docs>/` paths.
 5. **UNITS.md Integration:** Any architectural unit or visual control identified during the interview must be cross-checked against `UNITS.md`.
 6. **Polyglot Universality:** Keep all reference guides, examples, and rules framework-agnostic and balanced across different languages.
-7. **Open/Closed Growth Gate:** Any settings or plugin design must pass the four extensions in `plugin/SKILL.md` — add an item, add a module, add a shape, add a scope — without editing shared code beyond the declared extension point. Name the files each extension changes; if shared code appears, the seam is wrong.
+7. **Open/Closed Growth Gate:** Any settings or plugin design must pass the four extensions in `plugin/method.md` — add an item, add a module, add a shape, add a scope — without editing shared code beyond the declared extension point. Name the files each extension changes; if shared code appears, the seam is wrong.
 8. **Build-Time by Default:** Prefer build-time code and contracts. Move an axis to runtime only for a written reason and only on a platform that permits it. Never propose downloadable executable code on a mobile app-store target.

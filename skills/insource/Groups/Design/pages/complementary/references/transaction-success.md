@@ -1,6 +1,6 @@
 # Transaction success
 
-**Output contract:** this file owns content laws only. Registration is one PAGES.md §6 row per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
+**Output contract:** this file owns content laws only. Registration is one page file + root-index entry per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
 
 **Trigger:** server-confirmed completion of a consequential, ideally irreversible action —
 payment settled, order placed, filing submitted. The provider's return URL is a *request to

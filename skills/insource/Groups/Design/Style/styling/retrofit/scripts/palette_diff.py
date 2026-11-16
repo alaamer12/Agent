@@ -130,7 +130,7 @@ def state_names(root: str, file_name: str) -> list[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Exact before/after parity diff for styleup.")
+    parser = argparse.ArgumentParser(description="Exact before/after parity diff for the styling retrofit level.")
     parser.add_argument("--baseline", required=True)
     parser.add_argument("--current", required=True)
     parser.add_argument("--file", default=DEFAULT_FILE, help=f"image name per state (default {DEFAULT_FILE})")

@@ -5,7 +5,7 @@
      comment. Style DNA, Character canon and Hard rules are copied VERBATIM into each prompt.
      Leave shipped artwork alone - prompts exist only for slots that need (re)generation. -->
 
-- **Source:** `PAGES.md` §<page>
+- **Source:** `<docs>/pages/<page>.md`
 - **Status:** <style-confirmed / nothing-pending / N slots pending>
 - **Style canon:** `bom/style.md` (or "this file, single-page project")
 - **Style anchor:** <path of the first approved image, or "none yet">

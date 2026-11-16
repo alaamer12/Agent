@@ -1,6 +1,6 @@
 # HTTP & runtime errors
 
-**Output contract:** this file owns content laws only. Registration is one PAGES.md §6 row per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
+**Output contract:** this file owns content laws only. Registration is one page file + root-index entry per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
 
 **Trigger:** a route that does not resolve (404), a server fault (5xx), a resource gone
 (410), no connection (offline), or an unhandled runtime crash. Distinct from

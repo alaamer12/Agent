@@ -1,6 +1,7 @@
 ---
 name: states
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Classify any fact an app consults as a State or a Condition, decide who owns it, and settle whether a consumer may read it or must create it. Use when deciding loading vs offline, error vs permission-denied, empty vs feature-flag-off, or any "is this my own request or something external" question; when placing a fact source (hook, composable, signal, resource, store, injected service); when a background job, sync worker, or subscription needs an ownership decision; or when a fact is duplicated across consumers. Fact sources return data and never render — the UI roles that consume them belong to the /pvc skill.
 argument-hint: "<the flag, loading value, subscription, or request being classified>"
 ---

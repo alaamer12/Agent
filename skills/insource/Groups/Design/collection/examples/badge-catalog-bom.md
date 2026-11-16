@@ -7,7 +7,7 @@ them correctly.
 
 ## bom/achievements.md
 
-- **Source:** `PAGES.md` §achievements
+- **Source:** `<docs>/pages/achievements.md`
 - **Style canon:** none needed - this is existing art, not a generated set
 - **Placement:** `public/badges/`, resolved by slot id in `BadgeGrid.tsx`; a badge is swapped by
   dropping a same-named file

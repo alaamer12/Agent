@@ -1,6 +1,7 @@
 ---
 name: typing
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Type-hinting experience, one skill, two levels: harden (the general craft — brands for raw types, creation points, boundary checks that turn untrusted data into typed values, compiler-first rejection, validation libraries and database constraints, in any language) and tiers (the opt-in three-tier architecture — primitives, brands, shapes — with its conversion path). The router picks ONE level and reads only its method.md. Default to harden; reach for tiers only when the project or user chose it (detect primitives/, brands/, shapes/ folders or the word tiers) — never impose the architecture or a naming scheme. Triggers: improve/tighten/audit types, stringly-typed or primitive-obsessed code, branded/NewType/opaque types, validate config or API contracts, make wrong values an error, type-up, tier-up, tiered types, primitives brands shapes, adopt the tier architecture, promote this to a brand. Golden rule: reuse existing types, never reinvent them. Tier means type-system tiers only, never architecture layers.'
 when_to_use: The user asks to improve, tighten or audit a codebase's types (harden), or the project or user chose the three-tier type architecture and code must be built or converted to it (tiers).
 argument-hint: "[harden|tiers] <target>"

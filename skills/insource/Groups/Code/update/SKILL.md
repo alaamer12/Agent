@@ -1,6 +1,7 @@
 ---
 name: update
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: >-
   Change something everywhere it lives, leaving no stale copy behind. Use for ANY change
   request: reword copy or docs; rename a term, identifier, file, route, or brand; change a value

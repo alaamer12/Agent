@@ -1,6 +1,7 @@
 ---
 name: design
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Design work, one skill, four modes: design-md (author the project''s canonical DESIGN.md: machine-readable tokens + human rationale, Google Labs design.md conventions - "/design DESIGN.md <file>"), playfile (throwaway design-review waves: self-contained linked HTML screens, URL-forced states, README dossiers - "/design a playfile"), prototype (interactive URL-driven prototype system: dev dock, component stories, per-component state trees, dedup guards - "/design prototype <screen>"), calibrate (extract the full design, visual and interaction DNA of a North-Star reference implementation and apply it to a project - "calibrate the /design of X to Y"). The router picks ONE mode and reads only its method.md. Triggers: DESIGN.md, design tokens, playfile, quick linked HTML mockups, prototype this, dev dock, stories gallery, calibrate design, match this app''s design to a reference. Not for UI redesign passes, page inventories or mockup-to-device parity - those stay separate skills (denoise, pages, parity).'
 when_to_use: The user asks to author a DESIGN.md, run a wave of linked HTML review screens, build or extend an interactive URL-driven prototype, or calibrate a project's design to a reference implementation.
 argument-hint: "[design-md|playfile|prototype|calibrate] <target>"

@@ -1,11 +1,4 @@
----
-name: plugin
-version: 1.0.0
-description: "Authors an application's plugin and settings architecture as one extensibility system. Settings and plugins are the same family: a closed host exposes a small extension contract, and an open set of contributions adds behavior without editing shared code. Use when designing, reviewing or refactoring settings pages, configuration catalogs, feature flags, per-tenant or per-platform preferences, extension points, module systems, or plugin hosts. Decides build-time versus runtime loading per axis, enforces an Open/Closed growth gate, and specifies descriptor data, contribution registries, layered composition, scope and storage, renderer shapes, consumer authorities, migration, versioning, trust and failure isolation."
-argument-hint: "[project root or app name]"
----
-
-# Plugin & Settings Architecture Skill
+# Plugin & Settings Architecture Pillar
 
 ## 1. Overview & Philosophy
 
@@ -84,7 +77,7 @@ Two supporting tests:
 
 ```text
 plugin/
-├── SKILL.md                                                  # Entry point, doctrine, workflow, OCP gate
+├── method.md                                                 # Pillar doctrine, workflow, OCP gate
 ├── assets/
 │   └── templates/
 │       ├── settings-architecture-template.md                 # Binding settings/plugin specification
@@ -103,7 +96,7 @@ plugin/
 
 ## 5. Workflow & Conversational Discovery
 
-When invoked, either standalone or via the parent `architecture` skill:
+When the parent `architecture` skill routes to this pillar:
 
 ### Step 1: Inspect before asking
 

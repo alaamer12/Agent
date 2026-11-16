@@ -1,6 +1,7 @@
 ---
 name: svg
-version: 1.0.0
+version: 1.0.1
+specialized: svg
 description: "Animate a static, flat SVG logo or icon (solid-fill <path> elements) with one of twenty-five animation styles: chrome-liquid, draw-fill, loading-loop, elastic-entrance, rise, iris, neon, pulse, flip, comet, focus (rack-focus, blur resolves), crt (TV power-on + scanlines), chroma (RGB ghosts converge), mosaic (tiled mask dissolve), ripple (turbulence warps geometry), spark (a travelling spark reveals), engrave (emboss under raking light), grain (noise-threshold dissolve), tide (wavy waterline rises), polarity (inverting band sweeps), blinds (slats open), assemble (fragments fly in and lock), lantern (a wandering light reveals), pinwheel (wedges scale open), unroll (falls from a top hinge). Per-style signatures are in the SKILL.md table. Trigger when the user asks to animate a logo/SVG, names any of these effects, wants an existing treatment replicated on a new file, or needs light/dark theme variants. Always preserves fill-rule=evenodd so letterform holes (Arabic ص/ه, Latin a/o/e) never fill in solid."
 argument-hint: "<style> <file.svg>  (style: liquid|draw|load|elastic|rise|iris|neon|pulse|flip|comet|focus|crt|chroma|mosaic|ripple|spark|engrave|grain|tide|polarity|blinds|assemble|lantern|pinwheel|unroll)"
 ---

@@ -1,6 +1,7 @@
 ---
 name: chat
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Relaxed conversation mode the user starts and ends. The user wants to talk something through, not get work done: the agent listens, answers in short plain sentences, follows their lead, and changes nothing. Invoked only by the user with /chat [topic]; never self-started, and never entered by the agent because a conversation happens to sound casual.'
 when_to_use: Never. This skill is user-invoked only - /chat, /chat with me about <topic>. The agent must not start it on its own.
 argument-hint: "[topic, optional]"

@@ -3,8 +3,13 @@
 A filled-in anatomy sheet set for one flow, as `anatomy.md` requires before design. The
 product: a subscription app with card + wallet payments, provider redirects back to
 `/payments/return`, an `automatic_retry`/`manual_retry` pair already owned in the project's
-contracts. Two pages recorded; the third row is an exclusion, because exclusions are decisions
+contracts. Two pages recorded; the third is an exclusion, because exclusions are decisions
 too.
+
+In the tree these live as `payments/success.md`, `payments/failed.md` and `payments/pending.md`
+under `<docs>/pages/`, each kind=complementary on the root index map with its family noted; the
+`payments/` directory carries its own shard `index.md`. The cancel page below is an Exclusions
+entry on the root index — deliberately not a file.
 
 ## Payment Success — family: transaction-success
 
@@ -38,7 +43,7 @@ too.
 - **Cause copy:** human sentence + raw code in a `<details>` for support.
 - **Status:** confirmed with payments owner.
 
-## Provider Timeout (pending) — recorded as its own anatomy row
+## Provider Timeout (pending) — recorded as its own page
 
 - **Trigger:** status `unknown` and provider webhook not yet settled after N seconds.
 - **Behavior:** neither success nor failure graphics; "we could not confirm — checking your
@@ -53,6 +58,6 @@ too.
 
 - **Decision:** excluded. Provider cancel returns hit the same return URL with `aborted`;
   `transaction-failure`'s pending-vs-failed anatomy already answers it with a
-  "you cancelled, nothing charged (confirmed)" state row. A dedicated page would be a fourth
+  "you cancelled, nothing charged (confirmed)" state. A dedicated page would be a fourth
   exit nobody chose, and dead-end law prefers one failure surface that owns all its states.
 - **Status:** excluded (reason above) — recorded so nobody re-invents it.

@@ -1,6 +1,7 @@
 ---
 name: taste
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Smart design router skill that clarifies user intent to route to either ui-taste (apps/dashboards/iOS) or design-taste-frontend (landing pages/showcases).
 ---
 

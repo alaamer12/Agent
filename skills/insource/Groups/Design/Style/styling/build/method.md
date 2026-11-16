@@ -1,22 +1,4 @@
----
-name: styling
-version: 1.0.0
-description: >-
-  Platform-neutral rules for writing NEW styling on any stack (HTML/Web, Blazor, MAUI, Qt):
-  per-module stylesheets, no monolith; role-named tokens as single source of truth; styling as a
-  chain of layers, downward-only imports (values -> tokens -> mixins/utilities/functions ->
-  composed styles -> module scope; layer count is the project's call, not this skill's);
-  expressive names over ambiguous ones - the ambiguity trap: do not call everything 'card' and
-  patch it per site; thin bases fine, expressive layers chosen not mandated; module classes are
-  file-private; conditional/runtime discipline: states as class mappings or state attributes,
-  runtime values as dynamic tokens, inline only for calculated numbers; composition helpers
-  (joiner, merge-on-conflict, variant registry). Use when styling structure is yours, when it
-  sprawls into inline dumps or built class strings, or asked how to organize CSS/XAML/QML. Not
-  for retrofitting projects into tokens (styleup), redesign (denoise), or component galleries
-  (components).
----
-
-# Styling
+# build — writing new styling
 
 Write styling that a stranger can read: every value named once, every file scoped to its module,
 every dynamic decision made through a channel the platform can resolve — never assembled as a
@@ -153,15 +135,15 @@ Three jobs, any stack — prefer a thin local helper or platform primitive over 
 
 ## Boundaries
 
-`styling` and `styleup` both aim to enhance the styling experience — they are the same goal at
-different layers: **styling constructs the project so a true design system can exist** (structure,
-chain, naming, decisions made right the first time); **styleup takes action on the code that was
-already written** (inventorying hardcoding, migrating it into tokens with parity evidence). New
-work: this skill. Retrofit of existing mess: styleup.
+`build` and `retrofit` are the two levels of `/styling` — the same goal at different layers:
+**build constructs the project so a true design system can exist** (structure, chain, naming,
+decisions made right the first time); **retrofit takes action on the code that was already
+written** (inventorying hardcoding, migrating it into tokens with parity evidence). New work: this
+level. Retrofit of existing mess: the `retrofit` level (`/styling retrofit`).
 
 | Situation | Skill |
 |---|---|
-| Existing project hardcoded/duplicated, migrate into tokens with parity evidence | `styleup` |
+| Existing project hardcoded/duplicated, migrate into tokens with parity evidence | the `retrofit` level (`/styling retrofit`) |
 | Redesigning an existing UI for calm/readability | `denoise` |
 | Reviewing component x state coverage | `components` |
 | Deriving which states a screen must handle at all | `stateful` |

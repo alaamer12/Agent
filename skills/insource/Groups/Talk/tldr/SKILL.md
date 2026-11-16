@@ -1,6 +1,7 @@
 ---
 name: tldr
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Answer in the shortest honest form instead of the usual full explanation — a word, a phrase, or one short sentence, with no preamble, hedging, or recap of what was done. Use this whenever the user says "tldr", "tl;dr", asks you to be brief, asks for a short answer, a one-word answer, "just tell me yes or no", "in short", "sum it up", or reacts to a normal-length reply with something like "too long", "just answer", "shorter", or "get to the point." Also use it any time the user is clearly asking a plain yes/no/status/confirmation question about something already discussed ("does this work now?", "did that fix it?", "is it done?") and a short answer would fully satisfy them — even without the word "tldr." Always trigger this even if the user's phrasing is casual or in a language other than English.
 ---
 

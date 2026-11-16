@@ -1,6 +1,7 @@
 ---
 name: impurities
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Project-wide defect discovery and remediation through self-designed iterations — never a fixed checklist. Assess the actual project (runtime, resources, dependencies, assets, build, CI, config, platforms), then design and run as many focused investigate-and-remediate iterations as its specific risks warrant: investigate, document findings with evidence, root-cause, fix preserving intended behavior, verify, commit traceably on an isolated branch. Core discipline — absence of an obvious reference is evidence to investigate, not proof of unused: build tooling, plugins, reflection, codegen, and CI consume what imports never show. Findings classified confirmed/suspected/optimization/unresolved, never beyond their evidence; the plan adapts mid-work; sub-agents take independent scopes, the parent owns integration. Completes on responsible coverage, not "defect-free". Use for hidden defects, waste, unsafe patterns, deep tech-debt sweeps. Triggers: impurities, defect hunt, find what''s wrong, deep cleanup.'
 ---
 

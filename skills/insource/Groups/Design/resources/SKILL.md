@@ -1,6 +1,7 @@
 ---
 name: resources
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: 'Resource files for any platform: images, icons, fonts, audio, video, documents, color values - the files, not the systems that serve them. Fourteen tools: recolor, convert/fix-extension, rotate/flip/scale/resize/crop, favicon/app icon sets, OG images, splash screens, optimization with before/after sizes, CDN localization, inventory (duplicates, unused, external URLs), CSS Color 4 + WCAG contrast, a Bun.Image variants/ThumbHash script, and conform - probe a sheet (row-by-row layout, cut lines, ceiling), cut it into slots on an even grid or the measured gutters, fit each to its BOM delivery spec, review on a checkerboard with alpha-edge facts, verify. Audio/video use ffmpeg; renames are shell moves + reference updates. Rules: names, brand-vs-content, formats by purpose, ask-first splash choices. Triggers: favicon, icons, splash, OG, recolor, convert, optimize, localize, color, rename, unused resources, conform, split a generated image, sprite sheet, staggered sheet, probe sheet.'
 when_to_use: The user asks to create, convert, transform, recolor, organize, rename, localize or optimize project resources (images, icons, fonts, video, splash/loading screens, favicons, OG images), to split and fit generated images to their delivery spec, or to audit a resource folder for duplicates and unused files. Also /resources.
 argument-hint: "[the resource, folder or task - icons, favicon, splash, og, optimize, localize, inventory, rename, recolor, convert, transform, conform]"

@@ -1,253 +1,260 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "agent-browser": {
       "source": "vercel-labs/agent-browser",
       "sourceType": "github",
       "skillPath": "skills/agent-browser/SKILL.md",
-      "computedHash": "80161e6836b3b40f4e83730a290deb40ac14d877d38c97ad5f6d71be37ce74c3"
+      "computedHash": ""
     },
     "animation-on-scroll": {
       "source": "mengto/skills",
       "sourceType": "github",
       "skillPath": "agent-skills/web-design/animation-on-scroll/SKILL.md",
-      "computedHash": "12fd86ebbbe4d7baa11148ecc1bd4dcc1a188f7262d34d47d3b6ca169a432b9e"
+      "computedHash": ""
     },
     "animation-systems": {
       "source": "mengto/skills",
       "sourceType": "github",
       "skillPath": "agent-skills/web-design/animation-systems/SKILL.md",
-      "computedHash": "3b1538b9b7d54531ed0d83745d7748347b0285be6146b50af74b92224301eb3f"
+      "computedHash": ""
     },
     "animation-vocabulary": {
       "source": "emilkowalski/skills",
       "sourceType": "github",
       "skillPath": "skills/animation-vocabulary/SKILL.md",
-      "computedHash": "9aaad861dd54dab7c9bb3fb5bd4c539078d8d06c14530d92d49cdb1509bfa937"
+      "computedHash": ""
     },
     "anti-ai-writing": {
       "source": "iustinvaliza-del/anti-ai-writing-skill",
       "sourceType": "github",
       "skillPath": "SKILL.md",
-      "computedHash": "b223f57ca576795d8abb6da7f124926c358a03b0839ef81b6f604064620c05f1"
+      "computedHash": ""
     },
     "ascii-animation": {
       "source": "iart-ai/web-animation-skills",
       "sourceType": "github",
       "skillPath": "skills/ascii-animation/SKILL.md",
-      "computedHash": "0e4fa3f778c41e372cdcc1895fb206d0886c4fd5de221f69bfd12788920e8e3a"
+      "computedHash": ""
     },
     "authoring-github-workflows": {
       "source": "dotnet/skills",
       "sourceType": "github",
       "skillPath": ".agents/skills/authoring-github-workflows/SKILL.md",
-      "computedHash": "8a1ab212d59191e828ad00d02060c93cb642ff35dcb1761212a7cd2dcef212cb"
+      "computedHash": "40c2593a62798bb4d53e88dc63954f6db7714be59204bc93d9329655254961cd"
     },
     "brainstorming": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/brainstorming/SKILL.md",
-      "computedHash": "9c462616182917fb389d7d630c59000cff31ed18081baaa644ff148d4c967390"
+      "computedHash": "7d948b659fa494b6121055f66d6b94133381110a9f2304b8c0187a8e1581cdb0"
     },
     "breakdown-test": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
       "skillPath": "skills/breakdown-test/SKILL.md",
-      "computedHash": "aec76bd6b3246889ada4fecba3f78a6c5d0717d66a70af5791279556a3891759"
+      "computedHash": ""
     },
     "caption-animation": {
       "source": "iart-ai/tiktok-video-skills",
       "sourceType": "github",
       "skillPath": "skills/caption-animation/SKILL.md",
-      "computedHash": "1bcfe2026d1b2a81ff7257d7149f4a555d6d28e238be909050c308bec85ea513"
+      "computedHash": ""
     },
     "cast": {
       "source": "athevon/genjutsu",
       "sourceType": "github",
       "skillPath": "skills/cast/SKILL.md",
-      "computedHash": "1d15cbec63bef79d0f2f190ea1d4b20d81260cb051a6edaeb16a2113321fe3f5"
+      "computedHash": ""
     },
     "code-review": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/code-review/SKILL.md",
-      "computedHash": "b4f17857c85ca60af1df7d0b623dd03c2a48419f6123e714f3d9748ca744a1bf"
+      "computedHash": ""
     },
     "creative-thinking-for-research": {
       "source": "orchestra-research/ai-research-skills",
       "sourceType": "github",
       "skillPath": "21-research-ideation/creative-thinking-for-research/SKILL.md",
-      "computedHash": "2292a3a6b14e934e2077fe8d5c2fe5f2b636f068d44ec2bfb0d615d19c4fd740"
+      "computedHash": "647822185b60d4d2441cbfa8816e8d444df3f00be8615f19a96f0489d66bdff1"
     },
     "design-taste-frontend": {
       "source": "leonxlnx/taste-skill",
       "sourceType": "github",
       "skillPath": "skills/taste-skill/SKILL.md",
-      "computedHash": "974e1bb8cf7c78d3a63f1456d54a97119c03e7ab8bf374e04ade800892326ec7"
+      "computedHash": ""
     },
     "entrance-animations": {
       "source": "dylantarre/animation-principles",
       "sourceType": "github",
       "skillPath": "skills/05-by-animation-type/entrance-animations/SKILL.md",
-      "computedHash": "a9498cc8b268deaf3a7271474e7a1f04c6a4cbfbd6a43a652755ac3dee58ad2f"
+      "computedHash": ""
     },
     "find-animation-opportunities": {
       "source": "emilkowalski/skills",
       "sourceType": "github",
       "skillPath": "skills/find-animation-opportunities/SKILL.md",
-      "computedHash": "c6673fadf179233cc0a52c978ea9acc9b82a210665c749307a571a86ed4c092e"
+      "computedHash": ""
     },
     "gh-fix-ci": {
       "source": "openai/skills",
       "sourceType": "github",
       "skillPath": "skills/.curated/gh-fix-ci/SKILL.md",
-      "computedHash": "62b4c9b9aeb0e52925882185019e65c7785da8e7fa16ddb95dd3aaa00883961a"
+      "computedHash": "c937071ab3bf10c67ce9ca4152f318de0d9fbb5a24e2652a7e7d5a760bbc31be"
     },
     "godot-gdscript-mastery": {
       "source": "thedivergentai/game-dev-agentic-skills",
       "sourceType": "github",
       "skillPath": "skills/godot-gdscript-mastery/SKILL.md",
-      "computedHash": "d3ef93285ce1c0435d8887166a7a2dd83dff1e97654fafaaf4e73a5631918d9e"
+      "computedHash": "7eb22d05e74b9db4e85e22de06a9fc69e37b7729a6ce374a4675550fa9270665"
     },
     "grill-me": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/productivity/grill-me/SKILL.md",
-      "computedHash": "5e0c683385eafd83f106ac6c9d67dfbbfe5aa4b3fe65aad114eb1055a99c818f"
+      "computedHash": ""
     },
     "implement": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/engineering/implement/SKILL.md",
-      "computedHash": "130cac2d72bfde8cd526bf3b754211e2fe00e84bc4d9f9c56f749b9541a3afad"
+      "computedHash": ""
     },
     "ios-design": {
       "source": "uizze.sh",
       "sourceUrl": "https://uizze.sh/",
       "sourceType": "well-known",
-      "computedHash": "de4e9ed42df966a90087ea3a723571521ce72420442cbf6686388c00b2597312",
+      "computedHash": "bf6f8ac938352d92b8a1150f069c7c0a8ae4d9e18feccacc81862e2e7c72ebdb",
       "wellKnownDigest": "sha256:ae3d720aa60c1655c3dae48bc07c448527e367ab24ed829020ba0a5f6268b691"
     },
     "page-transition-animation": {
       "source": "iart-ai/web-animation-skills",
       "sourceType": "github",
       "skillPath": "skills/page-transition-animation/SKILL.md",
-      "computedHash": "2ca70040f86cc93643877b9cc1fe16653908b9729e87f5711fd6e74e62a789f4"
+      "computedHash": ""
     },
     "pdf": {
       "source": "anthropics/skills",
       "sourceType": "github",
       "skillPath": "skills/pdf/SKILL.md",
-      "computedHash": "37226d4220d844377e6b2a386c51a011df4cd130855ff0b80bcc22f9c28abd57"
+      "computedHash": ""
     },
     "programmatic-seo": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
       "skillPath": "skills/programmatic-seo/SKILL.md",
-      "computedHash": "55f7d5ab827c57ab916890ddd1aee1521f3aa447d66f75d9e8606236663d9180"
+      "computedHash": ""
     },
     "refactor": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
       "skillPath": "skills/refactor/SKILL.md",
-      "computedHash": "87789a786b96f99ba0680e89345a975106e10e7db1071c7cdc2e76d507c449d6"
+      "computedHash": ""
     },
     "refactoring-patterns": {
       "source": "wondelai/skills",
       "sourceType": "github",
       "skillPath": "refactoring-patterns/SKILL.md",
-      "computedHash": "5372f40d0b83f20713f7cb8436466280e234cc1b2a5e3c956ece457724c7b3a4"
+      "computedHash": ""
     },
     "review-animations": {
       "source": "emilkowalski/skills",
       "sourceType": "github",
       "skillPath": "skills/review-animations/SKILL.md",
-      "computedHash": "8c2befeb28bb484bf2de7b2fc228774857e266d32a65d76895e78651a536d8cf"
+      "computedHash": ""
     },
     "safe-debug": {
       "source": "lllllllama/rigorpilot-skills",
       "sourceType": "github",
       "skillPath": "skills/safe-debug/SKILL.md",
-      "computedHash": "f09bc8d4d750dd7cab6a61c05af7720d5543ff74bec8e557ae5e3461212c374c"
+      "computedHash": ""
     },
     "seo-audit": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
       "skillPath": "skills/seo-audit/SKILL.md",
-      "computedHash": "00202d90242df3ba5f240ffcf6bedca8e12854b350c8be65831a9346a5c6d6fd"
+      "computedHash": ""
     },
     "surprise-me": {
       "source": "bytedance/deer-flow",
       "sourceType": "github",
       "skillPath": "skills/public/surprise-me/SKILL.md",
-      "computedHash": "5f1e90e27bbf451bb0c1878ff4621b39a8f2c47f56e9a9b98426e736fbd1d37a"
+      "computedHash": "3e945d34ea3e1efef0890a36d7cbf2c70d613b093b22e1aefed6fdaf84958015"
     },
     "systematic-debugging": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/systematic-debugging/SKILL.md",
-      "computedHash": "3589907ee34dc8b1b7223a33fac98ab841a9e42f9960ab4433a832f0c6f00be0"
+      "computedHash": ""
     },
     "teach": {
       "source": "mattpocock/skills",
       "sourceType": "github",
       "skillPath": "skills/productivity/teach/SKILL.md",
-      "computedHash": "6e029f9d1d5acdc2e79e745f86424c218180b7b4c6a7c660e32c4802db12d6cf"
+      "computedHash": "31bb3eed09dd2787e290e933def99fbf7d65044a29119c224af47c01404ab228"
     },
     "testing-changes": {
       "source": "riekelt/principal-engineer",
       "sourceType": "github",
       "skillPath": "plugins/principal-engineer/skills/testing-changes/SKILL.md",
-      "computedHash": "e597c89d92066afeae1782507a5bb87eb6ca5cdc14d2fa275646995506287de7"
+      "computedHash": ""
     },
     "ui-animation": {
       "source": "mblode/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/ui-animation/SKILL.md",
-      "computedHash": "a27a1cfdb669fb9cb3759ea0409369d01bcfb577ca8bb945d5f95645c5806312"
+      "computedHash": ""
     },
     "ui-taste": {
       "source": "uizze.sh",
       "sourceUrl": "https://uizze.sh/",
       "sourceType": "well-known",
-      "computedHash": "9a37107c51b6bf6e3bdc2675d559094619b1b03092f8466c32ffc8e0cb9c1d4a",
+      "computedHash": "",
       "wellKnownDigest": "sha256:f26d607ceb3f3a6fa8c98f8dbcb2b1aeb0392de1953e826bb8893d9e49983bf9"
     },
     "ui-ux-pro-max": {
       "source": "nextlevelbuilder/ui-ux-pro-max-skill",
       "sourceType": "github",
       "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
-      "computedHash": "3f1e66e08e3d1d3feaf2a3187705022812e0bece8ff5bee80fe7cf782f26fe8b"
+      "computedHash": ""
     },
     "watch": {
       "source": "oxbshw/watch-skill",
       "sourceType": "github",
       "skillPath": "skills/watch/SKILL.md",
-      "computedHash": "f48c33110541e25575d53fea08fe60c07145b7499d7e04d23f278aecfa013ac5"
+      "computedHash": ""
     },
     "watching-videos": {
       "source": "oxbshw/watch-skill",
       "sourceType": "github",
       "skillPath": "skills/watching-videos/SKILL.md",
-      "computedHash": "3b6934b761bfb9e9e0f0d29796117c6ece7d2314bbd76d4ac1350e7ed0c137c8"
+      "computedHash": ""
     },
     "web-design-expert": {
       "source": "curiositech/some_claude_skills",
       "sourceType": "github",
       "skillPath": ".claude/skills/web-design-expert/SKILL.md",
-      "computedHash": "a5b561296a8fc3b057162c3b5b712b901d4aa840637308b5ceccf8450bb98316"
+      "computedHash": ""
     },
     "whiteboard-animation": {
       "source": "yangagent/whiteboard-animation-skill",
       "sourceType": "github",
       "skillPath": "skills/whiteboard-animation/SKILL.md",
-      "computedHash": "189aae005a449e532e92674f27d9bf2a7129831c92ce4ba3ec4750af4301767d"
+      "computedHash": ""
     },
     "writing-unit-tests": {
       "source": "riekelt/principal-engineer",
       "sourceType": "github",
       "skillPath": "plugins/principal-engineer/skills/writing-unit-tests/SKILL.md",
-      "computedHash": "3b87b422eaea2e84fb15de7e2b7d9bf5abebd4a60a2049ae285d22f69da254ce"
+      "computedHash": ""
+    },
+    "blog": {
+      "source": "AgriciDaniel/claude-blog",
+      "commit": "4f9c2cb8fd17f594e868d6c2ce0e8fb2c971f987",
+      "sourceType": "github",
+      "skillPath": "skills/blog/SKILL.md",
+      "computedHash": "3be06e6c81ce68813cbd4faa91c2545aefa94ab167feeac0162c4fd4b051f304"
     }
   }
 }

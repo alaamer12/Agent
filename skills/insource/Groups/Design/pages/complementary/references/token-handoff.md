@@ -1,6 +1,6 @@
 # Token handoffs
 
-**Output contract:** this file owns content laws only. Registration is one PAGES.md §6 row per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
+**Output contract:** this file owns content laws only. Registration is one page file + root-index entry per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
 
 **Trigger:** a one-time link landed — email verified, invitation accepted, password reset
 done, magic sign-in completed. The token *worked*; the page acknowledges the moment and hands

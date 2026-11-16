@@ -1,6 +1,7 @@
 ---
 name: revoke
-version: 1.0.1
+version: 1.0.2
+specialized: none
 description: 'Sanitise an artifact by revoking what ties it to a specific project, person, customer or deployment: the substance survives, the identity does not. Use when a report, spec, config, log or screenshot must leave its origin: inventory what is specific (names, ids, endpoints, secrets, dates, paths), choose per item [redact] [pseudonymize] [generalize] [aggregate] [keep] under one substitution map, verify nothing leaks (token/entropy sweeps, metadata, the map), and check the argument survives. No findings, no changes: with nothing identifying, the artifact ships byte-identical with a clean report; cosmetic rewording is editing, not revocation. Modes: /revoke partial masks values to fragments (A****) for owner-view screens - never secrets; /revoke image paints opaque blocks over visible identifiers (blur is not revocation), strips metadata. Not polyglot (stack-neutral); revoke is identity-neutral. Never to hide wrongdoing, evade a legal hold, strip safety notices or erase accountability; the original stays intact.'
 when_to_use: The user asks to sanitise, redact, anonymise, de-identify, genericise or "remove anything that identifies our project/customer" from a document, passage, config, log, screenshot, image or case study before sharing or reusing it. Also /revoke, /revoke partial (owner-recognition masks), /revoke image (pixel-level redaction of a picture).
 argument-hint: "[artifact or path] + [where it is going] | partial: [values] + [who will see them] | image: [image path] (+ regions, else revoke all visible identity)"

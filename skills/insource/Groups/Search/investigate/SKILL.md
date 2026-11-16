@@ -1,6 +1,7 @@
 ---
 name: investigate
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Investigate local files, codebases, datasets, and external Agent Skills. Use for high-precision searches across heterogeneous formats, diagnosing unfamiliar architectures, inspecting or comparing Skills from SkillsMP, GitHub, and other public sources, temporarily using or remixing external Skills, and synthesizing evidence into structured reports. Does not install external Skills unless explicitly requested.
 ---
 

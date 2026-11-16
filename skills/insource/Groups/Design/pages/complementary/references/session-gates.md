@@ -1,6 +1,6 @@
 # Session gates
 
-**Output contract:** this file owns content laws only. Registration is one PAGES.md §6 row per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
+**Output contract:** this file owns content laws only. Registration is one page file + root-index entry per `anatomy.md`; canon location and build follow `../../references/output-contract.md`.
 
 **Trigger:** the person is mid-intention and the app can no longer act for them — session
 expired, re-auth required for a sensitive step, verification pending between stages.

@@ -1,7 +1,8 @@
 # Anatomy — the contract every conditional page signs
 
 Every page in this family is described by the same six fields before a pixel is designed. They
-are the page's contract; the map records them; the audit checks them.
+are the page's contract; the page file carries them, the map marks the family, the audit checks
+them.
 
 1. **Trigger** — the exact condition that produces this page, stated as a predicate on real
    state: "backend returns `status=settled` for order X", not "after payment". If the trigger
@@ -26,14 +27,14 @@ are the page's contract; the map records them; the audit checks them.
    that survives translation — this family's text is quoted in support tickets more than any
    other.
 
-## The decision-record shape (into PAGES.md)
+## How the anatomy lands in the tree
 
-```
-### <Page name>
-Route · Family · Trigger · Condition source · States handled · Exits · Status: confirmed|inferred|excluded(reason)
-```
-
-The `PAGES.md` §6 row carries exactly these columns (`../../references/pages-md-format.md`).
+The six fields are decided here, then recorded in the page file under `<docs>/pages/` at the
+depth the page needs — a complementary page's sketch and notes carry its trigger, condition
+source, reachability states, exits, continuation ownership and announcement. The root index
+map marks the page kind=complementary and its family; the file shape is
+`../../references/pages-tree-format.md`'s. Depth is opt-in (the format's guideline), but a
+conditional page that cannot state its trigger and exits is not ready to design.
 
 Exclusions are recorded like in `/pages main` — an outage page *deliberately absent because the
 product has none of that operational story yet* is a decision that must survive the next

@@ -1,6 +1,7 @@
 ---
 name: generate
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: "Universal image AND video generation via RESTful providers (xAI, OpenAI, Gemini, KovAPI/NezhaGate) through registry data.csv: vendors and media types are data rows. Encapsulated per-media docs (media/image.md, media/video.md). Shared engine: concurrent --batch N with progress bar; --variations; --prompts-file; persistent context (--context new|<id>, seed with --context-seed); image inputs auto-encoded; video duration/fps; billing via usage.jsonl ledger; atomic download with results.jsonl for --salvage; keys masked. Triggers: generate, generate image, generate video, text-to-video, image-to-video, batch images, edit image, genimage, kovapi, nezha."
 metadata:
   version: "3.0"

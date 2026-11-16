@@ -1,6 +1,7 @@
 ---
 name: life
-version: 1.0.0
+version: 1.0.1
+specialized: none
 description: Designs, builds, reviews, and prototypes UI animation through three commands - micro, component, transition (one element, one visual unit, one state-to-state move with forward and back). Choreographs groups that move together - cast roles (lead/support/decoration/static), choose each pair's relation (together, overlap, sequence, carry, linked), no stagger on high-frequency UI, a timing table before code. Resolves vague requests like "make it feel premium" or "that bouncy thing when it opens", finds animation opportunities when the user does not know what to animate, proposes creative options as ASCII or HTML prototypes before touching production code, and reviews its own work against a craft bar. Use whenever the user mentions animation, motion, entrances, exits, intros, transitions, micro-interactions, easing, springs, scroll reveals, hover or press feedback, stagger, choreography, "feels mechanical", "too much going on", or wants an interface to feel more alive or polished, even if they never say "animate".
 compatibility: Works with any agent that can read files and ask the user questions. Optional scripts need Python 3.9+ using only the standard library; the match-existing scripts additionally need ffmpeg, opencv-python, numpy and scipy.
 metadata:
