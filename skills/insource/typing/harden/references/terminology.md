@@ -8,11 +8,11 @@ The single source of truth for the words this skill uses. Every other file uses 
 
 | Term | Definition | Example |
 |------|-----------|---------|
-| **tiered system** | The opt-in three-tier type architecture — its own skill, `/tier-up`. | tiers 1 to 3 |
+| **tiered system** | The opt-in three-tier type architecture — the sibling `tiers` level (`/typing tiers`). | tiers 1 to 3 |
 | **tier** | One of three ordered groups of types, each built only from the tier below. Used for nothing else: not for architecture, UI roles or deployment. | tier 1 primitives, tier 2 brands, tier 3 shapes |
 | **raw type** | A type the language provides. In the tiered system it is named in tier 1 only. | `string`, `number`, `int` |
 | **plain type** | A raw type under an explicit name, as a deliberate "any value is acceptable" choice. The first member of a primitive family. Use it only for that; if the code needs an integer, a float, a sign or a range, use the refinement. | `PlainString`, `PlainNumber` (`PlainX` is shorthand for the plain type of raw type X) |
-| **refinement** | A tier 1 type that narrows a plain type to a **visible state** of the value. It must pass the distinguishability test (owned by `/tier-up`). | `UppercaseString`, `IntNumber`, `PositiveIntNumber`, `NonEmptyString` |
+| **refinement** | A tier 1 type that narrows a plain type to a **visible state** of the value. It must pass the distinguishability test (owned by the `tiers` level). | `UppercaseString`, `IntNumber`, `PositiveIntNumber`, `NonEmptyString` |
 | **primitive** | Any tier 1 type: a plain type or a refinement. (Not the language's own type; that is a raw type.) | `PlainNumber`, `IntNumber` |
 | **primitive family** | The tier 1 types derived from one raw type, kept in one file. | the string family, the number family |
 | **brand** | A named type that says what a value means. Tier 2 in the tiered system, built from tier 1. In general practice a brand may be as light as a documented alias or as strong as a nominal type. | `UserEmail`, `Port`, `UserIso` |
@@ -20,7 +20,7 @@ The single source of truth for the words this skill uses. Every other file uses 
 | **tagged union** | A shape with cases, each carrying only its own data. | idle, loading, success(results), error(message) |
 | **variant** | One named version of a shape: **raw** (unvalidated input), **patch** (optional overrides), **resolved** (after defaults and validation). | `RawConfig`, `ConfigPatch`, `ResolvedConfig` |
 | **schema** | Reserved for a validation-library schema (Zod, Pydantic…) or a database schema. Never the name of a tier 3 type. | a Zod schema, a database schema |
-| **existing type** | A type provided by the language, its standard library, or a dependency already in the project. The tiers' roles are filled with existing types first; under `/tier-up` an existing type enters through tier 1 only. | Pydantic `PositiveInt`, Rust `NonZeroU32`, `Uppercase<string>` |
+| **existing type** | A type provided by the language, its standard library, or a dependency already in the project. The tiers' roles are filled with existing types first; under the `tiers` level an existing type enters through tier 1 only. | Pydantic `PositiveInt`, Rust `NonZeroU32`, `Uppercase<string>` |
 | **nominal type** | A type distinguished by name, not by structure. Representations: newtype, opaque type, `NewType`, value class, intersection marker. | Rust newtype, Scala `opaque type` |
 
 ## 2. Creating and checking values
@@ -54,9 +54,9 @@ The single source of truth for the words this skill uses. Every other file uses 
 
 | Term | Definition |
 |------|-----------|
-| **general practice** | This skill's default: enhancement of the project's type system with brands and creation points; the tiers are not required. |
-| **tiered practice** | Working inside the `/tier-up` architecture. |
-| **rigor options** | `[plain types]` (readable names, no safety), `[brands with creation points]` (rules enforced; this skill), `[tiered system]` (`/tier-up`). |
+| **general practice** | The harden level's default: enhancement of the project's type system with brands and creation points; the tiers are not required. |
+| **tiered practice** | Working inside the `tiers` level architecture. |
+| **rigor options** | `[plain types]` (readable names, no safety), `[brands with creation points]` (rules enforced; the harden level), `[tiered system]` (the `tiers` level). |
 | **golden rule** | Do not reinvent the wheel: use an existing type, and add only the part it lacks (see [reuse-before-create](./reuse-before-create.md)). |
 | **promotion** | Moving a value up: raw type, then the type the code means (a plain type only for "any value", otherwise a refinement), then brand, then shape. |
 

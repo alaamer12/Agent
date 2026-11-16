@@ -1,13 +1,13 @@
 # Migration — converting an existing codebase to the tiered system
 
-> For existing code. What the tiers *are* and their laws: [tiers](tiers.md); this file is only the sequence of steps from where the code stands to where the system says it should be. Identifiers are illustrative roles (the naming rules: `/type-up`).
+> For existing code. What the tiers *are* and their laws: [tiers](tiers.md); this file is only the sequence of steps from where the code stands to where the system says it should be. Identifiers are illustrative roles (the naming rules: the `harden` level).
 
 ```
 raw types ──► tier 1 ──► tier 2 ──► tier 3 ──► boundary
    (§1)        (§2)        (§3)        (§4)
 ```
 
-Run the stages in order; each is independently shippable. Before defining anything at any stage, apply the golden rule — the rule you just found may be one import away (the how: `/type-up`).
+Run the stages in order; each is independently shippable. Before defining anything at any stage, apply the golden rule — the rule you just found may be one import away (the how: the `harden` level).
 
 ## 1. Raw types → tier 1
 
@@ -174,7 +174,7 @@ func ReadRequest(raw map[string]any) (SearchRequest, error) {   // Go: (value, e
 }
 ```
 
-With a validation library, derive its schema from the creation points or test it against them — a rule never lives in the library only (the library discipline: `/type-up`). Callers that bypass the compiler (plain JS, scripts, other processes) get the runtime path: export the creation points and check at the public boundary. Failure handling, one project default: `[result naming the field]` (good default), `[typed throw]` (process startup), `[collect all errors]` (forms, bulk imports).
+With a validation library, derive its schema from the creation points or test it against them — a rule never lives in the library only (the library discipline: the `harden` level). Callers that bypass the compiler (plain JS, scripts, other processes) get the runtime path: export the creation points and check at the public boundary. Failure handling, one project default: `[result naming the field]` (good default), `[typed throw]` (process startup), `[collect all errors]` (forms, bulk imports).
 
 **Variants** — when one shape has more than one version, name each instead of loosening one type:
 

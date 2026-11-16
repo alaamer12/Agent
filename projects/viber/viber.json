@@ -42,7 +42,7 @@
         {"name": "states", "status": "mandatory"},
         {"name": "styling", "status": "mandatory"},
         {"name": "styleup", "status": "mandatory"},
-        {"name": "type-up", "status": "mandatory"},
+        {"name": "typing", "status": "mandatory"},
         {"name": "antipattern", "status": "mandatory"},
         {"name": "readme-md", "status": "mandatory"},
         {"name": "commitments-md", "status": "mandatory"},

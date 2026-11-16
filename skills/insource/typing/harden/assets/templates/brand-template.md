@@ -1,4 +1,4 @@
-> **Preserved original**, kept intact with terminology updated to [terminology](../../references/terminology.md). The tiered skeleton lives in `/tier-up`.
+> **Preserved original**, kept intact with terminology updated to [terminology](../../references/terminology.md). The tiered skeleton lives in the `tiers` level.
 
 # Brand Template
 

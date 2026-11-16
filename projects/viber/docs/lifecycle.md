@@ -410,7 +410,7 @@ Establishes additional styling-related standards and improvements.
 
 It contributes to the project's overall visual and styling quality.
 
-#### 9. type-up
+#### 9. typing
 
 **Status:** Mandatory
 
@@ -887,7 +887,7 @@ The following table summarizes the current Skill classification.
 | states | Project Foundation | Mandatory |
 | styling | Project Foundation | Mandatory |
 | styleup | Project Foundation | Mandatory |
-| type-up | Project Foundation | Mandatory |
+| typing | Project Foundation | Mandatory |
 | antipattern | Project Foundation | Mandatory |
 | readme-md | Project Foundation | Mandatory |
 | commitments-md | Project Foundation | Mandatory |

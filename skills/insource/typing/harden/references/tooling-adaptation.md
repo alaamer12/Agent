@@ -69,7 +69,7 @@ Checked: brands stack and a derived type carries every brand; a refined value fl
 - `refine` alone does **not** change the TypeScript type: `z.infer` is still `string`. Add `.brand<"Name">()` to get the nominal type.
 - The rule runs at **runtime only**. For literals that should fail the build, keep a compile-time check beside the schema ([wrong-type errors](./wrong-type-errors.md)); closed sets use `z.enum` / `z.literal`, which are checked statically.
 - Normalizing schemas have different input and output types; use `z.input<>` for what callers send and `z.infer<>` (output) for what circulates inside.
-- Under `/tier-up`, `z.string()` and `z.number()` are raw types, so they appear only in tier 1 files.
+- Under the `tiers` level, `z.string()` and `z.number()` are raw types, so they appear only in tier 1 files.
 
 ## 4. Valibot differences (verified)
 
@@ -120,6 +120,6 @@ def test_stable(s):
 ## 6. How practice and tiers use libraries
 
 - **General practice:** use the library's own features directly (`.refine`, `Field`, constraints) to tighten what is already there. Branding, tier files and the tier laws are not required.
-- **Under `/tier-up`:** the library implements the creation points, and only tier 1 imports its value types (tiers 2 and 3 import from tier 1). Tier files become library-schema files in the same folders; tier order and the one-file-per-family law still hold, because schemas import only the schemas of the tier below (structure and laws: `/tier-up`).
+- **Under the `tiers` level:** the library implements the creation points, and only tier 1 imports its value types (tiers 2 and 3 import from tier 1). Tier files become library-schema files in the same folders; tier order and the one-file-per-family law still hold, because schemas import only the schemas of the tier below (structure and laws: the `tiers` level).
 
 If a library is used only at the boundary and creation points are hand-written inside, keep the library schema derived from or tested against the creation points, so a rule never exists in only one of them. Persisted rules mirror into the project's migration tool ([database constraints](./database-constraints.md)).

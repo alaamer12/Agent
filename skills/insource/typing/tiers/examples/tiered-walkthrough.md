@@ -1,10 +1,10 @@
 # Tiered Walkthrough: raw → tiers 1–3
 
-> **For the tiered system** (this skill). The general (non-tiered) walkthrough lives in `/type-up`.
+> **For the tiered system** (this level). The general (non-tiered) walkthrough lives in the `harden` level.
 
 Per-tier detail is in [`../references/tiers.md`](../references/tiers.md); conversion steps are in [`../references/migration.md`](../references/migration.md). This file runs complete examples end to end.
 
-Identifiers are illustrative role names (the naming rules: `/type-up`).
+Identifiers are illustrative role names (the naming rules: the `harden` level).
 
 ## Where the files go
 

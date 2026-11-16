@@ -17,7 +17,7 @@ The tiers say what each group of types is **for**. A role can be filled by an ex
 **How an existing type enters the code depends on the mode:**
 
 - **General practice:** import the existing type where it is used.
-- **Under `/tier-up`:** follow the hierarchy. **Only tier 1 knows the existing type.** The tier 1 file re-exports it under the project's name (a one-line file is complete), and tiers 2 and 3 import it from tier 1, never from the library. This is the same law as for raw types: the library's name appears in one place, so swapping the library touches only tier 1. Lint: library value types are imported only in tier 1 files.
+- **Under the `tiers` level:** follow the hierarchy. **Only tier 1 knows the existing type.** The tier 1 file re-exports it under the project's name (a one-line file is complete), and tiers 2 and 3 import it from tier 1, never from the library. This is the same law as for raw types: the library's name appears in one place, so swapping the library touches only tier 1. Lint: library value types are imported only in tier 1 files.
 - A **shape container** the library provides (a Pydantic `BaseModel`, a Zod object) is a tier 3 tool, not a value type, so tier 3 may import it.
 
 ## 2. Search order
@@ -25,7 +25,7 @@ The tiers say what each group of types is **for**. A role can be filled by an ex
 1. **The language's built-in types**: TypeScript `Uppercase<string>`, template literal types, `URL`; Python `Literal`.
 2. **The standard library**: Python `pathlib.Path`, `ipaddress`, `uuid.UUID`, `enum`; Rust `NonZeroU32`; Go `net/netip.Addr`, `net/url.URL`, `time.Duration`.
 3. **A dependency already in the project**: Pydantic `PositiveInt`, `EmailStr`, `HttpUrl`; Zod `z.number().int().positive()`, `z.email()`; a refined-type library (Scala Iron).
-4. **Create**, only after 1 to 3 come up empty, and as small as possible (for the tiered architecture, `/tier-up` says how).
+4. **Create**, only after 1 to 3 come up empty, and as small as possible (for the tiered architecture, the `tiers` level says how).
 
 ## 3. Check what the existing type actually guarantees
 
@@ -38,7 +38,7 @@ retry(-1)        # mypy: no error, the checker sees plain int
 # at runtime the rule holds: TypeAdapter(PositiveInt) accepts 3, rejects 0, -1 and 1.5
 ```
 
-So a reused type is not always a complete answer. **Add only the part that is missing**, usually the nominal marker. Under `/tier-up` the library type enters through tier 1, and everything above imports from there (verified with a real module layout under `mypy --strict`):
+So a reused type is not always a complete answer. **Add only the part that is missing**, usually the nominal marker. Under the `tiers` level the library type enters through tier 1, and everything above imports from there (verified with a real module layout under `mypy --strict`):
 
 ```python
 # primitives/number.py      tier 1: the only module that imports the library's type

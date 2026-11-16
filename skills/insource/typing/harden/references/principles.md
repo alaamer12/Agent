@@ -1,6 +1,6 @@
 # Principles — the doctrine, both modes
 
-The rules every type-up task runs on, stated once here. Mechanism choice lives in [wrong-type-errors](wrong-type-errors.md); the golden rule's how in [reuse-before-create](reuse-before-create.md); the opt-in tiered architecture is its own skill (`/tier-up`); words in [terminology](terminology.md).
+The rules every harden task runs on, stated once here. Mechanism choice lives in [wrong-type-errors](wrong-type-errors.md); the golden rule's how in [reuse-before-create](reuse-before-create.md); the opt-in tiered architecture is the sibling `tiers` level (`/typing tiers`); words in [terminology](terminology.md).
 
 Turn raw-type fields into a documented, validated type system that helps editors, authors, runtime safety and CI — while staying practical for consumers. Use it for configuration shapes, public APIs, domain contracts, CLI patches, and any shared surface where intent is lost behind `string` / `int` / `bool`. **Not for:** pure internal implementation details with no shared surface — keep those lightweight.
 
@@ -55,7 +55,7 @@ Prefer the lightest representation that communicates intent and catches mistakes
 | **Enum / union** | closed sets of allowed values | all modern languages |
 | **Tagged union** | cases carrying different data | TS discriminated union, Rust `enum`, Go sealed interface, Python `Literal` + dataclasses |
 
-Heavy branding that forces casts on every dynamic consumer is usually worse than a well-documented alias plus a runtime creation point. (When the project adopted the tiered architecture, its laws fix which representation goes where — `/tier-up`.)
+Heavy branding that forces casts on every dynamic consumer is usually worse than a well-documented alias plus a runtime creation point. (When the project adopted the tiered architecture, its laws fix which representation goes where — the `tiers` level.)
 
 ## 5. Composing surfaces and variants
 
@@ -68,7 +68,7 @@ Config / Contract
   └── optional vs required clearly marked
 ```
 
-When one shape lives in more than one version, name the **variants** instead of loosening one type: `RawConfig` (unvalidated input), `ConfigPatch` (CLI/API overrides, all optional), `ResolvedConfig` (after defaults + validation). Only the resolved variant circulates inside the app; the boundary mechanics: the boundary stage of `/tier-up`'s migration path.
+When one shape lives in more than one version, name the **variants** instead of loosening one type: `RawConfig` (unvalidated input), `ConfigPatch` (CLI/API overrides, all optional), `ResolvedConfig` (after defaults + validation). Only the resolved variant circulates inside the app; the boundary mechanics: the boundary stage of the `tiers` level's migration path.
 
 ## 6. Brand catalog — starting names, illustrative
 
@@ -102,7 +102,7 @@ One change to a rule updates types, creation points, and schema together. Keep a
 | scanMode | `ScanMode` | enum membership | enum |
 | concurrency | `WorkerCount` | int ≥ 1 | `int().positive()` |
 
-When a field changes, update every column in one commit/PR. (The tiered architecture keeps this table as its **catalog** — `/tier-up` extends it with built-from, policy and users.)
+When a field changes, update every column in one commit/PR. (The tiered architecture keeps this table as its **catalog** — the `tiers` level extends it with built-from, policy and users.)
 
 ## 8. Workflow — definition of done
 
@@ -116,7 +116,7 @@ When a field changes, update every column in one commit/PR. (The tiered architec
 - [ ] 7. Sync        document usage; the §7 table or catalog is current — one change, one commit
 ```
 
-Typical layout: one `types/` or `contracts/` folder per surface — public type definitions, shared brands, the validation schema, lightweight checks, and their tests. The tiered architecture's folder law: `/tier-up`.
+Typical layout: one `types/` or `contracts/` folder per surface — public type definitions, shared brands, the validation schema, lightweight checks, and their tests. The tiered architecture's folder law: the `tiers` level.
 
 **Done means:** no unvalidated outside data flows inward; each rule lives in one place; the three checks cover it; no raw types on public fields where a domain meaning exists; consumers use the types without friction (no mandatory casts in common cases).
 
@@ -133,17 +133,17 @@ Typical layout: one `types/` or `contracts/` folder per surface — public type 
 | A rule in a comment ("must be lowercase") | the rule in a creation point the compiler enforces |
 | Partial adoption across a surface | adopt it fully or leave it (§1) |
 
-Tier-architecture mistakes live with that skill (`/tier-up`).
+Tier-architecture mistakes live in the `tiers` level.
 
 ## 10. The rigor spectrum
 
 ```
 Untyped / dynamic
   → visible raw-type names        audit marker, no safety yet
-    → brands + creation points    rules enforced at boundaries        (this skill)
+    → brands + creation points    rules enforced at boundaries        (harden)
       → nominal + refinement      kinds, signs and ranges in the type
         → the tiered architecture raw types confined, meanings branded,
-                                  structures shaped                   (/tier-up)
+                                  structures shaped                   (the tiers level)
         → refinement/dependent types, formal verification
 ```
 

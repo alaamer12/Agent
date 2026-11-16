@@ -1,6 +1,6 @@
 # Tiered Types Template
 
-> **For the tiered system** (this skill). For general type enhancement without the tiers, use `/type-up`.
+> **For the tiered system** (this level). For general type enhancement without the tiers, use the `harden` level (`/typing harden`).
 
 Skeleton for introducing the three-tier type system to a new surface. Names below are illustrative roles: use the project's and ecosystem's own names and types, and prefer a type the compiler already provides.
 

@@ -1,12 +1,12 @@
 # The tiered system — the laws
 
-> This skill's single owner for the tier system. General typing craft — the checks, naming, rigor, the brand catalog of starting names — belongs to `/type-up`; converting existing code is [migration](migration.md).
+> This level's single owner for the tier system. General typing craft — the checks, naming, rigor, the brand catalog of starting names — belongs to the `harden` level; converting existing code is [migration](migration.md).
 
 Three ordered groups of types, each built only from the tier below: **tier 1 primitives** (generic visible states, the only place a raw type is named) → **tier 2 brands** (domain meanings, one creation point each) → **tier 3 shapes** (records and tagged unions assembled from brands).
 
 ## 1. The laws
 
-1. **Raw type named in one file per primitive family.** Tier 1 owns the language's types; everything above speaks tier names. A library-provided type enters through tier 1 too: tier 1 re-exports it, tiers 2 and 3 import from there, so swapping the library touches one file (the golden rule's how: `/type-up`).
+1. **Raw type named in one file per primitive family.** Tier 1 owns the language's types; everything above speaks tier names. A library-provided type enters through tier 1 too: tier 1 re-exports it, tiers 2 and 3 import from there, so swapping the library touches one file (the golden rule's how: the `harden` level).
 2. **Imports follow tier order and never skip.** Shapes import brands, brands import primitives, same scope or shared; a shape reaching into tier 1 skips a tier — give that field a brand. A feature never imports another feature's private brand; promote it first.
 3. **Every brand is defined once.** Two modules needing one meaning import one brand.
 4. **Casts happen only at a brand's creation point.** Anywhere else, an escape hatch that breaks the guarantee.
@@ -47,7 +47,7 @@ src/
             └── shapes/                  tier 3 owned by this feature
 ```
 
-Placement test: *who owns this meaning / shape?* One owner keeps it local; two or more take it to `shared/`, once. Tier 1 never lives inside a feature (a `primitives/` folder under `features/` is a lint error). No feature folders → one `types/` with the same three subfolders. Boundary checks sit next to the shape they produce or beside the receiving service; tests sit next to what they test; migrations follow the project's own tool (the `CHECK`/domain mirroring: `/type-up`).
+Placement test: *who owns this meaning / shape?* One owner keeps it local; two or more take it to `shared/`, once. Tier 1 never lives inside a feature (a `primitives/` folder under `features/` is a lint error). No feature folders → one `types/` with the same three subfolders. Boundary checks sit next to the shape they produce or beside the receiving service; tests sit next to what they test; migrations follow the project's own tool (the `CHECK`/domain mirroring: the `harden` level).
 
 ## 3. The distinguishability test (what qualifies as a refinement)
 
@@ -70,7 +70,7 @@ A trimmed or truncated string is an ordinary string; the same holds for sanitize
 | **Normalize then reject** | type or failure | repair, then check (an email) |
 | **Reject** | type or failure | input must already be correct (a port) |
 
-Decide once per primitive family (tier 1) and per group of sibling brands (tier 2), write it in the catalog, keep siblings consistent. Rejection mechanics and error styles: the compiler-first ladder in `/type-up`.
+Decide once per primitive family (tier 1) and per group of sibling brands (tier 2), write it in the catalog, keep siblings consistent. Rejection mechanics and error styles: the compiler-first ladder in the `harden` level.
 
 ## 5. Tier 1 — primitives
 
@@ -119,7 +119,7 @@ func Greet(name NonEmptyString) {}
 
 ## 6. Tier 2 — brands
 
-Answer *"what does this value mean here?"* and attach every rule that follows from the meaning — format, range, unit, normalization. A module receiving a `UserEmail` knows the rules were already applied. Brand values come from the same three sources; closed sets (modes, statuses) are brands too, as enums or literal unions, never free strings; **secrets are brands** (`Token`, `Secret`) so logging and serialization can exclude them by type. Starting names: the brand catalog in `/type-up`.
+Answer *"what does this value mean here?"* and attach every rule that follows from the meaning — format, range, unit, normalization. A module receiving a `UserEmail` knows the rules were already applied. Brand values come from the same three sources; closed sets (modes, statuses) are brands too, as enums or literal unions, never free strings; **secrets are brands** (`Token`, `Secret`) so logging and serialization can exclude them by type. Starting names: the brand catalog in the `harden` level.
 
 ```ts
 type OrderId  = `ord_${string}`;                              // pattern type: literals checked, no function
@@ -179,9 +179,9 @@ Python: `Literal`-tagged frozen dataclasses with `match`; Go: no sum types, so a
 
 ## 9. Checks and lint
 
-The three checks (defined in `/type-up`) gain teeth here — four lint rules enforce almost the whole system mechanically: raw types and library value types imported only in tier 1 family files; `PlainX` only in tier 1 and boundary files; brand casts only at creation points; imports follow tier order. Property tests per creation point: normalizers idempotent, outputs satisfy the refinement, rejected inputs stay rejected, `toWire`→`parse` round-trips.
+The three checks (defined in the `harden` level) gain teeth here — four lint rules enforce almost the whole system mechanically: raw types and library value types imported only in tier 1 family files; `PlainX` only in tier 1 and boundary files; brand casts only at creation points; imports follow tier order. Property tests per creation point: normalizers idempotent, outputs satisfy the refinement, rejected inputs stay rejected, `toWire`→`parse` round-trips.
 
-**The catalog** (extends the sync table): every type — name, tier, built from, creation point, policy, users — updated in the same commit as the code. A validation library never defines a rule the creation point lacks (the library discipline: `/type-up`).
+**The catalog** (extends the sync table): every type — name, tier, built from, creation point, policy, users — updated in the same commit as the code. A validation library never defines a rule the creation point lacks (the library discipline: the `harden` level).
 
 ## 10. Mistakes
 

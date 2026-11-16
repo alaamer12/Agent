@@ -7,11 +7,12 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import manager
 
 
-class SkillStructureTests(unittest.TestCase):
+class ManagerFixture(unittest.TestCase):
     def setUp(self):
         self.sandbox = tempfile.TemporaryDirectory(prefix="manager-structure-")
         self.addCleanup(self.sandbox.cleanup)
@@ -50,6 +51,8 @@ class SkillStructureTests(unittest.TestCase):
         manager.make_link(source, target)
         self.addCleanup(lambda: manager.remove_entry(target) if manager.is_link_like(target) else None)
 
+
+class SkillStructureTests(ManagerFixture):
     def test_support_folders_do_not_turn_a_skill_into_a_battery(self):
         skill = self.skill("normal")
         for directory in ("reference", "references", "examples", "assets", "scripts",
@@ -238,6 +241,183 @@ class SkillStructureTests(unittest.TestCase):
         self.assertEqual(manager.classify_directory(root), "meta-skill")
         (root / "module" / "SKILL.md").unlink()
         self.assertEqual(manager.classify_directory(root), "battery-skill")
+
+
+class CrossreferenceTests(ManagerFixture):
+    def crossreference(self, *, expected_code: int = 0) -> dict:
+        result = self.cli("crossreference", "--json")
+        self.assertEqual(result.returncode, expected_code, result.stdout + result.stderr)
+        return json.loads(result.stdout)
+
+    def test_direction_is_not_assumed_to_be_mutual(self):
+        alpha = self.skill("alpha")
+        self.skill("beta")
+        self.write(alpha / "references" / "guide.md", "Use /beta.\n")
+        edges = self.crossreference()["edges"]
+        self.assertEqual([(e["from"], e["to"], e["mutual"]) for e in edges],
+                         [("alpha", "beta", False)])
+        self.assertEqual(edges[0]["evidence"], [{"file": "alpha/references/guide.md",
+                                               "line": 1, "text": "Use /beta."}])
+
+    def test_mutual_reference_requires_both_directions(self):
+        alpha = self.skill("alpha")
+        beta = self.skill("beta")
+        self.write(alpha / "README.md", "`beta`\n")
+        self.write(beta / "README.md", "**alpha**\n")
+        edges = self.crossreference()["edges"]
+        self.assertEqual({(e["from"], e["to"]) for e in edges},
+                         {("alpha", "beta"), ("beta", "alpha")})
+        self.assertTrue(all(e["mutual"] for e in edges))
+
+    def test_matching_is_whole_token_case_insensitive_and_line_deduplicated(self):
+        alpha = self.skill("alpha")
+        self.skill("beta-tool")
+        self.write(alpha / "guide.md", "beta-tool-extra pre-beta-tool beta_tool\n"
+                   "/BETA-TOOL and `beta-tool` and **beta-tool**\n"
+                   "[tool](../beta-tool/SKILL.md)\n")
+        edge = self.crossreference()["edges"][0]
+        self.assertEqual(edge["count"], 2)
+        self.assertEqual([item["line"] for item in edge["evidence"]], [2, 3])
+
+    def test_long_line_evidence_includes_the_matched_name(self):
+        alpha = self.skill("alpha")
+        self.skill("beta")
+        self.write(alpha / "guide.md", "unrelated context " * 100 + "use /beta.\n")
+        evidence = self.crossreference()["edges"][0]["evidence"][0]
+        self.assertIn("/beta", evidence["text"])
+        self.assertLessEqual(len(evidence["text"]), 240)
+
+    def test_self_references_and_unknown_names_are_not_edges(self):
+        alpha = self.skill("alpha")
+        self.write(alpha / "guide.md", "/alpha unknown-skill\n")
+        self.assertEqual(self.crossreference()["edges"], [])
+
+    def test_meta_child_owns_its_reference_not_parent(self):
+        self.skill("meta")
+        child = self.skill("meta/child")
+        self.skill("peer")
+        self.write(child / "guide.md", "Use peer.\n")
+        edges = self.crossreference()["edges"]
+        self.assertEqual([(e["source"], e["target"]) for e in edges], [("meta/child", "peer")])
+
+    def test_battery_module_reference_belongs_to_battery(self):
+        battery = self.skill("battery")
+        self.skill("peer")
+        self.write(battery / "mode" / "method.md", "Use peer.\n")
+        edges = self.crossreference()["edges"]
+        self.assertEqual([(e["source"], e["target"]) for e in edges], [("battery", "peer")])
+
+    def test_command_reports_references_across_all_skills(self):
+        alpha, beta, gamma, delta = [self.skill(name) for name in ("alpha", "beta", "gamma", "delta")]
+        self.write(alpha / "guide.md", "beta\n")
+        self.write(beta / "guide.md", "gamma\n")
+        self.write(gamma / "guide.md", "delta\n")
+        result = self.crossreference()
+        self.assertEqual({(e["from"], e["to"]) for e in result["edges"]},
+                         {("alpha", "beta"), ("beta", "gamma"), ("gamma", "delta")})
+        self.assertEqual(result["stats"]["skills"], 4)
+        self.assertEqual(result["stats"]["edges"], 3)
+
+    def test_ambiguous_target_names_are_not_invented_edges(self):
+        source = self.skill("source")
+        self.skill("one/shared")
+        self.skill("two/shared")
+        self.write(source / "guide.md", "Use shared.\n")
+        result = self.crossreference(expected_code=1)
+        self.assertEqual(result["edges"], [])
+        self.assertEqual(result["ambiguous"][0]["candidates"], ["one/shared", "two/shared"])
+        self.assertEqual(result["ambiguous"][0]["evidence"][0]["line"], 1)
+
+    def test_archives_resources_hidden_and_binary_content_are_excluded(self):
+        alpha = self.skill("alpha")
+        self.skill("beta")
+        for name in ("Archive", "_Archive", "_Resources", ".hidden"):
+            hidden = self.skill(f"{name}/hidden")
+            self.write(hidden / "guide.md", "beta\n")
+        self.write(alpha / "image.png", "beta\n")
+        self.write(alpha / ".private.md", "beta\n")
+        result = self.crossreference()
+        self.assertEqual(result["edges"], [])
+        self.assertEqual(result["stats"]["skills"], 2)
+        self.assertEqual(result["stats"]["files_scanned"], 2)
+
+    def test_invalid_document_encoding_reports_incomplete_scan(self):
+        alpha = self.skill("alpha")
+        (alpha / "bad.md").write_bytes(b"\xff\xfe\x80")
+        result = self.crossreference(expected_code=1)
+        self.assertEqual(result["errors"][0]["file"], "alpha/bad.md")
+
+    def test_no_database_is_created_by_crossreference(self):
+        self.skill("alpha")
+        self.crossreference()
+        self.assertFalse(Path(self.env["MANAGER_DB"]).exists())
+
+    def test_positional_values_are_rejected_even_for_existing_skills(self):
+        self.skill("alpha")
+        self.skill("beta")
+        for values in (("alpha",), ("missing",), ("alpha", "beta")):
+            with self.subTest(values=values):
+                result = self.cli("crossreference", *values)
+                self.assertEqual(result.returncode, 2)
+                self.assertIn(f"unrecognized arguments: {' '.join(values)}", result.stderr)
+
+    def test_empty_inventory_is_valid_json(self):
+        result = self.crossreference()
+        self.assertEqual(result["edges"], [])
+        self.assertEqual(result["stats"]["files_scanned"], 0)
+
+    def test_verbose_table_has_real_evidence(self):
+        alpha = self.skill("alpha")
+        self.skill("beta")
+        self.write(alpha / "guide.md", "Use /beta.\n")
+        result = self.cli("crossreference", "--verbose")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Mutual", result.stdout)
+        self.assertIn("alpha/guide.md:1", result.stdout)
+        self.assertIn("Use /beta.", result.stdout)
+
+    def test_each_document_is_opened_once_including_meta_children(self):
+        self.skill("meta")
+        child = self.skill("meta/child")
+        self.skill("peer")
+        self.write(child / "guide.md", "peer\n")
+        opened = []
+        original_open = Path.open
+
+        def counted_open(path, *args, **kwargs):
+            opened.append(path)
+            return original_open(path, *args, **kwargs)
+
+        skills = manager.walk_skills(self.registry, prune=False)
+        with patch.object(Path, "open", counted_open):
+            result = manager.scan_crossreferences(self.registry, skills)
+        expected = set(self.registry.rglob("*.md"))
+        self.assertEqual(set(opened), expected)
+        self.assertEqual(len(opened), len(expected))
+        self.assertEqual(result["stats"]["files_scanned"], len(expected))
+
+
+class AgentSourceTests(ManagerFixture):
+    def test_agent_uses_relocated_source_not_stale_root_file(self):
+        self.write(self.registry / "AGENTS.md", "Stale root instructions.\n")
+        source = self.write(self.registry / "_Resources" / "AGENTS.md", "Current instructions.\n")
+        result = self.cli("agent", "--agents", "qoder", "--hard-copy")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        target = Path(self.env["MANAGER_HOME"]) / ".qoder" / "agents.md"
+        self.assertEqual(target.read_text(encoding="utf-8"), source.read_text(encoding="utf-8"))
+
+    def test_agent_error_names_the_relocated_source(self):
+        self.write(self.registry / "AGENTS.md", "Not the source anymore.\n")
+        result = self.cli("agent", "--agents", "qoder", "--hard-copy")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(str(self.registry / "_Resources" / "AGENTS.md"), result.stderr)
+
+    def test_agent_dry_run_reads_new_source_without_deploying(self):
+        self.write(self.registry / "_Resources" / "AGENTS.md")
+        result = self.cli("agent", "--agents", "qoder", "--dry-run")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("_Resources", result.stdout)
+        self.assertFalse(Path(self.env["MANAGER_HOME"]).exists())
 
 
 if __name__ == "__main__":

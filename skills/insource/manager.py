@@ -2515,21 +2515,8 @@ def scan_crossreferences(registry: Path, skills: Sequence[Path]) -> dict[str, An
 
 
 def cmd_crossreference(args: argparse.Namespace, registry: Path) -> int:
-    skills = walk_skills(registry, prune=False)
-    wanted = {name.casefold() for name in args.skills}
-    missing = wanted - {path.name.casefold() for path in skills}
-    if missing:
-        raise ManagerError(f"unknown registry skill(s): {', '.join(sorted(missing))}")
-    result = scan_crossreferences(registry, skills)
-    selected = {path.relative_to(registry).as_posix() for path in skills
-                if path.name.casefold() in wanted}
-    if selected:
-        result["edges"] = [edge for edge in result["edges"]
-                           if edge["source"] in selected or edge["target"] in selected]
-        result["ambiguous"] = [item for item in result["ambiguous"]
-                               if item["source"] in selected or selected.intersection(item["candidates"])]
+    result = scan_crossreferences(registry, walk_skills(registry, prune=False))
     result["registry"] = str(registry)
-    result["stats"]["edges_shown"] = len(result["edges"])
     if args.json:
         print(json.dumps(result, indent=2))
     else:
@@ -2606,7 +2593,7 @@ def build_parser() -> argparse.ArgumentParser:
             "  python manager.py report techstack --json\n"
             "  python manager.py find techstack\n"
             "  python manager.py find pages revoke --quiet\n"
-            "  python manager.py crossreference iwts dtb\n"
+            "  python manager.py crossreference\n"
             "  python manager.py crossreference --json\n"
             "  python manager.py viber --into ./my-project --hard-copy\n"
         ),
@@ -2730,17 +2717,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     crossreference = subparsers.add_parser(
         "crossreference",
-        help="discover directed mentions between registry skills with file/line evidence",
-        description="Scan .md/.mdx/.txt/.rst documents once using a skill-name hash index. "
+        help="discover directed mentions among all registry skills with file/line evidence",
+        description="Compare every active registry skill; takes no skill names. Scan "
+                    ".md/.mdx/.txt/.rst documents once using a skill-name hash index. "
                     "Matches whole name tokens, case-insensitively, including slash commands "
-                    "and Markdown links. Shows incoming and outgoing mentions, not proven "
-                    "dependencies. Meta children own their files; battery modules belong to "
-                    "their parent. Archives, resources outside skills, hidden files and links "
-                    "are skipped. No database writes. Exit 1 on unknown names, ambiguous "
-                    "targets or unreadable content; otherwise 0, including an empty graph.",
+                    "and Markdown links. Shows mentions, not proven dependencies. Meta "
+                    "children own their files; battery modules belong to their parent. "
+                    "Archives, resources outside skills, hidden files and links are skipped. "
+                    "No database writes. Exit 1 on ambiguous targets or unreadable content; "
+                    "otherwise 0, including an empty graph.",
     )
     add_common(crossreference)
-    crossreference.add_argument("skills", nargs="*", help="optional skill names; show edges touching any of them")
     crossreference.add_argument("--json", action="store_true", help="emit all evidence and scan statistics as JSON")
 
     return parser

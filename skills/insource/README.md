@@ -83,6 +83,43 @@ python -m unittest test_manager_structure
 
 `report` includes nested independent skills, type, parent, and composition evidence (`children`, `modules`, and `issues` in JSON). Internal modules are not independent report rows. Per-skill file counts include descendants, while the summary counts unique files to avoid counting a meta-child's files twice. `find` uses the same classification across the registry, agent folders, and recorded `--into` installations. `lint` checks actual skill entrypoints and flags mixed structures; `--strict` makes findings fail the command.
 
+## Manager crossreferences and agent instructions
+
+### Discover references between skills
+
+```bash
+python manager.py crossreference
+python manager.py crossreference --verbose
+python manager.py crossreference --json
+```
+
+`crossreference` takes no skill names: every run compares all active registry skills and reports the whole graph. Positional values such as `crossreference iwts` are rejected as unrecognized arguments (exit `2`); to look at one skill, search the output or filter the `--json` edges by `from`/`to`.
+
+Each row means **the source skill's documents mention the target skill's name**, not that a runtime dependency has been proven. The table shows direction, distinct mention-line count, whether the reverse edge also exists, and the first `file:line` witness. `--verbose` shows all witnesses; JSON includes all evidence, excerpts around the matched names, scan statistics, ambiguous names, and read errors.
+
+Matching and ownership rules:
+
+- Scan UTF-8 `.md`, `.mdx`, `.txt`, and `.rst` files, including skill instructions, references, examples, templates, and battery methods. Code, binary assets, root catalog prose, archive trees, `_Resources`, hidden files/directories, and linked files/directories are outside this scan.
+- Match complete skill-name tokens, case-insensitively. Plain `iwts`, `/iwts`, inline-code names, and names in Markdown links all count; `pre-iwts` and `iwts_extra` do not match `iwts`. Repetitions on the same source line count once per target.
+- The nearest independent skill owns each file. A meta-child's documents are not scanned again for its parent; a battery method's references belong to the battery. Self-mentions do not create edges.
+- Skill names come from the discovered skill directory names, consistent with the manager's inventory and folder/name lint rule. Duplicate target names are reported with their candidate paths rather than converted into guessed edges.
+- Common words that are also skill names can produce textual matches unrelated to the skill. Inspect the evidence; the command does not infer aliases, understand prose, validate link destinations, or claim that every match is an intentional skill dependency.
+- Exit `0` means a complete, unambiguous scan, including an empty graph. Exit `1` means an ambiguous target or an unreadable document/directory. Evidence collected before a read failure remains visible. The command does not write to the manager database.
+
+**Algorithm:** build a hash index from skill-name tokens to skill paths, then tokenize each document once and look up each token. Core matching takes expected `O(P + T + R)` time, where `P` is the combined name length, `T` is the scanned text length, and `R` is the recorded evidence size. Filesystem traversal and deterministic ordering are additional; sorting the graph's `E` edges takes `O(E log E)`. The index, directory-owner map, and evidence are retained in memory, not whole documents. This avoids an all-pairs skill comparison and needs neither Shell sort nor a new dependency.
+
+### Deploy the relocated instruction source
+
+The source for `manager.py agent` is [`_Resources/AGENTS.md`](./_Resources/AGENTS.md), not a root-level `AGENTS.md`. Existing destination filenames inside each agent's home configuration are unchanged.
+
+```bash
+python manager.py agent --agents qoder --dry-run
+python manager.py agent --agents qoder
+python manager.py agent --agents qoder --hard-copy
+```
+
+The first command previews the deployment; the other two write to the selected agent's configuration. A missing `_Resources/AGENTS.md` is an error, even if a stale root-level file remains. Moving the source does not itself update previously installed instruction files or links; run `agent` for the intended targets when ready to refresh them.
+
 ## Quick Index
 
 ### Agent
@@ -256,8 +293,7 @@ python -m unittest test_manager_structure
 - [take-a-breath](./take-a-breath/SKILL.md) — Force a deliberate pause before implementing. Stop the urge to code from scratch, calm the overwhelmed engineering impulse, and apply sober judgment about wheth…
 - [techstack](./techstack/SKILL.md) — Recommend a technology/framework/library/tech stack (mobile, web, backend, desktop, infra) in any language or platform via rigorous, current, requirements-drive…
 - [theskills](./theskills/SKILL.md) — Pin skills as fixed, auto-apply behavior and persist that into the agent's memory context, so future sessions run them without being asked. Run at the start of…
-- [tier-up](./tier-up/SKILL.md) — Installs and runs the three-tier type architecture in a project: the raw type is named in exactly one file per primitive family, every domain meaning becomes a…
-- [type-up](./type-up/SKILL.md) — Enhances a codebase's type system so bugs surface at check time instead of runtime, in any language: brands for raw types, creation points, and boundary checks…
+- [typing](./typing/SKILL.md) — Type-hinting experience, one skill, two levels: harden (the general craft — brands for raw types, creation points, boundary checks that turn untrusted data into typed values…
 
 ## Skill Details
 
@@ -1254,18 +1290,12 @@ python -m unittest test_manager_structure
 
 ---
 
-#### `tier-up`
+#### `typing`
 
-- **Path:** [`tier-up/SKILL.md`](./tier-up/SKILL.md)
-- **Description:** Installs and runs the three-tier type architecture in a project: the raw type is named in exactly one file per primitive family, every domain meaning becomes a brand with one creation point and a stated policy, and every record is a shape assembled from brands; imports follow tier order and never skip. Opt-in — chosen by the project or the user, never imposed. Includes the conversion path for existing code (raw → tier 1 → tier 2 → tier 3 → boundary) with per-stage steps and a migration done-list. Trigger on "tier-up", "tiered types", "the tier system", "primitives brands shapes", "no raw types outside one file", "adopt the tier architecture", "promote this to a brand", converting a module to full typing rigor. The general craft — brands in any idiom, the compiler-first ladder, validation libraries, database constraints, the master vocabulary — is owned by /type-up; say so and stop rather than reinventing it. "Tier" here means the type-system tiers only, never architecture layers.
-- **Use-case:** The project or user chose the three-tier type system, or code must be converted to it; also maintaining one tier in a project that already has the folders (primitives/, brands/, shapes/).
-- **Usage:** `/tier-up [surface or module] [new | convert]`
-
----
-#### `type-up`
-
-- **Path:** [`type-up/SKILL.md`](./type-up/SKILL.md)
-- **Description:** Enhances a codebase's type system so bugs surface at check time instead of runtime, in any language: brands for raw types, creation points, and boundary checks that turn untrusted data into typed values. Use when the user asks to improve, tighten or audit types, remove stringly-typed or primitive-obsessed code, add branded/NewType/opaque types, validate config or API contracts, make wrong values an error (compile-time and runtime), use the project's validation library (Zod, Valibot, Pydantic, Hypothesis, serde…), or convert a raw-typed surface. Compiler first: rejection is moved to compile time wherever possible. Golden rule: reuse existing types, never reinvent them. The opt-in three-tier architecture (primitives, brands, shapes) and its conversion path are a separate skill, /tier-up; do not impose naming schemes or that architecture unless the project or user chooses them.
+- **Path:** [`typing/SKILL.md`](./typing/SKILL.md)
+- **Description:** Type-hinting experience, one skill, two levels: harden (the general craft — brands for raw types, creation points, boundary checks that turn untrusted data into typed values, compiler-first rejection, validation libraries and database constraints, in any language) and tiers (the opt-in three-tier architecture — primitives, brands, shapes — with its conversion path). The router picks ONE level and reads only its method.md. Default to harden; reach for tiers only when the project or user chose it (detect primitives/, brands/, shapes/ folders or the word tiers) — never impose the architecture or a naming scheme. Triggers: improve/tighten/audit types, stringly-typed or primitive-obsessed code, branded/NewType/opaque types, validate config or API contracts, make wrong values an error, type-up, tier-up, tiered types, primitives brands shapes, adopt the tier architecture, promote this to a brand. Golden rule: reuse existing types, never reinvent them. Tier means type-system tiers only, never architecture layers.
+- **Use-case:** The user asks to improve, tighten or audit a codebase's types (harden), or the project or user chose the three-tier type architecture and code must be built or converted to it (tiers).
+- **Usage:** `/typing [harden|tiers] <target>`
 
 ---
 

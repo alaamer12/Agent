@@ -193,7 +193,7 @@ flag echo; a warning banner that survives `--quiet`. Full specification in
 | `manager.py` | CLI, display layer, deploy/refresh/lint, audit, manifest |
 | `docs/display-architecture.md` | output layer specification |
 | `docs/manager-migration.md` | this inventory |
-| `AGENTS.md` | source deployed by `manager.py agent` |
+| `_Resources/AGENTS.md` | source deployed by `manager.py agent`; installed target names are unchanged |
 | `skills-lock.json` | lock records consumed by refresh/audit |
 
 ## 9. Verification performed

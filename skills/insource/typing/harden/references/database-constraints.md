@@ -26,7 +26,7 @@ The compiler and the boundary check protect values that pass through your code. 
 ## 3. What translates, what does not
 
 - **Translates:** visible states and domain rules that look only at the row: case, emptiness, integer-ness, sign, finiteness, closed sets, formats, ranges.
-- **Does not translate:** operations (trim, truncate, decode). They stay in the creation point. If the domain needs the outcome as a guarantee, state the outcome as part of the brand's rule (the distinguishability test: `/tier-up`).
+- **Does not translate:** operations (trim, truncate, decode). They stay in the creation point. If the domain needs the outcome as a guarantee, state the outcome as part of the brand's rule (the distinguishability test: the `tiers` level).
 - **Not a `CHECK`:** uniqueness and references (`UNIQUE`, `FOREIGN KEY`), and anything non-deterministic or depending on other rows.
 
 ## 4. Pitfalls (verified unless marked)
@@ -61,4 +61,4 @@ Name constraints so they identify the rule, in the project's naming convention (
 ## 8. Practice and tiers
 
 - **General practice:** add `CHECK`s for the rules the code already enforces, starting with the ones that have caused bad data.
-- **Under `/tier-up`:** domains mirror the tiers — tier 1 domains, tier 2 domains built on them, tier 3 tables; migrations hold one definition per tier, in the same order as the type files.
+- **Under the `tiers` level:** domains mirror the tiers — tier 1 domains, tier 2 domains built on them, tier 3 tables; migrations hold one definition per tier, in the same order as the type files.

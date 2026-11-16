@@ -60,11 +60,11 @@ setCountry("USA");    // error: ... '"Type error: must be 2 letters"'
 
 The `string extends S` branch is the guard for a general `string`. Whether a bare `UppercaseOnly<string>` evaluates to `never` or to `string` differs between compiler versions (it is `never` on the version used here), so never rely on either: test it.
 
-A standalone helper like this is the general-practice answer. Under `/tier-up` the same rule already lives in the tiers (a tier 1 state and a tier 2 brand), and the literal route is optional, added only for values written in source.
+A standalone helper like this is the general-practice answer. Under the `tiers` level the same rule already lives in the tiers (a tier 1 state and a tier 2 brand), and the literal route is optional, added only for values written in source.
 
 ## 4. Rung 3: nominal types
 
-A brand, NewType, opaque type or newtype makes a plain value an error where a named meaning is required. In TypeScript, the brand marker must hold a set of names so stacked brands merge (the marker shape: `/tier-up`'s tier 1):
+A brand, NewType, opaque type or newtype makes a plain value an error where a named meaning is required. In TypeScript, the brand marker must hold a set of names so stacked brands merge (the marker shape: the `tiers` level's tier 1):
 
 ```ts
 declare const t: unique symbol;
