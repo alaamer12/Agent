@@ -340,6 +340,31 @@
 
 ---
 
+#### `colors`
+
+- **Path:** [`Groups/Design/Style/styling/specialized/daisyui/colors/SKILL.md`](../Groups/Design/Style/styling/specialized/daisyui/colors/SKILL.md)
+- **Parent:** `daisyui`
+- **Description:** Color rules that you must use with daisyUI 5
+
+---
+
+#### `config`
+
+- **Path:** [`Groups/Design/Style/styling/specialized/daisyui/config/SKILL.md`](../Groups/Design/Style/styling/specialized/daisyui/config/SKILL.md)
+- **Parent:** `daisyui`
+- **Description:** Configuration options for daisyUI 5
+
+---
+
+#### `daisyui`
+
+- **Path:** [`Groups/Design/Style/styling/specialized/daisyui/SKILL.md`](../Groups/Design/Style/styling/specialized/daisyui/SKILL.md)
+- **Parent:** `styling`
+- **Description:** Official daisyUI 5 component library for Tailwind CSS 4 — class names for 76 components, semantic colors, themes, and the component discovery protocol. Use whenever a project uses daisyUI: installing it, configuring themes, applying usage and color rules, selecting a component before writing markup. Triggers: daisyUI, daisy ui, daisyUI component, daisyUI theme, install daisyUI, semantic colors, navbar drawer modal dropdown, component class names. For plain Tailwind without daisyUI use /tailwind; for platform-neutral styling architecture use /styling. Borrowed from https://daisyui.com/SKILL.md (content verbatim; frontmatter and when-to-use lightly adapted to this registry).
+- **Sub-skills:** `colors`, `config`, `install`, `usage`
+
+---
+
 #### `denoise`
 
 - **Path:** [`Groups/Design/denoise/SKILL.md`](../Groups/Design/denoise/SKILL.md)
@@ -354,6 +379,14 @@
 - **Description:** Previews genuinely different design directions for an existing UI before committing a whole project or batch of pages to one of them. Two commands: /diverge taste [n] builds n complete, genuinely different directions and delivers them side by side in a picker page whose "Use this one" button copies a ready-to-paste prompt; /diverge snippet proves one direction on a single representative file with mockup data, never touching source, in a like/dislike loop. Use when someone wants to see real options before a redesign rollout, asks for variations, directions, tastes, or design options side by side, says "show me a few different takes before we commit", names /diverge taste or /diverge snippet, or wants a fast go/no-go proof of a redesign feel on one file. Directions must differ on structural judgment calls, not paint. Not for applying one decided redesign pass (denoise or any redesign skill does that), and not from-scratch design.
 - **Use-case:** The person is about to commit a project or many pages to one redesign direction and wants real options first, asks for variations/directions/tastes side by side, or wants a one-file mockup proof before rollout.
 - **Usage:** `/diverge [taste [n]|snippet] <file-or-project>`
+
+---
+
+#### `install`
+
+- **Path:** [`Groups/Design/Style/styling/specialized/daisyui/install/SKILL.md`](../Groups/Design/Style/styling/specialized/daisyui/install/SKILL.md)
+- **Parent:** `daisyui`
+- **Description:** Installation instructions for daisyUI 5
 
 ---
 
@@ -394,7 +427,7 @@
 - **Description:** Styling experience, one skill, two levels: build (write NEW styling right on any stack — per-module stylesheets, no monolith, role-named tokens as single source of truth, a downward-only layer chain, expressive names, conditional styling as a lookup not a build, runtime values through a dynamic channel) and retrofit (take an EXISTING project's hardcoded/duplicated styling into a token-driven system: inventory, incumbent gate, one evidence-based native-vs-library decision, pixel-safe migration slices, no-hardcoding guards, before/after parity evidence). The router picks ONE level and reads only its method.md. New work or styling structure is yours → build; existing mess to centralize and prove parity → retrofit. Triggers: organize CSS/XAML/QML, design tokens, style layer chain, inline dumps, built class strings, styleup, style-up, make styles maintainable or professional, remove hardcoded styles, centralize colors/typography/spacing. Not for visual redesign (denoise) or component galleries (components).
 - **Use-case:** The user asks how to organize or write new styling (build), or to make an existing project's styling maintainable, token-driven and enforced with parity evidence (retrofit).
 - **Usage:** `/styling [build|retrofit] <target>`
-- **Sub-skills:** `scss`, `tailwind`
+- **Sub-skills:** `daisyui`, `scss`, `tailwind`
 
 ---
 
@@ -405,6 +438,14 @@
 - **Description:** Tailwind CSS v4 (v3-compatible), one battery, six modules: design-system (token scales, oklch/P3, theme namespaces), config (CSS-first directives @theme/@source/@plugin/@utility/@custom-variant, @apply/@layer/@reference scoped-style fix), migration (v3-to-v4 decision, audit-codemod-verify, single breaking-change catalog, traps and shims), dynamic-classes (runtime bg-${x}-500 never generates: four ranked fixes, @source inline grammar), utility-soup (3-use extraction, component-vs-@apply, prettier/eslint sorting, clsx/twMerge), validator (cross-module review rules, v3/v4 detection, advisory CI). The router picks ONE module and reads only its method.md. Triggers: Tailwind setup or @theme tokens, v3 to v4 upgrade, classes work in dev but not production, safelist or @source inline, too many utility classes one line, Cannot apply unknown utility class, tailwind-merge, audit or review a Tailwind codebase. Not for general styling architecture (styling build/retrofit levels).
 - **Use-case:** Any Tailwind CSS task — configuring v4, defining theme tokens, migrating v3 to v4, fixing classes missing in production, refactoring utility soup, or auditing a Tailwind codebase.
 - **Usage:** `/tailwind [design-system|config|migration|dynamic-classes|utility-soup|validator] <target>`
+
+---
+
+#### `usage`
+
+- **Path:** [`Groups/Design/Style/styling/specialized/daisyui/usage/SKILL.md`](../Groups/Design/Style/styling/specialized/daisyui/usage/SKILL.md)
+- **Parent:** `daisyui`
+- **Description:** Usage rules that you must use with daisyUI 5
 
 ---
 
@@ -774,6 +815,14 @@
 
 ---
 
+#### `blog`
+
+- **Path:** [`blog/SKILL.md`](../blog/SKILL.md)
+- **Description:** Write a new blog article from scratch for Google rankings and AI citations, then take it through the delivery gates. Generates the full article with template selection, answer-first formatting, Key Takeaways box, sourced statistics, licensed images, built-in SVG charts, optional FAQ and internal linking, in MDX, markdown or HTML. Use when the user asks to write a new blog post or article from a topic or brief ("write a blog post", "draft a new article", "/blog write"). Not for editing an existing post (blog-rewrite), and not for a standalone outline, brief or research request.
+- **Usage:** `/blog <topic>`
+
+---
+
 #### `caution`
 
 - **Path:** [`caution/SKILL.md`](../caution/SKILL.md)
@@ -899,10 +948,25 @@
 
 ---
 
+#### `surprise-me`
+
+- **Path:** [`surprise-me/SKILL.md`](../surprise-me/SKILL.md)
+- **Description:** Create a delightful, unexpected "wow" experience for the user by dynamically discovering and creatively combining other enabled skills. Triggers when the user says "surprise me" or any request expressing a desire for an unexpected creative showcase. Also triggers when the user is bored, wants inspiration, or asks for "something interesting".
+
+---
+
 #### `take-a-breath`
 
 - **Path:** [`take-a-breath/SKILL.md`](../take-a-breath/SKILL.md)
 - **Description:** Force a deliberate pause before implementing. Stop the urge to code from scratch, calm the overwhelmed engineering impulse, and apply sober judgment about whether a mature, production-proven solution already exists. Use when the agent is about to write custom code for a common problem, when the user says take a breath, pause and evaluate, don't reinvent, prefer existing solutions, or when the task feels like it might already have a solid library, framework, platform feature, or established pattern. Triggers include take-a-breath, take a breath, pause and think, don't reinvent the wheel, prefer proven solutions, evaluate existing options.
+
+---
+
+#### `teach`
+
+- **Path:** [`teach/SKILL.md`](../teach/SKILL.md)
+- **Description:** Teach the user a new skill or concept, within this workspace.
+- **Usage:** `/teach What would you like to learn about?`
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: caution
-version: 1.0.2
+version: 1.0.3
 author: Amr
 specialized: none
 description: 'Informed-consent gate on the user''s answers: screen every reply (chat, AskUserQuestion, command flags, hook or server input) for a decision whose cost the answerer may not know. Flags the guard, never the goal: storing data on a server, syncing devices or keeping history is the product and gets no card; storing it unencrypted, syncing it in plaintext, or keeping it forever without a cap is what gets flagged. Consequences are not only attacks - data loss, unbounded DB/memory/queue/log growth, irreversible actions, outward-facing contracts, removed safety nets. On a match it raises a visible DANGER mark in the chat, states the failure as a future postmortem headline with mechanism, blast radius and undo cost, names the cheapest adequate alternative, and re-asks once; then it accepts the answer, closes the loop in one line, and never re-opens it. Writes no files and keeps no log - the conversation is the record. A severity ladder keeps it quiet on recoverable calls and informed answers - not risk theater.'

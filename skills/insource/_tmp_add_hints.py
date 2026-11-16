@@ -13,7 +13,6 @@ HINTS = {
  "Groups/Crawl/Scraping/scrape": "<framework> [--auto|--url <site>] [flags]",
  "Groups/Design/denoise": "[lite|medium|ultra] <target>",
  "Groups/Files/pdf": "[read|write] <file or task> [options]",
- "Groups/Files/summarize": "[normal|extreme] <text or file>",
  "Groups/Prospecting/mine": "[read|run|case] <topic or source> [budget]",
  "Groups/Prospecting/smelt": "<source folder> into <destination>",
  "Groups/Talk/inquire": "[verbose|concise] [what needs deciding]",

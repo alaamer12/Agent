@@ -1,6 +1,6 @@
 ---
 name: document
-version: 1.1.0
+version: 1.1.1
 author: Amr
 specialized: none
 description: 'Markdown documents: five jobs, the default entry whenever a task produces, restructures, shortens or rewords a document - self-invoked. WRITE a new document (normal/comprehensive/concise) to the user''s purpose and evidence rules. REORGANIZE a messy doc set into one-concern-per-file with a README per directory as the map. SEPARATE the subject the user names into its own readable document. SUMMARIZE without losing meaning (normal/extreme): TL;DR, executive summary, digest, recap. REPHRASE sentence by sentence - improve grammar, flow and word choice inside each sentence; structure, claims and voice preserved; return the reworded text alone. Triggers: ''write a report about X'', ''refactor these docs'', ''summarize this'', ''rephrase this'', ''what went wrong''. Each job loads only its own method. Restructuring pair: separate first, then reorganize. POSTMORTEM, incident report, RCA, bug write-up: the nested `postmortem` child owns them; job A writes prose. Not for code, slides, or spreadsheets.'

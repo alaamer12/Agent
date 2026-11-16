@@ -2,7 +2,7 @@
 
 The inventory skills system of this workshop — a collection of modular Agent Skills developed by **Amr**. Each skill provides specialized domain instructions, operational workflows, patterns, and best practices for agents; [`manager.py`](manager.py) inventories, lints, versions, and installs them.
 
-Total active skills: **112** — 23 standalone at the repository root and the rest organized under 16 topic groups. 27 archived skills are catalogued in [`_Docs/archive.md`](_Docs/archive.md).
+Total active skills: **120** — 26 standalone at the repository root and the rest organized under 16 topic groups. 27 archived skills are catalogued in [`_Docs/archive.md`](_Docs/archive.md).
 
 > **Refactored 2026-11-16.** This README used to carry the whole catalog (≈1,400 lines). It has been refactored into a slim entry point, and almost all of its data now lives in [`_Docs/`](_Docs/index.md) as separate files. Nothing was dropped — every section moved; the catalog data (Quick Index, Skill Details, Archive) was regenerated fresh from the skills on disk. `manager.py lint --readme` follows the split layout and checks these files against the registry.
 
