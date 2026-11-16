@@ -1,6 +1,7 @@
 ---
 name: heir
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Acknowledge the legacy of previous agents before rebuilding anything. At the start of a task, if the project has a `bequest/` directory, open its INDEX, decide whether any inherited asset fits THIS task, verify it before trusting it, then reuse, adapt or extend it in place. Use when starting work in a project that may already contain scripts, procedures, configs or patterns left by earlier sessions, or when the user says "we did this before", "reuse what exists", "check what is already there". Inherited assets are evaluated, not assumed: inputs, assumptions, dependencies and verification status are read from the asset card, and its tests are run before it is trusted — a partially verified asset is a lead, not a fact. Improvements update the asset and its card rather than forking a copy. heir never creates bequest assets itself; when the session produces reusable work it hands off to `bequeath` so the next agent inherits it too.'
 when_to_use: At the beginning of a task in a project that has a `bequest/` directory, or whenever prior work might already solve part of the current problem.

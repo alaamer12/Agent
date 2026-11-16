@@ -469,6 +469,81 @@ class SpecializedLintTests(ManagerFixture):
                 (skill / "SKILL.md").unlink()
 
 
+class SkillLengthTests(ManagerFixture):
+    def grow(self, skill: Path, target: int) -> int:
+        f = skill / "SKILL.md"
+        lines = f.read_text(encoding="utf-8").splitlines()
+        lines = (lines + ["filler rule"] * target)[:target]
+        f.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return len(f.read_text(encoding="utf-8").splitlines())
+
+    def lint_strict(self) -> subprocess.CompletedProcess:
+        return self.cli("lint", "--strict", "--no-version")
+
+    def test_long_entrypoint_with_other_files_fails(self):
+        skill = self.skill("router")
+        self.write(skill / "references" / "guide.md")
+        count = self.grow(skill, 210)
+        result = self.lint_strict()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn(f"SKILL.md has {count} lines", result.stdout)
+
+    def test_solo_long_skill_passes(self):
+        self.grow(self.skill("monolith"), 210)
+        result = self.lint_strict()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("SKILL.md has", result.stdout)
+
+    def test_boundary_is_under_200(self):
+        skill = self.skill("edge")
+        self.write(skill / "references" / "guide.md")
+        self.assertEqual(self.grow(skill, 199), 199)
+        self.assertEqual(self.lint_strict().returncode, 0, self.lint_strict().stderr)
+        self.assertEqual(self.grow(skill, 200), 200)
+        result = self.lint_strict()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("SKILL.md has 200 lines", result.stdout)
+
+    def test_skill_length_can_be_accepted(self):
+        skill = self.skill("waived")
+        self.write(skill / "references" / "guide.md")
+        self.grow(skill, 230)
+        self.write(skill / "SKILL.md",
+                   (skill / "SKILL.md").read_text(encoding="utf-8").replace(
+                       "specialized: none\n",
+                       "specialized: none\nlint-accept:\n"
+                       '  skill-length: "Reference tables are the payload."\n'))
+        result = self.lint_strict()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        verbose = self.cli("lint", "--strict", "--no-version", "--verbose")
+        self.assertIn("skill-length", verbose.stdout)
+        self.assertIn("Reference tables are the payload.", verbose.stdout)
+
+    def test_battery_module_length_is_not_checked(self):
+        battery = self.skill("battery")
+        self.write(battery / "mode" / "method.md", "rule\n" * 250)
+        result = self.lint_strict()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_foreign_agent_skills_are_not_policed(self):
+        vendor = self.skill("vendor", base=Path(self.env["MANAGER_HOME"]) / ".qoder" / "skills")
+        self.write(vendor / "references" / "guide.md")
+        self.grow(vendor, 210)
+        result = self.lint_strict()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_report_flags_solo_skills(self):
+        self.skill("monolith")
+        self.write(self.skill("withrefs") / "references" / "guide.md")
+        rows = {r["name"]: r for r in self.report()["skills"]}
+        self.assertTrue(rows["monolith"]["solo"])
+        self.assertFalse(rows["withrefs"]["solo"])
+        table = self.cli("report", "--no-color")
+        self.assertEqual(table.returncode, 0, table.stderr)
+        self.assertIn("SKILL.md only", table.stdout)
+        self.assertIn("Solo SKILL.md skills", table.stdout)
+
+
 class LintAcceptTests(ManagerFixture):
     def hybrid(self, accept_yaml: str = "", *, specialized: bool = True) -> Path:
         root = self.skill("hybrid")
@@ -583,6 +658,96 @@ class AgentSourceTests(ManagerFixture):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("_Resources", result.stdout)
         self.assertFalse(Path(self.env["MANAGER_HOME"]).exists())
+
+
+class ArgumentHintTests(ManagerFixture):
+    def surface(self, name: str, body: str, *, hint: str | None = None,
+                accept: bool = False) -> Path:
+        fm = ("---\n" f"name: {name}\n" "version: 1.0.0\n" "specialized: none\n"
+              "description: Fixture description.\n")
+        if accept:
+            fm += ('lint-accept:\n'
+                   '  argument-hint: "Explains README command sections; takes no commands."\n')
+        if hint is not None:
+            fm += f'argument-hint: "{hint}"\n'
+        path = self.registry / name / "SKILL.md"
+        self.write(path, fm + "---\n\n# Fixture\n\n" + body)
+        return path
+
+    def lint_strict(self) -> subprocess.CompletedProcess:
+        return self.cli("lint", "--strict", "--no-version")
+
+    def test_interface_heading_without_hint_warns(self):
+        self.surface("demo", "## Commands\n\nDo the thing.\n")
+        result = self.lint_strict()
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("argument-hint", result.stdout)
+        self.assertIn('heading "Commands"', result.stdout)
+
+    def test_declared_hint_silences_the_rule(self):
+        self.surface("demo", "## Commands\n\nDo the thing.\n", hint="[run] <target>")
+        result = self.lint_strict()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_empty_hint_counts_as_missing(self):
+        self.surface("demo", "## Commands\n\nDo the thing.\n", hint="")
+        self.assertEqual(self.lint_strict().returncode, 1)
+
+    def test_own_slash_usage_with_argument_warns(self):
+        self.surface("demo", "Reach it as `/demo run <thing>` anytime.\n")
+        self.assertIn("self-slash", self.lint_strict().stdout)
+
+    def test_bare_slash_invocation_alone_does_not_fire(self):
+        self.surface("demo", "Type `/demo` and the run starts.\n")
+        self.assertEqual(self.lint_strict().returncode, 0, self.lint_strict().stdout)
+
+    def test_other_skills_commands_are_not_signals(self):
+        self.surface("demo", "Pair with `/other-tool <thing>` and `/second thing` freely.\n")
+        self.assertEqual(self.lint_strict().returncode, 0, self.lint_strict().stdout)
+
+    def test_prose_vocabulary_is_not_a_signal(self):
+        self.surface("demo", "Consider dark mode, maintenance windows and shell commands "
+                             "in CI; the command list lives upstream.\n")
+        self.assertEqual(self.lint_strict().returncode, 0, self.lint_strict().stdout)
+
+    def test_numbered_outline_and_prose_headings_do_not_fire(self):
+        self.surface("demo", "## 7. Commands, examples, and verification honesty\n\n"
+                             "## Why this needs a different mode than normal questions\n\n"
+                             "## Step 6 - Sweep mode\n\nText.\n")
+        self.assertEqual(self.lint_strict().returncode, 0, self.lint_strict().stdout)
+
+    def test_short_numbered_mode_heading_fires(self):
+        self.surface("demo", "### 2. Select mode\n\n- **Open**: discover.\n- **Strict**: named axes.\n")
+        self.assertIn("Select mode", self.lint_strict().stdout)
+
+    def test_mode_letters_fire(self):
+        self.surface("demo", "Mode A answers from what is there. Mode B recovers the thread.\n")
+        self.assertIn("mode letters", self.lint_strict().stdout)
+
+    def test_single_weak_signal_is_not_enough(self):
+        self.surface("demo", "The two commands run in order.\n")
+        self.assertEqual(self.lint_strict().returncode, 0, self.lint_strict().stdout)
+
+    def test_two_weak_signals_fire(self):
+        self.surface("demo", "The three commands - micro, component, transition.\n\n"
+                             "Commands: shown per run.\n")
+        self.assertEqual(self.lint_strict().returncode, 1, self.lint_strict().stdout)
+
+    def test_frontmatter_description_words_are_not_body_signals(self):
+        path = self.surface("demo", "Just a fixture body.\n")
+        text = path.read_text(encoding="utf-8").replace(
+            "description: Fixture description.",
+            "description: Handles three commands and two modes for the project.")
+        self.write(path, text)
+        self.assertEqual(self.lint_strict().returncode, 0, self.lint_strict().stdout)
+
+    def test_misfire_can_be_accepted(self):
+        self.surface("demo", "## Commands\n\nThe README documents its commands.\n", accept=True)
+        result = self.lint_strict()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        verbose = self.cli("lint", "--strict", "--no-version", "--verbose")
+        self.assertIn("argument-hint", verbose.stdout)
+        self.assertIn("Explains README command sections", verbose.stdout)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 ---
 name: scss
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: scss
 description: SCSS/Sassy CSS best practices and coding guidelines for maintainable, scalable stylesheets
 ---

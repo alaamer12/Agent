@@ -1,6 +1,7 @@
 ---
 name: assets
-version: 2.0.0
+version: 2.0.1
+author: Amr
 specialized: none
 description: >-
   Battery-Skill for a project's imagery pipeline: plan the bill of materials, generate the masters,

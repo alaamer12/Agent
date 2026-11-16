@@ -1,7 +1,7 @@
 # Recipe: blinds — `/animation svg blinds`
 
 Per-style recipe — shared build rules in [foundations.md](foundations.md),
-signature and trigger words in [../SKILL.md](../SKILL.md).
+signature and trigger words in [../method.md](../method.md).
 
 Distinct from `mosaic`, which is a 2-D grid of tiles gated on **opacity**. Here
 the mask geometry itself animates — each slat's `height` grows — in a single

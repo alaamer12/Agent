@@ -1,6 +1,6 @@
 # Choreography recipes
 
-> Copy-ready patterns for the relations in synchronization.md. Values are starting points — tune on a recording (scrub, don't remember). Patterns distilled 2026-11-14 from Emil Kowalski's published choreograph recipes; read from source, not re-executed here — stack APIs may drift, check the current docs when implementing. Routing: `../SKILL.md`.
+> Copy-ready patterns for the relations in synchronization.md. Values are starting points — tune on a recording (scrub, don't remember). Patterns distilled 2026-11-14 from Emil Kowalski's published choreograph recipes; read from source, not re-executed here — stack APIs may drift, check the current docs when implementing. Routing: `../method.md`.
 
 ## Overlap — CSS delay variable (one-shot entrances)
 

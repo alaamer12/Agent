@@ -1,6 +1,7 @@
 ---
 name: recall
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Recall, in two modes, on one rule: report only what you can actually find. Mode A answers "do you remember when I said X?", "did I mention Y?", or /recall <topic> from what is really present - live context, plus past-chat or memory tools when present: open with Yes, No, or Partly, quote the user''s own words verbatim on a Yes, 1-5 lines, never an invented memory. Mode B recovers a conversation that compaction, a lost session, or a new terminal made unavailable: prefer the harness''s own history mechanism over file hunting, locate the session by id, title, date, or distinctive content, inspect the real storage format before parsing, and recover at the requested depth - full fidelity (tool calls, outputs, errors, order) or the discussion - chunking long transcripts on record boundaries. The objective is the ORIGINAL conversation, not a summary or reconstruction; inaccessible sources are stated as limits, not guessed. Escalates A to B when the answer is missing from context but plausibly in an earlier session.'
 when_to_use: The user asks whether you remember, recall, or were told something earlier ("do you remember when I said…", "did I mention…", "what did I tell you about…"), or invokes /recall; or context was compacted or the session was lost and the current task depends on earlier decisions, instructions, tool results, errors, or research no longer visible.
@@ -103,7 +104,7 @@ If the source is gone or unreadable, state the limitation and stop. That is the 
 | writing the project's rules or the instruction file | `agents-md` |
 | the inventory of reusable units a task should reuse | `units-md` |
 | answering from general knowledge, no memory question involved | just answer, and say it is not from their history |
-| proving a past decision was made with evidence | `postmortem` §17 / the project's decision records |
+| proving a past decision was made with evidence | postmortem §17 (via `document`) / the project's decision records |
 
 ## Files
 

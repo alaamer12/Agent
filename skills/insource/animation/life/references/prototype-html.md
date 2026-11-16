@@ -1,6 +1,6 @@
 # HTML prototype
 
-> Owner of the when-to-escalate criteria and of the live demo contract. Routing lives in ../SKILL.md.
+> Owner of the when-to-escalate criteria and of the live demo contract. Routing lives in ../method.md.
 
 A live, runnable preview of an option, used when ASCII cannot convey the effect. It lets the user see the animation before it is implemented in production code.
 

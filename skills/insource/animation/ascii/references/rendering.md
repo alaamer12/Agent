@@ -1,7 +1,7 @@
 # ASCII Rendering Reference
 
 > Detailed ramp tables, sampling math, renderers, and motion-pattern sketches for the `ascii` skill.
-> Start from the skill overview in [`../SKILL.md`](../SKILL.md); load this file when you need full tables, ANSI helpers, or motion recipes.
+> Start from the skill overview in [`../method.md`](../method.md); load this file when you need full tables, ANSI helpers, or motion recipes.
 
 ## Brightness ramp tables
 

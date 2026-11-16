@@ -4,6 +4,19 @@ An image is a first-class artifact of this skill, not only a leak surface: scree
 mockups, photos and scans carry names, faces, avatars, handles, addresses and endpoints *as pixels*, and a
 substitution map over the text version of them revokes nothing. This file covers revoking the pixels.
 
+## What the mode is, in short
+
+**`/revoke image` - revoking pixels, not just prose.** Screenshots and pictures are first-class artifacts:
+the agent looks, inventories every visible identifier (avatars, faces, name labels *wherever they repeat* -
+header, quoted replies, toasts), and treats each region with an operation translated into pixels. Opaque
+flattened blocks are the redaction; blur is de-identification and gets recorded as such; the file is re-encoded
+with metadata and embedded thumbnails stripped; every frame of a multi-frame file is treated. With no region
+list given, the default is the document default - revoke everything that identifies. The non-negotiable loop:
+render to a temp file, look at the result (this agent has eyes; zoom the edges), fix coverage misses, and only
+then produce the final. `scripts/revoke_image.py` is the default mechanics - the script applies the spec, the
+agent decides it; any tool that meets the same obligations (opaque paint, flatten, strip, every frame) is
+equally valid.
+
 ## Step 0 still runs
 
 The destination still sets the budget (public post vs internal wiki vs third-party tool), because it decides
@@ -100,6 +113,9 @@ The method is tool-neutral, and the environment is the arbiter of what applies:
   covered? no halo text readable? OCR sweep of the output finds none of the inventoried strings?) → fix the
   spec, re-render → and only after the temp passes, produce the final file and re-run the checks on *it*.
   A final image produced without a looked-at predecessor is a leak with a filename.
+- **Verification status:** self-test and a real four-variant run (block/blur x normal/partial on a chat
+  screenshot) executed against Pillow 13.0.0 in a temp venv on 2026-11-06; the temp-inspection pass caught
+  and fixed a real coverage miss, so the loop it documents is the loop that worked.
 
 ## Verification closes the loop, then the record
 

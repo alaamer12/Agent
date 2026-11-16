@@ -1,6 +1,6 @@
 # Stack: CSS and native web APIs
 
-> Owner of CSS/Web Animations/View Transitions/scroll-driven CSS implementation mechanics. Routing lives in ../../SKILL.md.
+> Owner of CSS/Web Animations/View Transitions/scroll-driven CSS implementation mechanics. Routing lives in ../../method.md.
 
 Notes for projects with no animation library, or when the platform can do the job. Check browser support in the project's target list before relying on newer features, and keep a fallback.
 

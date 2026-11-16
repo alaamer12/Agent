@@ -68,6 +68,10 @@ warnings, and any deliberate exception), the motion promises measured against
 their expectations, and the file paths. Offer `npx hyperframes publish` for a
 stable link — private by default — but never publish without being asked.
 
+Report axes, runtime, canvas, the `qa.py` result, arrivals measured against
+arrivals implied, each motion promise's verdict, and anything that gave way.
+Append that record to `video-spec.md`.
+
 ## The pre-handoff pass
 
 ```bash

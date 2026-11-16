@@ -7,7 +7,7 @@ Selection decides *what* survives (02-selection.md); this decides *how* it's ren
 - **Extractive** (lifting existing sentences) is faithful but often disjointed — sentences written to sit inside a longer piece read oddly once stitched to other lifted sentences.
 - **Abstractive** (rewriting in your own words) is coherent and compresses further, but risks drifting from what the source actually said.
 
-Default: **rewrite in your own words, then run the faithfulness check** (05-faithfulness-check.md). Pure lifted-sentence collage is an anti-pattern, not a lightweight version of this skill.
+Default: **rewrite in your own words, then run the faithfulness check** (05-faithfulness-check.md). Pure lifted-sentence collage is an anti-pattern, not a lightweight version of this job.
 
 ## When to lift instead of rewrite
 

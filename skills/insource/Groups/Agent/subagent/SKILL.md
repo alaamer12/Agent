@@ -1,8 +1,10 @@
 ---
 name: subagent
-version: 1.0.1
+version: 1.0.3
+author: Amr
 specialized: none
 description: 'Create high-quality professional prompts for sub-agents. Use when the main agent needs to delegate work to a specialized sub-agent or worker. Produces a structured brief with hierarchical Context, precise Goal, How, Autonomy Bounds, and Output Contract so the sub-agent stays focused, never decides, and returns full raw results instead of summaries. Also covers pre-delegation environment consistency checks (to prevent sub-agent drift), requirements for exhaustive slightest-detail reporting back to the main agent, detecting/mitigating race conditions between concurrently running sub-agents (e.g. shared scripts or files), and the default dispatch mode — sub-agents always run in the background unless the user explicitly asks for foreground. Triggers include sub-agent, subagent, delegate, spawn worker, professional brief, task handoff, isolated prompt, parallel agents, concurrent agents, background agents. It also carries the rulebook in the brief and clears the subagent''s authority questions with the user first.'
+argument-hint: "[forked] <what to delegate>"
 ---
 
 # Professional Subagent

@@ -1,6 +1,7 @@
 ---
 name: glossary-md
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Maintains one unambiguous project vocabulary in alphabetical letter blocks. Golden rule for what earns a block: the word as used here carries more than the dictionary sense - redefined or made-concrete ordinary words (''eye'', ''minimal''), project coinages (''Melody'' for a workflow), private-sense abbreviations, transliterations (Basr, بصر), Franco spellings, names/codenames. The project''s own language is the canon, never English; bilingual terms show both forms together; article-led names file under the head noun (''Pit, The'' under P). Each block: term (acronym spelled out), all forms, a 2-5 line meaning, ''Used in:'' refs; keep identities generic - run ''revoke'' before the glossary leaves the project. Lives in AGENTS.md''s `# Glossary`, extracted to GLOSSARY.md when past the section budget. Self-invoke on learning, write the block in the same task; unknown means stay pending - never invent etymology. Also /glossary-md, ''add this term'', ''what does X mean here''. Owns glossary content; agents-md owns AGENTS.md.'
 when_to_use: The agent encounters or uses a project-specific, foreign, transliterated, or redefined term for the first time; the user asks to record or look up a term; or terminology appears mixed across docs and needs one canonical list. Also /glossary-md.

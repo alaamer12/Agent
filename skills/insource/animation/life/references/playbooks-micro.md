@@ -1,6 +1,6 @@
 # Playbook: micro
 
-> Owns the micro recipes (press, toggle, swaps, hold-to-confirm) and the micro state workflow. Routing lives in ../SKILL.md.
+> Owns the micro recipes (press, toggle, swaps, hold-to-confirm) and the micro state workflow. Routing lives in ../method.md.
 
 Animating a single element or a small visual unit: a button, icon, badge, toggle, number, input, link, chip. Small in scope, but it can be interactive, synchronized, and as creative as the tier allows.
 

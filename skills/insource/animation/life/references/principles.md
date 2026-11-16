@@ -1,6 +1,6 @@
 # Principles
 
-> Rationale only, no numbers (all ranges: timing-and-tokens.md; tiers and novelty policy: gate.md); routing lives in `../SKILL.md`.
+> Rationale only, no numbers (all ranges: timing-and-tokens.md; tiers and novelty policy: gate.md); routing lives in `../method.md`.
 
 The reasoning behind the playbooks. Use it to make judgment calls the recipes do not cover, especially for entrances, exits and states that come in pairs.
 

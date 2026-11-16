@@ -1,6 +1,6 @@
 # Playbook: component
 
-> Owns component lifecycle recipes, origin choices and the component workflow. Routing lives in ../SKILL.md.
+> Owns component lifecycle recipes, origin choices and the component workflow. Routing lives in ../method.md.
 
 Animating a complete component as one visual unit: dialog, popover, dropdown, drawer, toast, card, menu, accordion, list item, panel. The component may contain many parts; the animation is designed around the component.
 

@@ -1,6 +1,6 @@
 # Playbook: transition
 
-> Owns the state-graph workflow, direction awareness, and the rule that navigation is never blocked on the animation. Routing lives in ../SKILL.md.
+> Owns the state-graph workflow, direction awareness, and the rule that navigation is never blocked on the animation. Routing lives in ../method.md.
 
 Animating the move from one state, view or page to another. The question is always: how does the interface move from the current state to the next, and back?
 
@@ -21,7 +21,7 @@ Animating the move from one state, view or page to another. The question is alwa
 | Step 2 to 3 | ... | ... | ... |
 | Open detail from list | Shared element expands | Collapses back to the item's position | Reverse follows the pointer or gesture when swiped |
 
-A row with an empty reverse column is an unfinished design: the never-bend rule (every forward has a reverse) lives in ../SKILL.md.
+A row with an empty reverse column is an unfinished design: the never-bend rule (every forward has a reverse) lives in ../method.md.
 
 ## Direction awareness
 

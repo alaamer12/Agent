@@ -1,6 +1,7 @@
 ---
 name: educate
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: Turns documentation retrieved by the Scrape skill into a pruned, project-relevant, indexed, version-aware knowledge base so the agent never has to re-read or re-search the full raw docs again. Use whenever the user asks to "learn"/"study" a library or framework's docs, wants deep or repeated work with a specific dependency's documentation, asks to build or refresh a local docs index/cache, or whenever you notice you're about to re-scrape or re-read the same third-party documentation you've already fetched. Requires the Scrape skill's output as input — if that documentation hasn't been retrieved yet, run or request Scrape first. Covers pruning raw docs, detecting the project's real dependency version from whatever manifest format its ecosystem actually uses (Node, Python, Rust, Go, Ruby, PHP, JVM, or others — a template, not a fixed list), monorepos with conflicting versions, building a searchable index, and version-aware cache reuse.
 ---

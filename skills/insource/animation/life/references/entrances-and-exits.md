@@ -1,6 +1,6 @@
 # Entrances and exits
 
-> Owns the entrance kinds map, first-run intro policy, exits and the pairs table; routing lives in `../SKILL.md`.
+> Owns the entrance kinds map, first-run intro policy, exits and the pairs table; routing lives in `../method.md`.
 
 How things arrive and leave: first-run and onboarding intros, hero and page load, sections and lists appearing, overlays opening and closing, dismissal and removal.
 

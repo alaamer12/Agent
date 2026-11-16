@@ -1,6 +1,6 @@
 # Match an existing animation
 
-> Owns the recording→frames→tracks→curve pipeline and the measurement reading table; routing lives in `../SKILL.md`.
+> Owns the recording→frames→tracks→curve pipeline and the measurement reading table; routing lives in `../method.md`.
 
 Recreate an animation from a recording or a reference so the result matches its feel. Applies to any command: a recorded micro interaction, a component animation, a transition.
 

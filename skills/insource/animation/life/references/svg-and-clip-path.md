@@ -1,6 +1,6 @@
 # SVG and clip-path
 
-> Owner of clip/mask reveals, before and after sliders, line drawing, morphs and the mask-versus-clip edge rule. Routing lives in ../SKILL.md.
+> Owner of clip/mask reveals, before and after sliders, line drawing, morphs and the mask-versus-clip edge rule. Routing lives in ../method.md.
 
 Vector animation, reveals, masks and shape-following motion.
 

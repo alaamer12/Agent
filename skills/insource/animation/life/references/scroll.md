@@ -1,6 +1,6 @@
 # Scroll animation
 
-> Owner of the triggered-versus-scrubbed decision, the reveal observer, scroll timelines, parallax and scrollytelling. Routing lives in ../SKILL.md.
+> Owner of the triggered-versus-scrubbed decision, the reveal observer, scroll timelines, parallax and scrollytelling. Routing lives in ../method.md.
 
 Motion tied to scrolling: reveals, scrubbed progress, parallax, pinned scenes. Scroll is a user's primary control, so motion here must never fight it.
 

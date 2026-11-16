@@ -1,6 +1,6 @@
 # Gate
 
-> Owns the four gate questions, frequency→verdict, valid purposes, tier MEANINGS, one-shot rules and the novelty policy; routing lives in `../SKILL.md`.
+> Owns the four gate questions, frequency→verdict, valid purposes, tier MEANINGS, one-shot rules and the novelty policy; routing lives in `../method.md`.
 
 Decide whether and how much to animate before any creative work. Expect to reduce or refuse often; an interface that needs little animation is a good result.
 

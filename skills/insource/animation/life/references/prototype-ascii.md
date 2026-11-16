@@ -1,6 +1,6 @@
 # ASCII prototype
 
-> Owns the options-page structure, the prototype spec schema and field rules, the ASCII drawing rules, frame cadence and the lanes strip. Routing lives in ../SKILL.md.
+> Owns the options-page structure, the prototype spec schema and field rules, the ASCII drawing rules, frame cadence and the lanes strip. Routing lives in ../method.md.
 
 The default way to present creative options. One HTML file with one section per option; each option shows its animation as a sequence of ASCII states over time, so the user can see how it progresses before anything is implemented.
 
@@ -66,7 +66,7 @@ In a spec these are three frames of one sequence, each with its own `t` and `art
 
 ## Running the scripts
 
-Command lines are in the hub scripts table (../SKILL.md). Fix every validator error before building; the builder refuses an invalid spec. Report the output path to the user.
+Command lines are in the hub scripts table (../method.md). Fix every validator error before building; the builder refuses an invalid spec. Report the output path to the user.
 
 ## Manual fallback
 

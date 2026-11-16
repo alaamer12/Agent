@@ -1,6 +1,7 @@
 ---
 name: revoke
-version: 1.0.2
+version: 1.1.0
+author: Amr
 specialized: none
 description: 'Sanitise an artifact by revoking what ties it to a specific project, person, customer or deployment: the substance survives, the identity does not. Use when a report, spec, config, log or screenshot must leave its origin: inventory what is specific (names, ids, endpoints, secrets, dates, paths), choose per item [redact] [pseudonymize] [generalize] [aggregate] [keep] under one substitution map, verify nothing leaks (token/entropy sweeps, metadata, the map), and check the argument survives. No findings, no changes: with nothing identifying, the artifact ships byte-identical with a clean report; cosmetic rewording is editing, not revocation. Modes: /revoke partial masks values to fragments (A****) for owner-view screens - never secrets; /revoke image paints opaque blocks over visible identifiers (blur is not revocation), strips metadata. Not polyglot (stack-neutral); revoke is identity-neutral. Never to hide wrongdoing, evade a legal hold, strip safety notices or erase accountability; the original stays intact.'
 when_to_use: The user asks to sanitise, redact, anonymise, de-identify, genericise or "remove anything that identifies our project/customer" from a document, passage, config, log, screenshot, image or case study before sharing or reusing it. Also /revoke, /revoke partial (owner-recognition masks), /revoke image (pixel-level redaction of a picture).
@@ -28,23 +29,14 @@ sanitizing, and it is never the output of this skill ([`06`](references/06-bound
 
 ## Not the same as `polyglot`
 
-`polyglot` generalizes **across technology**: it removes the assumption that a reader is on one stack. `revoke`
-generalizes **across identity and context**: it removes the facts that name the people, tenants, systems,
-contracts and dates that produced the artifact. A document can be perfectly polyglot and still leak your
-customer list on line one. Do the two in that order.
+`polyglot` generalizes across technology, `revoke` across identity and context, and the order between them is
+fixed. The distinction, and why neither pass makes the other safe: [`00`](references/00-what-revoking-is.md).
 
 ## Step 0 - Where is it going? That sets the budget
 
-The destination decides how far to revoke and what must survive
-([`05`](references/05-purpose-calibration.md)):
-
-| Destination | Aggressiveness | What must survive |
-|---|---|---|
-| Same team, different repo | low | identifiers that engineers will need to look up |
-| Company-wide | medium | role names, system names, the causal chain |
-| Public blog, conference talk, vendor forum | high | the mechanism, the numbers rounded to a useful scale |
-| A third-party tool, hosted model, or contractor | high, plus policy check | nothing that is someone else's data to hand over |
-| Regulated content: personal, health, financial, security | highest, and often not yours to decide | the lesson, without the record |
+The destination decides how far to revoke and what must survive; the five destination levels, each with its
+aggressiveness and its survivors, are tabulated there with the detail
+([`05`](references/05-purpose-calibration.md)).
 
 If the destination is unknown, ask one short question before revoking anything. A different audience is a
 different document.
@@ -123,41 +115,15 @@ incident gets a second root cause"). Put it where the project already keeps such
 Entered by name, each with its own reference read in full before acting. Neither relaxes Steps 0-5; they
 change what the operations are applied *to*.
 
-**`/revoke partial` - the mask that only the owner can finish.** For recovery/confirmation screens where
-showing `A****` or `****4821` lets the owner recognize their own value while strangers get a fragment worth
-nothing. It is deliberately the inverse of the Step-4 shape rule, valid only under the owner-viewer
-assumption: head-vs-tail is a threat-model choice per field, masked parts keep their entropy, credential-class
-values get no fragment at all, and the result must never be copied into a shared artifact
-([`07`](references/07-partial-masking.md)).
-
-**`/revoke image` - revoking pixels, not just prose.** Screenshots and pictures are first-class artifacts:
-the agent looks, inventories every visible identifier (avatars, faces, name labels *wherever they repeat* -
-header, quoted replies, toasts), and treats each region with an operation translated into pixels. Opaque
-flattened blocks are the redaction; blur is de-identification and gets recorded as such; the file is re-encoded
-with metadata and embedded thumbnails stripped; every frame of a multi-frame file is treated. With no region
-list given, the default is the document default - revoke everything that identifies. The non-negotiable loop:
-render to a temp file, look at the result (this agent has eyes; zoom the edges), fix coverage misses, and only
-then produce the final ([`08`](references/08-image-redaction.md)). `scripts/revoke_image.py` is the default
-mechanics - the script applies the spec, the agent decides it; any tool that meets the same obligations
-(opaque paint, flatten, strip, every frame) is equally valid.
+- **`/revoke partial`** - the mask that only the owner can finish: what the mode is, in short, and its full
+  discipline ([`07`](references/07-partial-masking.md)).
+- **`/revoke image`** - revoking pixels, not just prose: what the mode is, in short, and its full discipline
+  ([`08`](references/08-image-redaction.md)).
 
 ## Boundaries - these stop the job, not style it
 
-Read [`06`](references/06-boundaries-and-misuse.md) before touching anything in this list.
-
-- **Never to conceal.** Revoking to hide wrongdoing, dodge an audit, defeat a legal hold, or erase a required
-  record is not sanitization. The artifact's *disclosure* is your subject; its *existence* is not.
-- **Never strip protective content**: safety warnings, consent notices, license headers, deprecation dates,
-  the reason a value must not be edited.
-- **Never launder accountability out of a timeline.** Replace names with roles - `[on-call]`,
-  `[database-owner]` - so *who did what* remains knowable while *who* stays private.
-- **Never revoke data that is not yours to disclose.** If the artifact contains another party's personal or
-  customer data and you lack authority, say so and stop; a sanitized copy handed to a third party is still a
-  disclosure.
-- **Never destroy the original.** Produce, don't overwrite.
-- **No redaction theatre.** A document with six black boxes and one unique surviving detail is not sanitized.
-  If you cannot revoke enough to make it safe, the answer is "this cannot be shared", which is a legitimate
-  deliverable.
+Read [`06`](references/06-boundaries-and-misuse.md) before touching anything in this list: the boundaries, each
+in one line, are recorded there above the full stop table.
 
 ## References
 
@@ -205,6 +171,3 @@ Read them after your own inventory, not instead of it:
   global interpreter - the script prints the exact commands); any other tool meeting the same obligations
   works too, the loop matters more than the library. Exit 0/1/2 as its sibling. No argument runs the
   self-test - synthetic avatar+name fixture, seven checks. On Windows use `python`, not `python3`.
-  **Verification status:** self-test and a real four-variant run (block/blur x normal/partial on a chat
-  screenshot) executed against Pillow 13.0.0 in a temp venv on 2026-11-06; the temp-inspection pass caught
-  and fixed a real coverage miss, so the loop it documents is the loop that worked.

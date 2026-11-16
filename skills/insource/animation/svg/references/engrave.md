@@ -1,7 +1,7 @@
 # Recipe: engrave — `/animation svg engrave`
 
 Per-style recipe — shared build rules in [foundations.md](foundations.md),
-signature and trigger words in [../SKILL.md](../SKILL.md).
+signature and trigger words in [../method.md](../method.md).
 
 The skill's first use of the **lighting primitives** (`feDiffuseLighting`).
 

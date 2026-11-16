@@ -12,6 +12,7 @@
 6. [Encapsulate Collection](#encapsulate-collection)
 7. [Replace Type Code with Class](#replace-type-code-with-class)
 8. [Decision Guide: Which Data Refactoring to Use](#decision-guide-which-data-refactoring-to-use)
+9. [Where to Start](#where-to-start)
 
 ---
 
@@ -432,3 +433,12 @@ class ManagerType {
 | Type code is informational | Replace Type Code with Class / Enum |
 | Type code drives behavior | Replace Type Code with Subclasses |
 | Type code changes at runtime | Replace Type Code with Strategy |
+
+---
+
+## Where to Start
+
+- Replace Magic Number with Symbolic Constant
+- Replace Data Value with Object (`Email`, `Money`, `DateRange`)
+- Encapsulate Field / Collection
+- Replace Type Code with Subclasses or Strategy

@@ -40,7 +40,7 @@ Write both halves in one pass and nothing downstream has to reconcile them.
    verbatim, hard rules appended, reference-chained from the style anchor.
 5. **Plan the generation run**, then hand it over: the BOM row already states the master size, the
    sheet grid and the delivery spec, so the command to `generate` is derived, not re-invented.
-   After generation, `resources conform` (probe → split → fit → verify) turns the raw sheet into
+   After generation, `conform` (probe → split → fit → verify) turns the raw sheet into
    the slot files. Pages marked `no-images` skip both.
 
 ## Bills of materials
@@ -59,7 +59,7 @@ as `no-images`, so "this page has no artwork" is a recorded decision instead of 
 
 ### The slot table
 
-The schema lives here; `resources conform` reads it and changes nothing about it.
+The schema lives here; `conform` reads it and changes nothing about it.
 
 | Slot | Role | Source | Master | Delivery | Status |
 |---|---|---|---|---|---|
@@ -68,19 +68,19 @@ The schema lives here; `resources conform` reads it and changes nothing about it
 | `hero-home` | hero illustration | generate single | 1600x900 single | `800x450 16:9 avif q60 @1x,2x` | pending |
 | `logo` | brand mark | reuse `brand/logo.svg` | — | `240x64 svg` | shipped |
 | `photo-teaser` | stock photo | `fahlwy` | — | `640x360 16:9 jpeg q80 @2x` | pending |
-| `icon-search` | icon | `resources` / icon set | — | `24x24 svg` | shipped |
+| `icon-search` | icon | `conform` / icon set | — | `24x24 svg` | shipped |
 
 - **Slot**: one id, a comma list, or a range for a numbered family (`avatar-01..10`). The id
   becomes the filename stem, and ids are arbitrary - `welcome`, `empty-state`, `hero-home`. For a
   sheet holding unrelated subjects, list them in the sheet's row-major order; that order is the cut
   order.
 - **Source**: `generate` (single or sheet), `sheet <path>` (an existing sheet image to cut - a
-  reference catalog the user owns), `reuse <path>`, `fahlwy`, `resources`. Only rows with a master
+  reference catalog the user owns), `reuse <path>`, `fahlwy`, `conform`. Only rows with a master
   get a spec and a prompt; only generated rows get a prompt.
 - **Master**: `WxH single`, `WxH sheet CxR [gutter N]`, or `WxH sheet rows 8,8,8,10` when the rows
   hold different subject counts - the raw render the slot is cut from. It must hold
   `delivery px x max DPR` per axis; `conform` reads this cell, so notes never go in it. Do not
-  guess it: `resources`' `sheet_probe.py` measures the image and prints the exact spec to paste.
+  guess it: `conform`'s `sheet_probe.py` measures the image and prints the exact spec to paste.
 - **Delivery**: `WxH [aspect] [format] [qN] [@1x,2x,3x]` - exactly what `conform` implements.
 - **Status**: `pending / shipped / reused / no-image`.
 
@@ -92,7 +92,7 @@ The schema lives here; `resources conform` reads it and changes nothing about it
 3. **Measure.** Box and aspect in the layout, then the real device pixels and DPR - that is the
    delivery spec. A 128 CSS px avatar at 3x needs a 384px master.
 4. **Route.** Generated sheet / generated single / reuse existing / stock (`fahlwy`) / icon set
-   (`resources`). Only the first two get prompts.
+   (`conform`). Only the first two get prompts.
 5. **Find economy.** Repeated, same-sized, same-style subjects are sheet candidates; unique
    full-bleed art is a single. Sheet rows do not have to share a column count - a catalog of
    badges is 8,8,8,10 - but each row is still one render plan. Record the arithmetic, not a feeling.
@@ -111,7 +111,7 @@ requests        = ceil(N / cells_per_sheet)  vs  N
 The avatar sheet above: 10 avatars at 128px `@1x,2x` need 256px masters; a 1536×1024 5×2 sheet
 gives 283px cells → valid, 1 request instead of 10. Raise the delivery to `@3x` (384px masters)
 and the same sheet **fails** - you need 3 sheets of 2×2 (12 cells), 10 singles, or a larger master.
-Measure with `resources`' `sheet_probe.py` before committing the plan.
+Measure with `conform`'s `sheet_probe.py` before committing the plan.
 
 Economy is not cheapness. A sheet trades cost for **correlated risk**: one bad cell invalidates
 the whole render, while individual generations drift in style. Record the fallback (`2x2 sheets`
@@ -180,10 +180,10 @@ The BOM and manifest are the deliverable; images are the second act.
 |---|---|
 | Writing one image prompt, running generations, video | `generate` |
 | Real photos, avatars from a library, proven free sources | `fahlwy` |
-| Splitting a generated sheet, fitting delivery sizes, naming, verifying | `resources` (conform) |
-| Renaming/organizing/converting files after they exist | `resources` |
+| Splitting a generated sheet, fitting delivery sizes, naming, verifying | `conform` |
+| Renaming/organizing/converting files after they exist | `conform` |
 | Deciding which pages a product has | `pages` - the BOM consumes the `pages` tree, never invents pages |
-| UI states needing illustrations designed for them | `stateful` (the states) → this skill (their art) |
+| UI states needing illustrations designed for them | `stateful` (the states) → `assets` (their art) |
 
 ## Resources
 

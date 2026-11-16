@@ -1,6 +1,6 @@
 # Debugging animation
 
-> Owns symptom→cause→fix; routing lives in `../SKILL.md`.
+> Owns symptom→cause→fix; routing lives in `../method.md`.
 
 Symptom first. Use when existing animation "feels off", flickers, jumps or stutters, before deciding whether to improve or redesign.
 

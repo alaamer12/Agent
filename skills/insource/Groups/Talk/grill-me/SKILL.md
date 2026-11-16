@@ -1,6 +1,7 @@
 ---
 name: grill-me
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.
 ---

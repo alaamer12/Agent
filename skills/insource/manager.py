@@ -36,6 +36,7 @@ import argparse
 import hashlib
 import json
 import os
+import posixpath
 import re
 import shutil
 import sqlite3
@@ -51,7 +52,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Sequence
 from urllib.parse import unquote
 
-__version__ = "2.3.0"
+__version__ = "2.6.0"
 
 # ---------------------------------------------------------------------------
 # optional dependencies
@@ -82,6 +83,7 @@ except Exception:  # pragma: no cover
 # ---------------------------------------------------------------------------
 
 DEFAULT_DESCRIPTION_LIMIT = 1024
+SKILL_LENGTH_LIMIT = 200
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
 SPECIALIZED_GENERAL = "none"
 SPECIALIZED_RE = re.compile(r"[a-z0-9][a-z0-9.+#-]*")
@@ -102,6 +104,7 @@ LINT_RULE_IDS = {
     "mixed-composition", "frontmatter", "version", "specialized",
     "name", "name-mismatch", "duplicate-name",
     "description", "description-multiline", "description-length",
+    "skill-length", "argument-hint",
 }
 INITIAL_VERSION = "1.0.0"
 DB_APP_DIR = "insource-manager"
@@ -1367,10 +1370,12 @@ def viber_plan(registry: Path) -> list[dict[str, Any]]:
     manifest_dir = manifest_file.resolve().parent
     step_info: dict[str, dict[str, str]] = {}
     for step in manifest.get("lifecycle", []):
-        for name in step.get("skills", []):
-            step_info[name] = {"phase": step.get("step", "-"), "status": "mandatory"}
         for name in step.get("commands", []):
             step_info[name] = {"phase": step.get("step", "-"), "status": "command"}
+    for name, entry in manifest.get("skills", {}).items():
+        serves = entry.get("fit", {}).get("serves", [])
+        if serves and name not in step_info:
+            step_info[name] = {"phase": ", ".join(serves), "status": "mandatory"}
     rows: list[dict[str, Any]] = []
     for name, entry in manifest.get("skills", {}).items():
         info = step_info.get(name, {"phase": "-", "status": "-"})
@@ -1681,6 +1686,8 @@ def lint_skill_dirs(
 
 
 README_NAME = "README.md"
+DOCS_NAME = "_Docs"
+DOCS_CATALOG_FILES = ("quick-index.md", "skill-details.md", "archive.md")
 STANDALONE_CATEGORY = "Standalone (repository root)"
 _README_QI_RE = re.compile(r"^- \[([^\]]+)\]\(([^)]+)\)(?: — (.*))?$")
 _README_FIELD_RE = re.compile(r"^- \*\*([^*]+):\*\* (.*)$")
@@ -1705,6 +1712,11 @@ def _readme_path(target: str) -> str:
 
 def _path_key(path: str) -> str:
     return _readme_path(path).casefold()
+
+
+def _resolve_readme_target(rel: str, base: str) -> str:
+    """A cleaned (_readme_path'd) link target made registry-relative from a part's base dir."""
+    return posixpath.normpath(posixpath.join(base, rel)) if base and rel else rel
 
 
 def expected_catalog(registry: Path) -> dict[str, dict[str, Any]]:
@@ -1735,7 +1747,28 @@ def expected_catalog(registry: Path) -> dict[str, dict[str, Any]]:
     return catalog
 
 
-def parse_readme(text: str) -> dict[str, Any]:
+def readme_parts(registry: Path) -> list[tuple[str, str]] | None:
+    """(base_dir, text) parts the catalog is parsed from, in order, or None if README is missing.
+
+    The legacy layout keeps every catalog section inside README.md; the split
+    layout keeps only the slim entry point there and carries Quick Index,
+    Skill Details and Archive as files under _Docs/ (links rebased ../).
+    """
+    readme = registry / README_NAME
+    if not readme.is_file():
+        return None
+    text = readme.read_text(encoding="utf-8", errors="replace")
+    if "## Quick Index" in text:
+        return [("", text)]
+    parts = [("", text)]
+    for name in DOCS_CATALOG_FILES:
+        part = registry / DOCS_NAME / name
+        if part.is_file():
+            parts.append((DOCS_NAME, part.read_text(encoding="utf-8", errors="replace")))
+    return parts
+
+
+def parse_readme(text: str, base: str = "") -> dict[str, Any]:
     header, _, rest = text.partition("## Quick Index")
     quick, _, rest = rest.partition("## Skill Details")
     details_text, _, archive_text = rest.partition("## Archive")
@@ -1746,12 +1779,12 @@ def parse_readme(text: str) -> dict[str, Any]:
         if line.startswith("### "):
             category = line[4:].strip()
         elif match := _README_QI_RE.match(line):
-            parsed["quick"].append({"name": match[1], "path": _readme_path(match[2]), "summary": match[3] or "", "category": category})
+            parsed["quick"].append({"name": match[1], "path": _resolve_readme_target(_readme_path(match[2]), base), "summary": match[3] or "", "category": category})
 
     category, block = None, None
     for line in details_text.splitlines():
         if line.startswith("#### "):
-            block = {"name": line[5:].strip().strip("`"), "category": category, "fields": {}}
+            block = {"name": line[5:].strip().strip("`"), "category": category, "fields": {}, "base": base}
             parsed["details"].append(block)
         elif line.startswith("### "):
             category, block = line[4:].strip(), None
@@ -1760,21 +1793,34 @@ def parse_readme(text: str) -> dict[str, Any]:
 
     for line in archive_text.splitlines():
         if match := _README_QI_RE.match(line):
-            parsed["archive"].append({"name": match[1], "path": _readme_path(match[2])})
+            parsed["archive"].append({"name": match[1], "path": _resolve_readme_target(_readme_path(match[2]), base)})
     return parsed
 
 
 def check_readme(registry: Path) -> list[tuple[str, str, str]]:
-    """Return (skill, section, issue) rows where README.md disagrees with the skills on disk."""
-    readme = registry / README_NAME
-    if not readme.is_file():
+    """Return (skill, section, issue) rows where README.md/_Docs disagree with the skills on disk."""
+    parts = readme_parts(registry)
+    if parts is None:
         return [("-", "readme", f"{README_NAME} not found in {registry}")]
-    text = readme.read_text(encoding="utf-8", errors="replace")
-    parsed = parse_readme(text)
-    catalog = expected_catalog(registry)
     issues: list[tuple[str, str, str]] = []
+    legacy = len(parts) == 1 and "## Quick Index" in parts[0][1]
+    if not legacy:
+        for name in DOCS_CATALOG_FILES:
+            if not (registry / DOCS_NAME / name).is_file():
+                issues.append(("-", "readme", f"catalog file missing: {DOCS_NAME}/{name}"))
+    header = parts[0][1].partition("## Quick Index")[0]
+    if legacy:
+        sub = parse_readme(parts[0][1])
+    else:
+        # _Docs carries the three sections in order; parse them as one flow.
+        sub = parse_readme("\n".join(part_text for _, part_text in parts[1:]), DOCS_NAME)
+    parsed: dict[str, Any] = {"header": header, "quick": sub["quick"], "details": sub["details"], "archive": sub["archive"]}
+    catalog = expected_catalog(registry)
 
-    archive_root = registry / "Archive"
+    archive_root = next(
+        (registry / name for name in ("_Archive", "Archive") if (registry / name).is_dir()),
+        registry / "Archive",
+    )
     archived = sorted(
         (path / "SKILL.md").relative_to(registry).as_posix()
         for path in walk_skills(archive_root, prune=False)
@@ -1805,7 +1851,7 @@ def check_readme(registry: Path) -> list[tuple[str, str, str]]:
         if match is None:
             issues.append((block["name"], "details", "detail block has no Path link"))
             continue
-        block["path"] = _readme_path(match[1])
+        block["path"] = _resolve_readme_target(_readme_path(match[1]), block.get("base", ""))
         if _path_key(block["path"]) in details_by_path:
             issues.append((block["name"], "details", f"listed twice ({block['path']})"))
         details_by_path[_path_key(block["path"])] = block
@@ -1877,14 +1923,79 @@ def check_readme(registry: Path) -> list[tuple[str, str, str]]:
             issues.append((entry["name"], "archive", f"stale entry: no archived skill at {entry['path']}"))
 
     reported = set(quick_by_path) | set(details_by_path) | set(listed_archive)
-    for match in _README_LINK_RE.finditer(text):
-        target = match[1].strip()
-        if not target or target.startswith("#") or re.match(r"^[a-z][a-z0-9+.-]*:", target, re.I):
-            continue
-        rel = _readme_path(target)
-        if _path_key(rel) not in reported and not (registry / rel).exists():
-            issues.append(("-", "links", f"broken link: {target}"))
+    scan = list(parts)
+    docs_dir = registry / DOCS_NAME
+    if docs_dir.is_dir():
+        catalog_names = set(DOCS_CATALOG_FILES)
+        for doc in sorted(docs_dir.glob("*.md")):
+            if doc.name not in catalog_names:
+                scan.append((DOCS_NAME, doc.read_text(encoding="utf-8", errors="replace")))
+    for base, part_text in scan:
+        for match in _README_LINK_RE.finditer(part_text):
+            target = match[1].strip()
+            if not target or target.startswith("#") or re.match(r"^[a-z][a-z0-9+.-]*:", target, re.I):
+                continue
+            rel = _resolve_readme_target(_readme_path(target), base)
+            if _path_key(rel) not in reported and not (registry / rel).exists():
+                issues.append(("-", "links", f"broken link: {DOCS_NAME}/{target}" if base == DOCS_NAME else f"broken link: {target}"))
     return issues
+
+
+_HINT_INTERFACE_RE = re.compile(r"\b(?:sub-?)?(?:commands?|modes?)\b", re.I)
+_HINT_NOISE_RE = re.compile(r"\b(?:than|via|without|needs?|need|step|why|adding|every|each)\b", re.I)
+_HINT_ENUM_RE = re.compile(
+    r"\b(?:one|two|three|four|five|six|both|several)\s+(?:distinct\s+)?(?:sub-?)?(?:commands?|modes?)\b",
+    re.I)
+_HINT_MODE_LETTER_RE = re.compile(r"\b[Mm]odes?\s+[A-Z]\b")
+_HINT_COLON_LABEL_RE = re.compile(r"^\s*[-*]?\s*\**\s*(?:sub-?)?(?:commands?|modes?)\s*:\**", re.M | re.I)
+
+
+def command_surface_evidence(skill_md: Path, name: str) -> str:
+    """Evidence that a skill presents user-facing commands or modes; '' when none.
+
+    Strong (fires alone): an interface heading naming commands/modes, or use of the
+    skill's own slash address with an argument (`/name <thing>`). Weak (two needed):
+    enumeration of N commands/modes, Mode A/Mode B letters, bold Commands:/Modes: labels.
+    Prose vocabulary ("dark mode", "shell commands", doc-outline headings) never counts:
+    the signals are structural - headings, self-slash usage, explicit enumerations.
+    """
+    try:
+        text = skill_md.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+    body = text.split("---", 2)[2] if text.count("---") >= 2 else text
+    strong: list[str] = []
+    weak = 0
+    for line in body.splitlines():
+        title = re.match(r"^\s{0,3}#{1,6}\s+(.+?)\s*$", line)
+        if title:
+            words = re.findall(r"[\w'’.-]+", title.group(1))
+            if (len(words) <= 7
+                    and not (re.match(r"^\d+[.)]\s", title.group(1)) and len(words) >= 5)
+                    and _HINT_INTERFACE_RE.search(title.group(1))
+                    and not _HINT_NOISE_RE.search(title.group(1))):
+                strong.append(f'heading "{title.group(1)}"')
+    for pat, label, kind in (
+        (re.compile(rf"(?:^|[\s|`(])/{''.join(re.escape(c) for c in name)}(?=\s+[^\s`])[^`\n]*`?"),
+         "self-slash usage", "strong"),
+        (_HINT_ENUM_RE, "command/mode enumeration", "weak"),
+        (_HINT_MODE_LETTER_RE, None, "weak"),
+        (_HINT_COLON_LABEL_RE, "commands/modes label", "weak"),
+    ):
+        hits = pat.findall(body)
+        if not hits:
+            continue
+        if kind == "strong":
+            strong.append(f"{label} x{len(hits)}")
+        elif label is None:
+            letters = {h.split()[-1].upper() for h in hits}
+            if len(letters) >= 2:
+                strong.append(f"mode letters {sorted(letters)}")
+        else:
+            weak += 1
+    if strong:
+        return "; ".join(strong[:3])
+    return f"enumeration+label x{weak}" if weak >= 2 else ""
 
 
 def specialized_problem(data: dict[str, Any]) -> str | None:
@@ -1903,6 +2014,20 @@ def specialized_problem(data: dict[str, Any]) -> str | None:
     if canonical:
         return f"specialized {items[0]!r} is an alias; use {canonical!r}"
     return None
+
+
+def skill_size(path: Path) -> tuple[int, bool]:
+    """SKILL.md line count and whether the skill is nothing but that file."""
+    try:
+        files = list(iter_files(path))
+    except OSError:
+        return 0, False
+    solo = len(files) == 1 and files[0].name == "SKILL.md"
+    try:
+        text = (path / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return 0, solo
+    return len(text.splitlines()), solo
 
 
 def lint_acceptances(data: dict[str, Any] | None) -> tuple[dict[str, str], list[str]]:
@@ -1937,6 +2062,7 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
     frontmatters = map_concurrent(
         lambda item: read_frontmatter(item[1] / "SKILL.md"), skills, jobs
     )
+    sizes = map_concurrent(lambda item: skill_size(item[1]), skills, jobs)
     warnings: list[tuple[str, str, Path, int | None, str]] = []
     accepted: list[tuple[str, str, Path, str, str, str]] = []
     checked_rows: list[list[str]] = []
@@ -1946,7 +2072,7 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
     total_checked = 0
     if yaml is None:
         warnings.append(("-", "environment", registry, None, "YAML validation unavailable; install PyYAML for full validation"))
-    for (name, path, label), (data, error) in zip(skills, frontmatters):
+    for (name, path, label), (data, error), (lines, solo) in zip(skills, frontmatters, sizes):
         total_checked += 1
         structure = inspect_directory(path)
         skill_type = SKILL_TYPES[structure.kind]
@@ -1975,6 +2101,16 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
             problem = specialized_problem(data)
             if problem:
                 emit("specialized", problem)
+            if not solo and lines >= SKILL_LENGTH_LIMIT:
+                emit("skill-length",
+                     f"SKILL.md has {lines} lines (limit {SKILL_LENGTH_LIMIT}); "
+                     "split depth into references/ or modules")
+            if not str(data.get("argument-hint") or "").strip():
+                evidence = command_surface_evidence(
+                    path / "SKILL.md", str(data.get("name") or path.name))
+                if evidence:
+                    emit("argument-hint",
+                         f"presents commands/modes ({evidence}); declare argument-hint")
         skill_name = data.get("name")
         if not isinstance(skill_name, str) or not re.fullmatch(r"[a-z0-9-]+", skill_name):
             emit("name", "missing or invalid name (use lowercase letters, digits and hyphens)")
@@ -2395,6 +2531,7 @@ def cmd_report(args: argparse.Namespace, registry: Path, jobs: int) -> int:
             "modules": [module.relative_to(path).as_posix() for module in structure.modules],
             "issues": list(structure.issues),
             "version": ver, "files": snap["file_count"], "desc": desc_len,
+            "solo": snap["file_count"] == 1 and "SKILL.md" in snap["files"],
             "git": skill_git_state(rel, status_map), "path": rel,
         }
         if _DISPLAY.verbose:
@@ -2408,9 +2545,10 @@ def cmd_report(args: argparse.Namespace, registry: Path, jobs: int) -> int:
         print(json.dumps({"registry": str(registry), "head": head, "skills": rows,
                           "types": type_counts, "total_files": len(counted_files)}, indent=2))
         return 0
-    headers = ["Skill", "Type", "Parent", "Version", "Files", "Desc chars", "Git", "Path"]
+    headers = ["Skill", "Type", "Parent", "Version", "Files", "SKILL.md only", "Desc chars", "Git", "Path"]
     table_rows = [[r["name"], SKILL_TYPES[r["type"]], r["parent"] or "-", r["version"],
-                   str(r["files"]), str(r["desc"]), r["git"], r["path"]] for r in rows]
+                   str(r["files"]), "yes" if r["solo"] else "-", str(r["desc"]), r["git"], r["path"]]
+                  for r in rows]
     if _DISPLAY.verbose:
         headers.append("Last commit")
         for r, tr in zip(rows, table_rows):
@@ -2423,6 +2561,7 @@ def cmd_report(args: argparse.Namespace, registry: Path, jobs: int) -> int:
         ("Skills", str(len(rows))),
         *[(title, str(type_counts[kind])) for kind, title in SKILL_TYPES.items()],
         ("Total files (unique)", str(len(counted_files))),
+        ("Solo SKILL.md skills", str(sum(1 for r in rows if r["solo"]))),
         ("Avg description chars", str(avg_desc)),
         ("Sorted by", f"{sort_key}{' (desc)' if args.reverse else ' (asc)'}"),
         ("Git HEAD", head or "-"),

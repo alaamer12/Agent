@@ -46,7 +46,7 @@ Decide the target length before drafting, not after writing at full length and t
 | Detailed recap | Up to ~40% of source | Normal |
 | Extreme digest | Shortest possible list of terms + one-liners, no target % — driven by number of distinct must-keep points, not source length | Extreme |
 
-Beyond ~40% in Normal mode, reconsider whether the task is really an edit of the original rather than a summary (see process-business-writing skill).
+Beyond ~40% in Normal mode, reconsider whether the task is really an edit of the original rather than a summary — that is job E (rephrase), or `humanizer`.
 
 ## Self-contained by default
 

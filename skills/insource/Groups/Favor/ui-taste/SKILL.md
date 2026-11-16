@@ -1,6 +1,7 @@
 ---
 name: ui-taste
-version: 1.0.1
+version: 1.0.2
+author: "UIZZE <business@uizze.com>"
 specialized: none
 description: Give your coding agent better UI taste. Build and polish web and iOS interfaces with Uizze's anti-ui-slop playbooks and optional real-product references. Use for UI design, implementation, redesign, critique, or a final visual review in Claude Code, Codex, Cursor, or Copilot.
 license: Apache-2.0; see LICENSE and NOTICE for third-party attribution

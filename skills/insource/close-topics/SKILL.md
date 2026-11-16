@@ -1,6 +1,7 @@
 ---
 name: close-topics
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Guided, conversational, topic-by-topic technical specification: close one design area before opening the next. Use when a project has undecided architecture (scrapers, workers, pipelines, caching, data models, queues, storage, deployment) and the user wants to work through it sequentially - ask targeted questions with real options and trade-offs, collect the decision, write it into a specification document in the project''s docs, update the index, then hand off to the next topic. Stops at design: no implementation until every agreed topic is resolved and the user says go. Standalone independent skill. Not for choosing a technology stack (techstack), not for deciding how to build something the agent already owns (dtb), not for planning a task list (planner), not for reorganizing or splitting docs (document).'
 when_to_use: The user wants to "work through the design topic by topic", nail down missing architecture decisions, resolve open technical questions before building, review what a project has not specified yet, or invokes /close-topics. Also when a spec is half-written and the gaps need closing one at a time.
@@ -94,7 +95,7 @@ from the agenda and ask whether to take it. The agenda is the user's to reorder.
 | Cataloging units that already exist so work reuses them | `units-md` |
 | Inventorying the system's architectural components | `system-md` |
 | Reorganizing or splitting documentation that exists | `document` |
-| Interviewing for a document type with its own skill | `postmortem`, `document` |
+| Interviewing for a document type with its own method | `document` (its postmortem child) |
 
 ## Independent Operation
 

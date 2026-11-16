@@ -1,6 +1,7 @@
 ---
 name: dbug
-version: 1.0.1
+version: 1.1.0
+author: Amr
 specialized: none
 description: 'Debug any problem in any codebase, any language — bug, error, exception, crash, 500, timeout, wrong/missing/duplicate data, regression, "worked before", "works on my machine", flaky, prod-only, or a pasted stack trace — even if the user never says "debug". One loop everywhere: see the problem → understand it → form a falsifiable hypothesis → run the cheapest experiment that can refute it → narrow → repeat; negative results delete search-space, so narrowing IS getting closer. Opens the mind with duck debugging: say the full traceback out loud, hop by hop (what enters, what must leave, what actually left) — it exposes the problem before any tooling runs. Stances: root cause not symptom, fix the source of truth, minimal-but-complete across every layer, every bug is a chance to test, controlled observation, honest escalation. Domain playbooks (backend, database, frontend, production), investigation engine, escalation ladder, git forensics, instrumentation, regression-testing load on demand from references/.'
 when_to_use: 'Something is broken, wrong, failing, unexpected, regressed, or hard to reproduce — the moment you feel the urge to "just change code until the error disappears" is the moment to load this skill.'
@@ -17,11 +18,11 @@ experiment → LOOP until fixed. Each refuted hypothesis deletes a region
 of the search space — narrowing is what getting closer looks like.
 ```
 
-This file holds the loop, the stances, and how to *see*. Everything deeper
-lives in `references/` — read only what the current bug needs (routing
-table at the bottom). Never "guess → change code → run → hope": that loop
-skips Understand and Hypothesis; if you catch yourself in it, stop and
-re-enter at stage 1.
+This file holds the loop's spine, the rails and the stances; how to *see*
+and every stage's depth live in `references/` — read only what the current
+bug needs (routing table at the bottom). Never "guess → change code → run →
+hope": that loop skips Understand and Hypothesis; if you catch yourself in
+it, stop and re-enter at stage 1.
 
 Three hard rails over the loop (empirically, where debug sessions die):
 
@@ -45,87 +46,17 @@ Three hard rails over the loop (empirically, where debug sessions die):
 
 ## The loop, stage by stage
 
-1. **Understand & classify.** Restate the problem in one sentence:
-   *expected behaviour vs actual behaviour, under what conditions.* If you
-   cannot write that sentence, you do not understand yet — that is the
-   point of the stage. Classify; the class sets the path:
+Full prose for each stage — the class table and its first moves, the
+question set, the evidence order, the fix rules, the close-out checklist:
+[`references/loop-stages.md`](references/loop-stages.md).
 
-   | Class | Signal | First move |
-   |---|---|---|
-   | Concrete artifact mismatch | two sources of truth disagree (schema file vs live DB, spec vs code) | diff them directly — no questions needed |
-   | Regression | "worked before / broke after a change" | git forensics → `references/git-forensics.md` |
-   | Wrong/missing/duplicate data | values off, no crash | data-lineage trace → `references/pipeline-model.md` §lineage |
-   | Failure at a point | error, trace, non-2xx, exception | duck-debug the trace (§below), then trace backward |
-   | Performance/resource | slow, timeout, OOM, grows over time | `references/production.md` — measure first, not code |
-   | Non-reproducible | intermittent / prod-only / "sometimes" | `references/production.md` — characterize before touching anything |
-   | Blast radius: "half the system broke" | everything at once | stop — ask the user first (§gates), never self-serve |
-
-   A bug can hold two classes (regression *and* prod-only) — take the
-   cheap part of both paths.
-
-2. **Ask — only path-changing questions** (skip for concrete-mismatch,
-   evidence is in hand): was this working before, how do you know? working
-   in Git, roughly how many commits ago, which branch? what changed just
-   before — deploy, migration, dependency bump, config edit? anywhere it
-   still works (staging, another machine, another account)? Maximum one
-   round; then investigate with whatever came back.
-
-3. **Gather evidence before touching anything.** Reading what exists is
-   free: exact error text and traceback verbatim (the trace is read
-   first, word-for-word, never skipped or paraphrased — it is the
-   cheapest observation channel that exists), logs, recent commits and
-   diffs, the files the error names, tests on the path, past bug records
-   (`.debugging/bugs/`, project docs — someone may have met this before).
-   The default first move is **"what touched it last?"** — working
-   systems keep working until something acts on them, so correlate onset
-   with deploys, migrations, dependency bumps, config/data/traffic
-   changes and diff that window before theorizing anything else.
-   Characterize: expected X / actual Y / repro rate (always | 1-in-M |
-   once) / conditions (env, data, user, since when). New evidence gets
-   created under control — see §Ways to see.
-
-4. **Duck-debug, then hypothesize.** Say the problem out loud first
-   (§Duck debugging below) — then convert it into a falsifiable causal
-   claim, "because \<A\>, we see \<B\>", with a prediction that can
-   *refute* it, and run the cheapest experiment that distinguishes your
-   top two hypotheses. The prediction must **discriminate**: whichever
-   way the result lands it should rule one group of hypotheses in and
-   another out — an experiment that can only "confirm" tests nothing.
-   Hypotheses are **cumulative**: a new one must absorb every satisfied
-   prediction, exclude every refuted one, and explain *all* the
-   observations including the noise — one unexplained fact demotes a
-   root cause to a suspect. Change one variable at a time so the next
-   run attributes honestly, and keep an **audit trail** as you go
-   (hypothesis → prediction → test → result): refuted regions never get
-   re-explored, and every mutation you made to the system stays
-   undoable to its pre-test state. Loop discipline and the evidence bar
-   (anecdote → code-reading → telemetry → captured first-invalid-state
-   → minimal repro) live in `references/hypothesis-and-evidence.md`;
-   which experiment costs what → `references/escalation-ladder.md`.
-
-5. **Find the first invalid state.** The failure's location is almost
-   never the defect's location. The target question: *where did actual
-   state first diverge from expected?* — earliest point, not the crash
-   site. Pipeline roles, directions (forward/backward/narrow/widen) and
-   lineage tracing: `references/pipeline-model.md`.
-
-6. **Design the fix: root cause, minimal, complete.** You have the cause
-   when you can state the chain `symptom ← immediate failure ← local
-   cause ← … ← root defect` and know that fixing the root removes the
-   failure while anything below it would not. Three rules: fix the
-   **source of truth** artifacts too (schema files, codegen inputs,
-   configs, seeds — live-state-only repairs re-break on next recreate);
-   **minimal ≠ incomplete** — scope what you touch, but check necessity
-   across *every layer the invalid data/state passes through*; make the
-   bug **structurally impossible** (constraint in the store, type in the
-   model, guard at the entry, assertion at the boundary — whichever
-   layers exist). One fix at a time.
-
-7. **Apply, test, verify.** Testable bug → failing regression test first
-   (red for the *right reason*), fix, green, keep it forever —
-   `references/regression-testing.md`. Verification sized to risk,
-   cheapest sufficient. New symptom from verification → new iteration at
-   stage 1; this is the loop, not a failure.
+1. **Understand & classify** — one sentence: expected vs actual, under what conditions.
+2. **Ask** — only path-changing questions, maximum one round, then go.
+3. **Gather evidence before touching anything** — "what touched it last?"
+4. **Duck-debug, then hypothesize** — a falsifiable, discriminating causal claim.
+5. **Find the first invalid state** — earliest divergence, not the crash site.
+6. **Design the fix** — root cause, source of truth, minimal but complete.
+7. **Apply, test, verify** — failing test first; a new symptom is a new iteration.
 
 ## Duck debugging — say the traceback out loud
 
@@ -182,31 +113,11 @@ the stack — there, correlation IDs replace call frames
 
 ## Ways to see — pick the observation, not a favorite
 
-Same loop, every stack; what changes is only how you look. In
-cheapest-first order (ladder with costs: `references/escalation-ladder.md`):
-
-| Way to see | Use for | Discipline |
-|---|---|---|
-| Error/traceback verbatim + duck-debug it | where and how it broke | capture word-for-word, never paraphrase |
-| Browser console & DevTools (Sources, Network + **Initiator chain** = the network edition of a call stack, Watch/Call Stack/Scope panels, Request Blocking as ablation, storage) | client-side failures, what the UI received | arm the Network panel BEFORE reproducing — it records only while open; normalize repeats with empty-cache hard reload; prefer evaluating in page context over editing source → `references/frontend.md` |
-| **Dev-only debug page/endpoint** returning JSON of live state (config, cache, pool stats, session, flags) — the Go `net/http/pprof` genre, self-describing index included | "what does the server actually BELIEVE right now?" | read its index first to discover what is observable instead of guessing names; some data is empty until the runtime opts in — **no data ≠ no problem**; gated to non-prod, no secrets, keep-or-delete deliberately → `references/instrumentation.md` |
-| **Debug-mode app boot** — a registered entry point (flag, `debug`-style command, env switch, deep link) that skips human gates, opens a named page directly, freezes interact-to-change state, or seeds fixture data | sessions that burn tokens reproducing navigation instead of observing the bug | use only what the project's rulebook registers — an unlisted instrument does not exist; when gates dominate and none is registered, propose engineering a gated one, dead in production → `references/instrumentation.md` §Debugging engineering |
-| Existing logs/metrics/traces | what happened over time | filter to failing request/correlation IDs only; aggregates (SLO, p99) characterize the symptom — per-request evidence locates the cause |
-| Scoped gated logger — verbosity hot-switchable without restart where the platform offers it | is state correct *at this hop* | dev-only by construction, addressable per module; tag every temporary print with a unique token (`[DEBUG-a4f2]`) so cleanup is one grep → `references/instrumentation.md` |
-| Scratch script in `.debugging/tmp/` (exit 0/1) | question the DB/env/service directly | deterministic verdict, redacted output, self-cleaning |
-| Isolated harness — call the suspect function with controlled inputs | our code vs its callers vs its dependencies | → `references/backend.md`, `examples/isolated-harness-polyglot.md` |
-| Debugger channels: breakpoints; **tracepoints** (breakpoint that logs and keeps running); conditional & hit-count breakpoints; **data breakpoints** (write-watch — answers "when did this change?"); race detectors; profilers | exact values at a point; reaching a rare loop iteration; mutation timing; resource causality | prefer the non-perturbing variants first — breakpoints and chatty logs shift timing and can make a timing bug vanish; a *broken* condition expression still breaks — never read that as confirmation → `references/escalation-ladder.md` |
-| OS/tool-level structured reports: live-process stack dumps, serialized crash reports (stack+registers+disassembly as machine-readable JSON), time-travel/replay recordings, allocation tags | when app channels are blind to the truth | demand/parse them from users and CI artifacts too — structured external reports have localized bugs before any maintainer repro existed |
-
-**Channel rules** (what separates a fast session from a thrashing one):
-establish the **black-box symptom first** (reproduce and probe from
-outside, as a user sees it), then go white-box for causes; **read the
-same boundary from both sides** — caller's view AND callee's view, one
-vantage point cannot discriminate two hypotheses; if no existing
-channel shows what you suspect, **create one** (tag the subsystem's
-allocations/so that existing tools see it separately); for performance
-defects **measure before fixing** — attribute time to a hop, never
-optimize a guess.
+The channel catalogue — traceback + duck-debug, browser DevTools and its
+Initiator chain, dev-only state endpoints, debug-mode boot, logs, gated
+loggers, scratch scripts, isolated harnesses, debugger and OS-level
+channels — each with its discipline, plus the black-box-first channel
+rules: [`references/observation-channels.md`](references/observation-channels.md).
 
 ## The stances — non-negotiable
 
@@ -255,20 +166,12 @@ If the project keeps a procedure library (e.g. a **how-to-do** skill),
 fold the *class-of-problem procedure* you just learned into it — dbug
 records incidents, procedures belong there.
 
-## Close-out checklist
-
-- [ ] Regression test kept — or a stated reason it's not testable
-- [ ] Source-of-truth artifacts fixed, not just runtime state
-- [ ] Every layer the invalid data/state crossed is now guarded
-- [ ] `.debugging/tmp/` triaged (promote/delete) — physically empty
-- [ ] Bug record written when the path has lasting value
-- [ ] Instrumentation gated-and-deliberate or removed
-- [ ] Reusable procedure captured into the project's procedure system
-
 ## Routing — load only what the bug needs
 
 | Situation | Read |
 |---|---|
+| A stage in full: classify table, questions, evidence order, fix rules, close-out | `references/loop-stages.md` |
+| Which observation channel answers this question, and its discipline | `references/observation-channels.md` |
 | Hypothesis discipline, evidence bar, meta-debugging when stuck | `references/hypothesis-and-evidence.md` |
 | Pipeline roles, directions, lineage, invariants, trace anatomy | `references/pipeline-model.md` |
 | Which experiment next, what each costs, reproduction hierarchy | `references/escalation-ladder.md` |

@@ -34,13 +34,13 @@ Create Markdown documents that fulfill the user's actual intent — not a prefer
 - Code and scripts, slides, spreadsheets, PDF or Word output (dedicated skills)
 - Any artifact the user did not ask for because it seems more conventional
 
-## Specialized document types
+## Genre children
 
-Some types have their own skill owning structure, evidence rules and artifacts, while this job keeps owning the prose. When the request matches one, load that skill first and apply this job to the writing:
+Some document types have a genre child inside this skill owning structure, evidence rules and artifacts, while job A keeps owning the prose. When the request matches one, load that child and apply this job to the writing:
 
-| Request | Skill | What it adds |
+| Request | Child | What it adds |
 |---|---|---|
-| postmortem, incident report, RCA, bug write-up, "what went wrong" | [`postmortem`](../../postmortem/SKILL.md) | 18-section template, file vs folder output, evidence levels V0–V5, blamelessness rules, artifact package with checksums |
+| postmortem, incident report, RCA, bug write-up, "what went wrong" | [`postmortem`](../postmortem/SKILL.md) | 18-section template, file vs folder output, evidence levels V0–V5, blamelessness rules, artifact package with checksums |
 
 ## Final rule
 

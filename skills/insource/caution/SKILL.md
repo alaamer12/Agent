@@ -1,6 +1,7 @@
 ---
 name: caution
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Informed-consent gate on the user''s answers: screen every reply (chat, AskUserQuestion, command flags, hook or server input) for a decision whose cost the answerer may not know. Flags the guard, never the goal: storing data on a server, syncing devices or keeping history is the product and gets no card; storing it unencrypted, syncing it in plaintext, or keeping it forever without a cap is what gets flagged. Consequences are not only attacks - data loss, unbounded DB/memory/queue/log growth, irreversible actions, outward-facing contracts, removed safety nets. On a match it raises a visible DANGER mark in the chat, states the failure as a future postmortem headline with mechanism, blast radius and undo cost, names the cheapest adequate alternative, and re-asks once; then it accepts the answer, closes the loop in one line, and never re-opens it. Writes no files and keeps no log - the conversation is the record. A severity ladder keeps it quiet on recoverable calls and informed answers - not risk theater.'
 when_to_use: Any answer, choice, confirmation or instruction from the user that removes a protection, accepts unbounded growth or cost, is hard to undo, commits something outward-facing, or declines an option the agent offered (especially "no" to encryption, auth, backups, limits, validation, retention caps). Also when the agent is about to ask a yes/no question whose "yes" or "no" has a serious consequence.
@@ -169,7 +170,7 @@ running it on every input costs almost nothing; the card is the only expensive p
 | finding vulnerabilities in code or config | `security-scan`, `antipattern` |
 | the user wants their own thinking attacked | `grill-me` |
 | deciding the engineering approach yourself | `dtb` (it already asks before irreversible calls) |
-| writing the incident after it happened | `postmortem` (an accepted risk you disclosed is evidence for §17) |
+| writing the incident after it happened | `document` → its postmortem child (an accepted risk you disclosed is evidence for §17) |
 | documenting a change that removed a guard | `diffs`, `commit` — state the accepted risk in the message |
 | settling a performance or cost claim with numbers | `benchmark` |
 

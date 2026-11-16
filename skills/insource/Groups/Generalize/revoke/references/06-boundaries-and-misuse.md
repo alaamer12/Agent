@@ -9,6 +9,22 @@ noticing.
 
 The subject is a copy going somewhere. The source of truth is never in scope.
 
+## The boundaries in short form
+
+- **Never to conceal.** Revoking to hide wrongdoing, dodge an audit, defeat a legal hold, or erase a required
+  record is not sanitization. The artifact's *disclosure* is your subject; its *existence* is not.
+- **Never strip protective content**: safety warnings, consent notices, license headers, deprecation dates,
+  the reason a value must not be edited.
+- **Never launder accountability out of a timeline.** Replace names with roles - `[on-call]`,
+  `[database-owner]` - so *who did what* remains knowable while *who* stays private.
+- **Never revoke data that is not yours to disclose.** If the artifact contains another party's personal or
+  customer data and you lack authority, say so and stop; a sanitized copy handed to a third party is still a
+  disclosure.
+- **Never destroy the original.** Produce, don't overwrite.
+- **No redaction theatre.** A document with six black boxes and one unique surviving detail is not sanitized.
+  If you cannot revoke enough to make it safe, the answer is "this cannot be shared", which is a legitimate
+  deliverable.
+
 ## Stop the job when the request is any of these
 
 | The request | What it actually is | Do instead |

@@ -1,7 +1,7 @@
 # Recipe: focus — `/animation svg focus`
 
 Per-style recipe — shared build rules in [foundations.md](foundations.md),
-signature and trigger words in [../SKILL.md](../SKILL.md).
+signature and trigger words in [../method.md](../method.md).
 
 This is the skill's only **animated-sharpness** style. The three glow styles
 (`neon`, `elastic-entrance`, `pulse`) halo an already-sharp source and never

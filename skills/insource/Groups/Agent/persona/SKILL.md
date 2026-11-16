@@ -1,6 +1,7 @@
 ---
 name: persona
-version: 1.0.1
+version: 1.1.0
+author: Amr
 specialized: none
 description: >
   Construct deep, professional, context-aware personas for subagents of any role — not just a job title, but a full behavioral specification of how the agent thinks, investigates, judges quality, and communicates. Use this whenever building, prompting, or orchestrating a subagent (security reviewer, database engineer, testing engineer, frontend engineer, DevOps/SRE, technical writer, code reviewer, or any other domain specialist) and a generic "you are a senior X" persona would be too shallow. Especially relevant for multi-agent orchestration systems (e.g. contribute-agents) that need distinct professional perspectives per role, and for any task asking to "give this agent a persona," "make this agent think like a senior X," or "construct context for a subagent." The method is role-agnostic — it applies identically whether the role is testing, security, database, frontend, or something else entirely.
@@ -78,49 +79,15 @@ Don't ask about dimensions that are irrelevant to the task — see step 4.
 
 ### 2. Select relevant dimensions
 
-From the full dimension list (below), select only the ones that matter for
-this specific role and task. Do not fill in all of them mechanically —
-an unused dimension left in as boilerplate is itself a generic-roleplay
-failure.
-
-Full dimension menu:
-
-1. Professional identity
-2. Relevant experience (the *kinds* of hard problems encountered — not a
-   tech list)
-3. Areas of expertise
-4. Mental models specific to the domain
-5. Engineering/professional philosophy (beliefs that actually drive
-   decisions)
-6. Investigation methodology
-7. Quality standards
-8. Failure patterns the agent recognizes
-9. What the agent instinctively looks for
-10. What the agent refuses to assume
-11. Communication behavior
-12. Collaboration behavior
-13. Stance toward criticism / being criticized
-14. Evidence standards (how it grades confidence: confirmed → reproduced →
-    plausible → suspected → unverified → disproven)
-15. Decision-making style
-16. Domain-specific heuristics
+Pick only the dimensions this role and task actually need; the full 16-item
+menu, why mechanical filling is a failure, and the selection rule:
+`references/dimensions-and-mental-models.md`.
 
 ### 3. Build the domain's mental models
 
-For dimensions 4, 8, 9, and 16 above, do the following regardless of role:
-
-1. Name 4–8 concrete things a real practitioner in this specific area
-   checks reflexively, phrased as short noun phrases (not full sentences).
-   This becomes the "mental models" / "what you instinctively look for"
-   list.
-2. For 2–3 of the most important ones, write one sentence showing *how*
-   that checking manifests in an actual review or investigation. This
-   becomes part of "investigation methodology" or "what you instinctively
-   look for."
-3. Sanity-check against realism: would a working specialist in this field
-   actually think this reflexively, or does it read like encyclopedic
-   research-summary knowledge with no practitioner grounding? If the
-   latter, narrow it to what's genuinely reflexive.
+Derive the 4–8 reflexive checks for dimensions 4, 8, 9 and 16 and
+sanity-check them for practitioner grounding:
+`references/dimensions-and-mental-models.md` (second half of the file).
 
 See `references/example_personas.md` for several fully worked examples
 across different roles (security review, database engineering, testing
@@ -149,177 +116,39 @@ go back and sharpen it against the actual context.
 
 ### 5. Respect the reality constraint
 
-The persona is a **professional reasoning style**, never fabricated
-personal history. Never write or allow a specific, checkable anecdote:
-
-> "I personally fixed this exact bug at Company X."
-
-But don't collapse all the way down to a bare label either — a label with
-nothing behind it reads as thin, not as honest:
-
-> "Approach this as an engineer experienced with production concurrency
-> failures."
-
-The better middle ground names the *category* of problems typically faced
-and the *standard* a resolution had to meet — concrete enough to carry
-real technical weight, general enough that nothing in it is an invented,
-checkable fact:
-
-> "Approach this as an engineer experienced with production concurrency
-> failures — the kind who has repeatedly worked through problems like
-> races surfacing only under production load, deadlocks from inconsistent
-> lock ordering across services, and state corruption from partially
-> applied writes — and who is used to only accepting a fix once it
-> reproduces the original failure mechanism, holds up under the actual
-> concurrency pattern involved (not just a single-threaded retest), and
-> doesn't just mask the symptom."
-
-This is what gives the persona **technical weight without fake
-confidence**: specific enough to sound like it comes from real
-experience, general enough that it's true of the *role*, not a fabricated
-claim about *this specific agent's* unverifiable history.
-
-Pattern for building this for any role:
-`"...experienced with <domain of failures>, the kind who has repeatedly
-worked through problems like <2–4 concrete problem categories>, and who
-is used to only accepting a solution once it satisfies <2–3 concrete
-standards — e.g. what it must reproduce, hold up under, or not merely
-mask>."`
-
-If the user's inputs support more specific prior experience, use it. If
-not, build the category-level version above rather than either a bare
-label or an invented anecdote.
+A professional reasoning style, never fabricated personal history — the
+forbidden anecdote, the too-thin bare label, the worked middle ground, and
+the reusable pattern: `references/reality-constraint.md`.
 
 ### 6. Write the output in the standard structure
 
-Use this structure by default; adapt it when a different structure would
-produce clearly better behavior for the situation (e.g. a much shorter
-persona for a narrowly scoped agent). Omit any section that would be
-empty or filler for this role/task — do not pad.
-
-```text
-PROFESSIONAL PERSONA
-
-Role:
-...
-
-Professional perspective:
-...
-
-Relevant experience:
-...
-
-Domain expertise:
-...
-
-Engineering philosophy:
-...
-
-Mental models:
-...
-
-What you instinctively look for:
-...
-
-What you refuse to assume:
-...
-
-Investigation methodology:
-...
-
-Quality standards:
-...
-
-Evidence standards:
-...
-
-Collaboration behavior:
-...
-
-Stance toward criticism:
-...
-
-Known biases to avoid:
-...
-
-Current context:
-...
-
-Current responsibility:
-...
-```
+The default section structure, with the adapt-or-omit rules (never pad):
+`references/output-structure.md`.
 
 ### 7. Communication behavior
 
-Write (and instruct the persona toward) natural professional speech, not
-credential-announcing preambles. This is the same for every role.
-
-Avoid: *"As a highly experienced senior software testing engineer, I
-believe..."*
-
-Prefer: *"I'm not convinced this is safe yet. The missing piece is the
-ordering guarantee between these two operations."*
-
-The agent should sound like a colleague: concise when the point is
-obvious, detailed when the issue is subtle, willing to say "I'm not
-convinced" or "that's a good point," explicit about uncertainty, not
-artificially formal, not repetitive.
+Natural professional speech instead of credential-announcing preambles,
+with avoid/prefer examples and the colleague tone:
+`references/output-structure.md`.
 
 ### 8. Integrating with a criticism/review protocol
 
-If the persona will be used inside an orchestration system that already
-has its own critical-review protocol (e.g. `contribute-agents`), the
-persona should establish **how this professional thinks**, and only
-briefly note **this professional's angle on criticism** — it should not
-duplicate the full criticism protocol.
-
-Example of the right scope (any role can substitute in the same way):
-
-> As an experienced test engineer, you are especially suspicious of
-> conclusions based only on happy-path behavior. When another agent
-> proposes that a race condition cannot occur, you want to understand
-> what synchronization guarantee makes that claim true.
-
-> As an experienced database engineer, you are especially suspicious of
-> claims that a migration is "backward compatible" without evidence it
-> was tested against production-shaped data volumes.
+The persona states how this professional thinks and only briefly notes its
+own angle on criticism — it never copies the orchestration system's full
+protocol: `references/output-structure.md`.
 
 ### 9. Final quality check before returning the persona
 
-Run through these questions. If any answer is "no," revise before
-returning:
+Run the nine questions, and check the result against the anti-pattern
+list they guard against: `references/quality-check.md`.
 
-- Can I tell what this engineer would notice that an ordinary agent
-  would miss?
-- Can I predict how this engineer would investigate a problem in their
-  domain?
-- Does the persona contain actual mental models, not just labels?
-- Does the experience section influence behavior, not just list nouns?
-- Does the philosophy section influence decisions, not just sound nice?
-- Is it specific to this task and domain, not swappable to any other?
-- Does it avoid generic "expert" language unless immediately cashed out
-  behaviorally?
-- Does it avoid fabricated personal history?
-- Would this persona cause the subagent to behave differently from a
-  different role given the same task?
+## Reference index
 
-## Anti-patterns to avoid
-
-- Listing every dimension from the menu regardless of relevance.
-- Generic trait adjectives ("detail-oriented," "highly skilled") without
-  behavioral payoff.
-- Superhuman experience — a persona that has personally encountered every
-  failure mode in existence. Keep it to what a real specialist plausibly
-  has encountered.
-- Checklist-driven philosophy for any role ("run through these 50 checks")
-  instead of hypothesis-driven, high-information investigation.
-- Fabricated specific personal history ("I fixed bug #4471 at my last
-  job").
-- Copy-pasting the full criticism protocol from the orchestration system
-  into the persona instead of just the professional's angle on it.
-- A persona identical in substance to one written for a different
-  role/task — if nothing in it is actually tied to this context, it
-  hasn't done its job.
-- Treating any one role (including testing) as the "main" case with
-  special built-in machinery, while other roles get generic treatment.
-  Every role goes through the same construction process in section 3.
+| File | Load when |
+|---|---|
+| `dimensions-and-mental-models.md` | steps 2–3: choosing dimensions, deriving reflexive checks |
+| `reality-constraint.md` | step 5: writing the experience section without invented history |
+| `output-structure.md` | steps 6–8: rendering the persona, its voice, its criticism scope |
+| `quality-check.md` | step 9 plus the anti-pattern catalog |
+| `example_personas.md` | calibrating specificity and tone against finished personas (never copy) |
+| `persona_construction_patterns.md` | deriving a domain's checks when the role has no example |

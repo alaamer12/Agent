@@ -1,8 +1,10 @@
 ---
 name: context
-version: 1.0.1
+version: 1.0.3
+author: Amr
 specialized: none
 description: 'Project-context reconstruction — build a reliable mental model of a project from all available artifacts (docs, source, config, git history with a 5-commit default, Flush notes, images, prototypes, design artifacts) before any work. Two modes: light (default) inspects and reads only, never running tests, builds, installs, or scripts; utter allows active verification when inspection alone cannot answer. Neither mode modifies the project for context. Treats docs as unverified, cross-checking claims against code; conflicts resolve by priority (current state > source/config > docs > recent git > flush notes > history), and fact, intention, decision, assumption, unknown stay distinct — assumptions never silently become facts. Completes when the agent could work without blindly rediscovering fundamentals. Reads companion Flush files (incl. the SESSIONS.md journal), works without them. Use at session start, before nontrivial tasks, after compaction. Triggers: load context, understand the project, get oriented.'
+argument-hint: "[light|utter] [what to reconstruct]"
 ---
 
 # context — reconstruct the project model before touching it

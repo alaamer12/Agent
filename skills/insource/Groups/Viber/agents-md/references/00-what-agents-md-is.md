@@ -127,6 +127,33 @@ Good - section 3 is 8 lines:
 The agent obeys the three obligation lines every session and opens the doc only when the task touches
 environment code. The rulebook stays cheap; the detail stays findable.
 
+## The recommended shape, and the two placements in practice
+
+**The skill's recommended shape is one dedicated file per topic/type of content** (`rules/version.md`,
+`rules/debugging.md`, …) with `AGENTS.md` keeping only the routing line and the 2-4 never-miss obligation lines
+per section - the agent then reads exactly the file its task names and pays for nothing else. Inline stays the
+user's right and the correct home for the few lines that must reach every message; it is a valid choice, not a
+defect, when the user picks it.
+
+- **Inline.** The user may keep procedures and policy inside `AGENTS.md` - in section 3 or a dedicated section.
+  That is a valid choice, not a defect. Keep it navigable; no extraction is required.
+- **Referenced.** By convention, routed how-to docs live under a `rules/` folder beside `AGENTS.md`:
+  `rules/development.md`, `rules/debugging.md`, or a folder split `rules/debugging/ui.md`,
+  `rules/debugging/backend.md`, `rules/version/main.md`. The project's declared docs root is equally valid;
+  use whichever the project already uses and ask when neither is evident. The names are examples, not a menu.
+- **When referenced**, `AGENTS.md` keeps the routing line, 2-4 obligation lines, and a `Read: <path>` pointer;
+  the routed doc owns the procedure and its policy, and the read-before-act and same-change duties still bind.
+- **When inline**, the How To router still names the task class, but the procedure stays in the section - there
+  is no `Read:` pointer and no separate doc to update.
+
+The one standing default worth keeping: **section 19's sync-block tables start in `<docs>/sync-blocks.md`**,
+because they grow line by line and are the fastest-growing body in the rulebook.
+
+Growth still has a cost, so name it honestly: when a section balloons and the user has not chosen to inline it,
+propose the split - Review's always-first rule stays (one line), task definitions move to
+`<docs>/review.md`; Ambiguity's record format moves to `<docs>/decision-conventions.md`. Ask before moving;
+"extract it" is a decision, not a formatting pass.
+
 ## Stability and drift
 
 Rules here are the ones that stay true across versions, channels, and phases. Anything that changes with them

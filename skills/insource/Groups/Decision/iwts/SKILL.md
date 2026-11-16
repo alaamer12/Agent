@@ -1,6 +1,7 @@
 ---
 name: iwts
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Autonomous ownership mode — "I Want to Sleep". Invoke when the user says iwts, "I want to sleep", "take over", "finish it while I''m away", or delegates the project and leaves: act as the senior engineer temporarily responsible - decide, implement, fix, validate, keep moving to completion without the user. Thin operating mode: records follow the project''s AGENTS.md Ambiguity convention (default: one file per decision in docs/decisions/, anchored Date+Commit+Version; ask-decisions too). Make the best reasonable decision instead of asking; prefer reversible choices with clean boundaries; hunt root causes before stopping; measure progress by completion, not activity; never invent work. Exactly two stops: the work is genuinely complete, or a decision truly belongs to the user (irreversible, external commitment, real cost, missing credentials, ambiguity that materially changes the outcome). Keep the run ledger at docs/decisions/states.md for interrupted-session resume. Not for one-off tasks with the user present.'
 

@@ -1,6 +1,6 @@
 # Stack: React with Motion
 
-> Owner of Motion/framer-motion API implementation notes. Routing lives in ../../SKILL.md.
+> Owner of Motion/framer-motion API implementation notes. Routing lives in ../../method.md.
 
 Notes for projects using the Motion library for React. Check which package the project already uses before adding anything: new work uses `motion` with imports from `motion/react`; a project on the older package keeps it, and migration is a follow-up. Verify props against the installed version.
 

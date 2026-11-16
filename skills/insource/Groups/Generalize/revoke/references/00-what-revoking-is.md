@@ -51,6 +51,11 @@ So the deliverable is *reduced identifiability at a stated level*, never "anonym
 
 ## And it is not `polyglot`
 
+`polyglot` generalizes **across technology**: it removes the assumption that a reader is on one stack. `revoke`
+generalizes **across identity and context**: it removes the facts that name the people, tenants, systems,
+contracts and dates that produced the artifact. A document can be perfectly polyglot and still leak your
+customer list on line one. Do the two in that order.
+
 - `polyglot` answers: *would this document mislead someone on a different stack?* It removes
   technology-specific assumptions.
 - `revoke` answers: *would this document identify someone, a customer, a system, a contract, a date?* It

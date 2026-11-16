@@ -31,6 +31,17 @@ Shared blocks import table (@kit/shared)            | -  | MOVE OUT -> a tech co
 Debugging escalation ladder                         | 8  | keep
 ```
 
+The same map at its most compact:
+
+```text
+existing content                       | -> section | action
+---------------------------------------+------------+---------------------
+"Prefer CMD over PowerShell"           | 6          | keep, add reason
+"pool of agents x->2x->4x" notation    | 10         | keep, add depth budget
+3 paragraphs describing the sync engine| (none)     | MOVE OUT -> docs/... + pointer
+"ask before deleting"                  | 1          | keep
+```
+
 ## Move-out decisions
 
 Content moves out when it **describes** rather than **obligates**, or when it duplicates a document that

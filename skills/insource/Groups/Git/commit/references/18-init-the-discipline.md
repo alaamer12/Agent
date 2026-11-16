@@ -10,7 +10,9 @@ nothing but review is a decision the maintainers make in their own stack — and
 change if they want one.
 
 There is no script for this on purpose: the valuable part is the interview, and the answer to "what should this
-project's rule be" is not in the repository. The repository only tells you what it currently does.
+project's rule be" is not in the repository — they are in the maintainers' heads. The repository only tells you
+what it currently does. The commands init uses are plain `git`/`ls` (detection), and the file it produces is
+prose.
 
 ## Step 1 — read the room (facts, not decisions)
 
@@ -40,12 +42,12 @@ stakes attached to each: every one has a silent failure mode.
 |---|---|---|---|
 | 1 | **Message shape** — keep what the history does, or change it? | the majority style in the last 40 | changing it silently converts the project; the next person's `git log` becomes two dialects. Keeping sentence style also means *no type list*, so a Conventional linter would reject every existing commit |
 | 2 | **Types** — which vocabulary, and is an unknown type a rejection or a shrug? | the types in use, not the standard fourteen | a list nobody uses is decoration in the doc and a CI wall in review. If the repo has no types, say so in the doc — that is a rule too |
-| 3 | **Subject budget** — 50, or 72? | median if it is tight, max minus overrun if scoped types are normal | over-budget subjects get truncated in `git log --oneline` and in forge UIs, which is where a reviewer stops reading |
+| 3 | **Subject budget** — 50, or 72? Matched to what the team actually writes, not to the guide's preference. | median if it is tight, max minus overrun if scoped types are normal | over-budget subjects get truncated in `git log --oneline` and in forge UIs, which is where a reviewer stops reading |
 | 4 | **Which branches are named branches** — the ones that must not carry `wip:`/`temp:`/`debug:`? | `origin/HEAD` if set, else the trunk-named local branch, else ask outright | a wrong list blocks nothing and *looks like it works*. Never guess this one silently — say how you detected it |
 | 5 | **Ticket keys** — subject prefix, footer, or untracked here? | whatever the last 40 show | a key in the subject eats the length budget; a key only in the body is invisible to the board |
 | 6 | **Body policy** — required when the *why* is non-obvious, or required always? | whether existing commits have bodies at all | "always" produces filler bodies; "when non-obvious" needs the doc to name what counts as non-obvious |
-| 7 | **Authorship** - does an agent's involvement get a `Co-authored-by:` trailer (with the exact name and address), or is the human the sole author and the tool invisible in history? | how many of the last 20 commits carry such a trailer; any commit template, alias, or `AGENTS.md` line that adds one; whether branch names already carry an agent segment | a trailer is a public claim about who did the work, so guessing it in either direction is a decision nobody authorised - and it must agree with the branch-name rule, or history and refs contradict each other |
-| 8 | **Enforcement** — document only, or do you want a check wired up too? | report what already exists and ask whether to extend it | a policy with no check decays within a quarter; a check with no documented escape hatch teaches people to bypass everything |
+| 7 | **Authorship** - does an agent's involvement get a `Co-authored-by:` trailer (with the exact name and address), or is the human the sole author and the tool invisible in history? Detect first, then ask only what the repository cannot answer. | how many of the last 20 commits carry such a trailer (`git log -20 --format='%(trailers:key=Co-authored-by)'`); any commit template, alias, or `AGENTS.md` line that adds one - `AGENTS.md`'s Version Control section is the decided home for authorship; whether branch names already carry an agent segment | a trailer is a public claim about who did the work, so guessing it in either direction is a decision nobody authorised - adding attribution nobody asked for and erasing provenance are the same mistake in opposite directions - and it must agree with the branch-name rule ([`branch`](../../branch/SKILL.md)): record both together, or history and refs contradict each other |
+| 8 | **Enforcement** — document only, or do you want a check wired up too? | report what already exists and ask whether to extend it | a policy with no check decays within a quarter; a check with no documented escape hatch teaches people to bypass everything. Say plainly that a local check is a courtesy and a CI check over the commit range is the layer that survives `--no-verify` |
 
 Two extra prompts worth their cost: *"what would make you break this rule?"* (that answer becomes the escape
 hatch sentence) and *"who owns this document?"* (an unowned policy file is a suggestion).

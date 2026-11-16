@@ -1,6 +1,7 @@
 ---
 name: agents-md
-version: 1.0.1
+version: 1.1.0
+author: Amr
 specialized: none
 description: 'Creates/audits AGENTS.md - agent rulebook: obligations+references not docs, rules/ per-topic referenced is the recommendation, inline stays valid; one owner per fact (brief+pointer). 19 sections: instructions; context fence value+REACH+docs-root MUST-ASK; how-to router (also owns exec/env/version policy); startup; delegation; privacy - cascade/gitignore; resourceful - local-first; authority - ask-per-session; version control - VCS tiers, parked-work, identity; ambiguity - Exact/Broad, weighty MANDATORY, 1-file records; golden rules - never-bend, violation-shaped; review - rulebook-violations lead, then named tasks; skills - per-skill rows; facts - corrections beat memory; before-between-after - per-phase rituals (read/dedup/type-check), current prompt overrides; voice - a register per surface user''s own; sync blocks - multi-home meanings, a per-block table (site+line), meaning not letters, same-change duty; sections never deleted; maintenance - same-change+date. Writes ONLY AGENTS.md.'
 when_to_use: The user asks to create, restructure, or audit AGENTS.md (or an equivalent agent instruction file), to define how the main agent delegates to subagents, or says "agents-md this project". Also /agents-md.
@@ -44,13 +45,11 @@ written by their owner (the `document` skill, or the user), never stubbed here.
 The last one is the difference between a rulebook and a rumor: an agent cannot tell an invented default from a
 decided one, and it will enforce the invented one.
 
-## Size and placement: a convention, not a rule
+## Where the rules live: inline, or `rules/` by convention
 
-Detail is conventionally kept in a `rules/` folder beside `AGENTS.md` (`rules/development.md`,
-`rules/debugging/ui.md`), or inline in `AGENTS.md` - the user chooses. Inline guarantees the agent sees the
-rule every message; referenced docs save context but can be skipped or forgotten. Around 500 lines for the file
-and 50 for a section are advisory heuristics for the referenced style, not enforced limits. Full guidance:
-"Where the rules live" under Step 4.
+Inline vs referenced, the `rules/` convention, the recommended one-file-per-topic shape, the advisory ~500/~50
+heuristics, and what moves out as a section grows: [`00-what-agents-md-is.md`](references/00-what-agents-md-is.md).
+Placement is the user's choice; size is guidance, never a finding.
 
 ## Step 1 - Look everything up before asking anything
 
@@ -72,17 +71,9 @@ decisions, not for facts I can read.
 
 ## Step 2 - Audit an existing `AGENTS.md` (if present), then propose a map
 
-Classify every existing rule into the nineteen sections and show the user the map **before** writing anything
-([`03`](references/03-audit-and-merge.md)):
-
-```text
-existing content                       | -> section | action
----------------------------------------+------------+---------------------
-"Prefer CMD over PowerShell"           | 6          | keep, add reason
-"pool of agents x->2x->4x" notation    | 10         | keep, add depth budget
-3 paragraphs describing the sync engine| (none)     | MOVE OUT -> docs/... + pointer
-"ask before deleting"                  | 1          | keep
-```
+Classify every existing rule into the nineteen sections and show the user the map **before** writing anything.
+The map table - with a compact example - the move-out options, the conflict rules and the foreign managed
+blocks: [`03-audit-and-merge.md`](references/03-audit-and-merge.md).
 
 - Nothing is dropped silently; a removed rule is a decision the user makes, not a formatting choice.
 - A block delimited by another tool's markers (for example `theskills` pins, between two HTML comment markers)
@@ -94,140 +85,42 @@ existing content                       | -> section | action
 follows, so every answer here becomes a standing instruction downstream - which is exactly why an unanswered
 question is recorded as pending instead of guessed.
 
-**Before Round 1 — Domain Research & Slate Confirmation ([`02`](references/02-interview-guide.md)):**
-- **Research the domain before asking:** Never ask generic, surface-level questions. For every section of `AGENTS.md` and every topic in Section 3 (`How To`), first inspect how the repo's stack works and map the professional properties, architectural models (e.g., lockstep SDK vs. independent per-package versioning), edge cases, and fallback/rollback mechanisms of that domain so the user is presented with real, well-researched options.
-- **Confirm the interview & `How To` slate upfront:** After Step 1 reconnaissance, show a brief summary of what the repo already answered, which `AGENTS.md` sections need decisions, and the proposed slate of Section 3 (`How To`) topics — checking which of the 5 common topics (`development`, `debugging`, `execution`, `environment`, `version`) apply, proposing any **6th, 7th, or Nth project-specific topics** spotted in the repo (e.g., `migrations`, `sdk-parity`, `codegen`), and asking the user which topics to keep, drop, or add before diving into their questions.
+**Before Round 1 - research the domain, then confirm the slate** ([`02`](references/02-interview-guide.md)):
+never ask a blank question; present the models this repo's stack actually supports, and settle the Section 3
+(`How To`) topic list - the 5 common topics plus any 6th, 7th or Nth the repo suggests - before the questions.
 
-**Deliver it in rounds, not as one wall of questions.** Each round settles one small group of sections
-(2-5 questions), and the user sees the next round only after the previous one is answered and confirmed:
-
-| Round | Sections it settles | The decisions inside it |
-|---|---|---|
-| **1 - What this project is, right now** | 1, 2, 3, 14 | confirm the overall interview slate + the Section 3 `How To` topic list (common candidates + repo-specific 6th/Nth additions, and inline vs referenced placement); the user's standing behavioral directives for every agent (declaration lines, skill-usage floors, mandatory pre-workflows - §1); active version/channels/other dimensions and what is excluded; where work lands; versioning and promotion; **the docs root (must-ask when missing - there is no project without docs)**; the golden rules that never bend (propose candidates from repo evidence) |
-| **2 - The toolchain as it actually is** | 3, 5 | shell/chaining pitfalls, the one package manager, environment/secrets strategy (all three as routed how-to docs), startup steps |
-| **3 - What the project already has** | 2, 4, 10, 19 | the units index and its duties; design/prototype locations and scope; per-skill usage notes; the version policy (pattern, bump rule + who, sites, dual-versioning, attachments); which writable meanings have more than one home and must be tabled as sync blocks |
-| **4 - Agents working in this project** | 3, 6, 15 | debug permissions and agent instrumentation (what the app lets the agent bypass, what never); delegation naming, reports, fan-out, what a subagent may decide alone; the named review tasks (rulebook-violation pass always leads) |
-| **5 - Trust and boundaries** | 7, 8, 9, 12, 13, 18 | privacy paths and the cache question; local-vs-global install exceptions; authority settings; version-control authority for whichever VCS the project uses (git, Unity VCS, Perforce...) - inspect/check-in tiers, outward-ask, never-without-order, parked-work (stash/[shelve]) policy, change identity; how the user wants to be asked (Exact / Broad / both) + where decisions get recorded; the voice the agent talks and writes in (register + the user's own) |
-
-Round rules:
-
-- **Skip what the repo answers.** Any round whose answers are already visible in the repository is skipped
-  with one line saying so - the interview asks decisions, not facts.
-- **Overlooking and overengineering are both failures.** Every settled concern gets the hidden-dimension
-  probe ([`02`](references/02-interview-guide.md)) before its round closes - a dimension nobody asked about
-  bites in a later session; a dimension invented to fill a table costs every session. The stop condition is
-  the same on both sides: **dig until you can record "confirmed absent", then stop.** Only dimensions with
-  repo evidence or a user decision enter the file; absences are stated, silence is not.
-- **One round at a time.** Present the round's questions, collect the answers, then **restate the decisions
-  in a 3-6 line list** and wait for corrections before opening the next round. The restatement is where a
-  misheard answer gets caught cheaply.
-- **Each question must** (a) change a rule in the file, (b) be unguessable from the repository, (c) carry its
-  trade-off. A question that fails any of the three is cut, not softened.
-- **Stopping early is allowed.** If the user wants to stop, the remaining rounds become numbered pending
-  items - never filled with defaults.
-- **Maintenance (section 11) is not a round.** It is the fixed duty; only its owner and review cadence are
-  worth one line if the user has an opinion.
-
-The question bank per round: [`02`](references/02-interview-guide.md). State the full decision list back before
-drafting ([`05`](references/05-delegation-and-subagents.md) for section 6 specifics).
+**Deliver it in rounds, not as one wall of questions** - five rounds, each settling one small group of sections
+(2-5 questions): what this project is, right now · the toolchain as it actually is · what the project already
+has · agents working in this project · trust and boundaries. Skip a round the repository already answers; close
+each settled concern with the hidden-dimensions probe (dig to "confirmed absent", then stop); restate the
+decisions in 3-6 lines and wait for corrections; stopping early leaves numbered pending items, never defaults.
+The round-to-question map, the research-before-asking rule, the probe, the decision bank with what each row
+feeds and what to write when it stays unanswered, and how to hand a round to `inquire`:
+[`02-interview-guide.md`](references/02-interview-guide.md). State the full decision list back before drafting
+([`05`](references/05-delegation-and-subagents.md) for section 6 specifics).
 
 ## Step 4 - Draft from the template
 
 Start from [`assets/templates/AGENTS-template.md`](assets/templates/AGENTS-template.md) and fill it. The nineteen
 sections, in this order:
 
-| # | Section | Must contain | Must not contain |
-|---|---|---|---|
-| 1 | Agent Instructions | stable behavioral rules and restrictions - **plus the user's standing behavioral directives: how every agent must BEHAVE and be FOLLOWED - [declaration lines] (e.g. the last line of each output names the skills used), [skill-usage floors] (e.g. try at least one applicable skill per response), [mandatory pre-workflows] (e.g. run grill-me before any implementation) - shapes are examples, the directives are the user's choice, and these bind subagents through the block's SKILLS clause too**; the file's H1 names the rulebook ("<project> - Agent Rulebook"), never a section's own title | version- or channel-dependent rules; silently skipping the question - an empty section says "none recorded yet", never stays blank by forgetting to ask |
-| 2 | Mandatory Context | routing table of files to read - REGISTERED docs live only here (how-to docs, the units index, commitments...); **registered indexes can carry their duties on the row** (units: read-before-implement, reuse over duplicate, entry in the same task - a standalone Units section is just one path plus three duties, which is what section 2 already is) - **each dimension names its REACH: what the value governs and how to recognize it** (a docs-tree split like docs/[main] vs docs/[canary], the code tree, a [build flag], a naming pattern, which rules apply); **excluded** scope; "indexes are routers, follow the links" | summaries of what those files say; label-only dimensions (a bare value with no reach - the shallow fence that misdirects every later read) |
-| 3 | How To | **the procedural router, also holding policy-shaped rules**: task class -> registered how-to doc; WHICH classes and file names exist is the project's own (found in its repo, asked when absent). What each routed kind typically owns - [a development doc]: branch model + operational meanings + promotion; [a debugging doc]: reproduce/registered instruments/escalate/verify/clean; [a commands doc]: shell rule WITH the failure it prevents + the one package manager; [a configuration doc]: strategy + the .env prohibition and its route; [a release/version doc]: scheme as SHAPE with its spec cited (never a live value), WRITTEN bump rule + who per component, dual-track meanings, declaration-site sync (a multi-home number = a sync block, section 19), attachment blocks as subsections - illustrative pairings, not required names or a required set. A grown kind splits into a folder ([rules/debugging/db.md], [rules/version/main.md]); the `rules/` prefix is the convention, not a required location - the project's docs root works too, and the user may instead keep the procedure/policy inline here. ROUTED docs own procedures AND their policy; AGENTS.md keeps the routing line + the read-before-act and write-back duties; the docs are REGISTERED in section 2's table (one owner per path - the router names docs, never repeats paths); duties: read the routed doc before working the task class, a discovered step updates that doc in the same change (section 11 routes); token efficiency is the point - the agent opens only the file the task needs; there is no standalone Version section - a project's version policy, if it has one, belongs to its routed doc; the routing line is all AGENTS.md keeps | path re-registration duplicating section 2, procedure or policy bodies duplicated when a routed doc already owns them, bare branch labels wherever the doc lives, forgetting the router line AND the registry row when a how-to doc is added |
-| 4 | Design & Prototypes | locations, which are in active scope, how to tell current spec from future spec | design rationale prose |
-| 5 | Agent Execution & Startup | what must be read/run/confirmed before the first change of a session | setup guide duplication |
-| 6 | Agents | delegation duties both ways, per-task doc list rule, the embedded pasteable block, report artifact; **the full rulebook binds a subagent like the main agent - scope narrows actions (no commits/VCS work unless ordered), never obligations; no context leaks into its artifacts; **the block is a template, not a snapshot - volatile facts (version, channel, docs list) are <FILL> slots the parent fills at paste time, stable policy stays fixed text** | burned volatile values (a version number frozen in the block), a second rulebook beside the first |
-| 7 | Privacy | **the project's visibility policy**: private paths (skills, plans, binaries) · the **cascade** (hidden tool ⇒ its outputs are hidden too) · hidden **binaries carry an install note elsewhere**, not the file · the **`.gitignore` sync duty** · when a declared-private path is missing from `.gitignore` or was tracked before the rule, **ask the user before clearing the cache** - never delete silently | secrets themselves (section 3), a file-by-file inventory of what exists |
-| 8 | Resourceful | **project-local first**: dependencies, toolchains, interpreters, environments stay in the project (the local env, not a global one, in every language); global installs are named exceptions with a reason, never a convenience default; project binaries run through the project's own tooling so the pinned version is the version used | a per-language install tutorial (the rule is language-neutral), the package manager choice (section 3) |
-| 9 | Authority | **what agents may do in this environment**: which actions are ask-per-session (the safe default) or fixed (granted, with reason) - external binary installs, external processes, existing-database writes, credentials, machine-level config; project-local installs stay in section 8; when a limit blocks the requested work, the agent says honestly what it cannot do and asks, never improvising or skipping | a per-command permission catalogue, or global installs themselves (section 8) |
-| 10 | Skills | **per-skill instructions**: one row per independent skill the project relies on - when it applies, and what to read/do first (the skill owns and updates its row; agents-md keeps the table) | the skill's full manual, or notes for skills the project does not use |
-| 11 | Rulebook Maintenance | **the duty to keep this file current**: every decision that changes a project rule updates the file in the same change; the decision→section map (new channel, new doc, rename, moved pointer, **privacy change ⇒ same-change `.gitignore` line**, version-control change ⇒ regenerate the block's VCS clause); a `Last reviewed: YYYY-MM-DD` line | a changelog, or technical detail that belongs in a doc |
-| 12 | Version Control | **authority over the project's version control** - neutrality is for the interview, the written file commits: when the project uses Git the heading IS "Git" and lines speak it natively, with no "the VCS in use" ceremony: the tiers (allowed: inspect + local commits per the development how-to doc (section 3's router) / ask-first: push, PRs, shared-branch merges / never-without-order: history rewrites, `reset --hard`, `clean`, force-push, `--no-verify`); the **parked-work policy** (stash/[shelve] allowed or not, and the naming pattern that makes entries identifiable in a shared worktree); the **change identity** (human sole author vs `Co-authored-by` disclosure - the exact name decided once, here; this is the answer `commit` and `branch` look for before asking) | tutorial-style git commands (the development how-to doc, routed by section 3, owns the branch model), non-git permissions (section 9), the full commit-message convention (a doc or the `commit` skill's INIT output) |
-| 13 | Ambiguity | **how the agent asks**: the chosen question mode - **Exact** (user answers named implementation specifics, "which cipher: X/Y/Z", never just "want encryption?") or **Broad** (user answers intent, "do you want E2EE?"; internals are the agent's to choose best-for-project) - or **both by weight** with the user's Exact list written down; the **[MANDATORY] always-ask rule** - weight-bearing decisions (irreversible, costly, security, cross-module, product behavior) are asked, never silently assumed, while the user is in the loop - and its twin: trivia ("X-file inside Y-folder?") is decided, never asked; consequential options routed through `caution`; **before going anonymous** - any mode that takes the user out of the loop, never named by one skill - every critical question is asked first, leftovers written as explicit assumptions. Also owns **decision records** (anonymous/autonomous modes are thin operating modes; this section is the convention): **one file per decision** at `<docs>/decisions/<slug>.md`, never a combined `decisions.md` that explodes with project age; each record anchored **Date + Commit hash + App-Version** (version stated when it changed between decisions); content order question→context→options→choice→consequences→reversal; **the ask-or-decide call itself is a recorded decision** (what was assumed instead of asked, especially under anonymity); the anonymous ledger lives at `<docs>/decisions/states.md` | a per-command question catalogue, the authority settings themselves (section 9), the subagent no-ask rule (section 6) |
-| 14 | Golden Rules | the **never-bend list**, one rule per line, each NAMING ITS MECHANISM - the one sanctioned path plus the loud failure guarding it ([typed settings schema + fail-fast at boot], [single accessor], [removed raw entry point], [CI import gate]); "don't hardcode env vars" rests on vigilance, "every env key is declared in the typed schema and startup fails without it" is unbreakable by construction - the second form or nothing goes here; keep it short - a golden rule that competes for memory is one too many; the subagent block carries a GOLDEN clause | wishes without a violation shape, the long conventions doc (that is a referenced rulebook), anything situational (situations are sections 2/13) |
-| 16 | Facts | **corrections to agents' training memory**: the section's paragraph is FIXED TEXT (reproduce verbatim) - verified facts contradict what training/prior knowledge would assume, they WIN over memory, a suspect fact is re-verified and re-dated, never argued from memory; the recording duty: verification contradicts a prior belief during any task -> append the dated bullet (believed / actual / proven) in the same change. Bullets ACCUMULATE over the project's life - the section starts near-empty and grows; the subagent block carries a FACTS clause | general knowledge, opinions, anything unverified, deleting stale bullets from memory instead of re-verifying in place |
-| 17 | Before-Between-After | the **always-on task rituals** in three phases - BEFORE a task (what to read/confirm first), BETWEEN/while working (e.g. search for an existing implementation before writing a new one - collapse duplication mid-task, not later), AFTER finishing (e.g. run the type-check gate [tsc --noEmit] / the project's equivalent, lint, self-review the diff against section 14). The user's CURRENT prompt overrides the rituals for that task ("run the type-check first this time" wins once); a standing wish to change a ritual edits THIS section. Guide paragraph fixed; bullets grow for the life of the project - an empty phase keeps its header | one-off instructions for a single task, the session-start ritual (that is section 5; this is every task), restating sections 2/4/9's read duties ("read the mandatory docs first" is section 2 twice - rituals are additive only) |
-| 15 | Review | **when a review runs - a named review task or the diff self-review - its first pass is finding violations of this rulebook - golden rules first - in code AND docs; it is the definition of a review here, not an always-on job between unrelated tasks**; beneath it the project's named review tasks, each as "name - what to read - what counts as a violation" (e.g. Docs: stale passages, unlinked docs nothing points to, docs over 500 lines become a folder named after the doc with index.md; [DB]: learn all tables, hunt hardcoded/mocked data - seeds, not a quota, only where such a store exists) | generic "review for bugs" prose, per-task checklists that belong in docs; phrasing the violation pass as a duty that fires outside review work |
-| 18 | Voice | **the register the agent speaks and writes in**: the chosen mode - [concise] (answer first, reasoning on request) / [explanatory] (trade-offs shown) / [verbose] (teaching walkthroughs) / [ponytail] (the lazy-senior-dev minimum: the shortest statement that still proves the point) - the modes are illustrative, the CHOICE is mandatory; **a register PER SURFACE** - replying to the user / [public documents] (README, release notes, help) / [internal documents] (decision records, reports, how-to docs) may each carry its own voice; one register everywhere is a valid CHOICE, never a silence-default; **the user's own register recorded** (their vocabulary, directness, terseness set the level; the agent answers at it, never lectures past it); **written reflection**: no surface speaks off-script - every document and artifact the agent writes takes the register of its surface row; the subagent block carries a VOICE clause | a transcript of past phrasings, per-audience tone rules that fight the single register, a persona the user never chose, silence-by-default ("whatever sounds right") |
-| 19 | Sync Blocks | **writable meanings with more than one home**: the same feature shipped as [two SDKs in two languages], a doc pair that must tell one story, a [config mirror], the version declaration sites section 3 points here for - THE LAW: blocks sync in **MEANING, not letters** (each home may phrase per its idiom; drift of what they MEAN is the defect); **one table per block**, rows exact: `location | line anchor | what this home carries`; **the tables are born in their own file** - <docs>/sync-blocks.md, one named section per block (they explode line by line as the project grows); AGENTS.md keeps the law, the duty, the format, and the `Read:` pointer; the **same-change duty**: an edit that changes one side's meaning updates every row of that block now (section 11 routes it; a moved anchor gets re-anchored); finding an unlisted duplicated meaning during audit is a finding, not a note; the subagent block carries a SYNC clause | demanding verbatim copies (the homes correctly differ in words), one merged table mixing blocks, locations without anchors (an unsyncable "sync"), growing block tables inside AGENTS.md by default, treating this as documentation-about-code rather than a binding list |
+1 Agent Instructions · 2 Mandatory Context · 3 How To · 4 Design & Prototypes · 5 Agent Execution & Startup ·
+6 Agents · 7 Privacy · 8 Resourceful · 9 Authority · 10 Skills · 11 Rulebook Maintenance · 12 Version Control ·
+13 Ambiguity · 14 Golden Rules · 15 Review · 16 Facts · 17 Before-Between-After · 18 Voice · 19 Sync Blocks -
+what each must contain and what must never land in it:
+[`10-the-nineteen-sections.md`](references/10-the-nineteen-sections.md).
 
 Rules that govern section 6's block: the block is a **projection of sections 1-5, 7-9, 12, 14, 16, 18, 19**, not a second
 rulebook.
 Generate it from the decisions already recorded, keep each clause traceable to its section, and state in the
 file that editing the rulebook means regenerating the block ([`05`](references/05-delegation-and-subagents.md)).
 
-## Where the rules live: inline, or `rules/` by convention
-
-`AGENTS.md` is loaded into the system prompt on every message. That makes **inline rules the safest place for
-anything the agent must never miss** - they cannot be forgotten, skipped, or half-read. It also makes them the
-most expensive: every line is paid for on every turn, and a long rulebook dilutes attention. Referenced docs
-solve the cost and add a risk: the agent may not open the file, may forget a rule it did not load, or may
-hallucinate a missing detail under pressure. **The skill's recommended shape is therefore one dedicated file
-per topic/type of content** (`rules/version.md`, `rules/debugging.md`, …) with `AGENTS.md` keeping only the
-routing line and the 2-4 never-miss obligation lines per section - the agent then reads exactly the file its
-task names and pays for nothing else. Inline stays the user's right and the correct home for the few lines
-that must reach every message; it is a valid choice, not a defect, when the user picks it.
-
-- **Inline.** The user may keep procedures and policy inside `AGENTS.md` - in section 3 or a dedicated section.
-  That is a valid choice, not a defect. Keep it navigable; no extraction is required.
-- **Referenced.** By convention, routed how-to docs live under a `rules/` folder beside `AGENTS.md`:
-  `rules/development.md`, `rules/debugging.md`, or a folder split `rules/debugging/ui.md`,
-  `rules/debugging/backend.md`, `rules/version/main.md`. The project's declared docs root is equally valid;
-  use whichever the project already uses and ask when neither is evident. The names are examples, not a menu.
-- **When referenced**, `AGENTS.md` keeps the routing line, 2-4 obligation lines, and a `Read: <path>` pointer;
-  the routed doc owns the procedure and its policy, and the read-before-act and same-change duties still bind.
-- **When inline**, the How To router still names the task class, but the procedure stays in the section - there
-  is no `Read:` pointer and no separate doc to update.
-
-Size is **guidance for the referenced style, not an enforced limit**. Around 500 lines for the whole file and
-around 50 for one section are reasonable heuristics; a file that is longer because the user chose to inline is
-not a violation. Length alone is never a finding.
-
-The one standing default worth keeping: **section 19's sync-block tables start in `<docs>/sync-blocks.md`**,
-because they grow line by line and are the fastest-growing body in the rulebook.
-
-Growth still has a cost, so name it honestly: when a section balloons and the user has not chosen to inline it,
-propose the split - Review's always-first rule stays (one line), task definitions move to
-`<docs>/review.md`; Ambiguity's record format moves to `<docs>/decision-conventions.md`. Ask before moving;
-"extract it" is a decision, not a formatting pass.
-
 ## Step 5 - Verify, then write the one file
 
-Read the draft back against this checklist before writing. Verify by hand; there is no lint script.
-
-1. **Sections.** All nineteen headings are present and in order, and each either carries its duties or says
-   "none recorded yet" - never blank-by-forgotten.
-2. **Links.** Every relative path resolves on disk. No absolute or foreign-project paths.
-3. **Scope.** The active-scope line names both what is in scope and what is excluded, and every context
-   dimension carries its reach (what it governs / how to recognize it), not a bare label.
-4. **Privacy (section 7).** Both duties are stated: the `.gitignore` sync and the ask-before-clearing-the-cache
-   rule.
-5. **Resourceful (section 8).** The local-over-global rule is stated.
-6. **Version control (section 12).** The VCS is named, along with its authority tiers, a parked-work policy, and
-   a change-identity rule.
-7. **Voice (section 17).** The chosen register, the user's own, and the binding to written artifacts are named.
-8. **Sync blocks (section 19).** Every block carries its own table (locations + line anchors, the meaning law,
-   the same-change duty).
-9. **Version policy.** Pattern, bump rule + who, the sync sites, and attachments are declared.
-10. **Facts (section 16).** The fixed trust-over-memory paragraph and the recording duty are present.
-11. **Before-between-after (section 18).** All three phases are named, plus the user-override rule.
-12. **Ambiguity (section 13).** The Exact/Broad question modes, the mandatory-ask rule, the pre-anonymous rule,
-    and the one-file-per-decision record convention with Date/Commit/App-Version anchors are present.
-13. **Golden rules and review (sections 14-15).** Golden rules state nothing casual; Review puts
-    rulebook-violation hunting first.
-14. **Section 1.** The behavioral-contract question is answered - a standing directive or an honest "none
-    recorded yet".
-15. **Subagent block.** Every clause maps to a section.
-16. **Maintenance.** The update duty and a `Last reviewed:` date that is not stale.
-
-Fix what the checklist finds; do not loosen the checklist to make the draft pass.
+Read the draft back against the sixteen-point checklist - sections, links, scope, privacy, resourceful, version
+control, voice, sync blocks, version policy, facts, rituals, ambiguity, golden rules and review, section 1, the
+subagent block, maintenance - and fix what it finds rather than loosening it to make the draft pass:
+[`11-verify-before-writing.md`](references/11-verify-before-writing.md). Verify by hand; there is no lint script.
 
 Then write `AGENTS.md` and report:
 
@@ -240,30 +133,19 @@ Then write `AGENTS.md` and report:
 
 ## Step 6 - Keep it current, every session
 
-The file is only worth what it is worth today. Section 15 is the duty, and the duty applies to agents-md itself:
+The file is only worth what it is worth today, and the maintenance duty applies to agents-md itself:
 
-- **A decision that changes a project rule updates `AGENTS.md` in the same change.** A new channel (`stable`
-  gains `canary`), a version that stops being future and becomes current, a new mandatory document, a document
-  renamed or moved, a permission that changed during debugging, a new delegation limit — each one is a section
-  edit, not a note to self. See
-  [`08-keeping-the-rulebook-current.md`](references/08-keeping-the-rulebook-current.md) for the decision→section
-  map.
-- **A privacy-rule change is two changes in one.** A newly private path must land in `.gitignore` in the same
-  edit; a path that was *already tracked* before being declared private is not hidden by `.gitignore` - the
-  cache-clearing step (`git rm --cached <path>`, removing local generated copies of hidden outputs) is
-  **proposed to the user and asked for, never done silently**. See
-  [`09-privacy-and-visibility.md`](references/09-privacy-and-visibility.md).
-- **A pointer that no longer resolves is a defect, fixed immediately.** Renaming a file without fixing the row
-  that cited it teaches every later session to ignore the file.
-- **Verification that contradicts a prior belief becomes a Facts bullet in the same change** - the
-  section that starts nearly empty is the one that grows for the whole life of the file; letting the
-  next agent re-learn "library X DOES support Vue" the expensive way is the defect this prevents.
-- **Rules retire.** Delete what no longer holds; a rulebook that accumulates obsolete rules is worse than an
-  empty one, because the agent cannot tell which half still applies.
-- **Refresh the review date** when you have verified the two highest-risk lines — the active-scope fence and
-  the branch/version policy — not merely when you touch the file.
-- **Subagents report drift, they do not edit it.** A subagent that finds the rulebook stale returns it as a
-  finding in its report; the parent reconciles.
+- **A decision that changes a project rule updates `AGENTS.md` in the same change** - a new channel, a version
+  that becomes current, a new mandatory document, a rename, a permission gained while debugging, a new
+  delegation limit: each is a section edit, not a note to self. A **privacy-rule change is two changes in one**:
+  the `.gitignore` line lands in the same edit, and an already-tracked path is cleared from the cache only
+  after asking the user - never silently. The decision-to-section map, the per-session habit and the drift
+  symptoms: [`08`](references/08-keeping-the-rulebook-current.md),
+  [`09`](references/09-privacy-and-visibility.md).
+- **A pointer that no longer resolves is a defect, fixed immediately**; **rules retire** (a rulebook that
+  accumulates obsolete rules is worse than an empty one); a verification that contradicts a prior belief
+  becomes a **Facts** bullet in the same change.
+- **Subagents report drift, they do not edit it**; the parent reconciles.
 
 ## Boundaries
 
@@ -283,9 +165,6 @@ The file is only worth what it is worth today. Section 15 is the duty, and the d
   invents or ranks priorities itself - a priority is a decision, not a formatting choice.
 - **Do not document the harness's internals** as if they were stable (which instruction files it reads, marker
   formats, precedence). Record what the user's project does; hedge the rest ([`07`](references/07-harness-and-portability.md)).
-- **Size is guidance, not a rule.** ~500 lines total and ~50 per section are conventional heuristics for the
-  referenced style, not a hard ceiling. If the user chose to inline, the file may be longer; do not extract
-  without their agreement. If the content is clearly documentation, propose the split and leave pointers.
 
 ## References
 
@@ -301,6 +180,8 @@ The file is only worth what it is worth today. Section 15 is the duty, and the d
 | [`07-harness-and-portability.md`](references/07-harness-and-portability.md) | Which instruction files agents read, project vs user scope, skill/command roots, the `AGENTS.local.md` split for machine-specific rules | Step 1 and section choice |
 | [`08-keeping-the-rulebook-current.md`](references/08-keeping-the-rulebook-current.md) | The maintenance duty: which decisions must update the file the same day, the decision-to-section map, rename and pointer hygiene, drift symptoms, subagent reporting | Writing section 11, and every session that changes a rule |
 | [`09-privacy-and-visibility.md`](references/09-privacy-and-visibility.md) | The Privacy section: what to declare private, the producer→output cascade, hidden binaries with a documented install need, `.gitignore` sync and the ask-before-clearing-the-cache rule, audit and subagent-block behavior | Writing section 7, and any session that changes a privacy rule |
+| [`10-the-nineteen-sections.md`](references/10-the-nineteen-sections.md) | The nineteen sections in their order, each with what it must contain and what must never land in it | Step 4, drafting the file |
+| [`11-verify-before-writing.md`](references/11-verify-before-writing.md) | The sixteen-point checklist the draft is read back against, by hand, before `AGENTS.md` is written | Step 5, before writing |
 
 ## Asset
 

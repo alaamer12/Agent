@@ -1,6 +1,6 @@
 # Gestures and drag
 
-> Owner of drag core rules, velocity projection, rubber-banding, axis commitment, pointer capture, dismiss, detents, rotary, reorder and gesture thresholds. Routing lives in ../SKILL.md.
+> Owner of drag core rules, velocity projection, rubber-banding, axis commitment, pointer capture, dismiss, detents, rotary, reorder and gesture thresholds. Routing lives in ../method.md.
 
 Direct manipulation: dragging, swiping, flicking, rotary controls, detents, swipe to dismiss, drag to reorder. The finger leads; animation only takes over after release.
 

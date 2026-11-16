@@ -77,3 +77,9 @@ Skip the question when the repo already answers (an existing README's register, 
 splitting jobs), when the user named the style, or when the ask is a small fix. If positioning is
 open and the *choice* would materially change the file, it is exactly one of the intent-dependent
 decisions worth asking (SKILL.md §10).
+
+## One register, held through the file
+
+Whichever voice wins: the fact layer is identical across all of them, the evidence rules
+of this skill bind every voice, and the chosen register is held consistently through the file —
+a README that changes personality mid-document is two READMEs failing at each other.

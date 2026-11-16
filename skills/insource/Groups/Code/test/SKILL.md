@@ -1,6 +1,7 @@
 ---
 name: test
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: General testing principles and ethics for any test the agent writes or reviews — unit, integration, contract, e2e, property, invariant, regression, or pipeline. Use whenever writing, refactoring, reviewing, or deciding what tests a change needs. Covers one-reason-to-fail, test vs verifier distinction, test data as contracts, selective execution, minimal mocking with feature-flag style seams, and discrimination. Do not use for project-specific tooling or mandated workflows.
 ---

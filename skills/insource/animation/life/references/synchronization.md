@@ -1,6 +1,6 @@
 # Synchronization and choreography
 
-> Owns how two or more moving elements relate: cast, the five relations, hard rules, moment sync, adaptive timing, direction and exits, interruption, attention loops, reduce behavior, and the timeline artifact. Value ranges belong to timing-and-tokens.md. Implementation patterns: choreography-recipes.md. Routing: `../SKILL.md`.
+> Owns how two or more moving elements relate: cast, the five relations, hard rules, moment sync, adaptive timing, direction and exits, interruption, attention loops, reduce behavior, and the timeline artifact. Value ranges belong to timing-and-tokens.md. Implementation patterns: choreography-recipes.md. Routing: `../method.md`.
 
 A group reads as one intentional motion when order, overlap, timing and stillness are *decided* — not when every part animates smoothly on its own. The default failure is choreographing by addition: every child gets a delay, the panel slides then its items trickle in; each piece is nice, and the user waits for the interface to finish performing before using it. Good choreography is mostly **cutting moving parts and running the rest in parallel**.
 

@@ -1,6 +1,7 @@
 ---
 name: gh
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: github
 description: 'All GitHub CLI/Actions work in one router: fix failing CI/PR checks (gh pr checks, gh run view --log-failed, bundled inspect_pr_checks.py; classify workflow-file vs job vs flaky vs infra vs external), auth and tokens (gh auth scopes, GITHUB_TOKEN permissions, 401/403 causes, never paste a token into chat), author or edit .github/workflows YAML (valid YAML is not a valid workflow: the space-hash comment trap, quoting expression scalars, actionlint gate), keep workflows thin (wiring not logic - move run: bodies into checked-in script files, conditions stay declarative, scripts return exit codes and one-line feedback; embedding programs in YAML breaks block-scalar indentation and mixes shell with language errors), and harden (SHA-pinned actions, least-privilege permissions, script-injection defense via env mapping, fork-PR rules, OIDC, concurrency, timeouts). Also gh run rerun, workflow dispatch, artifact/release inspection. Not for GitLab CI, Azure Pipelines, Jenkins, or application YAML unrelated to Actions.'
 when_to_use: 'Anything with gh, GitHub Actions, workflows, CI, or PR checks in it: the user says "fix CI", "the workflow failed", "write a workflow", pastes a run URL, a run says "This run likely failed because of a workflow file issue", a gh command answers 401/403, or a run: block you are writing grows past a couple of lines.'

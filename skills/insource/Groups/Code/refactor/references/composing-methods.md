@@ -13,6 +13,7 @@
 7. [Remove Assignments to Parameters](#remove-assignments-to-parameters)
 8. [Replace Method with Method Object](#replace-method-with-method-object)
 9. [Decision Guide: Which Composing Refactoring to Use](#decision-guide-which-composing-refactoring-to-use)
+10. [Where to Start](#where-to-start)
 
 ---
 
@@ -398,3 +399,12 @@ class Account:
 | One variable serves two purposes | Split Temporary Variable |
 | Parameter is reassigned inside method | Remove Assignments to Parameters |
 | Long method with too many entangled locals | Replace Method with Method Object |
+
+---
+
+## Where to Start
+
+- **Extract Method** is the single most important refactoring — master it first
+- Urge to write a comment? Extract the block and use the comment as the name
+- Inline Method / Variable when the indirection adds nothing
+- Replace Temp with Query; Split Temporary Variable; Replace Method with Method Object when locals are too tangled

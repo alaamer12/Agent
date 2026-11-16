@@ -1,6 +1,7 @@
 ---
 name: seam
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: Place and enforce the one file that knows the third party - the framework, the vendor SDK, the platform driver - so every layer above it speaks the project's own vocabulary. Covers the import wall and the markup wall, hard-zero versus ratcheted severity, arming a gate (glob liveness, planted violations, controls, doc/registry code parity, one baseline per auditor, wall-time budget), where enforcement actually bites, disjoint migration batches and counts-file keying, codemod mechanics, and the per-component ownership that adopting a framework component transfers. Use when someone says "only X may be used in Y" and nothing enforces it, when a component swap is planned, or when a boundary rule has been green for a suspiciously long time.
 argument-hint: "<the boundary to place, or the auditor to arm>"

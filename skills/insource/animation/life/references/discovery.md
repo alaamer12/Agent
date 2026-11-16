@@ -1,6 +1,6 @@
 # Discovery
 
-> Owns the opportunity posture, the seams catalog, script usage, the report format and grouping; routing lives in `../SKILL.md`.
+> Owns the opportunity posture, the seams catalog, script usage, the report format and grouping; routing lives in `../method.md`.
 
 Find where a target should animate, and reject the rest. Read-only: it proposes with exact values and implements nothing until the user picks.
 

@@ -1,7 +1,7 @@
 # Recipe: grain — `/animation svg grain`
 
 Per-style recipe — shared build rules in [foundations.md](foundations.md),
-signature and trigger words in [../SKILL.md](../SKILL.md).
+signature and trigger words in [../method.md](../method.md).
 
 Distinct from `ripple`, which *warps* geometry with the same noise source. Here
 noise decides **visibility**, never position.

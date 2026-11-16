@@ -1,6 +1,7 @@
 ---
 name: decide
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: Helps the user choose between candidates (software in any language or platform, databases, tools, cloud services, products, approaches) by researching them fairly and delivering one rich HTML decision page. The Compare tab has a dated freshness section, per-dimension winners (ties allowed), charts, tables, ratings, sources and a goal-based verdict. The Showcase tab shows real examples (code, images, audio, video, documents, specs or sample output, whichever fits) with candidate tabs. The page exports to PDF. Use this whenever the user wants to decide, choose, pick, evaluate, or compare options, asks "which is best", "X or Y?", "should I use...", "help me pick a...", or mentions /decide, even if they do not ask for a page or report.
 ---

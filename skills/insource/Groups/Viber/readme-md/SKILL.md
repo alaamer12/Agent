@@ -1,6 +1,7 @@
 ---
 name: readme-md
-version: 1.0.1
+version: 1.1.0
+author: Amr
 specialized: none
 description: 'Create, review, and update professional README files grounded in the actual project, never in assumptions or nonexistent features. Use when asked to write, fix, or refresh a README or project introduction. It inspects real sources (manifests, entry points, scripts, tests) before writing, separates implemented from planned, identifies the primary audience and picks a project-appropriate structure, asks the README voice/style (minimal / engineering / deep-DX / showcase / hybrid) with facts identical in any veoice, writes motivation without fabricated origin stories, uses only real commands verified against project config, refuses to fabricate badges/links/screenshots, offers motivation-phrasing options when positioning is open, asks only about intent-dependent decisions, and honestly reports what was tested vs reviewed. Preserves useful existing structure when updating; targeted edits; respects git state; draft mode. Triggers: readme, write/update the readme, README is outdated, document this project/repo.'
 
@@ -31,44 +32,24 @@ Inspect the project before choosing the mode.
 
 ## 2. Understand the project before writing
 
-Investigate proportionally: a small utility needs a brief pass; a framework
-needs several modules, public interfaces, and an execution path. Do **not**
-inspect every file — take the evidence needed to describe accurately:
-structure, package manifests/metadata, entry points, core modules/public
-APIs, user-facing code, config files, dependency manifests, build/install
-scripts, existing docs, tests and examples, CI/release config, license,
-contribution guides.
+Investigate proportionally: a small utility needs a brief pass; a framework needs several modules, public
+interfaces, and an execution path. Do **not** inspect every file - take the evidence needed to describe
+accurately; the proportionate sweep is the Evidence sweep checklist in
+`references/review-checklists.md`, which also carries how to apply the file safely (§11).
 
-Two distinctions are mandatory:
+Two distinctions are mandatory — **what is actually implemented** (separate implemented / partial / planned /
+experimental; never present planned as done; if status is uncertain and matters, investigate or qualify) and
+**the primary audience** (several may exist; establish the sensible primary one and organize secondary
+information around it — `references/structure-and-sections.md`).
 
-- **What is actually implemented** — separate implemented / partial /
-  planned / experimental. Never present planned as done; if status is
-  uncertain and matters, investigate or qualify.
-- **The primary audience** — end users, evaluating developers, integrators,
-  contributors, operators, researchers, buyers. Several may exist; establish
-  the sensible primary one and organize secondary information around it.
-  Different project types get different structures — no universal shape.
+## 2b. Voice and depth - ask once, then hold it
 
-## 2b. Voice and depth — ask once, then hold it
-
-Voice is the project's stable personality; tone is that voice adapted to one reader and purpose.
-Different README styles are **the same facts, re-ordered and re-registered** — never a license to
-change claims. Before drafting, when the repo and the user's request don't already fix the register,
-ask the one question — "which README do you want?" — offering styles with the recommendation first
-([details, levers, guardrails: `references/voice-and-tone.md`]):
-
-- **[Minimal setup]** — install and run in one screen.
-- **[Engineering overview]** — what it is, install, usage, limits (safe library default).
-- **[Deep developer experience]** — plus build-from-source, branch/channel navigation, contribution
-  and review path — for projects expecting contributors or juggling release channels.
-- **[Marketing showcase]** — the project presented as a product: problem, outcomes, visuals; every
-  aspirational line still evidence-bound.
-- **[Hybrid]** — e.g. showcase front + contributor second half; state the seam clearly.
-
-Skip the ask when an existing README's register, a docs-site split, or the user's own words already
-answer it. Whichever voice wins: the fact layer is identical across all of them, the evidence rules
-of this skill bind every voice, and the chosen register is held consistently through the file —
-a README that changes personality mid-document is two READMEs failing at each other.
+Voice is the project's stable personality; tone is that voice adapted to one reader and purpose. Different
+README styles are **the same facts, re-ordered and re-registered** - never a license to change claims.
+Before drafting, when the repo and the user's request don't already fix the register, ask the one question -
+"which README do you want?" - with the five styles, their levers, trade-offs and voice-specific guardrails:
+`references/voice-and-tone.md`. Skip the ask when an existing README's register, a docs-site split, or the
+user's own words already answer it.
 
 ## 3. Identity and motivation
 
@@ -106,19 +87,10 @@ credibility.
 
 ## 5. Structure chosen from the project
 
-Potential sections (a menu, never mandatory): title/intro, motivation,
-features, screenshots/demo, architecture overview, stack, prerequisites,
-installation, configuration, usage examples, API reference, dev workflow,
-testing, deployment, limitations, roadmap, contributing, license,
-acknowledgments.
-
-- **Prioritize reader needs**: library → installation + minimal working
-  example near the top; end-user app → purpose, capabilities, visuals,
-  access; CLI → commands, arguments, examples; research → problem, approach,
-  assumptions, setup, limitations over product sections.
-- **No section for the template's sake.** No content-free section → omit it
-  unless the user asked. Never create placeholder claims, empty feature
-  lists, invented roadmaps, or fictional badges to look complete.
+Potential sections are a menu, never mandatory, and the reader-need priorities differ by project type
+(library, end-user app, CLI, research). The menu, the per-audience ordering, the no-section-for-the
+template's-sake rule and what never to fabricate for completeness:
+`references/structure-and-sections.md`.
 
 ## 6. Feature accuracy
 
@@ -193,14 +165,11 @@ evidence → pick the reasonable default and proceed.
 
 ## 11. Apply the file safely
 
-Before editing: inspect git state; confirm the intended README path; preserve
-unrelated user modifications; decide full rewrite vs targeted edit on
-evidence. While editing: valid Markdown, consistent heading hierarchy,
-properly closed code fences, correct relative paths/links, no duplicate
-sections, examples consistent with implementation, useful content preserved.
-Don't overwrite a different README or create redundant README files without
-reason. **Draft mode:** if the user wants a draft rather than repo changes,
-deliver the document and touch no project files.
+Inspect git state, confirm the intended path, preserve unrelated user modifications, and decide full
+rewrite vs targeted edit on evidence; keep the Markdown integrity checks (heading hierarchy, closed fences,
+relative paths, no duplicate sections) honest to the implementation. The pass list - and **draft mode**, when
+the user wants the document and no repo changes - is in `references/review-checklists.md`
+(§Applying the file safely).
 
 ## 12. Review, then report
 

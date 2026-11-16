@@ -1,6 +1,6 @@
 # Intent resolution
 
-> Owns vague-wording and feeling translation plus the confirmation template; routing lives in `../SKILL.md`.
+> Owns vague-wording and feeling translation plus the confirmation template; routing lives in `../method.md`.
 
 Turn vague wording into precise animation terms and classification values. The user should leave knowing the name of what they asked for.
 
@@ -41,7 +41,7 @@ Phrases like "all together", "one after another", "the related ones react" name 
 
 ## Routing
 
-Name the job (entrance, exit, feedback, transition, ...) and take it to the hub's job table (`../SKILL.md`); routing is the hub's job, not this file's.
+Name the job (entrance, exit, feedback, transition, ...) and take it to the hub's job table (`../method.md`); routing is the hub's job, not this file's.
 
 ## Disambiguation pairs
 

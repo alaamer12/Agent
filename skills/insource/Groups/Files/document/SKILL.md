@@ -1,10 +1,11 @@
 ---
 name: document
-version: 1.0.1
+version: 1.1.0
+author: Amr
 specialized: none
-description: 'Markdown documents: five jobs, the default entry whenever a task produces, restructures, shortens or rewords a document - self-invoked, not only when /document is typed. WRITE a new document (normal/comprehensive/concise) matching the user''s purpose and evidence rules. REORGANIZE a messy doc set into one-concern-per-file with a README per directory as the map. SEPARATE the subject the user names into its own readable document. SUMMARIZE without losing meaning (normal/extreme): TL;DR, executive summary, digest, recap. REPHRASE sentence by sentence - improve grammar, flow and word choice only inside each sentence, preserving structure, boundaries, claims, certainty and the author''s voice; return the reworded text alone. Triggers: ''write a report about X'', ''refactor these docs'', ''separate X from Y'', ''summarize this'', ''rephrase this''. Each job loads only its own method; modes are named in the request. Restructuring pair: separate first, then reorganize. Not for code, slides, or spreadsheets.'
-when_to_use: Any task that produces, restructures, shortens or rewords a Markdown document — writing one, reorganizing a doc set, giving a named subject its own document, summarizing/condensing a source, or rephrasing sentences without touching structure — whether or not the user names this skill.
-argument-hint: "[what to write, the docs to reorganize, the seam to cut, the source to summarize, or the text to rephrase]"
+description: 'Markdown documents: five jobs, the default entry whenever a task produces, restructures, shortens or rewords a document - self-invoked. WRITE a new document (normal/comprehensive/concise) to the user''s purpose and evidence rules. REORGANIZE a messy doc set into one-concern-per-file with a README per directory as the map. SEPARATE the subject the user names into its own readable document. SUMMARIZE without losing meaning (normal/extreme): TL;DR, executive summary, digest, recap. REPHRASE sentence by sentence - improve grammar, flow and word choice inside each sentence; structure, claims and voice preserved; return the reworded text alone. Triggers: ''write a report about X'', ''refactor these docs'', ''summarize this'', ''rephrase this'', ''what went wrong''. Each job loads only its own method. Restructuring pair: separate first, then reorganize. POSTMORTEM, incident report, RCA, bug write-up: the nested `postmortem` child owns them; job A writes prose. Not for code, slides, or spreadsheets.'
+when_to_use: Any task that produces, restructures, shortens or rewords a Markdown document — writing one, reorganizing a doc set, giving a named subject its own document, summarizing/condensing a source, rephrasing sentences without touching structure, or writing a postmortem / incident report / RCA through its nested postmortem child — whether or not the user names this skill.
+argument-hint: "[what to write, the docs to reorganize, the seam to cut, the source to summarize, the incident to write up, or the text to rephrase]"
 ---
 
 # Document
@@ -21,6 +22,7 @@ shortens or rewords a document — the user rarely names the job.
 | "separate the state machine from the architecture doc", "give X its own document", "X shouldn't live inside Y's doc", "this file documents two things" | **C — separate the named seam** | `references/separate.md` + `references/restructuring-rules.md` |
 | "summarize this", "condense", "distill", "TL;DR", "executive summary", "digest", "recap", "shorten this" | **D — summarize** | `references/summarize.md` |
 | "rephrase this", "word these sentences better", "fix the awkward phrasing" — same length, same structure, better sentences | **E — rephrase** | `references/rephrase.md` |
+| "write a postmortem", "incident report", "RCA", "what went wrong", "bug write-up" | **A + genre child** | [`postmortem/SKILL.md`](postmortem/SKILL.md) (prose via `references/write.md`) |
 | "split this doc up", no subject named | One question: **which subject must stand alone?** Named → C. Only "it's too big / unfocused" → B. | |
 | Both restructuring complaints at once | **C first, then B** — reorganizing first moves content around a seam you then cut again | both |
 | Removing AI-flavored writing specifically | **E** with the Anti-AI Gate (`references/anti-ai-gate.md`) applied to strip tells, em-dashes, and filler while keeping sentence boundaries | `references/rephrase.md` + `references/anti-ai-gate.md` |
@@ -45,6 +47,7 @@ The five jobs share nothing operational. The table above names one job file per 
 - A summarize request never reads the writing, reorganizing, separation or rephrasing material, and a write request never reads the restructuring rules. Each job file is self-sufficient. A rephrase job reads nothing about compression or structure changes — its whole discipline is staying inside the sentence.
 - Modes belong to their job and are named in the request. **Write:** normal (default), comprehensive, concise. **Summarize:** normal (default) or extreme, plus reserved vs. custom output structure. A mode selects a reference *inside* that job's file — it never pulls in another job.
 - Only the two restructuring jobs share one file (`references/restructuring-rules.md`), and only they load it.
+- A **genre child** is not a sixth job: it is job A plus that genre's own structure, evidence rules and artifacts. A postmortem request loads `references/write.md` **and** `postmortem/SKILL.md`, and nothing else.
 
 ## The jobs, one line each
 
@@ -68,6 +71,13 @@ Reduces a longer source without losing the meaning the reader needs: read for th
 
 Improves the saying, never the said: sentence-by-sentence work on grammar, naturalness, word choice, flow and concision, with structure, sentence boundaries, claims, certainty and the author's voice preserved. Passes through the Anti-AI Gate (`references/anti-ai-gate.md`) whenever the audience is external or human-facing (stripping em-dashes, filler, buzzwords, and synthetic cadence), followed by a final skeleton pass that restores any drift back toward the source. Output is the rephrased text and nothing else.
 
+### Genre child — postmortem · `postmortem/SKILL.md`
+
+Blameless incident documents (postmortem, incident report, RCA, bug write-up) in **file** or **folder** mode:
+the 18-section template, V0–V5 evidence levels, the checksummed artifact package and `pm_check.py` live in the
+child. It owns structure and evidence; the prose is job A's, reached through it. No separate `/postmortem`
+command exists — `/document` is the entry.
+
 ## What this skill is not
 
 | Not this | Go instead |
@@ -75,7 +85,6 @@ Improves the saying, never the said: sentence-by-sentence work on grammar, natur
 | Code, scripts, implementation artifacts | the project's own conventions |
 | Slides, spreadsheets, PDF or Word output | the dedicated format skills |
 | A new project's README | `readme-md` |
-| Incident reports and postmortems | `postmortem` (with this skill's write job for the prose) |
 | Reorganizing code, modules, or source file layout | `senior-refactor` |
 | Deciding what a system *should* be | `detailsup`, `dtb` |
 | Prose review for AI-sounding writing | `humanizer` (job E rewords within the author's own voice; removing AI tells is a different goal) |
@@ -84,7 +93,7 @@ Improves the saying, never the said: sentence-by-sentence work on grammar, natur
 
 ```
 document/
-├── SKILL.md                              this file — job choice and the one-file loading rule
+├── SKILL.md                              this file — job choice, the genre child, and the one-file loading rule
 ├── references/
 │   ├── write.md                          job A procedure + mode table
 │   ├── guidelines.md                     write mode: normal
@@ -99,6 +108,11 @@ document/
 │   ├── rephrase.md                       job E procedure + preserve list + skeleton check
 │   ├── anti-ai-gate.md                   job E anti-AI gate: 20 rules against synthetic style, tells & filler
 │   └── 01-…07-*.md                       job D detail, loaded from summarize.md
+├── postmortem/                           genre child: incident reports / RCA → its own SKILL.md
+│   ├── SKILL.md                          18 sections, file vs folder mode, evidence discipline
+│   ├── assets/                           postmortem-template.md + the bundled index.html reader
+│   ├── references/                       00 evidence levels … 06 review and publish
+│   └── scripts/pm_check.py               folder sanitizer + document/folder validator
 ├── templates/                            B: plan + self-check; D: tldr, executive summary, digest, recap, extreme, conversation
 ├── examples/                             B: concern-mixing cases; D: normal-vs-extreme, reserved-vs-custom
 └── scripts/                              D: size_report.py + fallback

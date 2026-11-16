@@ -1,6 +1,7 @@
 ---
 name: exmaine
-version: 1.0.1
+version: 1.0.3
+author: Amr
 specialized: none
 description: >-
   Examine a project from the inside out, starting at AGENTS.md: follow every doc path it
@@ -14,6 +15,7 @@ description: >-
   project, to get oriented in an unfamiliar repo, 'read the docs and check the code', or before
   a large task needing whole-project understanding. Not a verdict run ('is this complete and
   verified?' = please-verify), not refactoring proposals, not runtime debugging.
+argument-hint: "[full | <area>]"
 ---
 
 # Exmaine

@@ -2,7 +2,7 @@
 
 > The single home of every rule shared by all 25 styles. Read this **top to bottom, once, for any build
 > job**, then read your one recipe `references/<style>.md`. Style identification and routing live in
-> [`../SKILL.md`](../SKILL.md); each recipe is the sole home of its own geometry numbers — this file never
+> [`../method.md`](../method.md); each recipe is the sole home of its own geometry numbers — this file never
 > repeats them.
 
 ## 1. Read the ENTIRE original SVG source
@@ -23,7 +23,7 @@ into `<defs>`, onto `<use>` elements, everywhere.
 
 ## 3. Extract with the bundled script, not by hand
 
-`<skill>` below means the directory holding the svg `SKILL.md` — in this repo, `skills/insource/animation/svg`.
+`<skill>` below means the directory holding the svg `method.md` — in this repo, `skills/insource/animation/svg`.
 It is not `~/.qoder/skills/...`, which does not exist here.
 
 ```bash

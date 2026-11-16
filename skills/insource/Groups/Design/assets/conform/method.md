@@ -1,11 +1,11 @@
-# resources - the project's resource files, managed once
+# conform - the project's resource files, managed once
 
-This skill owns **resource files and their references**: how they are named, where they live, how they
+This module owns **resource files and their references**: how they are named, where they live, how they
 are produced, converted, localized, optimized, and how the code points at them. It operates at the
 resource-file level - it is not a pipeline, storage layer, or delivery system.
 
 ```
-project files ──► resources skill ──► correct file, correct name, correct place, correct reference
+project files ──► conform module ──► correct file, correct name, correct place, correct reference
                  (no application-level processing, no database design, no infrastructure)
 ```
 
@@ -75,7 +75,7 @@ Detail and folder examples: `references/01-naming-and-organization.md`.
 | Animation, video | `WebM`/`MP4` by target support | format follows the medium |
 
 Conversion caveats: JPEG has no alpha (transparency flattens); SVG is **not** converted by these
-scripts - rasterizing/vectorizing needs a dedicated toolchain and this skill says so instead of
+scripts - rasterizing/vectorizing needs a dedicated toolchain and this module says so instead of
 guessing. Full guidance: `references/02-formats-and-conversion.md`.
 
 ## Platform assets
@@ -173,7 +173,7 @@ restructure code. Reference styles per stack and the rename protocol: `reference
 | Writing application features that display assets | the implementation skills |
 | Deciding a stack for media tooling | `techstack`, `thebest` |
 | Planning which images a page needs, or writing the prompts for them | `collection` (BOM + prompts), then `generate` |
-| Generating brand-new artwork from a description | `generate` - this skill normalizes what it produces |
+| Generating brand-new artwork from a description | `generate` - this module normalizes what it produces |
 
 ## Files
 

@@ -1,6 +1,7 @@
 ---
 name: stateful
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Derive every state a user-visible screen can enter, then implement the approved ones — pending, empty, stale, partial; provider down, degraded, throttled, maintenance; no connection at launch; extreme latency; expired session; refused entitlement; unknown values; device suspended, killed, storage-full; races; integrity and breach conditions. Platform-neutral: web, mobile, desktop, terminal, kiosk, embedded, any stack, and prototypes. Never a fixed checklist: states derive from the screen''s own dependencies through nine condition axes, each candidate passes four evidence gates and a severity triage, and unknown input gets a designed rendering rather than the happy path. Use for "handle all the states", "what states can this screen have", "make it state-complete", "audit for missing states", "this breaks when the network is slow or gone", "it hangs or shows nothing when the server is down", "/stateful <file|screen|app>". Not for polishing existing states, from-scratch screens, or headless state machines.'
 ---

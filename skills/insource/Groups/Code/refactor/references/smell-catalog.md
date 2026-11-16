@@ -11,6 +11,8 @@
 5. [Family 4: Dispensables](#family-4-dispensables)
 6. [Family 5: Couplers](#family-5-couplers)
 7. [Smell-to-Refactoring Quick Reference](#smell-to-refactoring-quick-reference)
+8. [Smell Signals and Typical Fixes](#smell-signals-and-typical-fixes)
+9. [Quick Diagnostic](#quick-diagnostic)
 
 ---
 
@@ -345,3 +347,34 @@ Smells where classes are too tightly bound to each other.
 | Inappropriate Intimacy | Move Method / Move Field | Extract Class |
 | Message Chains | Hide Delegate | Extract Method |
 | Middle Man | Remove Middle Man | Inline Method |
+
+---
+
+## Smell Signals and Typical Fixes
+
+Smells are surface indicators of deeper design problems. Name the smell, then apply its prescribed refactorings.
+
+Five families: Bloaters, Object-Orientation Abusers, Change Preventers, Dispensables, Couplers.
+
+Most common / most expensive: **Long Method**, **Duplicate Code**.
+
+| Smell signal | Typical fix |
+|--------------|-------------|
+| Method > ~10 lines or needs a comment | Extract Method |
+| One change touches many classes | Move Method / Field (Shotgun Surgery) |
+| One class has many reasons to change | Extract Class (Divergent Change) |
+| Same params travel together | Introduce Parameter Object |
+| Copy-pasted logic | Extract Method + Pull Up |
+
+## Quick Diagnostic
+
+| Question | If No | Action |
+|----------|-------|--------|
+| Do tests pass before you start? | No safety net | Write or fix tests first |
+| Can you name the smell? | Refactoring by instinct | Identify smell → prescribed refactoring |
+| Is each method under ~10–20 lines and one thing? | Long Method | Extract Method |
+| Does each class have one reason to change? | Divergent Change / Large Class | Extract Class |
+| Are there duplicated blocks? | Most expensive smell | Extract shared logic |
+| Do type-based conditionals use polymorphism? | Switch Statements remain | Replace Conditional with Polymorphism |
+| Are you committing after every green step? | Risk of lost work / mixed changes | Commit after each safe transformation |
+| Are names intention-revealing? | Comments or mental simulation required | Rename / Extract until the name is enough |

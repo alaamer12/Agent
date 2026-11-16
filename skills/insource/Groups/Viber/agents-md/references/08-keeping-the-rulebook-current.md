@@ -57,11 +57,16 @@ Pair it with a review marker a later agent can check:
 The test: **does this change what an agent must read, may do, or must not do?** If yes, it belongs here. If it
 changes how the system works, it belongs in a doc and this file keeps the pointer.
 
+Facts (section 16) is the one section that grows for the whole life of the file and starts nearly empty: a
+verification that contradicts a prior belief becomes a dated bullet in the same change. Letting the next agent
+re-learn "library X DOES support Vue" the expensive way is the defect this prevents.
+
 ## The habit, per session
 
 1. **Read the review date first.** If it is stale relative to what you know about the project, verify the two
    highest-risk lines before doing anything else: the active-scope fence (section 2) and the branch/version
-   policy (section 3). Those two are where a stale rulebook actively misleads.
+   policy (section 3). Those two are where a stale rulebook actively misleads. Refresh the date when you have
+   verified those lines, not merely when you touch the file.
 2. **Notice the moment a rule is being made.** It usually arrives as a sentence in a conversation: "from now on
    canary gets the new schema first", "all UI work goes through the units index", "don't touch `.env` anymore,
    use the generator". That sentence is a rule, and it has no home until this file gains it.

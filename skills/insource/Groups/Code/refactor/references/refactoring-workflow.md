@@ -13,6 +13,8 @@
 7. [Parallel Change (Expand-Migrate-Contract)](#parallel-change-expand-migrate-contract)
 8. [Large-Scale Refactoring Strategies](#large-scale-refactoring-strategies)
 9. [Refactoring Checklist](#refactoring-checklist)
+10. [Where to Start](#where-to-start)
+11. [Common Mistakes](#common-mistakes)
 
 ---
 
@@ -372,3 +374,26 @@ Use this checklist before, during, and after refactoring sessions:
 - [ ] No unnecessary comments remain (the code explains itself)
 - [ ] No new smells were introduced
 - [ ] Changes are committed with a clear message describing the refactoring
+
+---
+
+## Where to Start
+
+- Rule of Three for duplication
+- Preparatory refactoring before the feature
+- Characterization tests when legacy code has none
+- Branch by Abstraction / Parallel Change for production-scale moves
+
+---
+
+## Common Mistakes
+
+| Mistake | Why it fails | Fix |
+|---------|--------------|-----|
+| Refactoring without tests | No safety net | Characterization tests first |
+| Big-bang rewrite | Structure + behavior mixed | Smallest steps, green after each |
+| Two hats at once | Neither change verifiable | Refactor commit, then feature commit |
+| Extracting tiny methods with poor names | Indirection without clarity | Name must remove need to read the body |
+| Ignoring the smell catalog | Reinvents fixes | Name the smell → apply its recipe |
+| Polishing doomed code | Waste | Check lifespan first |
+| Optimizing while refactoring | Conflates clarity and speed | Clarity first, then profile |

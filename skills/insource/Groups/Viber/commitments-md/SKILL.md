@@ -1,6 +1,7 @@
 ---
 name: commitments-md
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Creates and maintains COMMITMENTS.md - the project''s declared goals, priorities and trade-offs - or a small Commitments section in AGENTS.md when tiny. Premise: you cannot get the gold in every case. Some goals are mutually exclusive, some reinforce each other, and every priority has a price, a horizon (MVP vs later) and, where possible, a measurable bar. The skill never invents priorities: it collects the stated goals, maps which ones compete, asks which wins when they collide and what is sacrificed, marks the pairs that do not conflict so nobody pays for a fake trade-off, and records the hard constraints that are never traded. Placement: a small set goes into AGENTS.md; a big set (several dimensions, conflict tables, phases) becomes COMMITMENTS.md with a pointer from AGENTS.md. Triggers: ''what are our priorities'', ''what should we sacrifice'', ''is DX more important than perf here'', ''define the trade-offs''. Not the idea itself (idea-md), not choosing the stack (techstack/thebest), not task planning (planner).'
 when_to_use: The user states competing goals, asks which priority wins, wants the project's trade-offs written down, or a project needs its commitments recorded/updated. Also /commitments-md.

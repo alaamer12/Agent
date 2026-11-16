@@ -1,6 +1,6 @@
 # Stack: React Native
 
-> Owner of Reanimated and gesture-handler implementation notes. Routing lives in ../../SKILL.md.
+> Owner of Reanimated and gesture-handler implementation notes. Routing lives in ../../method.md.
 
 Notes for React Native animation with Reanimated and the gesture handler. Verify API names and options against the installed versions. The one native difference: animation runs on the UI thread, not the JavaScript thread; the general rules (gate, timing, pairs, interruption) are unchanged and owned by the hub, gate.md and timing-and-tokens.md.
 

@@ -43,6 +43,8 @@ captures stderr, so warnings never reach context. Calling git yourself? `git dif
 - The index is **capped at 40 rows** (`--max-hunks`) and the file survey at 40 (`--max-files`): a full 330-row
   index cost 19 KB of context in testing to answer nothing. Narrow with `--match`/`--path` before raising caps.
 
+One hunk of an 885 KB diff then costs ~150 bytes of context instead of 221 k tokens.
+
 ## Reading a region out of a deleted or rewritten file
 
 A deleted 2 000-line file is the worst case for the naive approach: the diff carries all 2 000 removed lines, so
@@ -66,7 +68,7 @@ collapses into one hunk, or "what did this config say before it was removed".
 
 Budget: `--at` applies the same discipline as everything else — a **16 KB default**, `--budget N` to change it,
 `--force` to override. Asking for lines 1–5 000 of a 3 000-line file is a mistake, not an instruction, and it is
-refused rather than obeyed. `--path` must exist at that revision; if it does not, the error suggests
+refused rather than obeyed. When a fetch is refused, the tool suggests exactly this command. `--path` must exist at that revision; if it does not, the error suggests
 `git log --follow --name-only -- <path>` because the file was probably renamed, not deleted.
 
 **Binary content is refused, not dumped.** A deleted PNG asked for as `--lines 1:5` would otherwise return

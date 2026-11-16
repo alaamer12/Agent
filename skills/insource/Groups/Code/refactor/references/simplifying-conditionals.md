@@ -11,6 +11,7 @@
 5. [Introduce Special Case (Null Object)](#introduce-special-case-null-object)
 6. [Introduce Assertion](#introduce-assertion)
 7. [Decision Guide: Which Conditional Refactoring to Use](#decision-guide-which-conditional-refactoring-to-use)
+8. [Where to Start](#where-to-start)
 
 ---
 
@@ -384,3 +385,13 @@ def apply_discount(product, discount_rate):
 | Hidden assumption in code logic | Introduce Assertion |
 | Condition appears once, set of types is small | Keep the conditional, but Decompose it |
 | Condition varies at runtime | Use Strategy pattern |
+
+---
+
+## Where to Start
+
+- Decompose Conditional → named condition + named branches
+- Replace Nested Conditional with Guard Clauses (edge cases first, main path flat)
+- Consolidate Conditional Expression
+- Replace Conditional with Polymorphism (gold standard for type-based branches)
+- Introduce Special Case (Null Object) / Introduce Assertion

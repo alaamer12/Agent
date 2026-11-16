@@ -1,6 +1,6 @@
 # Performance and accessibility
 
-> Owner of property cost tiers, reduced-motion policy, main-thread rules, will-change, input devices and hover-on-touch, looping, the scroll-listener ban, and focus mechanics. Routing lives in ../SKILL.md.
+> Owner of property cost tiers, reduced-motion policy, main-thread rules, will-change, input devices and hover-on-touch, looping, the scroll-listener ban, and focus mechanics. Routing lives in ../method.md.
 
 Rules that apply to every build. The audit script checks the mechanical ones.
 

@@ -13,6 +13,7 @@
 7. [Introduce Foreign Method](#introduce-foreign-method)
 8. [Introduce Local Extension](#introduce-local-extension)
 9. [Decision Guide: Where Does This Behavior Belong?](#decision-guide-where-does-this-behavior-belong)
+10. [Where to Start](#where-to-start)
 
 ---
 
@@ -388,3 +389,11 @@ Use these questions to decide whether and where to move code:
 ### The Responsibility Placement Heuristic
 
 When unsure where to put a method, ask: **"If the data this method uses changes, which class should need to be updated?"** The method belongs in that class. This keeps data and behavior together, minimizing the ripple effect of change.
+
+---
+
+## Where to Start
+
+- Move Method / Field when a method uses more of another class’s data than its own (Feature Envy)
+- Extract Class when one class does two jobs; Inline Class when one does almost nothing
+- Hide Delegate (Law of Demeter) vs Remove Middle Man (pure forwarding)

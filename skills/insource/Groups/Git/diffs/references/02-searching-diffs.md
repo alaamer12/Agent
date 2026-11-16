@@ -19,7 +19,10 @@ git log -S'x' -p --follow -- path/one_file.ts            # one file across renam
 ```
 
 The classic failure: searching `-S` for a string that was *edited in place* — the count never changed, so nothing
-is found. If `-S` is empty, retry with `-G`, then with `git log -p | grep`.
+is found. If `-S` is empty, retry with `-G`, then with `git log -p | grep`. `-S` answers "when did this
+appear/disappear"; `-G` answers "when did a line mentioning it change"; `--grep` answers "what did humans *say*
+about it" — a channel the diff scanners never see. Choosing the wrong one is the most common reason a search
+"finds nothing".
 
 ## The topic dossier — "give me everything about one word, cheaply"
 

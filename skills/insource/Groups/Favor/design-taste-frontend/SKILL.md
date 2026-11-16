@@ -1,6 +1,7 @@
 ---
 name: design-taste-frontend
-version: 1.0.1
+version: 1.0.2
+author:
 specialized: none
 description: >-
   tasteskill 2.5.1, the anti-slop frontend skill. Builds professional company websites at the level

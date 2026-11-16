@@ -1,6 +1,6 @@
 # Classification
 
-> Owns the six descriptive dimensions and the classification line; routing lives in `../SKILL.md`.
+> Owns the six descriptive dimensions and the classification line; routing lives in `../method.md`.
 
 Animation is described along six independent dimensions. Mixing them up is the most common reason an animation feels arbitrary: "fade" is a technique, not a role. Decide the roles first.
 
@@ -41,7 +41,7 @@ Interactive animations need immediate response: press at 0ms, drag locked to the
 
 ## Scope
 
-The three scopes, their units and their commands: the hub's Commands table (`../SKILL.md`). A transition always answers: how does the interface move from the current state to the next, and back?
+The three scopes, their units and their commands: the hub's Commands table (`../method.md`). A transition always answers: how does the interface move from the current state to the next, and back?
 
 ## Synchronization
 
@@ -57,4 +57,4 @@ Technique answers "what movement": fade, slide, scale, move, rotate, reflect, mo
 
 ## The classification line
 
-Write the result as the Classification row of the hub's Output contract (`../SKILL.md`) and keep it visible through the run. Fill technique and timing only after the gate and the style decision; if a dimension is unknown, say so and resolve it before building.
+Write the result as the Classification row of the hub's Output contract (`../method.md`) and keep it visible through the run. Fill technique and timing only after the gate and the style decision; if a dimension is unknown, say so and resolve it before building.

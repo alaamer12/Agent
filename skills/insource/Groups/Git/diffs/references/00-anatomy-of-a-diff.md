@@ -83,6 +83,8 @@ Rules that prevent invented findings:
 | BOM appears as a change | editor added/removed BOM | treat as a file-format change, not logic |
 | A diff of a CRLF file is unreadable in a script | text-mode decoding rewrote CRLF | capture **bytes**, never decode (`scripts/diff_survey.py` does) |
 
+Compare `--numstat` with and without `-w` — equal numbers mean a whitespace-only edit.
+
 ## What the format cannot tell you
 
 - Whether the code compiles, and whether the change *works* — a diff is not the system.

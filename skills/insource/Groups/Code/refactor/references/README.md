@@ -9,6 +9,7 @@ Local map for the deep catalogs used by the `refactor` skill. Load only the file
 | [moving-features.md](moving-features.md) | Mechanics for Move Method/Field, Extract/Inline Class, Hide Delegate, Remove Middle Man |
 | [organizing-data.md](organizing-data.md) | Mechanics for Magic Number, Data Value→Object, Encapsulate Field/Collection, Type Code variants |
 | [simplifying-conditionals.md](simplifying-conditionals.md) | Mechanics for Decompose/Consolidate Conditional, Guard Clauses, Polymorphism, Special Case, Assertion |
+| [practical-patterns.md](practical-patterns.md) | Quick before/after sketches: Extract Method, Guard Clauses, Parameter Object/Domain Types, Strategy over Type Switch |
 | [refactoring-workflow.md](refactoring-workflow.md) | Green-to-green cycle, timing (preparatory / comprehension / litter-pickup), Rule of Three, Branch by Abstraction, Parallel Change, when not to refactor |
 
 You must update this file whenever a reference is added, removed, or renamed.

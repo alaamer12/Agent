@@ -9,6 +9,19 @@ Every row is checked by `scripts/qa.py` where it can be, and by eye where it
 cannot. Thresholds are starting points for a house style, not laws of nature:
 when you deliberately break one, say which and why in the delivery note.
 
+## Running the gate
+
+`qa.py` reads the timeline out of the composition files and the pixels out of the
+render: dead air between scenes, overlaps, whether the first scene opens at t=0,
+whether every clip lands at t=0 (the strongest AI tell), arrival dwell, the
+arrival budget against the spec, rendered duration / canvas / fps / audio presence,
+integrated loudness and true peak, and safe-zone compliance measured as ink in the
+outer 5% of the frame. It exits non-zero on a failure.
+
+Then read the contact sheet against the tells list: one easing family everywhere,
+everything centred, web-scale type, a transition on every cut, no rest before a
+cut, a first frame that is a still. Fix what measures; judge what doesn't.
+
 ## Cut and rhythm
 
 | Check | Threshold | How |

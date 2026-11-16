@@ -1,6 +1,6 @@
 # Interface sound
 
-> Owner of the optional audio-feedback gate and rules. Routing lives in ../SKILL.md.
+> Owner of the optional audio-feedback gate and rules. Routing lives in ../method.md.
 
 Optional audio feedback for interactions. Only when the user asks for sound, or when the product already uses it.
 

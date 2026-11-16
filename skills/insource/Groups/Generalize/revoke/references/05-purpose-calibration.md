@@ -3,6 +3,16 @@
 The same document sanitized for four destinations produces four different artifacts. Decide the destination
 first; almost every bad revocation is an unasked question about who reads this.
 
+## The levels at a glance
+
+| Destination | Aggressiveness | What must survive |
+|---|---|---|
+| Same team, different repo | low | identifiers that engineers will need to look up |
+| Company-wide | medium | role names, system names, the causal chain |
+| Public blog, conference talk, vendor forum | high | the mechanism, the numbers rounded to a useful scale |
+| A third-party tool, hosted model, or contractor | high, plus policy check | nothing that is someone else's data to hand over |
+| Regulated content: personal, health, financial, security | highest, and often not yours to decide | the lesson, without the record |
+
 ## The levels
 
 ### 1. Internal, same team, different repo

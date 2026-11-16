@@ -1,6 +1,6 @@
 # Review standards
 
-> Owns the ten craft standards, the remedy hierarchy, the findings/verdict format and the fix loop; routing lives in `../SKILL.md`.
+> Owns the ten craft standards, the remedy hierarchy, the findings/verdict format and the fix loop; routing lives in `../method.md`.
 
 How to review animation, whether it is a proposed option, existing code, or code just built. Default to flagging. Approval is earned, not assumed. A transition that merely works but feels sluggish, lands from the wrong origin, fires too often, or drops frames is a regression.
 
@@ -16,7 +16,7 @@ In Existing and Built modes run `python scripts/audit_motion.py <paths>` first. 
 
 ## What the script covers
 
-Mechanical coverage and usage: the hub's scripts table (`../SKILL.md`). The script lists `file:line`, the standard, and the remedy, never edits files, and does not judge origin, personality, hierarchy or feel; those are yours.
+Mechanical coverage and usage: the hub's scripts table (`../method.md`). The script lists `file:line`, the standard, and the remedy, never edits files, and does not judge origin, personality, hierarchy or feel; those are yours.
 
 ## The ten standards
 

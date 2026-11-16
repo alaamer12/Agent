@@ -13,6 +13,9 @@ Keep a question only if all three hold:
 3. **The alternative is a guess I would have to enforce.** If I can leave it `pending` without breaking the
    agent's other duties, asking may still not be worth it - but inventing never is.
 
+A question that survives must also **carry its trade-off**. A question that fails any of the three is cut, not
+softened.
+
 ## The universal "research the domain before asking" rule
 
 A static question list always misses the nuances of how an engineering domain works in practice. Therefore,

@@ -5,6 +5,19 @@ does. Every rule here comes from the framework's own conventions — `hyperframe
 declares the paths, `/hyperframes-studio` owns the timeline shape,
 `/hyperframes-core` owns the file contract, `/hyperframes-creative` owns `frame.md`.
 
+## What `scaffold.py` writes
+
+`scaffold.py` writes the structure this file describes: a root of
+timed hosts only, one sub-composition per scene **pre-cut into its arrival slots**
+(each a timed `.clip` with a labelled `fromTo` on the inner span, staggered across
+the window, on the tone's easing), a single caption track, a decoration layer,
+`assets/`, `frame.md`, and a `.gitignore` for generated output. Each scene file
+opens with its intent, content, beat count, blueprint, and motion promise, so the
+direction survives context compaction.
+
+It refuses to run without `hyperframes.json` and never overwrites `index.html`
+without `--force`.
+
 ## The tree
 
 ```

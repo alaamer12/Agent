@@ -1,11 +1,11 @@
 # Generated imagery — the BOM → generate → conform pipeline
 
-Status: implemented as three skills — `assets` (router), `collection` (BOM + prompts),
-`resources` (probe + conform) — backed by `sheet_probe.py`, `conform.py`,
-`contact_sheet.py` and the `sheet_geometry.py` module they share.
+Status: implemented as one Battery-Skill — `assets` (router) with internal modules
+`collection` (BOM + prompts), `generate` (masters) and `conform` (probe + conform) — backed
+by `sheet_probe.py`, `conform.py`, `contact_sheet.py` and the `sheet_geometry.py` module they share.
 Scope: a project's *generated* imagery, plus an existing sheet the user owns and needs cut
-(a catalog page, a sprite sheet). Stock photography (`fahlwy`), vector icons and font/brand
-work (`resources`) keep their own flows.
+(a catalog page, a sprite sheet). Stock photography (`fahlwy`) keeps its own flow;
+plain file work runs through the `conform` module directly, outside the BOM order.
 
 
 ## 1. Goals
@@ -27,10 +27,10 @@ The pipeline exists to close that gap with four properties:
 - **Failures are loud.** Fewer subjects than slots, a cell too small for its DPR, a
   subject spanning a cut line — each stops the run or is reported, never papered over.
 
-## 2. Three skills, one pipeline
+## 2. One battery, three modules
 
 ```
-collection          generate / existing file     resources
+collection          generate / existing file     conform
 BOM + prompts  ──►  masters                  ──► probe ──► conform ──► review
 bom/<page>.md       raw/*.png                      assets/<slots>      review/*.png
 ```
@@ -39,14 +39,14 @@ bom/<page>.md       raw/*.png                      assets/<slots>      review/*.
 |---|---|---|---|
 | 1. Plan | `collection` | `BOM.md`, `bom/<page>.md`, `bom/style.md` | every page listed or marked `no-images`; every generated row has slot id, master, delivery, prompt |
 | 2. Master | `generate`, or the file the user already owns | raw masters, `usage.jsonl` | the master exists at the BOM's size and plan |
-| 3. Conform | `resources` (`sheet_probe.py`, `conform.py`) | slot-named DPR files, `conform-report.json` | `ok: true`, expected file count, no empty cells |
+| 3. Conform | `conform` (`sheet_probe.py`, `conform.py`) | slot-named DPR files, `conform-report.json` | `ok: true`, expected file count, no empty cells |
 
-`assets` is the router: it states this order, the shared key and the handoffs, and
-owns none of the laws inside a step. Pages marked `no-images` skip steps 2 and 3.
+`assets/SKILL.md` is the router: it states this order, the shared key and the handoffs,
+and owns none of the laws inside a module. Pages marked `no-images` skip steps 2 and 3.
 
-**Why step 1 is not its own skill.** A BOM split into a separate skill creates a lossy
+**Why the plan module keeps both halves.** A BOM split into a separate skill creates a lossy
 handoff — the BOM owner knows the slot's size and grid, the prompt owner knows the style
-canon, and neither can see the other's constraints. One skill owns both, in fixed order.
+canon, and neither can see the other's constraints. One module owns both, in fixed order.
 
 ## 3. Scope: page versus set
 
@@ -70,7 +70,7 @@ canons is how a collection drifts.
 | `bom/shared.md` | `collection` | assets referenced by more than one page, specified once |
 | `raw/` | `generate` | untouched masters; never edited by hand |
 | delivery folder | project | slot-named files written by conform; the code reads these |
-| `conform-report.json` | `resources` | what was written, skipped, warned, failed |
+| `conform-report.json` | `conform` | what was written, skipped, warned, failed |
 
 A page that needs no imagery is listed as `no-images`, not omitted. An empty row is
 evidence; an absent row is an oversight.
@@ -86,14 +86,14 @@ The schema has one owner; `conform.py` reads it and changes nothing about it.
 | `hero-home` | hero illustration | generate single | `1600x900 single` | `800x450 16:9 avif q60 @1x,2x` | pending |
 | `logo` | brand mark | reuse `brand/logo.svg` | — | `240x64 svg` | shipped |
 | `photo-teaser` | card photo | `fahlwy` | — | `640x360 16:9 jpeg q80 @2x` | pending |
-| `icon-search` | nav icon | `resources` icon set | — | `24x24 svg` | shipped |
+| `icon-search` | nav icon | `conform` icon set | — | `24x24 svg` | shipped |
 
 - **Slot** — one id, a comma list, or a range. Ids are arbitrary (`welcome` is as valid as
   `avatar-01`); the id becomes the filename stem. A range is shorthand for a numbered family and
   expands row-major; a sheet of unrelated subjects lists its ids in sheet order, which is the cut
   order.
 - **Source** — `generate single`, `generate sheet CxR`, `sheet <path>` (an existing sheet to
-  cut, no prompt), `reuse <path>`, `fahlwy`, `resources`. Only rows with a master get a
+  cut, no prompt), `reuse <path>`, `fahlwy`, `conform`. Only rows with a master get a
   spec; only generated rows get a prompt. Everything else is still listed, so a later agent
   cannot mistake an icon slot for a render.
 - **Master** — `WxH single`, `WxH sheet CxR [gutter N]`, or `WxH sheet rows 8,8,8,10` when the
@@ -338,7 +338,7 @@ that produces different files on every run.
 
 ## 15. Verification
 
-- `resources/scripts/test_conform.py` (70 tests), `test_sheet_probe.py` (11) and
+- `../Groups/Design/assets/conform/scripts/test_conform.py` (70 tests), `test_sheet_probe.py` (11) and
   `test_contact_sheet.py` (8) cover grammar parsing, rows plans, band cutting, flag overrides,
   arbitrary slot ids, remainder distribution, content-box cuts, keying (including interior
   whites), empty cells, upscale refusal, naming, edge measurement and the report shape.

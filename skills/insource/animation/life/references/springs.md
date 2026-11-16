@@ -1,6 +1,6 @@
 # Springs
 
-> Owner of the spring concept (perceptual versus physical), the preset table and tuning guidance. Routing lives in ../SKILL.md.
+> Owner of the spring concept (perceptual versus physical), the preset table and tuning guidance. Routing lives in ../method.md.
 
 Physics-based motion. Use when motion should feel alive, respond to gestures, or be interrupted gracefully. Keep CSS easing for simple, predetermined motion.
 

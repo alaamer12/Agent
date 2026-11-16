@@ -1,7 +1,7 @@
 # Recipe: mosaic — `/animation svg mosaic`
 
 Per-style recipe — shared build rules in [foundations.md](foundations.md),
-signature and trigger words in [../SKILL.md](../SKILL.md). Nothing in the
+signature and trigger words in [../method.md](../method.md). Nothing in the
 other styles is tiled.
 
 ## Template

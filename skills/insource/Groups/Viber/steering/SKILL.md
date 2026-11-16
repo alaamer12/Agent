@@ -1,6 +1,7 @@
 ---
 name: steering
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: >-
   Interactive documentation architecture and steering taxonomy skill. Transforms project requirements

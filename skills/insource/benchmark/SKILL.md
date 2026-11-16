@@ -1,6 +1,7 @@
 ---
 name: benchmark
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Benchmark candidates on task-derived dimensions, in normal or ultra mode. Think first: which decision is being made (faster, more accurate, less memory) and how each will be measured - never a fixed list. Report the plan; ask the expected run time when unspecified: 5 min means ~10 iterations, an hour allows 100+. NORMAL measures the environment as-is (GC on, no warmup, no pinning) - what the deployment feels like; ULTRA fights noise for fairness (warmup, interleaved A/B/A/B, pinned core, locked frequency where permitted). Same language for every candidate, defaulting to the project''s; say so when harness overhead rivals the work measured. Correctness gate first: a fast wrong answer is not a faster candidate. Measure in an isolated env (venv, temp prefix) - never global packages - and restore any system control touched. Reports median/p95 with spread and a noise floor, never a bare mean; ''inconclusive'' when the gap sits inside the noise. scripts/bench_stats.py: stats, bootstrap verdict, budget math.'
 when_to_use: The user asks which of two or more approaches/libraries/implementations is faster, leaner, or more accurate; asks for a benchmark, a perf comparison, timings, or "is X better than Y"; or a measured number is needed to settle a design choice.
@@ -163,7 +164,7 @@ anecdotes with decimals.
 | where the time goes inside one implementation | a profiler (flame graphs, tracing) |
 | choosing a technology from requirements, no measurement yet | `techstack` |
 | comparing candidate *products* with researched non-performance evidence | `decide` / `judge` |
-| proving a change fixed a defect | tests + the `diffs`/`postmortem` evidence trail |
+| proving a change fixed a defect | tests + the `diffs` and postmortem evidence trail (written via `document`) |
 | a permanent performance gate in CI | the project's CI, seeded with this harness once the shape is settled |
 
 ## References and scripts

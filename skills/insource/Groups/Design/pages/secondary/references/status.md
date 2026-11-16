@@ -12,8 +12,8 @@ products this page is a component of the service, not marketing.
    updates and a promised cadence while active ("updates at least every N minutes" - the real
    number).
 3. **History** - the last 90 days visible, older archived; each closed incident gets a summary,
-   and a postmortem link for anything customer-visible (the `postmortem` skill's documents are the
-   detail, this page holds the index).
+   and a postmortem link for anything customer-visible (postmortems written through `document`'s
+   postmortem child are the detail, this page holds the index).
 4. **Subscriptions** - email/RSS/atom per component; the promise that subscribers see updates first.
 5. **Maintenance** - scheduled with start + expected window + affected components, posted N days
    ahead (ASK how many).

@@ -1,6 +1,7 @@
 ---
 name: units-md
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Generates, refreshes, and audits a project''s UNITS.md - the index of reusable units an agent reads before implementing, so it extends what exists instead of building a parallel one. Each entry is one row of facts: name, responsibility, where it lives (a path that must exist), what it depends on, what it replaces, its status, and the date the claim was checked; the header carries the four duties agents-md section 4 promises - read it in full first, reuse or extend with a stated reason, add a new reusable unit in the same task, and name who updates it. Built from the code, never from what docs claim or from plausible guesses. Use for "make a UNITS.md", "build the units index / component catalog", "we keep reinventing things that exist", "refresh UNITS.md", "does this already exist", when AGENTS.md section 4 points at a units file that does not exist, or before a fan-out so workers reuse instead of duplicating. Not a task list, not a backlog, not architecture documentation, and it never edits AGENTS.md itself.'
 when_to_use: The user asks to create, regenerate, refresh, or audit a units/component/registry index (often `docs/UNITS.md`); AGENTS.md's units duty points at a file that does not exist; work is being delegated in parallel and duplication is the risk; or the user complains that the project keeps rebuilding what it already has.

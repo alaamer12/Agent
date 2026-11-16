@@ -1,8 +1,8 @@
 # Run procedure
 
-> Sole home of the 8-phase run procedure and the stop points; routing lives in `../SKILL.md`.
+> Sole home of the 8-phase run procedure and the stop points; routing lives in `../method.md`.
 
-The detailed steps of every run. The hub (`../SKILL.md`) lists the phases; this file says exactly what to do in each, what to decide, and where to stop for the user.
+The detailed steps of every run. The hub (`../method.md`) lists the phases; this file says exactly what to do in each, what to decide, and where to stop for the user.
 
 ## Phase 0: Understand
 

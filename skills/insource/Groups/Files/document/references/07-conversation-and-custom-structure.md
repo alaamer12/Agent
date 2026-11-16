@@ -34,7 +34,7 @@ Here the request itself *is* a structure spec. Build the output to that spec dir
 
 **Test to tell them apart:** does the instruction describe a *content operation* (compress X, keep Y, focus on Z) or a *layout* (put A before B, group by C, add headers per D)? Content operations → reserved structure. Layout instructions → custom structure. A request can contain both — e.g. "keep my questions verbatim, and put them all at the top" — in which case follow the layout instruction (questions grouped at top) while applying the content rule (verbatim) within it.
 
-If genuinely ambiguous which is meant, default to reserved structure (the lower-risk assumption) and note the assumption briefly rather than asking — per the skill's general instruction, proceeding beats stalling on an assumption that's easy to state.
+If genuinely ambiguous which is meant, default to reserved structure (the lower-risk assumption) and note the assumption briefly rather than asking — per this job's general instruction, proceeding beats stalling on an assumption that's easy to state.
 
 ## Role-aware selection and compression (reserved structure, conversational sources)
 

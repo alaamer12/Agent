@@ -1,6 +1,6 @@
 # Stack: Next.js route transitions
 
-> Owner of App Router transition structure: template enter, FrozenRouter exit, view transitions integration, route-transition debugging. Routing lives in ../../SKILL.md.
+> Owner of App Router transition structure: template enter, FrozenRouter exit, view transitions integration, route-transition debugging. Routing lives in ../../method.md.
 
 Page and route transitions in the App Router. The router replaces content on navigation, so exit animations need extra structure. Verify details against the installed Next.js and animation library versions; the exit approach relies on internals that can change.
 

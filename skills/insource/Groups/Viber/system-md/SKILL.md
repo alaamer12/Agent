@@ -1,6 +1,7 @@
 ---
 name: system-md
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Produces and maintains SYSTEM-COMPONENTS.md for a confirmed application: an architectural inventory of the functional building blocks - subsystems, services, engines, integrations, processors, data systems, infrastructure - each with purpose, responsibilities, in/out-of-scope ownership, inputs and outputs, error handling, configuration, related components, plus an ASCII relationship map and a "removing it would" summary table. Answers "what exists and what does each piece own" without reading all the code. Application-scoped: in a monorepo, one document per confirmed app, never one blended document across apps. Reusable-unit catalogs (UI builder blocks, and code units generally) belong to UNITS.md and are owned by units-md, not here; a button or card never appears in SYSTEM-COMPONENTS.md, a queue or rate limiter never in UNITS.md. Documents only - no code changes, no enforcement.'
 when_to_use: The user asks to document or map the system's components, "what subsystems does this app have", write or refresh SYSTEM-COMPONENTS.md, produce a component hierarchy and relationship map for onboarding, or needs one document per application in a monorepo.

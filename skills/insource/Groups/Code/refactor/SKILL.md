@@ -1,6 +1,7 @@
 ---
 name: refactor
-version: 1.0.1
+version: 1.1.0
+author: Amr
 specialized: none
 description: Surgical code refactoring that improves structure and maintainability without changing behavior. Use when the user says refactor this, clean up this code, fix code smells, extract method, replace conditional, move method, introduce parameter object, eliminate duplication, break down god class/function, improve type safety, or prepare code for a new feature by restructuring. Also trigger for technical debt, smell-driven cleanup, safe transformation sequences, and characterization tests before change. Covers smell catalog, composing methods, moving features, organizing data, simplifying conditionals, and the green-to-green workflow. Not for big-bang rewrites or feature work mixed with structure changes.
 license: MIT
@@ -36,7 +37,7 @@ Bad structure is the normal cost of shipping under pressure, not a character fla
 
 ## Scoring (Goal 10/10)
 
-Score structural quality by how many of the eight [Quick Diagnostic](#quick-diagnostic) rows pass:
+Score structural quality by how many of the eight [Quick Diagnostic](references/smell-catalog.md#quick-diagnostic) rows pass:
 
 `score = round(passed / 8 × 10)`, adjust down for a single severe smell.
 
@@ -56,7 +57,7 @@ Always state the current score, name the smells driving it down, and list the sp
 
 If tests go red, revert. Do not debug a broken refactoring.
 
-See [references/refactoring-workflow.md](references/refactoring-workflow.md) for the full cycle, timing (preparatory / comprehension / litter-pickup), Branch by Abstraction, Parallel Change, and when *not* to refactor.
+See [references/refactoring-workflow.md](references/refactoring-workflow.md) for the full cycle, timing (preparatory / comprehension / litter-pickup), Branch by Abstraction, Parallel Change, and when *not* to refactor, plus the [Common Mistakes](references/refactoring-workflow.md#common-mistakes) table.
 
 ## Six Focus Areas
 
@@ -64,28 +65,11 @@ See [references/refactoring-workflow.md](references/refactoring-workflow.md) for
 
 Smells are surface indicators of deeper design problems. Name the smell, then apply its prescribed refactorings.
 
-Five families: Bloaters, Object-Orientation Abusers, Change Preventers, Dispensables, Couplers.
-
-Most common / most expensive: **Long Method**, **Duplicate Code**.
-
-| Smell signal | Typical fix |
-|--------------|-------------|
-| Method > ~10 lines or needs a comment | Extract Method |
-| One change touches many classes | Move Method / Field (Shotgun Surgery) |
-| One class has many reasons to change | Extract Class (Divergent Change) |
-| Same params travel together | Introduce Parameter Object |
-| Copy-pasted logic | Extract Method + Pull Up |
-
-Full catalog with detection heuristics → [references/smell-catalog.md](references/smell-catalog.md)
+Full catalog with detection heuristics, plus the smell signal → typical fix table and the eight-row Quick Diagnostic → [references/smell-catalog.md](references/smell-catalog.md)
 
 ### 2. Composing Methods
 
 Most refactoring starts here. Break long methods into short, intention-revealing pieces that read like prose.
-
-- **Extract Method** is the single most important refactoring — master it first
-- Urge to write a comment? Extract the block and use the comment as the name
-- Inline Method / Variable when the indirection adds nothing
-- Replace Temp with Query; Split Temporary Variable; Replace Method with Method Object when locals are too tangled
 
 Mechanics and before/after → [references/composing-methods.md](references/composing-methods.md)
 
@@ -93,20 +77,11 @@ Mechanics and before/after → [references/composing-methods.md](references/comp
 
 The core OO question: where should this responsibility live?
 
-- Move Method / Field when a method uses more of another class’s data than its own (Feature Envy)
-- Extract Class when one class does two jobs; Inline Class when one does almost nothing
-- Hide Delegate (Law of Demeter) vs Remove Middle Man (pure forwarding)
-
 Mechanics → [references/moving-features.md](references/moving-features.md)
 
 ### 4. Organizing Data
 
 Replace primitives, magic numbers, and exposed fields with small domain objects that enforce invariants.
-
-- Replace Magic Number with Symbolic Constant
-- Replace Data Value with Object (`Email`, `Money`, `DateRange`)
-- Encapsulate Field / Collection
-- Replace Type Code with Subclasses or Strategy
 
 Mechanics → [references/organizing-data.md](references/organizing-data.md)
 
@@ -114,105 +89,15 @@ Mechanics → [references/organizing-data.md](references/organizing-data.md)
 
 Deep nests and long switches are the hardest code to read and the most bug-prone.
 
-- Decompose Conditional → named condition + named branches
-- Replace Nested Conditional with Guard Clauses (edge cases first, main path flat)
-- Consolidate Conditional Expression
-- Replace Conditional with Polymorphism (gold standard for type-based branches)
-- Introduce Special Case (Null Object) / Introduce Assertion
-
 Mechanics → [references/simplifying-conditionals.md](references/simplifying-conditionals.md)
 
 ### 6. Safe Workflow & Scale
-
-- Rule of Three for duplication
-- Preparatory refactoring before the feature
-- Characterization tests when legacy code has none
-- Branch by Abstraction / Parallel Change for production-scale moves
 
 Details → [references/refactoring-workflow.md](references/refactoring-workflow.md)
 
 ## Practical Patterns (Quick Reference)
 
-### Extract Method (the workhorse)
-
-```diff
-- async function processOrder(orderId) {
--   // 50 lines fetch + validate + price + inventory + ship + notify
-- }
-+ async function processOrder(orderId) {
-+   const order = await fetchOrder(orderId);
-+   validateOrder(order);
-+   const pricing = calculatePricing(order);
-+   await updateInventory(order);
-+   const shipment = await createShipment(order);
-+   await sendNotifications(order, pricing, shipment);
-+   return { order, pricing, shipment };
-+ }
-```
-
-### Guard Clauses over Nested Conditionals
-
-```diff
-- function process(order) {
--   if (order) {
--     if (order.user) {
--       if (order.user.isActive) {
--         if (order.total > 0) return processOrder(order);
--         else return { error: 'Invalid total' };
--       } ...
-- }
-+ function process(order) {
-+   if (!order) return { error: 'No order' };
-+   if (!order.user) return { error: 'No user' };
-+   if (!order.user.isActive) return { error: 'User inactive' };
-+   if (order.total <= 0) return { error: 'Invalid total' };
-+   return processOrder(order);
-+ }
-```
-
-### Parameter Object / Domain Types
-
-```diff
-- function createUser(email, password, name, age, address, city, country, phone) { ... }
-+ interface UserData {
-+   email: string;
-+   password: string;
-+   name: string;
-+   age?: number;
-+   address?: Address;
-+   phone?: string;
-+ }
-+ function createUser(data: UserData) { ... }
-```
-
-### Strategy over Type Switch
-
-When a conditional branches on type or mode and will grow, replace it with Strategy or polymorphism rather than adding another `else if`.
-
-## Common Mistakes
-
-| Mistake | Why it fails | Fix |
-|---------|--------------|-----|
-| Refactoring without tests | No safety net | Characterization tests first |
-| Big-bang rewrite | Structure + behavior mixed | Smallest steps, green after each |
-| Two hats at once | Neither change verifiable | Refactor commit, then feature commit |
-| Extracting tiny methods with poor names | Indirection without clarity | Name must remove need to read the body |
-| Ignoring the smell catalog | Reinvents fixes | Name the smell → apply its recipe |
-| Polishing doomed code | Waste | Check lifespan first |
-| Optimizing while refactoring | Conflates clarity and speed | Clarity first, then profile |
-
-## Quick Diagnostic
-
-| Question | If No | Action |
-|----------|-------|--------|
-| Do tests pass before you start? | No safety net | Write or fix tests first |
-| Can you name the smell? | Refactoring by instinct | Identify smell → prescribed refactoring |
-| Is each method under ~10–20 lines and one thing? | Long Method | Extract Method |
-| Does each class have one reason to change? | Divergent Change / Large Class | Extract Class |
-| Are there duplicated blocks? | Most expensive smell | Extract shared logic |
-| Do type-based conditionals use polymorphism? | Switch Statements remain | Replace Conditional with Polymorphism |
-| Are you committing after every green step? | Risk of lost work / mixed changes | Commit after each safe transformation |
-| Are names intention-revealing? | Comments or mental simulation required | Rename / Extract until the name is enough |
+Four worked before/after sketches — Extract Method (the workhorse), guard clauses over nested conditionals, parameter object / domain types, strategy over type switch → [references/practical-patterns.md](references/practical-patterns.md)
 
 ## Checklist Before Finishing
 

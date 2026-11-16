@@ -1,6 +1,7 @@
 ---
 name: flush
-version: 1.0.1
+version: 1.1.0
+author: Amr
 specialized: none
 description: 'Agent continuity capture, manual — persist working state before session end, environment change, loss, milestone, handoff, or when the conversation grew too large: CONTEXT.md (how we got here — decisions, reversals, what worked/failed, open questions), PLAN.md (the ACTUAL plan, not the original), SNAPSHOT.md (facts verified against the project, not memory), STATUS.md (assessment) — one job per note; compression, never transcript or continuation. Each flush carries an agent-chosen kebab-case session name with a sequence number in every note header and appends one entry to the append-only SESSIONS.md journal, so later sessions see each session''s record; past entries are never rewritten and git owns old note content — no hand-rolled archives. Uncertainty stays Unknown, partial work is never written as done, stale notes are replaced not accumulated, cross-note consistency checked before completion. The companion context skill reads these back. Triggers: flush, save/persist state, hand off the project.'
 ---
@@ -29,6 +30,13 @@ these files is the `context` skill (its "Flush notes" step reads exactly
 these filenames) — write so a reader who never saw this conversation can
 reconstruct the working state from the notes alone.
 
+## What each note owns
+
+One job per note, with its include list, its exclusions and its governing
+rule — CONTEXT (reconstruct, never transcribe), PLAN (the actual current
+plan), SNAPSHOT (facts, not interpretation), STATUS (the assessment):
+[`references/note-responsibilities.md`](references/note-responsibilities.md).
+
 ## Invocation — manual, by design
 
 Flush is **not an automatic interruption handler**. Agent or user invokes it
@@ -54,65 +62,6 @@ worst source here. Before writing anything:
 6. Write the four notes and append the journal entry.
 
 Never blindly reuse old notes that no longer represent reality.
-
-## The four notes — responsibilities and boundaries
-
-### 1. CONTEXT.md — working context
-
-The deepest note: how we arrived here and what the next agent must
-understand. Include: user requirements and goals · important decisions and
-their reasons · decisions changed or reversed · relevant assumptions ·
-constraints · important discoveries · technical/domain knowledge learned
-during the task · problems encountered · solutions attempted, worked, and
-failed · trade-offs · relevant dependencies · terminology established
-during work · earlier-conversation context that affects current work ·
-unresolved questions that materially affect continuation.
-
-Exclude (this is compression, not archiving): casual conversation,
-greetings, repetitive discussion, tool-call noise, internal execution
-details with no future value, temporary reasoning that doesn't affect the
-resulting understanding, repeated versions of the same fact, information
-represented more accurately elsewhere.
-
-Rule: **never copy the conversation verbatim — reconstruct the meaningful
-working context.**
-
-### 2. PLAN.md — the current operating plan
-
-Any form appropriate to the work — task list, phased implementation plan,
-workflow, research process, debugging strategy, migration plan, design or
-validation process, or a combination. **Do not force every project into a
-generic TODO list.** Include: main objective · current phase · planned
-phases · tasks/subtasks · dependencies · completed steps · the current step
-· next steps · blocked steps · validation steps · important changes made to
-the original plan **with their reasons** · conditions required before
-continuing.
-
-Rule: it must be the **actual current plan** — the latest valid direction
-wins over the plan the conversation started with.
-
-### 3. SNAPSHOT.md — objective point-in-time state
-
-Answers *what objectively exists right now* — not how we got here (that is
-CONTEXT.md) and not evaluation (that is STATUS.md). Include (as
-applicable): existing/created/modified/deleted/missing files · implemented
-and partially-implemented features · configurations · current architecture
-· data/state · dependencies · tests **and current test results** · current
-errors · build state · environment-relevant facts · other verifiable state.
-
-Rule: **prefer factual statements over interpretation** —
-"`src/search.ts` exists; the filter implementation is incomplete; search
-tests currently pass" — never "the project is almost finished" (that
-belongs in STATUS.md). Verify these claims against the project before writing
-them.
-
-### 4. STATUS.md — high-level assessment
-
-Answers *where the project stands*: overall status · completed · in
-progress · remaining · not started · blocked · known issues · important
-risks · current priorities · immediate next actions · milestones · any
-major deviation from the intended outcome. Structure (see templates) may be
-adapted when another format represents the project more accurately.
 
 ## Preservation rules
 
@@ -173,24 +122,11 @@ copy-directory scheme. If the project has no VCS, say so once in the
 journal and keep only the freshest notes; do not silently fork the files
 into numbered duplicates.
 
-## Consistency check before finishing
+## Checks before finishing
 
-Compare the four notes against each other:
-
-- context does not contradict the current plan
-- plan reflects the current project state
-- snapshot reflects the actual state at flush time (re-verified)
-- status is consistent with the snapshot
-- nothing is completed-and-incomplete at once; blocked tasks are described
-  the same way everywhere; the current task is the same task in all notes
-- recent important decisions appear wherever they matter
-- no note depends on information that only existed in this agent's memory
-- all four notes and the new journal entry carry the same session name and
-  number
-
-On conflict: resolve with the most recent, most reliable information — for
-objective state, directly verifiable project facts beat remembered
-conversation.
+The cross-note consistency pass and the final validation checklist are the
+gate on completion — run both:
+[`references/consistency-checks.md`](references/consistency-checks.md).
 
 ## Handoff goal
 
@@ -207,19 +143,10 @@ project is, what already happened, why decisions were made, the current
 plan, what exists, and what remains. (The `context` skill is exactly this
 reader — flush exists so context never has to guess.)
 
-## Final validation
+## Reference index
 
-- [ ] `CONTEXT.md` holds the meaningful working context
-- [ ] `PLAN.md` is the current, actual plan
-- [ ] `SNAPSHOT.md` matches the project as verified at flush time
-- [ ] `STATUS.md` is consistent with the snapshot
-- [ ] the four notes do not materially contradict each other
-- [ ] stale information removed or corrected
-- [ ] important decisions preserved with their reasons
-- [ ] incomplete work clearly marked; unknowns not presented as facts
-- [ ] conversational and execution noise removed
-- [ ] a new agent could continue from these notes alone
-- [ ] the session is named specifically (`kebab-case`, 2–4 words, what the
-  work actually was) and every note header carries it
-- [ ] `SESSIONS.md` was read at start and this flush's entry appended —
-  past entries untouched
+| File | Load when |
+|---|---|
+| `references/note-responsibilities.md` | writing any note: its include list, exclusions, governing rule |
+| `references/consistency-checks.md` | finishing: cross-note consistency + the final validation list |
+| `assets/note-templates.md` | the copyable skeleton of each note and of the `SESSIONS.md` journal |

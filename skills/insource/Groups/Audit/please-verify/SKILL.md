@@ -1,6 +1,7 @@
 ---
 name: please-verify
-version: 1.0.1
+version: 1.0.2
+author: Amr
 specialized: none
 description: 'Broad verification of a project or delivered body of work - not just the last step - answering one question: is the work actually complete and sufficiently verified? Starts from the user''s ask (conversation, IDEA.md, plan, AGENTS.md), never from the agent''s own summary, and sweeps requirements, completeness, bugs, rule violations, consistency, missing work, proof of work, integration and project-level correctness. The evidence ladder is the rule: files existing is not proof, ''it should work'' is not proof - a build log, a test run with output, a launched app with observed behavior are proof; unproven is UNVERIFIED, never PASS. Catches the classic failure: files delivered and called ''done'' without ever building or running them. Read-only: runs builds, tests and the app for evidence, then reports COMPLETE & VERIFIED / INCOMPLETE / UNVERIFIED / BROKEN with an evidence table, blockers and ordered next actions - it does not fix. Triggers: ''please verify'', ''is this actually done'', ''did we finish'', ''prove it works''.'
 when_to_use: The user asks whether work is really complete, wants a broad project-level verification or a proof-of-work check, or a delivery claims to be finished and the claim needs testing against the original expectations. Also /please-verify.

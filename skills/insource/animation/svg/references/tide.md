@@ -1,7 +1,7 @@
 # Recipe: tide — `/animation svg tide`
 
 Per-style recipe — shared build rules in [foundations.md](foundations.md),
-signature and trigger words in [../SKILL.md](../SKILL.md).
+signature and trigger words in [../method.md](../method.md).
 
 The skill's first use of an **animated `d` attribute**. `chrome-liquid` also
 fills bottom-to-top, but its meniscus is a straight edge on a sliding rect; the

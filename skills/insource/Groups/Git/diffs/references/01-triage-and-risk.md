@@ -20,7 +20,7 @@ When the diff is regenerated output, the information is the **generator input ch
    removed `try`, a removed test, a lowered timeout — additions announce themselves; deletions do not.
 2. **Dependency manifests** (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `Gemfile`, `composer.json`)
    — a version bump can explain half the diff, and a **manifest without its lockfile** (or the reverse) is a
-   finding.
+   finding. Read the manifest, skim the lock; a version bump explains a hundred other hunks.
 3. **Migrations, schema, config, CI** — `*.sql`, `migrations/`, `.github/workflows/`, `Dockerfile`, env files,
    feature-flag defaults. These change the environment the code runs in, and are often irreversible.
 4. **Core logic** — the files whose hunks contain conditions, error paths, defaults, signatures.

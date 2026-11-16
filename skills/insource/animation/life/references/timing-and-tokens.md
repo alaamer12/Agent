@@ -1,6 +1,6 @@
 # Timing and tokens
 
-> The single owner of every duration, easing, stagger, scale and blur range and the tier caps; routing lives in `../SKILL.md`.
+> The single owner of every duration, easing, stagger, scale and blur range and the tier caps; routing lives in `../method.md`.
 
 One canonical set of values, scoped by tier, so the sources of motion advice stop contradicting each other. The machine-readable copy is `assets/tokens.json`. A project's own tokens always win: detect them in recon and extend them.
 

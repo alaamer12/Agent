@@ -1,7 +1,7 @@
 # Recipe: crt — `/animation svg crt`
 
 Per-style recipe — shared build rules in [foundations.md](foundations.md),
-signature and trigger words in [../SKILL.md](../SKILL.md).
+signature and trigger words in [../method.md](../method.md).
 
 Distinct from `iris`, which grows a circle radially from the centre. This
 opens a **1-D band** off a horizontal axis, and clips with CSS `clip-path`

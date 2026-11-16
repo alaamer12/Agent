@@ -1,9 +1,11 @@
 ---
 name: techstack
-version: 1.0.1
+version: 1.0.3
+author: Amr
 specialized: none
 description: 'Recommend a technology/framework/library/tech stack (mobile, web, backend, desktop, infra) in any language or platform via rigorous, current, requirements-driven evaluation, never memorized popularity. Trigger on "recommend a tech stack", "React Native vs Flutter", choose/add/replace-tech requests. Discover by topic search, never memory; classify by scope; weigh consolidated vs specialists; count only features the project will use. Pin every capability claim to the candidate''s latest stable version (from registry/releases, not memory) and ground it in real-world proof - before calling a capability awkward, find a real app that does it. Surface parity is not implementation parity - probe how daily-used capabilities are delivered. Compare via a yes/no capability matrix; split a product''s distinct modes into separate candidate rows. Weigh the dimensions that matter; state trade-offs honestly. Two modes: normal (primary tech plus close dependencies) and ultra (every real need), on "ultra"/"full coverage".'
 
+argument-hint: "[normal|ultra] <what to choose or evaluate>"
 ---
 
 # Tech Stack Recommendation

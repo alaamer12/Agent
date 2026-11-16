@@ -4,6 +4,14 @@ Requested only as `/revoke partial`. Never entered because a redaction looked li
 normal rule of this skill is that partial masks **leak** (a shape-revealing `a**@acme.com` is a Step 4
 finding, not a technique), and the whole point of this mode is that sometimes the leak is the feature.
 
+## What the mode is, in short
+
+**`/revoke partial` - the mask that only the owner can finish.** For recovery/confirmation screens where
+showing `A****` or `****4821` lets the owner recognize their own value while strangers get a fragment worth
+nothing. It is deliberately the inverse of the Step-4 shape rule, valid only under the owner-viewer
+assumption: head-vs-tail is a threat-model choice per field, masked parts keep their entropy, credential-class
+values get no fragment at all, and the result must never be copied into a shared artifact.
+
 ## When the leak is the feature
 
 A recovery or confirmation screen has one viewer who matters: the owner. "Amr Muhamed" is their own name;

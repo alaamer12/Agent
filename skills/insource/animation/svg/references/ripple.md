@@ -1,7 +1,7 @@
 # Recipe: ripple — `/animation svg ripple`
 
 Per-style recipe — shared build rules in [foundations.md](foundations.md),
-signature and trigger words in [../SKILL.md](../SKILL.md). The only style
+signature and trigger words in [../method.md](../method.md). The only style
 here that touches the shape's vertices instead of painting over it.
 
 ## Template

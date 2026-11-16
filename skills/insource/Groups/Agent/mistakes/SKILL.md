@@ -1,8 +1,10 @@
 ---
 name: mistakes
-version: 1.0.1
+version: 1.1.0
+author: Amr
 specialized: none
 description: 'A personal, growing log of mistakes already made or observed, with where each one shows up and how to fix it. Use when the user says mistakes, check my mistakes, audit for mistakes, avoid this, remember this mistake, log a mistake, add to my mistakes, lessons learned, I told you before, we already fixed this, or before data modeling, API design, migrations, auth, state management, UI, tests, or configuration. Invoked as /mistakes it audits the project against the active log, reports confirmed findings with file and line evidence, fixes the safe ones (docs, comments, README, tests) and proposes the risky ones (schema, migrations, API contracts, auth, secrets) for approval instead of editing them. It also loads only the rows that match the current task, applies their fixes before the work, runs their checks after it, and appends a new row only when the user asks. Not a style guide, not a generic best-practice list, and never a silent override of the project own documented decisions.'
+argument-hint: "[<id|keyword|path> | add <description>]"
 ---
 
 # mistakes — failure patterns to avoid
@@ -47,34 +49,8 @@ With no argument, the default is a full audit of the current repository. Filters
 | `SKILL.md` | How to load, apply, verify and record mistakes |
 | `data.csv` | The log itself: one row per mistake |
 
-**Why CSV, not JSON.** Each lesson is a flat record with the same fields. CSV is easy to append,
-diff, review in a pull request, and filter with a search tool or a spreadsheet. JSON would nest
-prose and make the log harder to scan; use it only if a row ever needs structured sub-records.
-
----
-
-## The data file
-
-```
-id,category,mistake,where,signal,why,fix,check,scope,tags,source,confidence,status,added
-```
-
-| Column | Meaning |
-|---|---|
-| `id` | Stable kebab-case identifier; never renamed after it is referenced |
-| `category` | `data-modeling`, `api`, `state`, `security`, `testing`, `process`, `migration`, `ui`, `config` |
-| `mistake` | One-line name of the failure |
-| `where` | Surfaces where it shows up: `db`, `api`, `ui`, `form`, `state`, `tests`, `ci`, `docs` |
-| `signal` | How to recognise it by eye or by a quick search |
-| `why` | The concrete consequence, not a principle |
-| `fix` | The correct pattern, specific enough to apply |
-| `check` | A verification that can fail: grep, schema rule, query count, test |
-| `scope` | Stack or domain; `*` for universal |
-| `tags` | Search terms and synonyms |
-| `source` | Where the lesson came from (`project`, `review`, `incident`, `seed:review`) |
-| `confidence` | `confirmed` (seen/reproduced) or `suspected` (plausible, verify first) |
-| `status` | `active` or `retired` |
-| `added` | Date the row was added, `YYYY-MM-DD` |
+`data.csv` is never skimmed or hand-read: its columns, the reason the log is CSV, and the
+intent-to-filter mapping live in [`references/data-schema.md`](references/data-schema.md).
 
 ---
 
@@ -86,14 +62,8 @@ Never paste the whole file into context. Filter by the task's surfaces, stack, c
 keywords, using whatever search tool is available (`rg`, `grep`, `Select-String`, a spreadsheet,
 or the agent's own search tool):
 
-```text
-Filter by intent:
-- data modeling or schema work   -> category is data-modeling or migration
-- money, units, measurements     -> tags contain money, currency, unit, measure or price
-- a specific stack               -> scope contains react and status is active
-- the flagship example           -> id is mixed-type-field
-- a phrase the user remembers    -> search mistake, signal and tags for their words
-```
+The five standard intents (schema work, money/units, a named stack, the flagship id, a phrase
+the user remembers) are listed in [`references/data-schema.md`](references/data-schema.md).
 
 Match on `scope`, `where`, `category` and `tags`. Prefer exact matches; use fuzzy matches only
 when they clearly apply.
@@ -121,82 +91,15 @@ Triggers: "remember this", "log this mistake", "add it to mistakes", "add to my 
 "update your mistakes", `/mistakes add`.
 
 Propose one row, show it in the schema, and append it after the user confirms. When the user
-explicitly says "add it", appending is the confirmation.
-
-```text
-Proposed row:
-id: nullable-boolean-consent
-category: data-modeling
-mistake: A boolean used where consent has three states
-where: db; api; form
-signal: has_consent is false for both "declined" and "never asked"
-why: Cannot distinguish refusal from absence; compliance reports are wrong
-fix: Nullable boolean with documented semantics, or an explicit tri-state enum plus timestamp
-check: A "not asked" fixture behaves differently from a "no" fixture
-scope: *
-tags: consent;boolean;tristate;compliance
-source: user
-confidence: confirmed
-status: active
-added: 2026-11-09
-```
+explicitly says "add it", appending is the confirmation. The proposed-row shape, the admission
+gate, the weak-vs-strong calibration and the do-not-add list:
+[`references/adding-a-row.md`](references/adding-a-row.md).
 
 ### 5. Audit the project (`/mistakes`)
 
-A bare `/mistakes` means: read the active log, search the project for real instances of each
-pattern, report what is confirmed, and fix only what is safe.
-
-1. **Scope.** The whole repository by default. Narrow by `id`, keyword or path when given.
-2. **Select rows.** Only `status=active`; skip `retired`. Skip rows whose `scope` names a stack
-   or domain this project does not use (`*` always applies). A `suspected` row must be confirmed
-   by reading code before it is reported.
-3. **Probe.** Turn each row's `signal`, `tags` and `where` into a short set of searches. Search
-   only surfaces that exist: schema and migrations, API handlers, components, state, tests,
-   config, docs. Do not search the same pattern twice.
-4. **Confirm.** A search hit is a lead, not a finding. Read the surrounding code and cite
-   `file:line` with the exact snippet. Drop anything you cannot confirm.
-5. **Classify.** Assign each finding a fix tier (below).
-6. **Report.** One findings table with a tier column, plus a clean list and an unverified list.
-7. **Fix.** Apply tier A, show the diff. Propose tier B. List tier C without editing.
-8. **Verify.** Run the row's `check` where possible; state pass, fail, or cannot-run.
-
-#### Fix safety
-
-| Tier | Examples | Action |
-|---|---|---|
-| **A — safe** | Docs, comments, README, changelog, docstrings, example config | Fix immediately, then show the diff |
-| **B — local code** | One-file rename, splitting a composite value inside one module, adding a missing validation, adding a regression test | Show the proposed diff first; apply after approval |
-| **C — report only** | Schema or migration, data backfill, public API contract, auth or permission logic, secrets, dependency upgrade, cross-cutting refactor | Never edit; report with a plan |
-
-Hard rules:
-
-- Never run a database migration, backfill or destructive query.
-- Never rotate, print or move a secret; report its location only.
-- Never change a public API contract or an auth rule without explicit approval.
-- Never fix a `suspected` row.
-- Stop and ask when a "safe" fix would touch more than one concern.
-
-#### Audit report format
-
-```text
-mistakes audit — <repo or path> — <date>
-
-Applied rows (6): mixed-type-field, float-money, timezone-naive, ...
-
-Findings (3)
-| # | row | location | evidence | tier | action |
-|---|-----|----------|----------|------|--------|
-| 1 | mixed-type-field | src/db/schema.sql:42 | `price TEXT` stores "$12" | C | report only |
-| 2 | timezone-naive   | docs/api.md:18      | example uses local time | A | fixed |
-| 3 | n-plus-one       | src/api/orders.ts:88 | query inside a loop | B | proposed |
-
-Clean (3): secrets-in-client, duplicated-state, client-validation-only — checks passed.
-Unverified (1): <id> — could not run <check> because <reason>.
-```
-
-Report only what you actually found. "No findings" is a valid, useful result; never pad it.
-When the project documents a deliberate exception, list the finding once under "Known exceptions"
-with the citing decision and move on.
+Read the active log, search the project for real instances of each pattern, report what is
+confirmed, and fix only what is safe — the eight-step procedure, the A/B/C fix-safety tiers,
+the hard rules and the report format: [`references/audit.md`](references/audit.md).
 
 ---
 
@@ -222,72 +125,6 @@ because it may reveal a real exception.
 
 ---
 
-## Adding a row
-
-A row is admissible only if all of these are true:
-
-- **It actually happened.** A real codebase, review, incident or reproduction. Not "someone
-  might".
-- **It is one lesson.** Do not bundle three fixes into one row.
-- **The signal is observable.** A reader can find it with a search, a schema look, or a test.
-- **The fix is applicable.** Not "be careful"; a concrete pattern.
-- **The check can fail.** If it always passes, it is not a check.
-- **The id is stable and unique.** Kebab-case, descriptive, never reused.
-
-Merge duplicates instead of adding near-copies. If a row is wrong, set `status=retired` and say
-why in the conversation; do not delete history.
-
-### Weak vs strong
-
-| Weak | Strong |
-|---|---|
-| "Use best practices for money" | "Store `price_amount` as integer minor units + `price_currency` as ISO 4217; format only in the UI" |
-| "Be careful with timezones" | "Store UTC instants; keep the IANA timezone separately; test a DST boundary" |
-| "Tests are flaky" | "A retry hides a race; reproduce with parallelism and fix the shared state" |
-| "Validate input" | "Validate at the server boundary with the same schema the client uses" |
-| "Don't duplicate state" | "One owner; derive the rest; a test mutates the source and observes every consumer" |
-
-### Do not add
-
-- Style preferences ("use tabs").
-- Framework fashion ("always use X").
-- Anything the project has explicitly decided otherwise.
-- A mistake that only exists in theory.
-- A row without a `check`.
-
----
-
-## Worked example — the flagship row
-
-The pattern behind `mixed-type-field`: **if a value encodes more than one primitive, split it.**
-
-Money is the common case:
-
-```text
-Bad:  price = "$12.50"        price = "12 USD"       price = 12
-Good: price_amount = 1250     price_currency = USD
-```
-
-The same test applies to anything with a value and a unit or a second dimension:
-
-| Composite value | Split into |
-|---|---|
-| Money | `amount` (integer minor units or decimal) + `currency` (ISO 4217) |
-| Duration | `value` + `unit` (`ms`, `s`, `min`, `h`) |
-| Distance / weight | `value` + `unit`, canonical at storage |
-| Temperature | `value` + `unit` (`C`, `F`, `K`) |
-| Range | `min` + `max` (and inclusivity if it matters) |
-| Phone | `e164` + optional `extension` |
-| Address | `line1`, `line2`, `locality`, `region`, `postcode`, `country` |
-| Person name | `display_name` + optional `given_name` / `family_name` |
-| Geo point | `latitude` + `longitude` (and precision if needed) |
-| Percentage | `ratio` (0–1) or `basis_points`, never an ambiguous `5` |
-
-Formatting belongs at the presentation layer. Parsing belongs at the boundary. Storage stays
-atomic.
-
----
-
 ## Maintenance
 
 - Keep the log small. Prune rows that no longer teach anything.
@@ -309,3 +146,14 @@ atomic.
 | "I told you before" | Search `id`, `mistake`, `tags`, and the conversation for the lesson |
 | "we already fixed this" | Find the row and its `check`; confirm the check still passes |
 | Nothing, but the task touches data/API/auth/state/tests | Silently match and apply the relevant rows, stating them in one line |
+
+---
+
+## Reference index
+
+| File | Load when |
+|---|---|
+| `data-schema.md` | reading or writing `data.csv`: columns, format rationale, filter-by-intent |
+| `audit.md` | any audit — the procedure, fix-safety tiers, hard rules, report format |
+| `adding-a-row.md` | logging a mistake: admissibility gate, weak vs strong, do-not-add, row shape |
+| `mixed-type-field.md` | composite values: the flagship pattern and the full split table |

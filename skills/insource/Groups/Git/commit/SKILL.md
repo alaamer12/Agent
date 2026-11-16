@@ -1,6 +1,7 @@
 ---
 name: commit
-version: 1.0.1
+version: 1.1.0
+author: Amr
 specialized: git
 description: "Professional git commits, in two modes. GUIDE (default, writes nothing): detect the repo's incumbent convention from its history, split work into atomic units, stage with git add -p, write an imperative subject that survives git log --oneline, a what/why body, readable trailers - plus scenario calls: when to commit, gray zones, a fix interrupting a feature, wip vocabulary, squash or not, repairing history behind a backup ref. INIT (/commit init): co-author this repository's written commit discipline - read what the history and existing tooling do, ask the eight questions the repo cannot answer (shape, types, budget, named branches, ticket keys, body policy, agent authorship (trailer + branch segment), enforcement), draft one document, merge never clobber existing prose, install nothing: no hook, no git config, no CI file - enforcement is the maintainers' choice. Rails: no --no-verify, no committing unread files, no claiming unrun tests, no rewriting pushed history."
 when_to_use: The user asks to commit, to write or review a commit message, to split work into professional commits, or to tidy local history. Init mode when they ask to set up commit conventions here, write down the project's commit rules, or document a commit policy. Also /commit, /commit init.
@@ -29,7 +30,7 @@ types — and any stack can fill those roles.
 | **Init** | `/commit init`, "set up commit conventions here", "write down our commit rules" | one document, after the user approves the text | making every future commit in this repository describable by a policy the team agreed on |
 
 Guide never writes anything. Init writes **one discipline document and installs nothing** — no hook, no git
-config, no CI file. It is a conversation: read what the repository already does, ask the user the seven
+config, no CI file. It is a conversation: read what the repository already does, ask the user the eight
 questions the repository cannot answer, then write the agreed rules down. Whether the team later wires a check
 up to enforce them is their decision in their stack, and a separate change.
 
@@ -56,108 +57,22 @@ up to enforce them is their decision in their stack, and a separate change.
 10. **Record clean intent, clean up later.** When a constraint forces a messy moment, label it truthfully
     (`wip:`, `wip-fix:`, `debug:`) so the cleanup pass can find it.
 
-## The safety gate before any history rewrite
+## The workflow
 
-Rule 9 protects other people; this protects you from your own cleanup. Before `rebase -i`, `--amend` beyond
-the last local commit, `reset` past `--soft`, `filter-*`, `gc --prune`, or any force-push:
+Each step in full — inspection and convention-detection commands, the "what the repo shows" table, the splitting
+and staging lists, the message shape, the check-and-report sequence:
+[`19-guide-step-by-step.md`](references/19-guide-step-by-step.md).
 
-```bash
-git branch backup/pre-rebase-<name>             # 1. a named ref at the current tip
-git rev-parse --short backup/pre-rebase-<name>  # 2. print it, so it is in the transcript
-# … rewrite …
-git log --oneline origin/main..HEAD             # 3. the shape you wanted?
-git diff backup/pre-rebase-<name> HEAD          # 4. MUST be empty — content unchanged, history tidied
-git push --force-with-lease                     # 5. never plain --force on a shared branch
-git branch -D backup/pre-rebase-<name>          # 6. delete only after everything verifies
-```
+1. **Know what changed before you describe it** — inspect cheaply, summarize, never dump the tree.
+2. **Adopt the repository's convention, do not import one** ([`04`](references/04-conventions-and-when-to-drop-them.md)).
+3. **Split into atomic, change-based commits** ([`03`](references/03-atomicity-and-staging.md)).
+4. **Stage deliberately** — named paths or `git add -p`; read `git diff --cached` before describing it.
+5. **Write it** — subject ([`01`](references/01-subject-line.md)), body ([`02`](references/02-body-what-why-not-how.md)), trailers ([`05`](references/05-trailers-and-footers.md)).
+6. **Check, commit, report** — `python scripts/commit_lint.py --file MSG`, `git commit -F MSG`; let any project
+   hook run and fix the message ([`07`](references/07-history-hygiene-and-hooks.md)).
 
-A branch, not the reflog: reflog entries expire (`gc.reflogExpire`, ~90 days) and `git gc` prunes unreachable
-objects. If step 4 is **not** empty you changed code, not history — that needs its own commit and review.
-Full decision tree: [`14`](references/14-repairing-history.md).
-
-## Step 1 — Know what changed before you describe it
-
-Prefer the context you already have; if this session produced the work, don't re-read a 3,000-line diff to
-rediscover it. Otherwise inspect cheaply and summarize, never dump:
-
-```bash
-git status --short          git diff --stat          git diff --cached --stat
-git diff -- <path>          # read only the files that decide the message
-```
-
-If you cannot say what the change accomplishes, you are not ready to write its message. A message invented
-from filenames is where "update code" comes from.
-
-## Step 2 — Adopt the repository's convention, do not import one
-
-```bash
-git log --oneline -20                              # the style actually in force
-git log -3 --format='%n--- %h ---%n%B'             # the shape of a real body
-ls .githooks .husky .pre-commit-config.yaml .commitlintrc* commitlint.config.* 2>/dev/null
-grep -rilE "commit message|conventional commit" CONTRIBUTING* README* docs/ .github/ 2>/dev/null | head
-```
-
-| What the repo shows | Do this |
-|---|---|
-| a message linter, hook manager, or release tool configured (any ecosystem) | obey it exactly; run its check before committing |
-| history is Conventional (`feat(scope): …`) | use it, matching its type vocabulary and casing |
-| history is sentence style (`Fix rounding in invoice total`) | use that; do not convert the project |
-| ticket prefixes (`APP-1234 …`) | include the key as the project does — trailer, not subject |
-| fresh repo, no history, no config | Conventional Commits as the default, and say you chose it |
-
-A convention the surrounding commits don't use is noise in `git log`; a tool-enforced convention you ignored
-is a failed CI job.
-
-## Step 3 — Split into atomic, change-based commits
-
-- Mixed concerns (`fix` + `refactor` + `formatting` + `dependency bump`) become separate commits
-  ([`03`](references/03-atomicity-and-staging.md)).
-- A change and the tests that prove it belong together; a test for work you haven't written does not.
-- Formatting-only and lint-only edits ride alone, so a behavior change stays reviewable.
-- Order them so each intermediate commit is sensible — the reader and `git bisect` walk them in sequence.
-- Split when a reviewer would ask "why are these two things in the same commit?"
-
-## Step 4 — Stage deliberately
-
-```bash
-git add <paths>            git add -p            # named paths; hunk-by-hunk for a mixed file
-git restore --staged <p>   git diff --cached     # fix staging; READ the source of the message
-```
-
-- Never a blind `git add .`/`-A` with more than one concern present — it sweeps in `.env`, scratch files,
-  build output, and someone else's in-progress edits.
-- Scan the staged diff for secrets, keys, tokens, debug printers, commented-out blocks, large binaries.
-- In a shared worktree, re-check `git status` immediately before committing; another agent's work stays theirs.
-
-## Step 5 — Write it
-
-```text
-<type(scope)!: subject, imperative, <= 50 where possible>     <- or the repo's shape
-<blank>
-<body: what and why, wrapped at 72; the constraint that made this the right choice>
-<blank>
-<trailers: Closes #123, Co-authored-by:, Reviewed-by:, BREAKING CHANGE: …>
-```
-
-1. **Imperative mood** — it composes with git's own `Merge…`/`Revert…` output.
-2. **What changes for the reader**, not which files you touched.
-3. **Short enough to survive `--oneline`** — 50 is the budget, 72 the ceiling; the rest belongs in the body.
-4. **No trailing period**, no filler (`WIP`, `update`, `fix bug`).
-5. **Body when the why isn't obvious** — motivation, the alternative rejected, the risk accepted.
-6. **Never fabricate** — no "all tests pass" you didn't run, no "fixed" for a cause you didn't find.
-
-## Step 6 — Check, commit, report
-
-```bash
-python scripts/commit_lint.py --file MSG      # format + clarity; exit 1 on findings
-python scripts/commit_lint.py --staged        # secrets / junk in what is staged
-git commit -F MSG                             # multi-line safe
-git show --stat --no-patch HEAD               # the intended files, and only those
-```
-
-If the project lints messages in a hook, let it run and **fix the message** — never `--no-verify`. Do not
-push, amend a published commit, or rebase shared history as part of "committing" ([`07`](references/07-history-hygiene-and-hooks.md)).
-Then report the short hashes, one line each, and anything deliberately left uncommitted.
+Rule 9 protects other people; its gate protects you from your own cleanup — the backup ref, the empty-diff
+proof, and the full decision tree are in [`14`](references/14-repairing-history.md).
 
 ## Guardrails
 
@@ -186,6 +101,7 @@ Then report the short hashes, one line each, and anything deliberately left unco
 | WIP commits, checkpoints, dead-end fixes, squash or not, an 800-line diff | [`13`](references/13-wip-checkpoints-and-squash.md) |
 | Something committed is broken or wrong | [`14`](references/14-repairing-history.md) |
 | Version bumps, tags, `--follow-tags`, release commits | [`15`](references/15-releases-tags-bumps.md) |
+| Need the six Guide steps end to end | [`19`](references/19-guide-step-by-step.md) |
 | Need the answer fast | [`16`](references/16-decision-trees.md) |
 | Need the exact command and its trap | [`17`](references/17-command-reference.md) |
 | Write this repository's commit discipline down | **Mode 2**, then [`18`](references/18-init-the-discipline.md) |
@@ -202,57 +118,15 @@ nothing — no hook, no `git config`, no CI file, nothing to uninstall.
 | Step | What you do | Output |
 |---|---|---|
 | 1. Read the room | history shape, types and scopes actually used, real subject lengths, branch names, anything that already checks messages, which doc could hold a policy | one short facts block — never ask what the repository can answer |
-| 2. Ask the seven | the decisions below, each with its failure mode attached | the project's rules, chosen by its maintainers |
+| 2. Ask the eight | the questions in [`18`](references/18-init-the-discipline.md), each with its failure mode attached and its detected default proposed | the project's rules, chosen by its maintainers |
 | 3. Draft | the seven-section skeleton, in the project's own vocabulary | text shown in the conversation **before** any file is touched |
 | 4. Merge | read any existing commit prose, hook or linter; keep what still holds | a diff the user approves, not a rewrite |
 | 5. Write | one document: a `CONTRIBUTING.md` section, or `docs/commit-conventions.md` | the path, plus what links to it |
 | 6. Close it | write the maintenance duty in (`Last reviewed: <date>`, decisions recorded in the same change) and name an owner | a policy that outlives its author |
 
-Questionnaire, section skeleton, merge rules, and the enforcement table:
-[`18-init-the-discipline.md`](references/18-init-the-discipline.md).
-
-## The eight questions
-
-1. **Message shape** — keep the dialect the history uses, or change it? Changing it is a project decision made
-   *before* init, not a default init applies.
-2. **Types** — which vocabulary, and is an unknown type a refusal or a shrug? "This repo has no types" is a
-   valid rule to write down.
-3. **Subject budget** — 50 or 72, matched to what the team actually writes, not to the guide's preference.
-4. **Named branches** — which ones must not carry `wip:`/`temp:`/`debug:`? State how you detected them; a wrong
-   list blocks nothing and still looks like it works.
-5. **Ticket keys** — subject prefix, footer, or not tracked here.
-6. **Body policy** — required always, or when the *why* is not obvious — and what counts as non-obvious here.
-7. **Authorship** — does an agent's involvement get a `Co-authored-by:` trailer (with what exact name and
-   address), or is the human the sole author and the tool invisible in the history? Detect first
-   (`git log -20 --format='%(trailers:key=Co-authored-by)'`, plus `AGENTS.md` - its Version Control section is the
-   decided home for authorship - and any git alias or template that appends trailers); ask only what the
-   repository cannot answer. The same decision has a twin in branch naming
-   (an agent segment or none) — see [`branch`](../branch/SKILL.md); record both together so history and ref names
-   do not contradict each other. Neither side may be decided silently: adding attribution nobody asked for and
-   erasing provenance are the same mistake in opposite directions.
-8. **Enforcement appetite** — document only, or a check too? Say plainly that a local check is a courtesy and a
-   CI check over the commit range is the layer that survives `--no-verify`.
-
-Two prompts pay for themselves: *"what would make you break this rule?"* — that answer becomes the documented
-escape hatch — and *"who owns this document?"*, because an unowned policy file is a suggestion.
-
-## Init rules
-
-- **One document, no installation.** If the user wants a hook, a linter or a CI job, that is a separate change
-  they approve line by line, built on whatever the repository already has — never layered on top of it.
-- **Merge, never clobber.** An existing commit section or hook means someone already decided part of this: read
-  it, quote it, keep what still holds, propose the rest as a diff. Do not delete a rule you merely disagree with.
-- **One source of truth.** The same rule written in three files becomes two lies at the next change. `AGENTS.md`
-  gets a pointer plus the agent-facing duties (staging hygiene, no `--no-verify`, backup before rewrite); the
-  policy itself stays in one place.
-- **Every rule carries its reason and its way out.** A rule without a reason gets re-litigated in every review;
-  enforcement without a stated escape hatch gets bypassed wholesale.
-- **Write the rules in the project's vocabulary.** If they say "trunk" rather than `main`, or "story key" rather
-  than issue, use their words — a policy in borrowed words reads as imported and gets ignored.
-- **Init never rewrites history and never converts the project.** It records the convention the maintainers
-  chose; existing commits stay exactly as they are.
-- **Verify anything that claims to enforce.** If a check was wired up because the user asked, run the probes and
-  report what it printed. A check nobody has seen refuse something may not be running at all.
+Questionnaire with failure modes and detected defaults, section skeleton, merge-never-clobber rules, the
+enforcement roles, the maintenance duty, and what init refuses to do:
+[`18-init-the-discipline.md`](references/18-init-the-discipline.md) — read it before writing anything.
 
 ## References
 
@@ -277,6 +151,7 @@ escape hatch — and *"who owns this document?"*, because an unowned policy file
 | [`16-decision-trees.md`](references/16-decision-trees.md) | Every decision as a fast path: when to commit, which type, which scope, one commit or N, squash or not, broken-and-pushed, the safety gate | Mid-task, no time to read |
 | [`17-command-reference.md`](references/17-command-reference.md) | The command set with the trap annotated per command, including the backup sequence and recovery commands | Typing a git command you're unsure about |
 | [`18-init-the-discipline.md`](references/18-init-the-discipline.md) | The detection commands, the eight questions with their failure modes, the discipline document's section skeleton, merge-never-clobber rules, enforcement as roles (not products), the maintenance duty, what init refuses to do | Mode 2, before writing anything |
+| [`19-guide-step-by-step.md`](references/19-guide-step-by-step.md) | The Guide mode's six steps in full: inspection commands, convention detection and its table, atomic splitting, deliberate staging, the message shape, the check-commit-report sequence | Mode 1, making this change commit well |
 
 ## Examples
 
@@ -303,7 +178,5 @@ Full messages, before and after, one scenario per file — read the one that mat
   (`wip:`, `temp:`, `debug:`, `try:`, `checkpoint:`, `save:`, `wip-fix:`) and duplicate subjects — "don't
   worry about duplicate fixes, avoid duplicate messages". Exit 0 clean, 1 findings, 2 usage error; no argument
   runs the self-test (18 fixtures). Windows: `python`, not `python3`; output is ASCII.
-- **Mode 2 has no script, on purpose.** Writing a repository's discipline is an interview, and the answers are
-  not in the repository — they are in the maintainers' heads. The commands it uses are plain `git`/`ls`
-  (detection) and the file it produces is prose. [`18`](references/18-init-the-discipline.md) holds the
+- **Mode 2 has no script, on purpose.** [`18`](references/18-init-the-discipline.md) says why, and holds the
   questionnaire and the document skeleton.

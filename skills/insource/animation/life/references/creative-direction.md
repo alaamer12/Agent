@@ -1,6 +1,6 @@
 # Creative direction
 
-> Owner of the master idea-lanes table and of how creative options are conceived and presented. Routing lives in ../SKILL.md.
+> Owner of the master idea-lanes table and of how creative options are conceived and presented. Routing lives in ../method.md.
 
 How to produce animation ideas that are not the default fade or slide, and how to present them so the user can choose.
 

@@ -93,3 +93,14 @@ Done when all hold:
 
 The README need not contain every detail about the project — its
 completeness is determined by purpose and audience, never by section count.
+
+## Applying the file safely (before and during edits)
+
+Before editing: inspect git state; confirm the intended README path; preserve
+unrelated user modifications; decide full rewrite vs targeted edit on
+evidence. While editing: valid Markdown, consistent heading hierarchy,
+properly closed code fences, correct relative paths/links, no duplicate
+sections, examples consistent with implementation, useful content preserved.
+Don't overwrite a different README or create redundant README files without
+reason. **Draft mode:** if the user wants a draft rather than repo changes,
+deliver the document and touch no project files.
