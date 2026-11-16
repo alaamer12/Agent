@@ -4,9 +4,10 @@
 Commands
 --------
     python manager.py skill <name> ...     link/copy skills (default command)
-    python manager.py agent                deploy AGENTS.md to agent configs
+    python manager.py agent                deploy _Resources/AGENTS.md to agent configs
     python manager.py lint                 validate SKILL.md descriptions and sync
     python manager.py viber                install every skill the Viber lifecycle uses
+    python manager.py crossreference       discover directed mentions between skills
 
 The default command is ``skill``, so ``python manager.py avatar`` and
 ``python manager.py skill avatar`` are equivalent.
@@ -50,7 +51,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Sequence
 from urllib.parse import unquote
 
-__version__ = "2.2.0"
+__version__ = "2.3.0"
 
 # ---------------------------------------------------------------------------
 # optional dependencies
@@ -87,9 +88,12 @@ DB_APP_DIR = "insource-manager"
 DB_FILE_NAME = "manager.db"
 LEGACY_STORE_FILES = {"copies": "manager-copies.json", "lock": "skills-lock.json",
                       "versions": "manager-versions.json"}
-SKIP_NAMES = {"Archive", "__pycache__", "node_modules", ".git", ".venv", "venv"}
-SKILL_SUPPORT_DIRS = {"references", "examples", "assets", "scripts", "templates",
-                      "research", "docs", "tests", "fixtures", "data", "resources"}
+SKIP_NAMES = {"Archive", "_Archive", "_Resources", "__pycache__", "node_modules", ".git", ".venv", "venv"}
+AGENT_SOURCE = Path("_Resources") / "AGENTS.md"
+REFERENCE_SUFFIXES = {".md", ".mdx", ".txt", ".rst"}
+REFERENCE_TOKEN_RE = re.compile(r"[\w-]+")
+SKILL_SUPPORT_DIRS = {"reference", "references", "examples", "assets", "scripts", "templates",
+                      "research", "docs", "tests", "evals", "fixtures", "data", "resources", "legacy"}
 SKILL_TYPES = {"skill": "Skill", "meta-skill": "Meta-Skill", "battery-skill": "Battery-Skill"}
 MIGRATION_AGENTS = {"qoder", "gemini"}
 
@@ -123,7 +127,7 @@ ALIASES = {
 }
 
 REGISTRY = Path(__file__).resolve().parent
-COMMANDS = {"skill", "agent", "lint", "viber", "report", "find"}
+COMMANDS = {"skill", "agent", "lint", "viber", "report", "find", "crossreference"}
 
 
 class ManagerError(Exception):
@@ -1321,7 +1325,7 @@ def cmd_skill(args: argparse.Namespace, registry: Path, jobs: int, invoked: set[
     return 1 if failures else 0
 
 
-VIBER_MANIFEST = Path("Groups") / "Viber" / "viber.json"
+VIBER_MANIFEST = Path("../../projects/viber/viber.json")
 
 
 def viber_plan(registry: Path) -> list[dict[str, Any]]:
@@ -1334,14 +1338,20 @@ def viber_plan(registry: Path) -> list[dict[str, Any]]:
     except (OSError, json.JSONDecodeError) as exc:
         raise ManagerError(f"cannot read {manifest_file}: {exc}") from exc
     known = registry_skills(registry)
+    manifest_dir = manifest_file.resolve().parent
     rows: list[dict[str, Any]] = []
     for phase in manifest.get("phases", []):
         for entry in phase.get("skills", []):
             label = entry.get("as") or entry["name"]
             base = {"phase": phase.get("phase", "-"), "status": entry.get("status", "-"), "entry": label}
             if "path" in entry:
-                group = registry / entry["path"]
-                members = sorted(walk_skills(group), key=lambda p: p.name) if group.is_dir() else []
+                group = (manifest_dir / entry["path"]).resolve()
+                if has_skill(group):
+                    members = [group]
+                elif group.is_dir():
+                    members = sorted(walk_skills(group), key=lambda p: p.name)
+                else:
+                    members = []
                 if not members:
                     rows.append({**base, "name": entry["name"], "path": None})
                 for member in members:
@@ -1357,7 +1367,8 @@ def cmd_viber(args: argparse.Namespace, registry: Path, jobs: int, invoked: set[
         display_table(
             ["Phase", "Entry", "Skill", "Status", "Path"],
             [[row["phase"], row["entry"], row["name"], row["status"],
-              str(row["path"].relative_to(registry)) if row["path"] else "not in registry"] for row in rows],
+              str(row["path"].relative_to(registry)) if row["path"] and row["path"].is_relative_to(registry)
+              else str(row["path"]) if row["path"] else "not in registry"] for row in rows],
             title=f"viber skills ({len({row['path'] for row in rows if row['path']})} installable)",
             always=True,
         )
@@ -1513,7 +1524,7 @@ def cmd_refresh(args: argparse.Namespace, registry: Path, jobs: int, into: Path 
 
 
 def cmd_agent(args: argparse.Namespace, registry: Path) -> int:
-    source = registry / "AGENTS.md"
+    source = registry / AGENT_SOURCE
     if not source.is_file():
         raise ManagerError(f"source AGENTS.md not found at {source}")
 
@@ -1936,7 +1947,7 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
         )
     if _DISPLAY.verbose and checked_rows:
         display_table(
-            ["Skill", "Location", "Chars", "State", "Path"],
+            ["Skill", "Type", "Location", "Chars", "State", "Path"],
             checked_rows,
             title="all checked skills",
             always=True,
@@ -1964,6 +1975,7 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
             1 for agent in DEFAULT_AGENTS if agent_skill_dir(agent).is_dir()
         ))),
         ("SKILL.md files checked", str(total_checked)),
+        *[(title, str(type_counts[kind])) for kind, title in SKILL_TYPES.items()],
         ("Hard copies tracked", str(hard_copies)),
         ("Skill warnings", str(len(warnings))),
         ("Synchronization issues", str(len(issues))),
@@ -2262,33 +2274,38 @@ def check_versions(registry: Path, jobs: int) -> tuple[list[tuple[str, str, str,
 
 
 def cmd_report(args: argparse.Namespace, registry: Path, jobs: int) -> int:
-    skills = registry_skills(registry)
-    names = sorted(skills)
+    inventory = walk_skills(registry, prune=False)
+    paths = inventory
     if args.skills:
         wanted = set(args.skills)
-        names = [n for n in names if n in wanted]
-        missing = wanted - set(names)
-        for n in sorted(missing):
-            display_warn(f"no registry skill named '{n}'")
-    if not names:
-        display_warn(f"no skills found in {registry}")
-        return 0
+        paths = [path for path in inventory if path.name in wanted]
+        for name in sorted(wanted - {path.name for path in paths}):
+            display_warn(f"no registry skill named '{name}'")
     status_map = git_status_map(registry)
     head = git_head(registry)
-    frontmatters = map_concurrent(lambda n: read_frontmatter(skills[n] / "SKILL.md"), names, jobs)
-    snaps = map_concurrent(lambda n: skill_snapshot(skills[n]), names, jobs)
+    frontmatters = map_concurrent(lambda path: read_frontmatter(path / "SKILL.md"), paths, jobs)
+    snaps = map_concurrent(skill_snapshot, paths, jobs)
     rows: list[dict[str, Any]] = []
-    for n, (data, _err), snap in zip(names, frontmatters, snaps):
+    counted_files: set[Path] = set()
+    for path, (data, _err), snap in zip(paths, frontmatters, snaps):
         ver, desc_len = "-", 0
         if isinstance(data, dict):
             v = data.get("version")
             ver = str(v) if v is not None else "-"
             d = data.get("description")
             desc_len = len(d) if isinstance(d, str) else 0
-        rel = skills[n].relative_to(registry).as_posix()
+        structure = inspect_directory(path)
+        parent = skill_parent(path, inventory)
+        rel = path.relative_to(registry).as_posix()
+        counted_files.update(path / name for name in snap["files"])
         row = {
-            "name": n, "version": ver, "files": snap["file_count"],
-            "desc": desc_len, "git": skill_git_state(rel, status_map), "path": rel,
+            "name": path.name, "type": structure.kind,
+            "parent": parent.relative_to(registry).as_posix() if parent else None,
+            "children": [child.relative_to(path).as_posix() for child in structure.children],
+            "modules": [module.relative_to(path).as_posix() for module in structure.modules],
+            "issues": list(structure.issues),
+            "version": ver, "files": snap["file_count"], "desc": desc_len,
+            "git": skill_git_state(rel, status_map), "path": rel,
         }
         if _DISPLAY.verbose:
             row["last_commit"] = git_last_commit(registry, rel) or "-"
@@ -2296,21 +2313,26 @@ def cmd_report(args: argparse.Namespace, registry: Path, jobs: int) -> int:
     sort_key = args.sort
     rows.sort(key=lambda r: r[sort_key] if sort_key != "name" else r["name"].lower(),
               reverse=args.reverse)
+    type_counts = {kind: sum(row["type"] == kind for row in rows) for kind in SKILL_TYPES}
     if args.json:
-        print(json.dumps({"registry": str(registry), "head": head, "skills": rows}, indent=2))
+        print(json.dumps({"registry": str(registry), "head": head, "skills": rows,
+                          "types": type_counts, "total_files": len(counted_files)}, indent=2))
         return 0
-    headers = ["Skill", "Version", "Files", "Desc chars", "Git", "Path"]
-    table_rows = [[r["name"], r["version"], str(r["files"]), str(r["desc"]), r["git"], r["path"]] for r in rows]
+    headers = ["Skill", "Type", "Parent", "Version", "Files", "Desc chars", "Git", "Path"]
+    table_rows = [[r["name"], SKILL_TYPES[r["type"]], r["parent"] or "-", r["version"],
+                   str(r["files"]), str(r["desc"]), r["git"], r["path"]] for r in rows]
     if _DISPLAY.verbose:
-        headers.insert(5, "Last commit")
+        headers.append("Last commit")
         for r, tr in zip(rows, table_rows):
-            tr.insert(5, r.get("last_commit", "-"))
+            tr.append(r.get("last_commit", "-"))
     display_table(headers, table_rows, title=f"skill report ({len(rows)})", always=True)
-    total_files = sum(r["files"] for r in rows)
+    display_table(["Skill", "Issue"], [[r["path"], issue] for r in rows for issue in r["issues"]],
+                  title="composition warnings", always=True)
     avg_desc = round(sum(r["desc"] for r in rows) / len(rows)) if rows else 0
     summary = [
         ("Skills", str(len(rows))),
-        ("Total files", str(total_files)),
+        *[(title, str(type_counts[kind])) for kind, title in SKILL_TYPES.items()],
+        ("Total files (unique)", str(len(counted_files))),
         ("Avg description chars", str(avg_desc)),
         ("Sorted by", f"{sort_key}{' (desc)' if args.reverse else ' (asc)'}"),
         ("Git HEAD", head or "-"),
@@ -2320,118 +2342,218 @@ def cmd_report(args: argparse.Namespace, registry: Path, jobs: int) -> int:
 
 
 def cmd_find(args: argparse.Namespace, registry: Path, jobs: int) -> int:
-    """Locate a skill everywhere it could live: the registry inventory, the agent
-    folders (live junctions and hard copies), the recorded --into installs, and the
-    lockfile. A name that is not a skill may still resolve as a GROUP or a plain
-    folder and is answered as such. Stale --into records are pruned on sight."""
-    names: list[str] = []
-    explicit: list[Path] = []
-    for item in args.skills:
-        candidate = Path(item).expanduser()
-        if candidate.is_dir():
-            if has_skill(candidate):
-                names.append(candidate.name)
-            else:
-                explicit.append(candidate)
-        else:
-            names.append(item)
-    registry_real = os.path.normcase(os.path.realpath(str(registry))) + os.sep
-    installs = load_installs(registry)
     removed = prune_installs(registry)
     if removed:
-        installs = load_installs(registry)
         display_info(f"[installs] pruned {len(removed)} stale --into record(s)")
     locked = load_lockfile(registry).get("locked", {})
-    skill_paths = walk_skills(registry, prune=False)
-    found_any = False
+    locations: list[tuple[str, Path]] = []
+    structures: dict[Path, SkillStructure] = {}
 
-    def render(name: str, rows: list[list[str]]) -> None:
-        nonlocal found_any
+    def structure(path: Path) -> SkillStructure:
+        if path not in structures:
+            structures[path] = inspect_directory(path)
+        return structures[path]
+
+    def add_tree(label: str, root: Path, include_root: bool = True) -> None:
+        paths = walk_skills(root, prune=False)
+        if include_root:
+            paths.insert(0, root)
+        for path in paths:
+            locations.append((label, path))
+            for module in structure(path).modules:
+                locations.append((label, module))
+            for parent in path.parents:
+                if parent == root or not is_under(parent, root):
+                    break
+                locations.append((label, parent))
+
+    add_tree("registry", registry, include_root=False)
+    for agent in DEFAULT_AGENTS:
+        directory = agent_skill_dir(agent)
+        if directory.is_dir():
+            for entry in sorted(directory.iterdir()):
+                if entry.is_dir() or is_link_like(entry):
+                    add_tree(f"agent:{agent}", entry)
+    for entry in load_installs(registry).get("into", {}).values():
+        add_tree("into (recorded)", Path(entry["target"]))
+
+    found_any = False
+    for item in dict.fromkeys(args.skills):
+        candidate = Path(os.path.abspath(Path(item).expanduser()))
+        explicit = candidate.is_dir() or is_link_like(candidate)
+        name = candidate.name if explicit else item
+        matches = [(label, path) for label, path in locations if path.name == name]
+        if explicit:
+            matches.append(("path argument", candidate))
+        rows: list[list[str]] = []
+        seen: set[str] = set()
+        for label, path in matches:
+            key = _key(path)
+            if key in seen:
+                continue
+            seen.add(key)
+            info = structure(path)
+            kind = SKILL_TYPES.get(info.kind, info.kind)
+            notes: list[str] = []
+            parent = skill_parent(path, (p for p in path.parents if has_skill(p)))
+            if info.kind in SKILL_TYPES:
+                if parent:
+                    notes.append(f"sub-skill of {parent.name}")
+                if info.children:
+                    notes.append(f"{len(info.children)} independent sub-skill(s)")
+                if info.modules:
+                    notes.append(f"{len(info.modules)} internal module(s), not independent")
+            elif info.kind == "group":
+                notes.append(f"not a skill; holds {len(info.children)} skill(s)")
+            elif info.kind == "plain":
+                if parent and path in structure(parent).modules:
+                    notes.append(f"internal module of {parent.name}; not an independent skill")
+                else:
+                    notes.append("no SKILL.md; not a skill")
+            else:
+                notes.append("BROKEN link; no live skill verified")
+            if is_link_like(path):
+                link_kind = "symlink" if path.is_symlink() else "junction"
+                notes.append(f"{link_kind} -> {os.path.realpath(path)}")
+            elif label.startswith("agent:") and info.kind in SKILL_TYPES:
+                notes.append("hard copy")
+            notes.extend(info.issues)
+            shown = path.relative_to(registry).as_posix() if is_under(path, registry) else str(path)
+            rows.append([label, kind, shown, "; ".join(notes)])
+        if name in locked:
+            rows.append(["database", "lock record", ", ".join(sorted(locked[name])),
+                         "record only; not proof of a live skill"])
         if rows:
             found_any = True
-            display_table(["Where", "Kind", "Path / target", "Note"], rows,
-                          title=f"find: {name} ({len(rows)} location(s))", always=True)
+            display_table(["Where", "Type", "Path", "Note"], rows,
+                          title=f"find: {item} ({len(rows)} match(es))", always=True)
         else:
-            display_warn(
-                f"find: '{name}' not in the registry, any agent folder, or any recorded "
-                f"--into install; nothing else is known about it"
-            )
-
-    def registry_kind(path: Path) -> tuple[str, str]:
-        rel = path.relative_to(registry)
-        parents = [p for p in skill_paths if p != path and is_under(path, p)]
-        if parents:
-            outer = min(parents, key=lambda p: len(p.parts))
-            return "sub-skill", f"nested inside skill '{outer.name}'"
-        if len(rel.parts) > 1:
-            group = rel.parts[1] if rel.parts[0] == "Groups" else rel.parts[0]
-            return "group skill", f"member of group '{group}'"
-        return "inventory", ""
-
-    for name in dict.fromkeys(names):
-        rows: list[list[str]] = []
-        for path in skill_paths:
-            if path.name == name:
-                kind, note = registry_kind(path)
-                rows.append(["registry", kind, path.relative_to(registry).as_posix(), note])
-        for agent in DEFAULT_AGENTS:
-            directory = agent_skill_dir(agent)
-            if not directory.is_dir():
-                continue
-            dest = directory / name
-            if is_link_like(dest):
-                kind = "junction" if is_reparse(dest) else "symlink"
-                try:
-                    tgt = os.path.realpath(dest)
-                except OSError:
-                    tgt = "?"
-                if not dest.exists():
-                    note = "BROKEN link"
-                elif os.path.normcase(os.path.realpath(tgt)).startswith(registry_real):
-                    note = "live twin -> this registry"
-                else:
-                    note = "live, points elsewhere"
-                rows.append([f"agent:{agent}", kind, tgt, note])
-            elif dest.is_dir():
-                if has_skill(dest):
-                    rows.append([f"agent:{agent}", "hard copy", str(dest), "real folder"])
-                elif walk_skills(dest):
-                    rows.append([f"agent:{agent}", "group", str(dest),
-                                 "holds skills, no SKILL.md of its own"])
-        for entry in installs.get("into", {}).values():
-            if entry.get("skill") != name:
-                continue
-            target = Path(entry.get("target", ""))
-            alive = target.exists() or is_link_like(target)
-            rows.append(["into (recorded)", entry.get("mode", "link"), str(target),
-                         f"installed {entry.get('installed_at', '-')}" if alive
-                         else "STALE on disk"])
-        if not rows:
-            groups = {p.parent for p in skill_paths
-                      if p.parent.name == name and classify_directory(p.parent) == "group"}
-            for group in sorted(groups):
-                members = sorted(p.name for p in walk_skills(group))
-                rows.append(["registry", "group",
-                             group.relative_to(registry).as_posix(),
-                             f"not a skill; holds {len(members)} skill(s): "
-                             f"{', '.join(members[:8])}{' ...' if len(members) > 8 else ''}"])
-        if name in locked:
-            rows.append(["lockfile", "locked", ", ".join(sorted(locked[name])), ""])
-        render(name, rows)
-
-    for path in dict.fromkeys(explicit):
-        kind = classify_directory(path)
-        if kind == "group":
-            members = sorted(p.name for p in walk_skills(path))
-            note = f"not a skill; holds {len(members)} skill(s): " \
-                   f"{', '.join(members[:8])}{' ...' if len(members) > 8 else ''}"
-        elif kind == "plain":
-            note = "no SKILL.md and no skills inside; a folder of things, not a skill"
-        else:
-            note = "has SKILL.md"
-        render(str(path), [["path argument", kind, str(path), note]])
-
+            display_warn(f"find: '{item}' not in the registry, agent folders, or recorded --into installs")
     return 0 if found_any else 1
+
+
+def scan_crossreferences(registry: Path, skills: Sequence[Path]) -> dict[str, Any]:
+    index: dict[str, list[Path]] = {}
+    for skill in skills:
+        index.setdefault(skill.name.casefold(), []).append(skill)
+    skill_set = set(skills)
+    owners: dict[Path, Path | None] = {}
+    edges: dict[tuple[Path, Path], dict[str, Any]] = {}
+    ambiguous: dict[tuple[Path, str], dict[str, Any]] = {}
+    errors: list[dict[str, str]] = []
+    files_scanned = characters_scanned = 0
+
+    def walk_error(error: OSError) -> None:
+        errors.append({"file": str(error.filename), "error": str(error)})
+
+    for dirpath, dirnames, filenames in os.walk(registry, onerror=walk_error):
+        directory = Path(dirpath)
+        dirnames[:] = sorted(name for name in dirnames
+                             if name not in SKIP_NAMES and not name.startswith(".")
+                             and not is_link_like(directory / name))
+        owner = directory if directory in skill_set else owners.get(directory.parent)
+        owners[directory] = owner
+        if owner is None:
+            continue
+        source = owner.relative_to(registry).as_posix()
+        owner_name = owner.name.casefold()
+        for filename in sorted(filenames):
+            path = directory / filename
+            if filename.startswith(".") or path.suffix.lower() not in REFERENCE_SUFFIXES or is_link_like(path):
+                continue
+            relative = path.relative_to(registry).as_posix()
+            try:
+                with path.open(encoding="utf-8-sig") as stream:
+                    for line_number, line in enumerate(stream, 1):
+                        characters_scanned += len(line)
+                        seen: set[str] = set()
+                        for match in REFERENCE_TOKEN_RE.finditer(line):
+                            name = match.group().casefold()
+                            if name in seen or name == owner_name:
+                                continue
+                            seen.add(name)
+                            targets = index.get(name)
+                            if not targets:
+                                continue
+                            start = max(0, match.start() - 80)
+                            end = max(start + 240, match.end())
+                            evidence = {"file": relative, "line": line_number,
+                                        "text": line[start:end].strip()}
+                            if len(targets) > 1:
+                                key = (owner, name)
+                                if key not in ambiguous:
+                                    ambiguous[key] = {
+                                        "source": source, "name": name,
+                                        "candidates": [p.relative_to(registry).as_posix() for p in targets],
+                                        "evidence": [],
+                                    }
+                                record = ambiguous[key]
+                            else:
+                                target = targets[0]
+                                edge_key = (owner, target)
+                                if edge_key not in edges:
+                                    edges[edge_key] = {
+                                        "from": owner.name, "to": target.name, "source": source,
+                                        "target": target.relative_to(registry).as_posix(), "evidence": [],
+                                    }
+                                record = edges[edge_key]
+                            record["evidence"].append(evidence)
+                files_scanned += 1
+            except (OSError, UnicodeError) as error:
+                errors.append({"file": relative, "error": str(error)})
+
+    for (source, target), edge in edges.items():
+        edge["mutual"] = (target, source) in edges
+        edge["count"] = len(edge["evidence"])
+    return {
+        "edges": sorted(edges.values(), key=lambda edge: (edge["source"], edge["target"])),
+        "ambiguous": sorted(ambiguous.values(), key=lambda item: (item["source"], item["name"])),
+        "errors": errors,
+        "stats": {"skills": len(skills), "files_scanned": files_scanned,
+                  "characters_scanned": characters_scanned, "edges": len(edges)},
+    }
+
+
+def cmd_crossreference(args: argparse.Namespace, registry: Path) -> int:
+    skills = walk_skills(registry, prune=False)
+    wanted = {name.casefold() for name in args.skills}
+    missing = wanted - {path.name.casefold() for path in skills}
+    if missing:
+        raise ManagerError(f"unknown registry skill(s): {', '.join(sorted(missing))}")
+    result = scan_crossreferences(registry, skills)
+    selected = {path.relative_to(registry).as_posix() for path in skills
+                if path.name.casefold() in wanted}
+    if selected:
+        result["edges"] = [edge for edge in result["edges"]
+                           if edge["source"] in selected or edge["target"] in selected]
+        result["ambiguous"] = [item for item in result["ambiguous"]
+                               if item["source"] in selected or selected.intersection(item["candidates"])]
+    result["registry"] = str(registry)
+    result["stats"]["edges_shown"] = len(result["edges"])
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        rows = []
+        for edge in result["edges"]:
+            first = edge["evidence"][0]
+            rows.append([edge["from"], edge["to"], str(edge["count"]),
+                         "yes" if edge["mutual"] else "no", f"{first['file']}:{first['line']}"])
+        display_table(["From", "To", "Mention lines", "Mutual", "First evidence"], rows,
+                      title="skill crossreferences (textual mentions, not proven dependencies)", always=True)
+        if _DISPLAY.verbose:
+            display_table(["From", "To", "Evidence", "Text"],
+                          [[edge["from"], edge["to"], f"{item['file']}:{item['line']}", item["text"]]
+                           for edge in result["edges"] for item in edge["evidence"]],
+                          title="reference evidence", always=True)
+        display_table(["Source", "Ambiguous name", "Candidates"],
+                      [[item["source"], item["name"], ", ".join(item["candidates"])]
+                       for item in result["ambiguous"]], title="ambiguous references", always=True)
+        display_table(["File", "Read error"],
+                      [[item["file"], item["error"]] for item in result["errors"]],
+                      title="incomplete scan", always=True)
+        display_kv([(key.replace("_", " "), value) for key, value in result["stats"].items()],
+                   title="crossreference summary", always=True)
+    return 1 if result["errors"] or result["ambiguous"] else 0
 
 
 # ---------------------------------------------------------------------------
@@ -2468,7 +2590,7 @@ def add_mode_flag(parser: argparse.ArgumentParser) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="manager.py",
-        description="Link or hard-copy skills into agent folders, deploy AGENTS.md, lint skills, report skill stats, and find where a skill lives.",
+        description="Deploy skills and agent instructions, lint and classify skills, locate installs, and discover crossreferences.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "examples:\n"
@@ -2484,13 +2606,15 @@ def build_parser() -> argparse.ArgumentParser:
             "  python manager.py report techstack --json\n"
             "  python manager.py find techstack\n"
             "  python manager.py find pages revoke --quiet\n"
+            "  python manager.py crossreference iwts dtb\n"
+            "  python manager.py crossreference --json\n"
             "  python manager.py viber --into ./my-project --hard-copy\n"
         ),
     )
     parser.add_argument(
         "-V", "--version", action="version", version=f"%(prog)s {__version__}"
     )
-    subparsers = parser.add_subparsers(dest="command", metavar="{skill,agent,lint,viber,report,find}")
+    subparsers = parser.add_subparsers(dest="command", metavar="{skill,agent,lint,viber,report,find,crossreference}")
 
     skill = subparsers.add_parser(
         "skill",
@@ -2532,7 +2656,7 @@ def build_parser() -> argparse.ArgumentParser:
     agent = subparsers.add_parser(
         "agent",
         help="deploy AGENTS.md to agent configurations",
-        description="Link or copy the registry's AGENTS.md into every agent's global instruction file.",
+        description=f"Link or copy the registry's {AGENT_SOURCE.as_posix()} into each selected agent's global instruction file.",
     )
     add_common(agent)
     add_deploy_flags(agent)
@@ -2543,7 +2667,9 @@ def build_parser() -> argparse.ArgumentParser:
     lint = subparsers.add_parser(
         "lint",
         help="validate skill metadata and installation synchronization",
-        description="Check all nested SKILL.md metadata and audit installed copies and links.",
+        description="Check all independent SKILL.md metadata, classify Skill / Meta-Skill / "
+                    "Battery-Skill, flag mixed independent/internal composition, and audit installs. "
+                    "Support folders and internal modules are not independently linted skills.",
     )
     add_common(lint)
     lint.add_argument(
@@ -2556,7 +2682,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     lint.add_argument(
         "-S", "--strict", action="store_true",
-        help="exit 1 when there are description warnings, sync issues or README issues",
+        help="exit 1 on metadata, composition, version, sync or README findings",
     )
     lint.add_argument(
         "--readme", action="store_true",
@@ -2570,14 +2696,18 @@ def build_parser() -> argparse.ArgumentParser:
 
     report = subparsers.add_parser(
         "report",
-        help="report per-skill file count, description length, version and git state",
-        description="Summarize registry skills: file count, description length, version, "
-                    "and git working-tree state. Sortable; optional JSON output.",
+        help="report skill types, parents, file counts, description lengths, versions and git state",
+        description="Report every independent skill, including meta children. Meta-Skill has "
+                    "nested SKILL.md entrypoints; Battery-Skill has Markdown-backed internal "
+                    "module folders without their own SKILL.md; Skill has neither. Standard "
+                    "support folders (references, assets, scripts, etc.) do not make a battery. "
+                    "Mixed composition is flagged. Per-row file counts include descendants; "
+                    "the summary counts unique files. Sortable; optional JSON output.",
     )
     add_common(report)
     report.add_argument("skills", nargs="*", help="optional skill names to filter the report")
     report.add_argument(
-        "--sort", choices=["name", "files", "desc", "version"], default="name",
+        "--sort", choices=["name", "type", "files", "desc", "version"], default="name",
         help="sort column (default: name)",
     )
     report.add_argument("--reverse", action="store_true", help="sort descending")
@@ -2586,16 +2716,32 @@ def build_parser() -> argparse.ArgumentParser:
     find = subparsers.add_parser(
         "find",
         help="locate a skill in the registry, agent folders, or recorded --into installs",
-        description="Search every known place a skill can live: this registry, the global "
-                    "agent folders (junctions and hard copies), installs recorded from "
-                    "--into deploys, and the lockfile. Read-only; exit 0 when any name "
-                    "resolves, 1 when nothing does. Stale --into records are pruned on sight.",
+        description="Find skills, groups and internal modules in this registry, global agent "
+                    "folders and recorded --into installs, with structural skill types. "
+                    "Lock records are shown separately, not as live skills. Exit 0 when any "
+                    "name or path resolves, 1 when none does. No skill files are changed; "
+                    "stale --into records are pruned from the database.",
     )
     add_common(find)
     find.add_argument(
         "skills", nargs="+",
-        help="skill name(s), or a path to a skill folder (its name is used)",
+        help="skill/module/group name(s), or directory path(s) to classify",
     )
+
+    crossreference = subparsers.add_parser(
+        "crossreference",
+        help="discover directed mentions between registry skills with file/line evidence",
+        description="Scan .md/.mdx/.txt/.rst documents once using a skill-name hash index. "
+                    "Matches whole name tokens, case-insensitively, including slash commands "
+                    "and Markdown links. Shows incoming and outgoing mentions, not proven "
+                    "dependencies. Meta children own their files; battery modules belong to "
+                    "their parent. Archives, resources outside skills, hidden files and links "
+                    "are skipped. No database writes. Exit 1 on unknown names, ambiguous "
+                    "targets or unreadable content; otherwise 0, including an empty graph.",
+    )
+    add_common(crossreference)
+    crossreference.add_argument("skills", nargs="*", help="optional skill names; show edges touching any of them")
+    crossreference.add_argument("--json", action="store_true", help="emit all evidence and scan statistics as JSON")
 
     return parser
 
@@ -2742,7 +2888,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return int(exc.code or 0)
 
     configure_display(
-        quiet=args.quiet,
+        quiet=args.quiet or (command in {"report", "crossreference"} and args.json),
         color=not args.no_color and not os.environ.get("NO_COLOR"),
         verbose=args.verbose,
     )
@@ -2779,6 +2925,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 settings=[
                     ("Registry", str(registry)),
                     ("Agents", args.agents),
+                    ("Source", str(registry / AGENT_SOURCE)),
                     ("Mode", "hard-copy" if (args.hard_copy or args.mode == "copy") else "symlink"),
                 ],
                 flags=[
@@ -2824,6 +2971,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 implicit=implicit,
             )
             return cmd_find(args, registry, jobs)
+        elif command == "crossreference":
+            return cmd_crossreference(args, registry)
         else:
             display_command_report(
                 "lint",

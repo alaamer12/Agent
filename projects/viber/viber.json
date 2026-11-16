@@ -1,15 +1,18 @@
 {
   "name": "viber",
-  "description": "Every skill the Viber project lifecycle uses, by phase. `python manager.py viber` installs this whole list in one shot.",
+  "description": "Every skill the Viber lifecycle walks, step by step, each step tagged with the project phase it belongs to. Adding a step is adding an entry here and in the lifecycle. `python manager.py viber` installs this whole list in one shot.",
   "source": "viber skill references/lifecycle.md, section 10 (Skills Inventory)",
   "notes": {
     "steering": "steering-perception and steering-tech are the perception and tech tiers of the one steering skill",
-    "FULL CODE": "a skill group, not a skill: every skill under Groups/Code is installed",
-    "unclassified": "named by the lifecycle but awaiting a phase; not installed until classified"
+    "FULL CODE": "a skill group, not a skill: every skill under the insource Groups/Code directory is installed",
+    "unclassified": "named by the lifecycle but awaiting a phase; not installed until classified",
+    "projectPhase": "[DR] Draft = deciding and refining · [IP] In-Progress = implementation, testing, launching · [PP] Post-production governs the time after the first real release, beyond the steps listed here; see lifecycle.md 1.2",
+    "Shared and Commands": "not lifecycle steps — these skills are reachable from every step; their install entries live outside the step tagging"
   },
   "phases": [
     {
       "phase": "Idea & Understanding",
+      "projectPhase": "[DR]",
       "skills": [
         {"name": "idea-md", "status": "mandatory"},
         {"name": "reveal", "status": "optional"},
@@ -19,6 +22,7 @@
     },
     {
       "phase": "Vision",
+      "projectPhase": "[DR]",
       "skills": [
         {"name": "pages", "status": "mandatory"},
         {"name": "prototype", "status": "mandatory"},
@@ -28,6 +32,7 @@
     },
     {
       "phase": "Project Foundation",
+      "projectPhase": "[DR]",
       "skills": [
         {"name": "steering", "status": "mandatory", "as": "steering-tech"},
         {"name": "architecture", "status": "mandatory"},
@@ -50,26 +55,28 @@
     },
     {
       "phase": "Implementation",
+      "projectPhase": "[IP]",
       "skills": [
-        {"name": "FULL CODE", "status": "mandatory group", "path": "Groups/Code"}
+        {"name": "FULL CODE", "status": "mandatory group", "path": "../../skills/insource/Groups/Code"}
       ]
     },
     {
       "phase": "Shared",
       "skills": [
-        {"name": "viber", "status": "mandatory"},
+        {"name": "viber", "status": "mandatory", "path": "skills/viber"},
         {"name": "grill-me", "status": "intermediate"},
         {"name": "close-topics", "status": "intermediate"},
-        {"name": "adapt", "status": "intermediate"},
+        {"name": "adapt", "status": "intermediate", "path": "skills/adapt"},
+        {"name": "thaw", "status": "intermediate"},
         {"name": "mistakes", "status": "optional"}
       ]
     },
     {
       "phase": "Commands",
       "skills": [
-        {"name": "vinit", "status": "command · entry"},
-        {"name": "vcompact", "status": "command · any phase"},
-        {"name": "vflow", "status": "command · any phase"}
+        {"name": "vinit", "status": "command · entry", "path": "skills/vinit"},
+        {"name": "vcompact", "status": "command · any phase", "path": "skills/vcompact"},
+        {"name": "vflow", "status": "command · any phase", "path": "skills/vflow"}
       ]
     }
   ],

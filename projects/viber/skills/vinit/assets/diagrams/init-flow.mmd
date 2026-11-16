@@ -1,0 +1,50 @@
+flowchart TD
+    CMD(["/viber init"])
+
+    subgraph S1["1 — UNDERSTAND THE USER'S DECK"]
+        SRC["scan Skills"]
+        META["read metadata"]
+        CLS["classify · tag"]
+        REG["write registry"]
+        EXCL["ask exclusions"]
+        MEM["create memory files"]
+        LAYOUT["ensure ignores"]
+        SRC --> META --> CLS --> REG --> EXCL --> MEM --> LAYOUT
+    end
+
+    subgraph S2["2 — MENTION IT IN AGENTS.md"]
+        AG{"AGENTS.md exists?"}
+        ADD["add Viber section"]
+        NEW["create AGENTS.md"]
+        AG -- "yes" --> ADD
+        AG -- "no" --> NEW
+    end
+
+    subgraph S3["3 — START THE FLOW"]
+        ST{"outputs present?"}
+        FRESH["new project"]
+        EXIST["review existing"]
+        NEXT["name next step"]
+        GO(["start the step"])
+        ST -- "no" --> FRESH --> GO
+        ST -- "yes" --> EXIST --> NEXT --> GO
+    end
+
+    CMD --> SRC
+    LAYOUT --> AG
+    ADD --> ST
+    NEW --> ST
+
+    subgraph LG["LEGEND"]
+        LD1["step"]
+        LD2["decision"]
+        LD3["endpoint"]
+    end
+
+    classDef step fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef endpoint fill:#f3e8ff,stroke:#9333ea,color:#581c87
+
+    class SRC,META,CLS,REG,EXCL,MEM,LAYOUT,ADD,NEW,FRESH,EXIST,NEXT,LD1 step
+    class AG,ST,LD2 decision
+    class CMD,GO,LD3 endpoint

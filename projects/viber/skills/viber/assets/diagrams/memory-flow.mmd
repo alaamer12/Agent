@@ -1,0 +1,47 @@
+flowchart TD
+    subgraph SRC["knowledge arrives"]
+        GM["grill-me"]
+        CT["close-topics"]
+        AM["agents-md"]
+        SES["session"]
+    end
+
+    MEM[".viber/memory.md"]
+    SET[".viber/settled.md"]
+    LRN[".viber/learnt.md"]
+
+    GM -- "open question" --> MEM
+    CT -- "open topic" --> MEM
+    AM -- "pending item" --> MEM
+    GM -- "answered" --> SET
+    CT -- "closed topic" --> SET
+    SES -- "answer" --> SET
+    SES -- "fact" --> LRN
+
+    MEM -- "blocker clears" --> RT{{"ROUTER"}}
+    RT -- "answered" --> SET
+    SET -. "points to" .-> SPEC["docs/steering · AGENTS.md"]
+
+    INIT(["vinit"]) -- "creates" --> MEM
+    INIT --> SET
+    INIT --> LRN
+    START(["session start"]) -- "reads" --> MEM
+    START --> SET
+    START --> LRN
+
+    subgraph LG["LEGEND"]
+        LF["file"]
+        LS["source"]
+        LR["router"]
+        LE["endpoint"]
+    end
+
+    classDef file fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef src fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+    classDef router fill:#f3e8ff,stroke:#9333ea,color:#581c87
+    classDef endpoint fill:#fef3c7,stroke:#d97706,color:#78350f
+
+    class MEM,SET,LRN,LF file
+    class GM,CT,AM,SES,LS src
+    class RT,LR router
+    class INIT,START,SPEC,LE endpoint

@@ -1,0 +1,162 @@
+flowchart TD
+    START(["Project idea"])
+
+    subgraph P1["PROJECT PHASE 1 · DRAFT [DR]"]
+        subgraph S1["01 — IDEA & UNDERSTANDING"]
+            I["idea-md"]
+            R["reveal"]
+            P["steering-perception"]
+            A["agents-md"]
+
+            I --> R --> P --> A
+        end
+
+        M1(["Understanding"])
+
+        subgraph S2["02 — VISION"]
+            PG["pages"]
+            MP["Main Pages"]
+            SP["Secondary Pages"]
+            CP["Complementary Pages"]
+            PT1["prototype · draft"]
+            DN["denoise"]
+            AS["anti-slop"]
+            CPF["pages & features"]
+            PT2["prototype · refine"]
+
+            PG --> MP & SP & CP
+            MP & SP & CP --> PT1
+            PT1 --> DN --> AS --> CPF --> PT2
+        end
+
+        M2(["Vision ready"])
+
+        subgraph S3["03 — PROJECT FOUNDATION"]
+            ST["steering-tech · first"]
+            AR["architecture · second"]
+            EF["Engineering foundation"]
+            STE["steering"]
+            PVC["pvc"]
+            STY["styling"]
+            STU["styleup"]
+            STA["states"]
+            TU["type-up"]
+            CON["contract"]
+            DOC["Project documentation"]
+            GL["glossary-md"]
+            CM["commitments-md"]
+            SY["system-md"]
+            RM["readme-md"]
+            UN["units-md"]
+            AP["antipattern"]
+            OPT["packages · personalize"]
+
+            ST --> AR --> EF
+            EF --> DOC & STE & PVC & STY & STU & STA & TU & CON
+            DOC --> GL & CM & SY & RM & UN & AP
+            DOC -.-> OPT
+        end
+
+        M3(["Foundation ready"])
+
+        START --> I
+        A --> M1 --> PG
+        PT2 --> M2 --> ST
+        S3 --> M3
+    end
+
+    subgraph P2["PROJECT PHASE 2 · IN-PROGRESS [IP]"]
+        subgraph S4["04 — IMPLEMENTATION"]
+            FC["FULL CODE"]
+            PLAN["Plan"]
+            IM["Implement"]
+            DB["Debugging"]
+            FX["Fix"]
+            UP["Update"]
+
+            FC --> PLAN --> IM --> DB
+            DB --> FX --> UP
+            UP -. "iterate" .-> IM
+        end
+
+        END(["Working product"])
+
+        M3 --> FC
+        S4 --> END
+    end
+
+    MX(["mistakes"])
+    MX -. "docs" .-> DOC
+    MX -. "code" .-> FX
+
+    subgraph INT["INTERMEDIATE SKILLS"]
+        GR(["grill-me"])
+        CT(["close-topics"])
+        AD(["adapt"])
+        TW(["thaw"])
+    end
+
+    INT -. "any step" .-> S1
+    INT -.-> S2
+    INT -.-> S3
+    INT -.-> S4
+    AD -. "Viber version" .-> A
+
+    subgraph CMD["VIBER COMMANDS"]
+        VI(["vinit"])
+        VC(["vcompact"])
+        VF(["vflow"])
+    end
+
+    VI -. "entry · refresh" .-> S1
+    VC -. "any phase" .-> S1
+    VC -.-> S2
+    VC -.-> S3
+    VC -.-> S4
+    VF -. "defines flows" .-> S4
+
+    subgraph DECKS["SKILL DECKS"]
+        OSD["Opensource Deck<br/>unregistered"]
+        AMD["USERNAME's Deck<br/>registered"]
+    end
+
+    DECKS -. "relevance" .-> S1
+    DECKS -.-> S2
+    DECKS -.-> S3
+    DECKS -.-> S4
+    AD -. "attaches" .-> DECKS
+
+    subgraph LEG["LEGEND"]
+        LL["solid: flow<br/>dotted: influence<br/>band: project phase"]
+        L1["Mandatory"]
+        L2["Optional"]
+        L3["step"]
+        L4["Milestone"]
+        L5["Intermediate"]
+        L6["Command"]
+        L7["Deck"]
+    end
+
+    classDef mandatory fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef optional fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef shared fill:#f3e8ff,stroke:#9333ea,color:#581c87
+    classDef milestone fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef deck fill:#ccfbf1,stroke:#0d9488,color:#134e4a
+    classDef command fill:#ffe4e6,stroke:#e11d48,color:#881337
+    classDef legend fill:#f8fafc,stroke:#94a3b8,color:#334155
+    classDef projectphase fill:#f1f5f9,stroke:#475569,stroke-width:2px,color:#0f172a
+
+    class I,P,A,PG,PT1,PT2,ST,AR,FC,STE,PVC,STY,STU,STA,TU,CON,GL,CM,SY,RM,UN,AP mandatory
+    class R,DN,AS,OPT,MX optional
+    class GR,CT,AD,TW shared
+    class START,M1,M2,M3,END milestone
+    class OSD,AMD deck
+    class VI,VC,VF command
+    class LL,L3 legend
+    class L1 mandatory
+    class L2 optional
+    class L4 milestone
+    class L5 shared
+    class L6 command
+    class L7 deck
+    class P1,P2 projectphase

@@ -4,6 +4,85 @@ This repository contains a comprehensive collection of modular Agent Skills. Eac
 
 Total active skills: **125** — 28 standalone at the repository root and the rest organized under 16 topic groups. 26 archived skills are listed at the end.
 
+## Skill types
+
+This catalog uses three composition types. **A skill's entrypoint is its own `SKILL.md`; a folder name or its depth in the repository does not make it a skill.** Type describes what a skill contains, not where it is stored or which slash command an agent exposes.
+
+| Type | Root entrypoint | Functional children | Independent skill boundaries |
+|---|---|---|---|
+| **Meta-Skill** | `<meta-skill>/SKILL.md` | Sub-skills, each with its own `SKILL.md` | The parent and each sub-skill have separate entrypoints |
+| **Battery-Skill** | `<battery-skill>/SKILL.md` | Internal modes/modules without their own `SKILL.md` | Only the battery is an independent skill |
+| **Skill** | `<skill>/SKILL.md` | Supporting material, not a collection of sub-skills or internal methods | Only the skill itself |
+
+### Meta-Skill: compose independent sub-skills
+
+The parent routes work to sub-skills. Each functional child carries its own skill instructions and metadata, so it can be identified and used as a skill in its own right. Its own composition can again be a Skill, Battery-Skill, or Meta-Skill. Separate slash-command exposure depends on the host agent; it is not the classification test.
+
+```text
+meta-skill/
+  SKILL.md
+  first/
+    SKILL.md
+    references/
+  second/
+    SKILL.md
+    scripts/
+```
+
+Example: [`animation`](./animation/SKILL.md) contains the `ascii`, `life`, and `svg` sub-skills. Inventory and lint include each actual child entrypoint, with its nearest owning skill recorded as its parent.
+
+### Battery-Skill: one skill, several internal methods
+
+The root owns the shared rules and dispatches to internal methods. Those methods are parts of the battery, not separately installable skills: a `method.md`, `README.md`, or other internal guide does not substitute for a child `SKILL.md`.
+
+```text
+battery-skill/
+  SKILL.md
+  first-mode/
+    method.md
+    references/
+  second-mode/
+    method.md
+    assets/
+```
+
+Example: [`design`](./design/SKILL.md) contains `design-md`, `playfile`, `prototype`, and `calibrate`; [`pages`](./Groups/Design/pages/SKILL.md) contains `main`, `secondary`, and `complementary`. Their internal methods do not receive independent catalog rows, versions, or installation records. Change tracking belongs to the containing skill.
+
+### Skill: one method with supporting material
+
+A normal skill can have many files and folders. References, examples, scripts, assets, and templates support its method; their presence alone does not make it a battery. Several commands or a routing table alone also do not establish separate module boundaries.
+
+```text
+skill/
+  SKILL.md
+  references/
+  examples/
+  scripts/
+  assets/
+```
+
+Example: [`techstack`](./techstack/SKILL.md) uses references, examples, and templates without making those directories independent skills or internal modes.
+
+### Groups, support folders, and mixed structures
+
+- **Groups are organization, not a fourth skill type.** `Groups/Design/` has no entrypoint of its own. Moving a skill into a group does not change its type or make it a sub-skill.
+- **Support names are contextual.** `references/method.md` is not automatically a battery mode. Conversely, [`assets`](./Groups/Design/assets/SKILL.md) and [`resources`](./Groups/Design/resources/SKILL.md) are real skills because those directories have their own entrypoints.
+- **Structure is evidence, not semantic proof.** The manager infers composition from actual entrypoints and Markdown-backed module directories outside conventional support folders. An unusually named reference collection can resemble a module; inspect the reported child/module paths rather than treating a label as proof that the content is independently usable.
+- **Mixed composition needs an explicit correction.** A parent with both independent sub-skills and internal module branches does not cleanly satisfy either composite form. The manager preserves the real sub-skill entrypoints, reports the parent as Meta-Skill, and emits a composition warning. It does not add or delete `SKILL.md` files automatically.
+- **Links are installation details, not types.** A symlink, junction, or hard copy can contain any of the three types. A broken link or a database record alone does not prove a live skill exists.
+
+### Inspecting the types
+
+```bash
+python manager.py report --sort type
+python manager.py report animation design pages techstack --json
+python manager.py find design prototype
+python manager.py lint --strict --verbose
+python -m unittest test_manager_structure
+```
+
+`report` includes nested independent skills, type, parent, and composition evidence (`children`, `modules`, and `issues` in JSON). Internal modules are not independent report rows. Per-skill file counts include descendants, while the summary counts unique files to avoid counting a meta-child's files twice. `find` uses the same classification across the registry, agent folders, and recorded `--into` installations. `lint` checks actual skill entrypoints and flags mixed structures; `--strict` makes findings fail the command.
+
 ## Quick Index
 
 ### Agent

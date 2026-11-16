@@ -1,0 +1,32 @@
+flowchart TD
+    CMD(["vflow"])
+    CMD -- "create" --> GRILL["grill steps"]
+    GRILL --> SEQ["sequence.md · source"]
+    SEQ --> LIFE["lifecycle.md"]
+    SEQ --> DIAG["lifecycle.mmd"]
+    LIFE --> FOLD[".viber/flow/&lt;name&gt;/"]
+    DIAG --> FOLD
+    SEQ --> FOLD
+
+    RUN(["work matches flow"]) -- "reads" --> SEQ
+    SEQ --> STEP["run step"]
+    STEP -- "gate met" --> NEXT["next step"]
+    NEXT --> STEP
+    STEP -- "gate failed" --> FIX["fix · ask"]
+    FIX --> STEP
+    STEP -. "finding" .-> MEM[".viber/memory.md"]
+    STEP -. "discovered step" .-> SEQ
+
+    subgraph LG["LEGEND"]
+        LF["file"]
+        LA["action"]
+        LE["flow"]
+    end
+
+    classDef file fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef action fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+    classDef flow fill:#f3e8ff,stroke:#9333ea,color:#581c87
+
+    class SEQ,LIFE,DIAG,FOLD,MEM,LF file
+    class GRILL,STEP,NEXT,FIX,LA action
+    class CMD,RUN,LE flow

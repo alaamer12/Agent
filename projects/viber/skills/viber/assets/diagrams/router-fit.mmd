@@ -1,0 +1,50 @@
+flowchart TD
+    LC["Project Lifecycle"]
+    PV["project Viber version"]
+    DK["Skill Decks"]
+    EV["project evidence"]
+    MEM["project memory"]
+
+    RT{{"ROUTER"}}
+
+    LC --> RT
+    PV --> RT
+    DK --> RT
+    EV --> RT
+    MEM --> RT
+
+    RT --> TR["Track Skills & Progress"]
+    RT --> NX["Identify Next Skills"]
+    RT --> HS["Suggest Helpful Skills"]
+    RT --> WN["Warn About Missing Outputs"]
+
+    HS --> SG["Suggest grill-me"]
+    HS --> SC["Suggest close-topics"]
+    HS --> SA["Suggest adapt"]
+    HS --> ST["Suggest thaw"]
+    HS --> STC["Suggest vcompact"]
+    HS --> SD["Suggest Deck Skills"]
+    HS --> SO["Suggest other relevant"]
+
+    TR --> US["Update Project Status"]
+    NX --> US
+    WN --> US
+
+    SA -. "records version" .-> PV
+
+    subgraph LG["LEGEND"]
+        LS["source"]
+        LR["router"]
+        LA["action"]
+        LD["deck"]
+    end
+
+    classDef source fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+    classDef router fill:#f3e8ff,stroke:#9333ea,color:#581c87
+    classDef action fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef deck fill:#ccfbf1,stroke:#0d9488,color:#134e4a
+
+    class LC,PV,EV,MEM,LS source
+    class RT,LR router
+    class TR,NX,HS,WN,SG,SC,SA,ST,STC,SO,US,LA action
+    class DK,SD,LD deck
