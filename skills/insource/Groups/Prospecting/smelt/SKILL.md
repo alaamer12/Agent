@@ -1,9 +1,9 @@
 ---
 name: smelt
-version: 1.0.3
+version: 1.1.0
 author: Amr
 specialized: none
-description: 'Turns a completed mine run — or any research corpus of checkpoints, distillations, plans, and witness notes — into a durable, evidence-linked knowledge base another agent can consume. Trigger on "/smelt", "smelt the mine", "turn the mine for X into a knowledge base", "compress the mining folder", "make this research reusable", "build a knowledge base from these files", or any request to preserve everything learned across many large files without losing knowledge. Takes a source folder and a destination; works file by file into a running knowledge file, then reconciles folders globally. Verifies every reference URL the run left behind — exhaustively, never a sample — recording status and handling dead links, and reports each source file''s smelt yield (what share of its knowledge entered the base) sorted top yield to bottom. Writing is free-form — no template — and every claim stays traceable to its source. Never summarizes sources away, never deletes a finding, always keeps the evidence pointer.'
+description: 'Turns a completed mine run — or any corpus of checkpoints, distillations, plans and witness notes — into a durable, evidence-linked knowledge base another agent can consume. Trigger on "/smelt", "smelt the mine", "build a knowledge base from these files", or any request to preserve what was learned across many large files. Works file by file into a running knowledge file, then reconciles folders globally. Verifies every URL the run left behind — exhaustively, never a sample — recording status, the address a redirect landed on, and how a dead link was handled, and reports each source file''s smelt yield. Writing is free-form — no template — and every claim stays traceable to its source. Never summarizes sources away, never deletes a finding, always keeps the evidence pointer. Keeps the run''s working material in a declared .work/ zone, and scripts/smelt_check.py measures what eyeballing cannot: redirect chains, every quote span vs the cached corpus, undeclared files, counts that disagree with the tree.'
 argument-hint: "<source folder> into <destination>"
 ---
 
@@ -92,6 +92,12 @@ Transparency is structural, not a disclaimer at the bottom:
 - **References are verified, all of them.** Every URL a mining file cites — checkpoint ledgers, bibliography, inline sources — gets checked before delivery, exhaustively, not by sampling: alive, redirected, or dead, with the date and what was done about it (recovered from an archive, the claim's confidence marked down, a gap written). A dead reference is stated at the claim it supports, never quietly dropped. `provenance/links.md`.
 - **Every merge is recorded.** What was combined, what was kept apart, and what changed the writer's mind.
 
+## The package is part of the product
+
+The knowledge is the deliverable; the run also generates a sweep's output, an audit's unmatched spans, and the scripts that computed a table. That working material is kept — it is what makes a number re-checkable — but in `.work/`, declared in the INDEX layout with a line saying a reader need not open it. Nothing sits in the package undeclared, no two artifacts answer one question without the delivered ledger naming its source, and every count in prose is emitted from the rows that hold it rather than typed from memory. Full rules: `references/output.md` → "Two zones, and everything declared".
+
+`scripts/smelt_check.py` measures the half of the verify pass that is measurable — `package`, `quotes`, `links --sweep` — because a claim that survives at 352 URLs and a megabyte of prose does not survive eyeballing. It is advisory: each finding is fixed or waived with a reason. It never decides whether knowledge is right, and a clean report is not a pass.
+
 ## Writing standards
 
 - Lead with the claim, then the mechanism, then the cost.
@@ -135,4 +141,6 @@ Read the knowledge base cold, as a consumer would. It must answer, without openi
 |---|---|
 | `references/workflow.md` | Running the fold: URL sweep and check ledger, per-file integration with fold tallies, closing a folder, the single global reconciliation, large files, resume |
 | `references/knowledge-model.md` | Deciding whether something is new, duplicate, a variant, a contradiction, or a correction |
-| `references/output.md` | Writing the destination: layout, index, provenance, and the quality bar |
+| `references/output.md` | Writing the destination: layout, the two zones, index, provenance, and the quality bar |
+| `scripts/smelt_check.py` | The verify pass, step 5 — `package` (declarations, counts, receipts, duplicates, file graph), `quotes` (every span against the cached corpus), `links --sweep` (status, redirect chains, archive recovery, retained receipts). Stdlib Python, no dependencies, no network unless `--sweep` is passed |
+| `tests/test_smelt_check.py` | Before trusting a report from the checker: mutation-tests every check — builds a clean package, injects one defect per check, requires it to fire, and requires the clean package to stay silent. `python tests/test_smelt_check.py` (`--no-network` skips the local-server half) |

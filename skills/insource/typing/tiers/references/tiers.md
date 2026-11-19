@@ -119,7 +119,7 @@ func Greet(name NonEmptyString) {}
 
 ## 6. Tier 2 — brands
 
-Answer *"what does this value mean here?"* and attach every rule that follows from the meaning — format, range, unit, normalization. A module receiving a `UserEmail` knows the rules were already applied. Brand values come from the same three sources; closed sets (modes, statuses) are brands too, as enums or literal unions, never free strings; **secrets are brands** (`Token`, `Secret`) so logging and serialization can exclude them by type. Starting names: the brand catalog in the `harden` level.
+Answer *"what does this value mean here?"* and attach every rule that follows from the meaning — format, range, unit, normalization. A module receiving a `UserEmail` knows the rules were already applied. Brand values come from the same three sources; closed sets (modes, statuses) are brands too, as enums or literal unions, never free strings — the spelling tie-breaker (prefer literal where the language offers it) is owned by the `harden` level: [wrong-type-errors](../../harden/references/wrong-type-errors.md#within-rung-2-literal-or-enum-the-tie-breaker); **secrets are brands** (`Token`, `Secret`) so logging and serialization can exclude them by type. Starting names: the brand catalog in the `harden` level.
 
 ```ts
 type OrderId  = `ord_${string}`;                              // pattern type: literals checked, no function

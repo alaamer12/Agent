@@ -4,6 +4,7 @@
 Commands
 --------
     python manager.py skill <name> ...     link/copy skills (default command)
+    python manager.py interactive          checklist TUI: pick which skills stay installed
     python manager.py agent                deploy _Resources/AGENTS.md to agent configs
     python manager.py lint                 validate SKILL.md descriptions and sync
     python manager.py viber                install every skill the Viber lifecycle uses
@@ -52,7 +53,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Sequence
 from urllib.parse import unquote
 
-__version__ = "2.7.0"
+__version__ = "2.12.0"
 
 # ---------------------------------------------------------------------------
 # optional dependencies
@@ -61,6 +62,7 @@ __version__ = "2.7.0"
 try:  # rich gives colour, boxes and wrapping; everything works without it
     from rich import box as rich_box
     from rich.console import Console
+    from rich.live import Live
     from rich.panel import Panel
     from rich.table import Table
 
@@ -71,6 +73,7 @@ except Exception:  # pragma: no cover - exercised only without rich
     Table = None  # type: ignore[assignment]
     rich_box = None  # type: ignore[assignment]
     RICH_AVAILABLE = False
+    Live = None  # type: ignore[assignment]
 
 try:  # PyYAML parses every frontmatter shape correctly; fallback is minimal
     import yaml
@@ -127,7 +130,6 @@ AGENT_SKILL_SUBDIRS: dict[str, Path] = {
     "opencode": Path(".config") / "opencode" / "skills",
     "claude": Path(".claude") / "skills",
 }
-DEFAULT_AGENTS = list(AGENT_SKILL_SUBDIRS)
 
 AGENT_MD_SUBDIRS: dict[str, list[Path]] = {
     "qoder": [Path(".qoder") / "agents.md"],
@@ -150,7 +152,7 @@ ALIASES = {
 }
 
 REGISTRY = Path(__file__).resolve().parent
-COMMANDS = {"skill", "agent", "lint", "viber", "report", "find", "crossreference"}
+COMMANDS = {"skill", "agent", "agents", "claim", "remote", "interactive", "lint", "viber", "report", "find", "crossreference"}
 
 
 class ManagerError(Exception):
@@ -333,12 +335,613 @@ def home_dir() -> Path:
     return Path(override).expanduser() if override else Path.home()
 
 
+_AGENTS_CACHE: dict[str, dict[str, Any]] | None = None
+
+
+def _agent_path(raw: str) -> Path:
+    """A stored path may be absolute (user-set) or relative to the home
+    directory (seeded default)."""
+    path = Path(raw).expanduser()
+    return path if path.is_absolute() else home_dir() / path
+
+
+def agents_all(*, include_removed: bool = False) -> dict[str, dict[str, Any]]:
+    """The agents table as {name: {skill_dir, md_paths, origin}}; removal
+    tombstones are hidden unless asked for."""
+    global _AGENTS_CACHE
+    if _AGENTS_CACHE is None:
+        conn = db_connect()
+        try:
+            rows = conn.execute(
+                "SELECT name, skill_dir, md_paths, origin FROM agents ORDER BY name"
+            ).fetchall()
+        finally:
+            conn.close()
+        parsed: dict[str, dict[str, Any]] = {}
+        for name, skill_dir, md_raw, origin in rows:
+            try:
+                mds = json.loads(md_raw)
+            except (json.JSONDecodeError, TypeError):
+                mds = []
+            parsed[name] = {"skill_dir": skill_dir,
+                            "md_paths": [str(m) for m in mds if str(m)],
+                            "origin": origin}
+        _AGENTS_CACHE = parsed
+    if include_removed:
+        return dict(_AGENTS_CACHE)
+    return {n: r for n, r in _AGENTS_CACHE.items() if r["origin"] != "removed"}
+
+
+def _agents_cache_clear() -> None:
+    global _AGENTS_CACHE
+    _AGENTS_CACHE = None
+
+
+def agent_names() -> list[str]:
+    return list(agents_all())
+
+
 def agent_skill_dir(agent: str) -> Path:
-    return home_dir() / AGENT_SKILL_SUBDIRS[agent]
+    row = agents_all().get(agent)
+    if row is None or not row["skill_dir"]:
+        raise ManagerError(
+            f"agent '{agent}' is not registered in the agents table; add it with "
+            f"`manager.py agents --set {agent} --skill-dir PATH`"
+        )
+    return _agent_path(row["skill_dir"])
 
 
 def agent_md_targets(agent: str) -> list[Path]:
-    return [home_dir() / rel for rel in AGENT_MD_SUBDIRS[agent]]
+    row = agents_all().get(agent)
+    if row is None:
+        raise ManagerError(
+            f"agent '{agent}' is not registered in the agents table; add it with "
+            f"`manager.py agents --set {agent} --skill-dir PATH`"
+        )
+    return [_agent_path(rel) for rel in row["md_paths"]]
+
+
+AGENT_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,31}$")
+
+
+def _store_agent_path(raw: str) -> str:
+    """Store a user-supplied path as an absolute posix string."""
+    return Path(raw).expanduser().absolute().as_posix()
+
+
+def agents_set(name: str, *, skill_dir: str | None = None,
+               md_paths: Sequence[str] | None = None, override: bool = False) -> tuple[str, str]:
+    """Register or update one agents row. Returns (status, detail).
+    Conflicts - a differing existing row or another agent owning the same
+    skill dir - raise ManagerError unless override is set."""
+    name = name.strip().lower()
+    if not AGENT_NAME_RE.match(name):
+        raise ManagerError(
+            f"invalid agent name '{name}': lowercase letters, digits, dot, dash, "
+            f"underscore, starting alphanumeric, max 32 characters"
+        )
+    all_rows = agents_all(include_removed=True)
+    visible = agents_all()
+    existing = all_rows.get(name)
+    tombstoned = existing is not None and existing["origin"] == "removed"
+    new_skill = _store_agent_path(skill_dir) if skill_dir else None
+    new_mds = [_store_agent_path(p) for p in md_paths] if md_paths else None
+    if new_skill is None and new_mds is None:
+        raise ManagerError("agents --set needs at least --skill-dir or --md-path")
+    if tombstoned and new_skill is None:
+        raise ManagerError(f"agent '{name}' was removed; re-registering needs --skill-dir")
+    if new_skill:
+        clash = next((n for n, r in visible.items() if n != name and r["skill_dir"] == new_skill), None)
+        if clash and not override:
+            raise ManagerError(
+                f"conflict: the skill dir '{new_skill}' already belongs to agent '{clash}'. "
+                f"Pass --override to let '{name}' share it."
+            )
+    final_skill = new_skill or (existing["skill_dir"] if existing else "")
+    final_mds = new_mds if new_mds is not None else (existing["md_paths"] if existing else [])
+    if existing is not None and not tombstoned:
+        if existing["skill_dir"] == final_skill and existing["md_paths"] == final_mds:
+            return "unchanged", f"skill: {final_skill}; md: {', '.join(final_mds) or 'none'}"
+        if not override:
+            raise ManagerError(
+                f"conflict: agent '{name}' is already registered as skill '{existing['skill_dir']}'"
+                f", md [{', '.join(existing['md_paths']) or 'none'}]; the given values differ. "
+                f"Pass --override to replace them."
+            )
+    conn = db_connect()
+    try:
+        conn.execute(
+            "INSERT INTO agents (name, skill_dir, md_paths, origin, updated_at) VALUES (?, ?, ?, ?, ?) "
+            "ON CONFLICT(name) DO UPDATE SET skill_dir = excluded.skill_dir, "
+            "md_paths = excluded.md_paths, origin = excluded.origin, updated_at = excluded.updated_at",
+            (name, final_skill, json.dumps(final_mds), "user",
+             datetime.now().isoformat(timespec="seconds")),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    _agents_cache_clear()
+    status = "added" if existing is None else ("re-registered" if tombstoned else "updated")
+    return status, f"skill: {final_skill}; md: {', '.join(final_mds) or 'none'}"
+
+
+def agents_remove(name: str) -> str:
+    """Remove an agent. Seeded defaults become tombstones so they never
+    re-seed behind the user; user-registered rows are deleted outright."""
+    name = name.strip().lower()
+    if name not in agents_all():
+        raise ManagerError(
+            f"agent '{name}' is not in the agents table (known: "
+            f"{', '.join(agent_names()) or 'none'})"
+        )
+    conn = db_connect()
+    try:
+        if name in AGENT_SKILL_SUBDIRS:
+            conn.execute(
+                "UPDATE agents SET origin = 'removed', skill_dir = '', md_paths = '[]', updated_at = ? "
+                "WHERE name = ?",
+                (datetime.now().isoformat(timespec="seconds"), name),
+            )
+        else:
+            conn.execute("DELETE FROM agents WHERE name = ?", (name,))
+        conn.commit()
+    finally:
+        conn.close()
+    _agents_cache_clear()
+    return "tombstoned" if name in AGENT_SKILL_SUBDIRS else "deleted"
+
+
+def cmd_agents(args: argparse.Namespace) -> int:
+    if getattr(args, "inventory", False):
+        return cmd_agents_inventory(args)
+    if args.set and args.remove:
+        raise ManagerError("--set and --remove are exclusive")
+    if args.remove:
+        kind = agents_remove(args.remove)
+        display_info(f"[agents] '{args.remove}' {kind} (deployments on disk were not touched)")
+    if args.set:
+        status, detail = agents_set(args.set, skill_dir=args.skill_dir,
+                                    md_paths=args.md_path, override=args.override)
+        display_info(f"[agents] {status} '{args.set}' - {detail}")
+    if args.json:
+        print(json.dumps(agents_all(), ensure_ascii=False, indent=2))
+        return 0
+    if not (args.set or args.remove or args.list):
+        display_info("no action given; showing the table (see --help for --set/--remove)")
+    rows = [[name, r["skill_dir"], " | ".join(r["md_paths"]) or "-", r["origin"]]
+            for name, r in sorted(agents_all(include_removed=True).items())]
+    display_table(["Agent", "Skill dir", "Instruction files", "Origin"], rows,
+                  title=f"{len([r for r in rows if r[3] != 'removed'])} agents (agents table)",
+                  always=True)
+    return 0
+
+
+def agent_skill_inventory(directory: Path, registry: Path) -> list[dict[str, Any]]:
+    """Installed skills in one agent directory: name, kind, source.
+    Links resolve; managed hard copies carry their record's origin."""
+    out: list[dict[str, Any]] = []
+    try:
+        entries = sorted(directory.iterdir(), key=lambda p: p.name.lower())
+    except OSError:
+        return out
+    for entry in entries:
+        if entry.name.startswith("."):
+            continue
+        if is_link_like(entry):
+            kind = "symlink" if entry.is_symlink() else "junction"
+            if not has_skill(entry):
+                kind = "broken-link"
+            out.append({"name": entry.name, "kind": kind,
+                        "source": os.path.realpath(entry)})
+        elif entry.is_dir() and has_skill(entry):
+            rec = get_record(registry, entry)
+            out.append({"name": entry.name,
+                        "kind": "managed-copy" if rec else "unmanaged-dir",
+                        "source": rec.source if rec else str(entry)})
+    return out
+
+
+def cmd_agents_inventory(args: argparse.Namespace) -> int:
+    registry = (args.registry or REGISTRY).expanduser().resolve()
+    data = {}
+    rows: list[list[str]] = []
+    for name in agent_names():
+        directory = agent_skill_dir(name)
+        items = agent_skill_inventory(directory, registry)
+        data[name] = {"dir": str(directory), "skills": items}
+        if not directory.is_dir():
+            rows.append([name, "-", "-", "dir absent"])
+            continue
+        if not items:
+            rows.append([name, "-", "-", "no skills installed"])
+        for item in items:
+            rows.append([name, item["name"], item["kind"], item["source"]])
+    if args.json:
+        print(json.dumps(data, ensure_ascii=False, indent=2))
+        return 0
+    total = sum(len(v["skills"]) for v in data.values())
+    display_table(["Agent", "Skill", "Kind", "Source"], rows,
+                  title=f"agent inventory ({len(data)} agents, {total} installed skills)",
+                  always=True)
+    return 0
+
+
+def resolve_agent_dir(raw: str) -> tuple[Path, str]:
+    """An agents-table name, or a direct folder path."""
+    name = raw.strip().lower()
+    if name in agents_all():
+        return agent_skill_dir(name), name
+    path = Path(raw).expanduser().absolute()
+    return path, f"path:{path.as_posix()}"
+
+
+def cmd_claim(args: argparse.Namespace, registry: Path) -> int:
+    """Claim X into Y: Y ends with X's skill set. Modes: override (default)
+    replaces shared entries, adds missing, and removes Y's manager-owned
+    extras (unmanaged folders protected unless --force); --append adds only
+    what Y lacks, deduped by name, never touching existing entries."""
+    src_dir, src_label = resolve_agent_dir(args.from_agent)
+    dst_dir, dst_label = resolve_agent_dir(args.into_agent)
+    if same_path(src_dir, dst_dir):
+        raise ManagerError("claim source and destination are the same folder")
+    if is_under(dst_dir, registry):
+        raise ManagerError("refusing to claim INTO the registry itself")
+    if args.append and args.force:
+        raise ManagerError("--append never removes; --force is meaningless with it")
+    if not src_dir.is_dir():
+        raise ManagerError(f"source '{src_label}' has no skills folder at {src_dir}")
+    src_items = agent_skill_inventory(src_dir, registry)
+    if not src_items:
+        raise ManagerError(
+            f"source '{src_label}' has no installed skills - refusing to claim an empty "
+            f"set into '{dst_label}' (name a populated source, or remove entries explicitly)")
+    src_items = [i for i in src_items if i["kind"] != "broken-link"]
+
+    rows: list[list[str]] = []
+    counts: Counter[str] = Counter()
+    failures = 0
+    dst_dir.parent.mkdir(parents=True, exist_ok=True)
+    src_names = {i["name"] for i in src_items}
+    for item in src_items:
+        dest = dst_dir / item["name"]
+        existing = is_link_like(dest) or dest.is_dir()
+        if args.append and existing:
+            rows.append([item["name"], src_label, dst_label, "kept",
+                         "already installed (append never touches existing)"])
+            counts["kept"] += 1
+            continue
+        mode = "symlink" if item["kind"] in ("symlink", "junction") else "hard-copy"
+        source = Path(item["source"])
+        # override replaces a same-named UNMANAGED folder: back it up first
+        note_extra = ""
+        if (existing and not args.append and not args.dry_run
+                and not is_link_like(dest) and dest.is_dir()
+                and get_record(registry, dest) is None):
+            if not args.no_backup:
+                archive = backup_dirs([dest], "claim-replace-backup")
+                if archive is not None:
+                    note_extra = f"; replaced unmanaged folder backed up as {archive.name}"
+        status, detail = deploy_skill(
+            source, dest, mode=mode, force=not args.append, agent=dst_label,
+            registry=registry, dry_run=args.dry_run)
+        rows.append([item["name"], str(source), dst_label, status, detail + note_extra])
+        counts[status] += 1
+        if status == "failed":
+            failures += 1
+
+    removed = 0
+    if not args.append:
+        for extra in agent_skill_inventory(dst_dir, registry):
+            if extra["name"] in src_names:
+                continue
+            entry = dst_dir / extra["name"]
+            if extra["kind"] == "broken-link" or is_link_like(entry):
+                if not args.dry_run:
+                    remove_entry(entry)
+                rows.append([extra["name"], dst_label, "-",
+                             "would unlink" if args.dry_run else "unlinked", "extra entry removed"])
+                removed += 1
+            elif extra["kind"] == "managed-copy":
+                archive = None
+                if not args.dry_run:
+                    if not args.no_backup:
+                        archive = backup_dirs([entry], "claim-remove-backup")
+                    remove_tree_local(entry)
+                    drop_record(registry, entry)
+                rows.append([extra["name"], dst_label, "-",
+                             "would remove copy" if args.dry_run else "removed copy",
+                             "managed extra" + (f"; backup {archive.name}" if archive else "")])
+                removed += 1
+            elif args.force:
+                archive = None
+                if not args.dry_run:
+                    if not args.no_backup:
+                        archive = backup_dirs([entry], "claim-remove-backup")
+                    remove_tree_local(entry)
+                rows.append([extra["name"], dst_label, "-",
+                             ("would remove" if args.dry_run else "removed") + " unmanaged",
+                             "forced" + (f"; backup {archive.name}" if archive else "")])
+                removed += 1
+            else:
+                rows.append([extra["name"], dst_label, "-", "protected",
+                             "unmanaged folder not in source (use --force)"])
+                counts["protected"] += 1
+    counts["removed"] = removed
+    display_table(["Skill", "From", "To", "Action", "Detail"], rows,
+                  title=f"claim {src_label} -> {dst_label} "
+                        f"({'append' if args.append else 'override'})",
+                  always=True)
+    display_counts(counts)
+    summary = (f"[claim] {dst_label} now has {len(src_names)} of {src_label}'s skill set; "
+               f"{counts.get('kept', 0)} kept, {removed} extra(s) removed")
+    if args.dry_run:
+        summary += " (dry run - nothing changed)"
+    display_info(summary)
+    return 1 if failures else 0
+
+
+# ---------------------------------------------------------------------------
+# remote skills: git-backed sources outside the registry
+# ---------------------------------------------------------------------------
+
+def remote_cache_root() -> Path:
+    return db_path().parent / "remotes"
+
+
+def _clear_readonly(func, path, *args) -> None:
+    try:
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+    except OSError:
+        pass
+
+
+def remove_checkout_tree(path: Path) -> None:
+    """Delete a manager-owned checkout. Git keeps loose objects read-only,
+    which silently defeats rmtree(ignore_errors=True) on Windows."""
+    if not path.exists():
+        return
+    try:
+        shutil.rmtree(path, onexc=_clear_readonly)
+    except TypeError:  # Python without onexc
+        shutil.rmtree(path, onerror=_clear_readonly)
+
+
+def remotes_all() -> dict[str, dict[str, Any]]:
+    conn = db_connect()
+    try:
+        rows = conn.execute(
+            "SELECT name, url, subpath, ref, head, added_at, updated_at FROM remotes ORDER BY name"
+        ).fetchall()
+    finally:
+        conn.close()
+    return {r[0]: {"name": r[0], "url": r[1], "subpath": r[2], "ref": r[3],
+                   "head": r[4], "added_at": r[5], "updated_at": r[6]} for r in rows}
+
+
+def remote_get(name: str) -> dict[str, Any] | None:
+    return remotes_all().get(name.strip().lower())
+
+
+def remote_upsert(name: str, url: str, subpath: str, ref: str, force: bool) -> str:
+    """Register (or re-register) a remote. Returns added/updated/unchanged."""
+    if not REMOTE_URL_RE.match(url) and not (os.path.isabs(url) and os.path.exists(url)):
+        raise ManagerError(
+            f"unsupported remote url '{url}': need https://, ssh://, git@host:path or an "
+            "existing absolute local repo path")
+    if not REMOTE_NAME_RE.match(name):
+        raise ManagerError(f"invalid remote name '{name}': lowercase letters, digits, dot, "
+                           "dash, underscore, max 64")
+    existing = remote_get(name)
+    if existing and existing["url"] != url and not force:
+        raise ManagerError(
+            f"conflict: remote '{name}' already points at '{existing['url']}'; "
+            f"pass --force to re-point it to '{url}'.")
+    status = "added" if existing is None else (
+        "unchanged" if (existing["url"], existing["subpath"], existing["ref"]) == (url, subpath, ref)
+        else "updated")
+    conn = db_connect()
+    try:
+        conn.execute(
+            "INSERT INTO remotes (name, url, subpath, ref, added_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(name) DO UPDATE SET url = excluded.url, "
+            "subpath = excluded.subpath, ref = excluded.ref, updated_at = excluded.updated_at",
+            (name, url, subpath, ref, datetime.now().isoformat(timespec="seconds"),
+             datetime.now().isoformat(timespec="seconds")),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    return status
+
+
+def remote_delete(name: str) -> None:
+    conn = db_connect()
+    try:
+        cur = conn.execute("DELETE FROM remotes WHERE name = ?", (name,))
+        conn.commit()
+    finally:
+        conn.close()
+    if cur.rowcount == 0:
+        raise ManagerError(f"no such remote '{name}' (known: "
+                           f"{', '.join(remotes_all()) or 'none'})")
+
+
+def derive_remote_name(url: str, subpath: str) -> str:
+    def tail_of(raw: str) -> str:
+        return raw.replace("\\", "/").rstrip("/").rsplit("/", 1)[-1]
+    tail = tail_of(subpath or url)
+    if tail in ("", "."):
+        tail = tail_of(url)
+    slug = re.sub(r"\.git$", "", tail)
+    slug = re.sub(r"[^a-z0-9._-]+", "-", slug.lower()).strip("-.")[:64].strip("-.")
+    return slug or "remote"
+
+
+REMOTE_URL_RE = re.compile(r"^(https://|ssh://|git@)")
+REMOTE_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
+
+
+def remote_checkout(info: dict[str, Any]) -> Path:
+    return remote_cache_root() / info["name"]
+
+
+def remote_root(info: dict[str, Any]) -> Path | None:
+    """The skill-search root inside the checkout (subpath), if fetched."""
+    dest = remote_checkout(info) / info["subpath"] if info["subpath"] else remote_checkout(info)
+    return dest if dest.is_dir() else None
+
+
+def remote_skill_dirs(info: dict[str, Any]) -> list[Path]:
+    root = remote_root(info)
+    if root is None:
+        return []
+    if has_skill(root):
+        return [root]
+    return walk_skills(root)
+
+
+def remote_fetch(info: dict[str, Any]) -> tuple[str, str]:
+    """Clone or refresh the checkout. Manager owns this directory entirely."""
+    name, url, ref = info["name"], info["url"], info["ref"]
+    dest = remote_checkout(info)
+    if (dest / ".git").exists():
+        origin = _git(dest, "config", "--get", "remote.origin.url")
+        if origin != url:
+            remove_checkout_tree(dest)  # cache is manager-owned; re-clone
+        else:
+            before = _git(dest, "rev-parse", "HEAD")
+            if ref:
+                fetch_specs = [ref]
+                resolve = "FETCH_HEAD"
+            else:
+                fetch_specs = ["+refs/heads/*:refs/remotes/origin/*"]
+                resolve = "origin/HEAD"
+            run = ["git", "-C", str(dest), "fetch", "--quiet", "--depth", "1", "origin",
+                   *fetch_specs]
+            proc = subprocess.run(run, capture_output=True, text=True,
+                                  encoding="utf-8", errors="replace", timeout=180)
+            if proc.returncode != 0:
+                return "failed", f"fetch: {proc.stderr.strip()[:200]}"
+            if not ref:
+                subprocess.run(["git", "-C", str(dest), "remote", "set-head", "origin", "--auto"],
+                               capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", timeout=60)
+            proc = subprocess.run(["git", "-C", str(dest), "reset", "--quiet", "--hard",
+                                   resolve], capture_output=True, text=True,
+                                  encoding="utf-8", errors="replace", timeout=60)
+            if proc.returncode != 0:
+                return "failed", f"reset: {proc.stderr.strip()[:200]}"
+            after = _git(dest, "rev-parse", "HEAD")
+            conn = db_connect()
+            try:
+                conn.execute("UPDATE remotes SET head = ?, updated_at = ? WHERE name = ?",
+                             (after, datetime.now().isoformat(timespec="seconds"), name))
+                conn.commit()
+            finally:
+                conn.close()
+            return ("updated" if after != before else "unchanged"), (after or "")[:9]
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    cmd = ["git", "clone", "--quiet", "--depth", "1"]
+    cmd += ["--branch", ref] if ref else []
+    cmd += [url, str(dest)]
+    proc = subprocess.run(cmd, capture_output=True, text=True,
+                          encoding="utf-8", errors="replace", timeout=300)
+    if proc.returncode != 0:
+        remove_checkout_tree(dest)
+        return "failed", f"clone: {proc.stderr.strip()[:200]}"
+    head = _git(dest, "rev-parse", "HEAD")
+    conn = db_connect()
+    try:
+        conn.execute("UPDATE remotes SET head = ?, updated_at = ? WHERE name = ?",
+                     (head, datetime.now().isoformat(timespec="seconds"), name))
+        conn.commit()
+    finally:
+        conn.close()
+    return "cloned", (head or "")[:9]
+
+
+def remote_skill_index() -> dict[str, Path]:
+    """name -> skill dir, across fetched remotes (audit support)."""
+    out: dict[str, Path] = {}
+    for info in remotes_all().values():
+        for d in remote_skill_dirs(info):
+            out.setdefault(d.name, d)
+    return out
+
+
+def cmd_remote(args: argparse.Namespace) -> int:
+    if args.add and args.remove:
+        raise ManagerError("--add and --remove are exclusive")
+    if args.add:
+        name = args.name or derive_remote_name(args.add, args.path or "")
+        status = remote_upsert(name, args.add, args.path or "", args.ref or "", args.force)
+        info = remote_get(name)
+        fstatus, detail = remote_fetch(info)
+        rows = [[name, args.add, args.path or "-", args.ref or "-", fstatus, detail]]
+        display_table(["Remote", "URL", "Subpath", "Ref", "Fetch", "Head"], rows,
+                      title=f"remote {status} '{name}'", always=True)
+        return 0 if fstatus != "failed" else 1
+    if args.remove:
+        info = remote_get(args.remove)
+        if info is None:
+            raise ManagerError(f"no such remote '{args.remove}' (known: "
+                               f"{', '.join(remotes_all()) or 'none'})")
+        victims: list[str] = []
+        for agent_dir in [agent_skill_dir(a) for a in agent_names()]:
+            if not agent_dir.is_dir():
+                continue
+            for entry in agent_dir.iterdir():
+                if is_link_like(entry):
+                    try:
+                        if os.path.commonpath([os.path.realpath(entry),
+                                               str(remote_checkout(info))]) == str(remote_checkout(info)):
+                            victims.append(f"{entry.parent.name}/{entry.name}")
+                    except (ValueError, OSError):
+                        pass
+        remote_delete(args.remove)
+        remove_checkout_tree(remote_checkout(info))
+        display_info(f"[remote] '{args.remove}' unregistered and its manager-owned cache deleted")
+        if victims:
+            display_warn("agent links still point into the removed cache: "
+                         + ", ".join(victims) + " - re-point with `skill --remote` or clean with `skill -U`")
+        return 0
+    if args.update:
+        targets = args.names or sorted(remotes_all())
+        if not targets:
+            display_info("no remotes registered; nothing to update")
+            return 0
+        rows, failures = [], 0
+        for name in targets:
+            info = remote_get(name.lower())
+            if info is None:
+                display_error(f"no such remote '{name}'")
+                failures += 1
+                continue
+            status, detail = remote_fetch(info)
+            rows.append([name, info["url"], status, detail])
+            if status == "failed":
+                failures += 1
+        display_table(["Remote", "URL", "Fetch", "Head"], rows, title="remote update", always=True)
+        return 1 if failures else 0
+    data = {}
+    rows = []
+    for info in remotes_all().values():
+        dirs = remote_skill_dirs(info)
+        data[info["name"]] = {**info, "cache": str(remote_checkout(info)),
+                              "skills": [d.name for d in dirs]}
+        rows.append([info["name"], info["url"], info["subpath"] or "-", info["ref"] or "-",
+                     str(len(dirs)) if remote_root(info) else "not fetched",
+                     info["updated_at"] or info["added_at"]])
+    if args.json:
+        print(json.dumps(data, ensure_ascii=False, indent=2))
+        return 0
+    display_table(["Remote", "URL", "Subpath", "Ref", "Skills", "Updated"], rows,
+                  title=f"{len(rows)} remotes (remotes table)", always=True)
+    if not rows:
+        display_info("no remotes registered; add one with `manager.py remote --add URL` "
+                     "or install directly: `manager.py skill --remote URL`")
+    return 0
 
 
 def is_reparse(path: Path) -> bool:
@@ -388,6 +991,20 @@ def clear_entries(entries: Iterable[Path]) -> None:
     for entry in entries:
         if entry.exists() or is_link_like(entry):
             remove_entry(entry)
+
+
+def remove_tree_local(path: Path) -> None:
+    """Delete a real directory tree WITHOUT following links or junctions:
+    nested reparse points are removed as entries, never descended."""
+    for entry in os.scandir(path):
+        child = Path(entry.path)
+        if is_link_like(child):
+            remove_entry(child)
+        elif entry.is_dir(follow_symlinks=False):
+            remove_tree_local(child)
+        else:
+            child.unlink()
+    path.rmdir()
 
 
 def make_link(source: Path, dest: Path) -> str:
@@ -448,10 +1065,43 @@ def db_connect() -> sqlite3.Connection:
             "registry TEXT NOT NULL, store TEXT NOT NULL, data TEXT NOT NULL, "
             "updated_at TEXT NOT NULL, PRIMARY KEY (registry, store))"
         )
+        _ensure_agents_table(conn)
+        _ensure_remotes_table(conn)
     except sqlite3.Error:
         conn.close()
         raise
     return conn
+
+
+def _ensure_agents_table(conn: sqlite3.Connection) -> None:
+    """Create the agents table and seed the built-in defaults once per name.
+    Rows (including removal tombstones) survive later calls, so a removed
+    default is never resurrected behind the user's back."""
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS agents ("
+        "name TEXT PRIMARY KEY, skill_dir TEXT NOT NULL, "
+        "md_paths TEXT NOT NULL DEFAULT '[]', "
+        "origin TEXT NOT NULL DEFAULT 'seed', updated_at TEXT NOT NULL)"
+    )
+    now = datetime.now().isoformat(timespec="seconds")
+    for name, subdir in AGENT_SKILL_SUBDIRS.items():
+        mds = json.dumps([p.as_posix() for p in AGENT_MD_SUBDIRS.get(name, [])])
+        conn.execute(
+            "INSERT OR IGNORE INTO agents (name, skill_dir, md_paths, origin, updated_at) "
+            "VALUES (?, ?, ?, 'seed', ?)",
+            (name, subdir.as_posix(), mds, now),
+        )
+    conn.commit()
+
+
+def _ensure_remotes_table(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS remotes ("
+        "name TEXT PRIMARY KEY, url TEXT NOT NULL, subpath TEXT NOT NULL DEFAULT '', "
+        "ref TEXT NOT NULL DEFAULT '', head TEXT NOT NULL DEFAULT '', "
+        "added_at TEXT NOT NULL, updated_at TEXT NOT NULL)"
+    )
+    conn.commit()
 
 
 def _registry_key(registry: Path) -> str:
@@ -634,6 +1284,17 @@ def drop_record(registry: Path, target: Path) -> None:
         save_manifest(registry, data)
 
 
+def drop_install(registry: Path, target: Path) -> bool:
+    """Remove the --into install index row for a target, if present."""
+    data = load_installs(registry)
+    into = data.setdefault("into", {})
+    if _key(target) in into:
+        del into[_key(target)]
+        kv_set(registry, "installs", data)
+        return True
+    return False
+
+
 def is_under(child: Path, parent: Path) -> bool:
     try:
         child_s = os.path.normcase(os.path.abspath(child))
@@ -770,6 +1431,7 @@ def audit_all(registry: Path, agents: Sequence[str], jobs: int) -> list[SyncIssu
 
     known = registry_skills(registry)
     nested = nested_skill_index(registry)
+    remote_index = remote_skill_index()
     locked = load_lockfile(registry).get("locked", {})
     record_keys = set(load_records(registry))
     expected_md = registry / AGENT_SOURCE
@@ -799,7 +1461,7 @@ def audit_all(registry: Path, agents: Sequence[str], jobs: int) -> list[SyncIssu
                               + (f"; nested skill(s) below it: {', '.join(nested_skills)}" if nested_skills else ""))
                     add("folder", name, direct, "missing-skill", detail)
                 continue
-            source = known.get(name) or nested.get(name)
+            source = known.get(name) or nested.get(name) or remote_index.get(name)
             if not direct.exists():
                 detail = f"link target is gone (expected {source})" if source else "link target is gone; name is not in the registry"
                 add("link", name, direct, "broken-link", detail)
@@ -965,22 +1627,24 @@ def resolve_skill(name: str, cwd: Path, registry_root: Path) -> Path:
 
 
 def parse_agents(raw: str) -> list[str]:
+    available = agent_names()
     if not raw:
-        return list(DEFAULT_AGENTS)
+        return available
     requested = [part.strip().lower() for part in raw.replace(",", " ").split() if part.strip()]
     if not requested or "all" in requested:
-        return list(DEFAULT_AGENTS)
+        return available
     result: list[str] = []
     unknown: list[str] = []
     for item in requested:
         name = ALIASES.get(item, item)
-        if name not in AGENT_SKILL_SUBDIRS:
+        if name not in agents_all():
             unknown.append(item)
         elif name not in result:
             result.append(name)
     if unknown:
         raise ManagerError(
-            f"unknown agent(s): {', '.join(unknown)}. Available: {', '.join(DEFAULT_AGENTS)}"
+            f"unknown agent(s): {', '.join(unknown)}. Registered: {', '.join(available)} - "
+            f"add one with `manager.py agents --set NAME --skill-dir PATH`"
         )
     return result
 
@@ -1020,6 +1684,7 @@ def backup_dirs(dirs: Sequence[Path], label: str = "skill-sync-backup") -> Path 
         return None
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     archive = home_dir() / f"{label}-{stamp}.zip"
+    archive.parent.mkdir(parents=True, exist_ok=True)
     seen: set[str] = set()
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as bundle:
         for base in existing:
@@ -1300,6 +1965,10 @@ def scan_existing(base: Path, known: set[str]) -> dict[str, list[Path]]:
 
 
 def cmd_skill(args: argparse.Namespace, registry: Path, jobs: int, invoked: set[str]) -> int:
+    if args.remove and (args.refresh or args.list):
+        raise ManagerError("--remove cannot combine with --refresh/--list")
+    if args.remote and (args.remove or args.refresh or args.list):
+        raise ManagerError("--remote cannot combine with --remove/--refresh/--list")
     if args.list:
         skills = registry_skills(registry)
         rows = [[name, str(path.relative_to(registry))] for name, path in sorted(skills.items())]
@@ -1310,29 +1979,39 @@ def cmd_skill(args: argparse.Namespace, registry: Path, jobs: int, invoked: set[
     if into is not None and ({"-A", "--agents"} & invoked):
         raise ManagerError("--into targets one folder; drop --agents")
 
+    if args.remove:
+        return cmd_skill_remove(args, registry, into)
+
     if args.refresh:
         if args.skills or args.all:
             raise ManagerError("--refresh cannot be combined with skill names or --all")
         return cmd_refresh(args, registry, jobs, into)
-
-    if args.all:
-        names = sorted(registry_skills(registry))
-    else:
-        names = list(args.skills)
-    if not names:
-        raise ManagerError("name at least one skill, or use --all / --refresh")
 
     hard = bool(args.hard_copy or args.mode == "copy")
     if args.hard_copy and args.mode == "symlink" and ({"-M", "--mode"} & invoked):
         raise ManagerError("--hard-copy and --mode symlink contradict each other")
     mode = "hard-copy" if hard else "symlink"
 
-    sources: list[Path] = []
-    for name in names:
-        try:
-            sources.append(resolve_skill(name, Path.cwd(), registry))
-        except ManagerError as exc:
-            display_error(str(exc))
+    if args.remote:
+        if args.all:
+            raise ManagerError("--remote takes its skill list from the checkout; drop --all")
+        if args.lock:
+            display_warn("--lock records registry skills only; remote installs are not locked")
+        sources = remote_sources(args.remote, list(args.skills))
+    else:
+        if args.all:
+            names = sorted(registry_skills(registry))
+        else:
+            names = list(args.skills)
+        if not names:
+            raise ManagerError("name at least one skill, or use --all / --refresh")
+
+        sources = []
+        for name in names:
+            try:
+                sources.append(resolve_skill(name, Path.cwd(), registry))
+            except ManagerError as exc:
+                display_error(str(exc))
     if not sources:
         return 1
 
@@ -1381,10 +2060,485 @@ def cmd_skill(args: argparse.Namespace, registry: Path, jobs: int, invoked: set[
     display_table(["Target", "Skill", "Mode", "Status", "Detail"], rows, title="skill deployment")
     display_counts(counts)
 
-    if args.lock and successful and not args.dry_run:
+    if args.lock and successful and not args.dry_run and not args.remote:
         record_locks(registry, successful, parse_agents(args.agents))
         display_info(f"[lock] recorded {len(successful)} skill(s) into the manager database")
     return 1 if failures else 0
+
+
+def remote_sources(url: str, names: list[str]) -> list[Path]:
+    """Resolve skill source dirs inside a remote checkout, registering and
+    fetching the remote as needed. The registration key is the URL-derived
+    name so `skill --remote` and `remote --add` agree on one entry."""
+    rname = derive_remote_name(url, "")
+    info = remote_get(rname)
+    if info is not None and info["url"] != url:
+        raise ManagerError(
+            f"a remote named '{rname}' already points at '{info['url']}'; register this URL "
+            f"under another name first: `manager.py remote --add {url} --name NAME`")
+    if info is None:
+        remote_upsert(rname, url, "", "", force=False)
+        info = remote_get(rname)
+        display_info(f"[remote] registered '{rname}' -> {url}")
+    status, detail = remote_fetch(info)
+    if status == "failed":
+        raise ManagerError(f"remote fetch failed for '{rname}': {detail}")
+    display_info(f"[remote] '{rname}': {status} ({detail})")
+    dirs = remote_skill_dirs(info)
+    if not dirs:
+        raise ManagerError(
+            f"no skill found in remote '{rname}' (checkout: {remote_checkout(info)}); if the "
+            "skills live in a subfolder, register it first: "
+            f"`manager.py remote --add {url} --path SUBPATH`")
+    by_name = {d.name: d for d in dirs}
+    if names:
+        sources = []
+        for raw in names:
+            key = Path(raw.rstrip("/\\")).name
+            hit = by_name.get(key)
+            if hit is None:
+                display_error(f"'{key}' is not a skill in remote '{rname}' "
+                              f"(available: {', '.join(sorted(by_name))})")
+            else:
+                sources.append(hit)
+        return sources
+    if len(dirs) > 1:
+        rows = [[d.name, d.relative_to(remote_checkout(info)).as_posix()] for d in dirs]
+        display_table(["Skill", "Path in checkout"], rows, title=f"remote '{rname}' skills")
+        raise ManagerError(
+            f"remote '{rname}' holds {len(dirs)} skills; name the ones to install")
+    return dirs
+
+
+def remove_lock_entry(registry: Path, name: str, agent: str | None) -> None:
+    """Drop the --lock row for (skill, agent); prune the skill when empty."""
+    if agent is None:
+        return
+    data = load_lockfile(registry)
+    entry = data.get("locked", {}).get(name)
+    if isinstance(entry, dict) and agent in entry:
+        del entry[agent]
+        if not entry:
+            del data["locked"][name]
+        save_lockfile(registry, data)
+
+
+def cmd_skill_remove(args: argparse.Namespace, registry: Path, into: Path | None) -> int:
+    """Uninstall deployed skills - links, junctions and tracked hard copies -
+    from agent folders or --into. Registry sources are never touched."""
+    if args.all:
+        names = sorted(registry_skills(registry))
+    else:
+        names = []
+        for raw in args.skills:
+            name = Path(raw.rstrip("/\\")).name
+            if not name:
+                raise ManagerError(f"--remove: cannot derive a skill name from '{raw}'")
+            if name not in names:
+                names.append(name)
+    if not names:
+        raise ManagerError("--remove: name at least one skill, or use --all")
+
+    if into is not None:
+        roots: list[tuple[str, Path, str | None]] = [(f"into {into}", into, None)]
+    else:
+        roots = [(agent, agent_skill_dir(agent), agent) for agent in parse_agents(args.agents)]
+
+    rows: list[list[str]] = []
+    counts: Counter[str] = Counter()
+    failures = 0
+    for label, root, agent in roots:
+        for name in names:
+            target = root / name
+            exists_or_link = False
+            try:
+                exists_or_link = target.exists() or is_link_like(target)
+            except OSError:
+                pass
+            if not exists_or_link:
+                rows.append([label, name, "-", "absent", str(target)])
+                counts["absent"] += 1
+                continue
+            if is_under(target, registry) or same_path(target, registry):
+                rows.append([label, name, "-", "protected", "registry source is never removed here"])
+                counts["protected"] += 1
+                continue
+            if is_link_like(target):
+                kind = "symlink" if target.is_symlink() else "junction"
+                detail = f"-> {os.path.realpath(target)}"
+                if not args.dry_run:
+                    try:
+                        remove_entry(target)
+                    except OSError as exc:
+                        rows.append([label, name, kind, "failed", str(exc)])
+                        counts["failed"] += 1
+                        failures += 1
+                        continue
+                    drop_install(registry, target)
+                    remove_lock_entry(registry, name, agent)
+                rows.append([label, name, kind, "would unlink" if args.dry_run else "unlinked", detail])
+                counts["unlinked"] += 1
+                continue
+            if target.is_file():
+                if not args.force:
+                    rows.append([label, name, "file", "skipped", "stray file, unmanaged (use --force)"])
+                    counts["skipped"] += 1
+                    continue
+                if not args.dry_run:
+                    remove_entry(target)
+                rows.append([label, name, "file", "removed file" if not args.dry_run else "would remove file",
+                             "unmanaged"])
+                counts["removed"] += 1
+                continue
+            # real directory: managed copy, or unmanaged tree
+            record = get_record(registry, target)
+            managed = record is not None
+            if not managed and not args.force:
+                rows.append([label, name, "directory", "skipped",
+                             "unmanaged directory, not a tracked copy (use --force)"])
+                counts["skipped"] += 1
+                continue
+            action = ("would remove copy" if args.dry_run else "removed copy") if managed \
+                else ("would remove tree" if args.dry_run else "removed tree")
+            detail = "tracked in manager database" if managed else "unmanaged (forced)"
+            if not args.dry_run:
+                if not args.no_backup:
+                    archive = backup_dirs([target], "skill-remove-backup")
+                    if archive is not None:
+                        detail += f"; backup {archive.name}"
+                try:
+                    remove_tree_local(target)
+                except OSError as exc:
+                    rows.append([label, name, "directory", "failed", str(exc)])
+                    counts["failed"] += 1
+                    failures += 1
+                    continue
+                drop_record(registry, target)
+                drop_install(registry, target)
+                remove_lock_entry(registry, name, agent)
+            rows.append([label, name, "directory", action, detail])
+            counts["removed"] += 1
+
+    display_table(["Target", "Skill", "Kind", "Action", "Detail"], rows, title="skill removal")
+    display_counts(counts)
+    if not args.dry_run and counts.get("removed", 0) + counts.get("unlinked", 0):
+        removed_rows = prune_installs(registry)
+        if removed_rows:
+            display_info(f"[installs] pruned {len(removed_rows)} stale index row(s)")
+    return 1 if failures else 0
+
+
+# ---------------------------------------------------------------------------
+# interactive checklist picker
+# ---------------------------------------------------------------------------
+
+def checklist_step(visible: Sequence[str], selected: set[str], cursor: int,
+                   key: str) -> tuple[int, set[str], str]:
+    """Pure checklist transitions, shared by the TUI, its tests and prompts.
+    Returns (cursor, selected copy, action) with action in move/toggle/all/
+    done/quit/none."""
+    out = set(selected)
+    if key == "up":
+        return max(0, cursor - 1), out, "move"
+    if key == "down":
+        return min(max(0, len(visible) - 1), cursor + 1), out, "move"
+    if key == "home":
+        return 0, out, "move"
+    if key == "end":
+        return max(0, len(visible) - 1), out, "move"
+    if key == "pgup":
+        return max(0, cursor - 10), out, "move"
+    if key == "pgdn":
+        return min(max(0, len(visible) - 1), cursor + 10), out, "move"
+    if key == "space" and visible:
+        name = visible[min(cursor, len(visible) - 1)]
+        if name in out:
+            out.discard(name)
+        else:
+            out.add(name)
+        return cursor, out, "toggle"
+    if key == "a" and visible:
+        if any(name not in out for name in visible):
+            out.update(visible)
+        else:
+            out.difference_update(visible)
+        return cursor, out, "all"
+    if key == "enter":
+        return cursor, out, "done"
+    if key in ("q", "esc", "ctrl-c"):
+        return cursor, out, "quit"
+    return cursor, out, "none"
+
+
+def _read_key() -> str:
+    """One keypress as a logical name (up/down/space/enter/esc/...); single
+    printable characters come back lowercased."""
+    if os.name == "nt":
+        import msvcrt
+
+        ch = msvcrt.getwch()
+        if ch == "\x03":
+            return "ctrl-c"
+        if ch in ("\x00", "\xe0"):
+            extended = msvcrt.getwch()
+            return {"H": "up", "P": "down", "K": "left", "M": "right",
+                    "G": "home", "O": "end", "I": "pgup", "Q": "pgdn",
+                    "S": "delete"}.get(extended, "")
+        if ch == "\x1b":
+            return "esc"
+        if ch in ("\r", "\n"):
+            return "enter"
+        if ch == "\x08":
+            return "backspace"
+        if ch == " ":
+            return "space"
+        return ch.lower()
+    import select
+    import termios
+    import tty
+
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    try:
+        tty.setcbreak(fd)
+        ch = sys.stdin.read(1)
+        if ch == "\x03":
+            return "ctrl-c"
+        if ch == "\x1b":
+            if not select.select([sys.stdin], [], [], 0)[0]:
+                return "esc"
+            seq = sys.stdin.read(1)
+            if seq == "[":
+                code = sys.stdin.read(1)
+                return {"A": "up", "B": "down", "C": "right", "D": "left",
+                        "H": "home", "F": "end", "5": "pgup", "6": "pgdn"}.get(code, "")
+            return "esc"
+        if ch in ("\r", "\n"):
+            return "enter"
+        if ch in ("\x7f", "\x08"):
+            return "backspace"
+        if ch == " ":
+            return "space"
+        return ch.lower()
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+
+def _checklist_lines(visible: Sequence[str], selected: set[str], cursor: int,
+                     installed: set[str], height: int) -> tuple[list[str], int]:
+    """Plain-text checklist window; returns (lines, top index kept on screen)."""
+    top = min(max(0, cursor), max(0, len(visible) - 1))
+    if cursor >= top + height:
+        top = cursor - height + 1
+    elif cursor < top:
+        top = cursor
+    top = max(0, min(top, len(visible) - height))
+    lines = []
+    for index in range(top, min(top + height, len(visible))):
+        name = visible[index]
+        box = "x" if name in selected else " "
+        mark = ">" if index == cursor else " "
+        tag = "installed" if name in installed else "-"
+        lines.append(f"{mark} [{box}] {name:<30} {tag}")
+    if not lines:
+        lines.append("  (no skills match the filter)")
+    return lines, top
+
+
+def _pick_tui(names: Sequence[str], selected: set[str], installed: set[str]) -> set[str] | None:
+    """Arrow-key multi-select rendered with rich Live (or ANSI redraw). None
+    means the user cancelled."""
+    state_selected = set(selected)
+    cursor = 0
+    pending_filter = ""
+    committed_filter = ""
+    mode = "nav"
+    height = max(5, shutil.get_terminal_size((100, 30)).lines - 8)
+    sys.stdout.write("\x1b[?25l")
+
+    def visible_now() -> list[str]:
+        needle = committed_filter.lower()
+        return [n for n in names if not needle or needle in n.lower()]
+
+    def frame() -> str:
+        visible = visible_now()
+        lines, _top = _checklist_lines(visible, state_selected, cursor, installed, height)
+        done = sum(1 for n in visible if n in state_selected)
+        header = (f"skills: {len(state_selected & set(names))}/{len(names)} selected"
+                  f" ({done}/{len(visible)} shown)"
+                  + (f"   filter: {committed_filter}" if committed_filter else ""))
+        hint = ("up/down move - space toggle - a all/none - / filter - enter plan - q quit"
+                + ("   [typing filter: enter applies, esc cancels]" if mode == "filter" else ""))
+        return "\n".join([header, *lines, hint])
+
+    console = _console()
+    use_live = console is not None and Live is not None
+    if use_live:
+        from rich.text import Text
+
+    live: Any = None
+    try:
+        if use_live:
+            live = Live(Text(frame()), console=console, transient=True,
+                        refresh_per_second=12)
+            live.__enter__()
+        else:
+            sys.stdout.write("\x1b[2J\x1b[H" + frame() + "\n")
+            sys.stdout.flush()
+        while True:
+            key = _read_key()
+            if key == "":
+                continue
+            redraw = True
+            if mode == "filter":
+                if key == "enter":
+                    committed_filter = pending_filter
+                    mode = "nav"
+                elif key in ("esc", "ctrl-c"):
+                    pending_filter = committed_filter
+                    mode = "nav"
+                elif key == "backspace":
+                    pending_filter = pending_filter[:-1]
+                elif len(key) == 1 and key.isprintable():
+                    pending_filter += key
+                else:
+                    redraw = False
+            elif key == "/":
+                pending_filter = committed_filter
+                mode = "filter"
+            else:
+                visible = visible_now()
+                cursor, state_selected, action = checklist_step(visible, state_selected, cursor, key)
+                cursor = min(cursor, max(0, len(visible) - 1))
+                if action == "done":
+                    return state_selected
+                if action == "quit":
+                    return None
+                if action == "none":
+                    redraw = False
+            if not redraw:
+                continue
+            if live is not None:
+                live.update(Text(frame()))
+            else:
+                sys.stdout.write("\x1b[2J\x1b[H" + frame() + "\n")
+                sys.stdout.flush()
+    finally:
+        if live is not None:
+            live.__exit__(None, None, None)
+        sys.stdout.write("\x1b[0m\x1b[?25h")
+        sys.stdout.flush()
+
+
+def _pick_fallback(names: Sequence[str], selected: set[str], installed: set[str]) -> set[str] | None:
+    """Numbered-prompt multi-select for pipes, dumb terminals and --no-tui."""
+    shown = set(selected)
+    display_info("[interactive] numbered picker (type skill numbers to toggle them)")
+    for index, name in enumerate(names, start=1):
+        box = "x" if name in shown else " "
+        tag = " installed" if name in installed else ""
+        print(f"  {index:>3}. [{box}] {name}{tag}")
+    while True:
+        try:
+            raw = input("choose> ").strip().lower()
+        except EOFError:
+            return None
+        if not raw:
+            continue
+        if raw in ("done", "d"):
+            return shown
+        if raw == "quit":
+            return None
+        if raw == "all":
+            shown = set(names)
+            continue
+        if raw == "none":
+            shown = set()
+            continue
+        for token in raw.replace(",", " ").split():
+            if not token.isdigit():
+                print(f"  ? '{token}' is not a number, 'all', 'none', 'done' or 'quit'")
+                continue
+            index = int(token)
+            if not 1 <= index <= len(names):
+                print(f"  ? no skill number {index} (1..{len(names)})")
+                continue
+            name = names[index - 1]
+            if name in shown:
+                shown.discard(name)
+            else:
+                shown.add(name)
+
+
+def _confirm_apply() -> bool:
+    try:
+        answer = input("Apply changes? [y/N] ").strip().lower()
+    except EOFError:
+        answer = ""
+    return answer in ("y", "yes")
+
+
+def cmd_interactive(args: argparse.Namespace, registry: Path, jobs: int, invoked: set[str]) -> int:
+    """Reconcile what stays installed: multi-select the skills to keep, then
+    apply installs/uninstalls behind one [y/N] confirmation."""
+    into = resolve_into(args.into) if args.into else None
+    if into is not None and ({"-A", "--agents"} & invoked):
+        raise ManagerError("--into targets one folder; drop --agents")
+    skills = registry_skills(registry)
+    if not skills:
+        raise ManagerError("the registry holds no skills to pick from")
+    if into is not None:
+        roots: list[tuple[str, Path, str | None]] = [(f"into {into}", into, None)]
+    else:
+        roots = [(agent, agent_skill_dir(agent), agent) for agent in parse_agents(args.agents)]
+    installed: set[str] = set()
+    for _label, root, _agent in roots:
+        installed.update(item["name"] for item in agent_skill_inventory(root, registry))
+
+    names = sorted(skills, key=str.lower)
+    selected = {name for name in names if name in installed}
+    if args.no_tui or not (sys.stdin.isatty() and sys.stdout.isatty()):
+        chosen = _pick_fallback(names, selected, installed)
+    else:
+        chosen = _pick_tui(names, selected, installed)
+    if chosen is None:
+        display_info("[interactive] cancelled; nothing changed")
+        return 0
+
+    to_install = sorted(chosen - installed, key=str.lower)
+    to_remove = sorted(installed & (set(names) - chosen), key=str.lower)
+    foreign = sorted(installed - set(names))
+    rows = [[name, "install"] for name in to_install] + [[name, "uninstall"] for name in to_remove]
+    title = (f"interactive plan: {len(to_install)} install, {len(to_remove)} uninstall, "
+              f"{len(chosen & installed)} keep, {len(names) - len(chosen) - len(to_remove)} absent")
+    if rows:
+        display_table(["Skill", "Action"], rows, title=title, always=True)
+    else:
+        display_info(f"{title}; nothing to change")
+        return 0
+    if foreign:
+        display_info(f"left untouched (installed but not registry skills): {', '.join(foreign)}")
+    if args.dry_run:
+        display_info("[interactive] dry-run: plan shown, nothing applied")
+        return 0
+    if not _confirm_apply():
+        display_info("[interactive] declined; nothing changed")
+        return 0
+
+    rc = 0
+    if to_install:
+        deploy_args = argparse.Namespace(
+            skills=to_install, all=False, agents=args.agents, lock=args.lock,
+            refresh=False, remove=False, list=False, remote=None, into=args.into,
+            hard_copy=args.hard_copy, mode=args.mode, force=args.force,
+            dry_run=False)
+        rc |= cmd_skill(deploy_args, registry, jobs, set())
+    if to_remove:
+        remove_args = argparse.Namespace(
+            skills=to_remove, all=False, agents=args.agents, dry_run=False,
+            force=args.force, no_backup=args.no_backup)
+        rc |= cmd_skill_remove(remove_args, registry, into)
+    return rc
 
 
 VIBER_MANIFEST = Path("../../projects/viber/viber.json")
@@ -1715,6 +2869,7 @@ def lint_skill_dirs(
     registry: Path,
     extra_roots: Sequence[Path],
     records: Iterable[CopyRecord],
+    remote_roots: Sequence[tuple[Path, str]] = (),
 ) -> list[tuple[str, Path, str]]:
     seen: dict[str, tuple[str, Path, str]] = {}
 
@@ -1729,8 +2884,9 @@ def lint_skill_dirs(
             add(record.skill, Path(record.target), "hard-copy")
     for path in walk_skills(registry, prune=False):
         add(path.name, path, "registry")
-    roots = [(agent_skill_dir(agent), f"agent:{agent}") for agent in DEFAULT_AGENTS]
+    roots = [(agent_skill_dir(agent), f"agent:{agent}") for agent in agent_names()]
     roots.extend((root, f"into:{root}") for root in extra_roots)
+    roots.extend(remote_roots)
     for root, label in roots:
         if not root.is_dir():
             continue
@@ -2114,8 +3270,17 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
     if limit <= 0:
         raise ManagerError("--max-description must be a positive number")
     extra_roots = [resolve_into(value) for value in (args.into or [])]
+    remote_roots: list[tuple[Path, str]] = []
+    if getattr(args, "remote", False):
+        for info in remotes_all().values():
+            root = remote_root(info)
+            if root is not None:
+                remote_roots.append((root, f"remote:{info['name']}"))
+            else:
+                display_warn(f"remote '{info['name']}' is not fetched yet; skipped "
+                             "(run `manager.py remote --update`)")
     records = list(load_records(registry).values())
-    skills = lint_skill_dirs(registry, extra_roots, records)
+    skills = lint_skill_dirs(registry, extra_roots, records, remote_roots)
     if not skills:
         display_warn(f"no SKILL.md files found in {registry} or the configured skill folders")
 
@@ -2257,7 +3422,7 @@ def cmd_lint(args: argparse.Namespace, registry: Path, jobs: int, issues: Sequen
     summary = [
         ("Registry", str(registry)),
         ("Roots scanned", str(1 + len(extra_roots) + sum(
-            1 for agent in DEFAULT_AGENTS if agent_skill_dir(agent).is_dir()
+            1 for agent in agent_names() if agent_skill_dir(agent).is_dir()
         ))),
         ("SKILL.md files checked", str(total_checked)),
         *[(title, str(type_counts[kind])) for kind, title in SKILL_TYPES.items()],
@@ -2560,50 +3725,69 @@ def check_versions(registry: Path, jobs: int) -> tuple[list[tuple[str, str, str,
 
 
 def cmd_report(args: argparse.Namespace, registry: Path, jobs: int) -> int:
-    inventory = walk_skills(registry, prune=False)
-    paths = inventory
-    if args.skills:
-        wanted = set(args.skills)
-        paths = [path for path in inventory if path.name in wanted]
-        for name in sorted(wanted - {path.name for path in paths}):
-            display_warn(f"no registry skill named '{name}'")
-    status_map = git_status_map(registry)
-    head = git_head(registry)
-    frontmatters = map_concurrent(lambda path: read_frontmatter(path / "SKILL.md"), paths, jobs)
-    snaps = map_concurrent(skill_snapshot, paths, jobs)
+    roots: list[tuple[str, Path]] = [("", registry)]
+    if getattr(args, "remote", False):
+        for info in remotes_all().values():
+            root = remote_root(info)
+            if root is None:
+                display_warn(f"remote '{info['name']}' is not fetched yet; skipped "
+                             "(run `manager.py remote --update`)")
+                continue
+            roots.append((f"remote:{info['name']}/", root))
+
+    wanted = set(args.skills)
+    missing = set(wanted)
     rows: list[dict[str, Any]] = []
     counted_files: set[Path] = set()
-    for path, (data, _err), snap in zip(paths, frontmatters, snaps):
-        ver, desc_len = "-", 0
-        if isinstance(data, dict):
-            v = data.get("version")
-            ver = str(v) if v is not None else "-"
-            d = data.get("description")
-            desc_len = len(d) if isinstance(d, str) else 0
-        structure = inspect_directory(path)
-        parent = skill_parent(path, inventory)
-        rel = path.relative_to(registry).as_posix()
-        counted_files.update(path / name for name in snap["files"])
-        row = {
-            "name": path.name, "type": structure.kind,
-            "parent": parent.relative_to(registry).as_posix() if parent else None,
-            "children": [child.relative_to(path).as_posix() for child in structure.children],
-            "modules": [module.relative_to(path).as_posix() for module in structure.modules],
-            "issues": list(structure.issues),
-            "version": ver, "files": snap["file_count"], "desc": desc_len,
-            "solo": snap["file_count"] == 1 and "SKILL.md" in snap["files"],
-            "git": skill_git_state(rel, status_map), "path": rel,
-        }
-        if _DISPLAY.verbose:
-            row["last_commit"] = git_last_commit(registry, rel) or "-"
-        rows.append(row)
+    heads: list[tuple[str, str | None]] = []
+    for prefix, base in roots:
+        inventory = walk_skills(base, prune=False)
+        if prefix and has_skill(base):
+            inventory.insert(0, base)
+        paths = [p for p in inventory if p.name in wanted] if wanted else list(inventory)
+        for path in paths:
+            missing.discard(path.name)
+        status_map = git_status_map(base)
+        head = git_head(base)
+        heads.append((prefix.rstrip("/") or "registry", head))
+        frontmatters = map_concurrent(lambda path: read_frontmatter(path / "SKILL.md"), paths, jobs)
+        snaps = map_concurrent(skill_snapshot, paths, jobs)
+        for path, (data, _err), snap in zip(paths, frontmatters, snaps):
+            ver, desc_len = "-", 0
+            if isinstance(data, dict):
+                v = data.get("version")
+                ver = str(v) if v is not None else "-"
+                d = data.get("description")
+                desc_len = len(d) if isinstance(d, str) else 0
+            structure = inspect_directory(path)
+            parent = skill_parent(path, inventory)
+            rel = path.relative_to(base).as_posix()
+            counted_files.update(path / name for name in snap["files"])
+            row = {
+                "name": path.name, "type": structure.kind,
+                "parent": parent.relative_to(base).as_posix() if parent else None,
+                "children": [child.relative_to(path).as_posix() for child in structure.children],
+                "modules": [module.relative_to(path).as_posix() for module in structure.modules],
+                "issues": list(structure.issues),
+                "version": ver, "files": snap["file_count"], "desc": desc_len,
+                "solo": snap["file_count"] == 1 and "SKILL.md" in snap["files"],
+                "git": skill_git_state(rel, status_map), "path": prefix + rel,
+            }
+            if _DISPLAY.verbose:
+                row["last_commit"] = git_last_commit(base, rel) or "-"
+            rows.append(row)
+    if wanted:
+        for name in sorted(missing):
+            display_warn(f"no {'registry or remote ' if len(roots) > 1 else 'registry '}skill named '{name}'")
+    head = heads[0][1] if heads else None
     sort_key = args.sort
     rows.sort(key=lambda r: r[sort_key] if sort_key != "name" else r["name"].lower(),
               reverse=args.reverse)
     type_counts = {kind: sum(row["type"] == kind for row in rows) for kind in SKILL_TYPES}
     if args.json:
         print(json.dumps({"registry": str(registry), "head": head, "skills": rows,
-                          "types": type_counts, "total_files": len(counted_files)}, indent=2))
+                          "types": type_counts, "total_files": len(counted_files),
+                          "remote_heads": {label: h for label, h in heads[1:]}}, indent=2))
         return 0
     headers = ["Skill", "Type", "Parent", "Version", "Files", "SKILL.md only", "Desc chars", "Git", "Path"]
     table_rows = [[r["name"], SKILL_TYPES[r["type"]], r["parent"] or "-", r["version"],
@@ -2625,6 +3809,7 @@ def cmd_report(args: argparse.Namespace, registry: Path, jobs: int) -> int:
         ("Avg description chars", str(avg_desc)),
         ("Sorted by", f"{sort_key}{' (desc)' if args.reverse else ' (asc)'}"),
         ("Git HEAD", head or "-"),
+        *[("Git HEAD " + label, h or "-") for label, h in heads[1:]],
     ]
     display_kv(summary, title="report summary", always=True)
     return 0
@@ -2657,7 +3842,7 @@ def cmd_find(args: argparse.Namespace, registry: Path, jobs: int) -> int:
                 locations.append((label, parent))
 
     add_tree("registry", registry, include_root=False)
-    for agent in DEFAULT_AGENTS:
+    for agent in agent_names():
         directory = agent_skill_dir(agent)
         if directory.is_dir():
             for entry in sorted(directory.iterdir()):
@@ -2665,6 +3850,14 @@ def cmd_find(args: argparse.Namespace, registry: Path, jobs: int) -> int:
                     add_tree(f"agent:{agent}", entry)
     for entry in load_installs(registry).get("into", {}).values():
         add_tree("into (recorded)", Path(entry["target"]))
+    if getattr(args, "remote", False):
+        for info in remotes_all().values():
+            root = remote_root(info)
+            if root is None:
+                display_warn(f"remote '{info['name']}' is not fetched yet; skipped "
+                             "(run `manager.py remote --update`)")
+                continue
+            add_tree(f"remote:{info['name']}", root)
 
     found_any = False
     for item in dict.fromkeys(args.skills):
@@ -2884,18 +4077,26 @@ def build_parser() -> argparse.ArgumentParser:
             "  python manager.py find pages revoke --quiet\n"
             "  python manager.py crossreference\n"
             "  python manager.py crossreference --json\n"
+            "  python manager.py remote --add https://github.com/acme/skills -p skills/\n"
+            "  python manager.py skill --remote https://github.com/acme/skills foo bar\n"
+            "  python manager.py remote --update\n"
+            "  python manager.py lint --remote\n"
+            "  python manager.py interactive\n"
+            "  python manager.py interactive --into ./my-project --hard-copy\n"
             "  python manager.py viber --into ./my-project --hard-copy\n"
         ),
     )
     parser.add_argument(
         "-V", "--version", action="version", version=f"%(prog)s {__version__}"
     )
-    subparsers = parser.add_subparsers(dest="command", metavar="{skill,agent,lint,viber,report,find,crossreference}")
+    subparsers = parser.add_subparsers(dest="command", metavar="{skill,agent,agents,claim,remote,interactive,lint,viber,report,find,crossreference}")
 
     skill = subparsers.add_parser(
         "skill",
-        help="link or copy skills (default command)",
-        description="Link or copy named skills into global agent folders or a project folder.",
+        help="link, copy, refresh, or remove skills (default command)",
+        description="Link or copy named skills into global agent folders or a project folder; "
+                    "--remove uninstalls them from wherever they are deployed "
+                    "(symlinks, junctions, tracked hard copies).",
     )
     add_common(skill)
     add_deploy_flags(skill)
@@ -2905,10 +4106,19 @@ def build_parser() -> argparse.ArgumentParser:
     skill.add_argument("-A", "--agents", default="all", help="comma-separated agents or 'all'")
     skill.add_argument("-l", "--lock", action="store_true", help="record installs in the manager database")
     skill.add_argument("-R", "--refresh", action="store_true", help="repair existing and locked entries")
+    skill.add_argument("-U", "--remove", action="store_true",
+                       help="uninstall named skills from agent folders (or --into): links and "
+                            "junctions are removed without touching sources, tracked hard copies "
+                            "are removed (backed up first); unmanaged directories need --force; "
+                            "registry sources are always protected")
     skill.add_argument("-i", "--into", default=None, help="project folder to install into instead of agent folders")
     skill.add_argument("-c", "--hard-copy", action="store_true", help="copy instead of link and track sync")
-    skill.add_argument("-B", "--no-backup", action="store_true", help="skip the backup before --refresh")
+    skill.add_argument("-B", "--no-backup", action="store_true", help="skip the backup before --refresh or --remove of hard copies")
     skill.add_argument("-L", "--list", action="store_true", help="list registry skills and exit")
+    skill.add_argument("-x", "--remote", metavar="URL", default=None,
+                       help="take the named skills from a remote git repo instead of the "
+                            "registry: registers the URL if new, fetches it, deploys from the "
+                            "cache (links point into the cache; keep fresh with `remote --update`)")
 
     viber = subparsers.add_parser(
         "viber",
@@ -2927,7 +4137,7 @@ def build_parser() -> argparse.ArgumentParser:
     viber.add_argument("-i", "--into", default=None, help="project folder to install into instead of agent folders")
     viber.add_argument("-c", "--hard-copy", action="store_true", help="copy instead of link and track sync")
     viber.add_argument("-L", "--list", action="store_true", help="list the viber skills and where they resolve, then exit")
-    viber.set_defaults(skills=[], all=False, refresh=False, no_backup=False)
+    viber.set_defaults(skills=[], all=False, refresh=False, no_backup=False, remove=False, remote=None)
 
     agent = subparsers.add_parser(
         "agent",
@@ -2939,6 +4149,112 @@ def build_parser() -> argparse.ArgumentParser:
     add_mode_flag(agent)
     agent.add_argument("-A", "--agents", default="all", help="comma-separated agents or 'all'")
     agent.add_argument("-c", "--hard-copy", action="store_true", help="copy instead of link and track sync")
+
+    agents = subparsers.add_parser(
+        "agents",
+        help="manage the agents table: where each code agent lives",
+        description="Code-agent locations are read from the agents table, seeded once from the "
+                    "built-in defaults (qoder, junie, gemini, opencode, claude). --set registers or "
+                    "updates a row; --remove unregisters without touching deployments on disk. "
+                    "Every --agents use in skill/viber/agent reads this table.",
+    )
+    add_common(agents)
+    agents.add_argument("-s", "--set", metavar="NAME", default=None,
+                        help="register a new agent or update this one")
+    agents.add_argument("-d", "--skill-dir", default=None, metavar="PATH",
+                        help="skills folder for --set (relative paths resolve against the current folder)")
+    agents.add_argument("-m", "--md-path", action="append", default=None, metavar="PATH",
+                        help="instruction file for --set, repeatable; omit to keep existing ones on update")
+    agents.add_argument("-x", "--remove", metavar="NAME", default=None,
+                        help="unregister this agent; a seeded default stays removed (tombstone row)")
+    agents.add_argument("-O", "--override", action="store_true",
+                        help="replace differing existing values or share a skill dir despite the conflict")
+    agents.add_argument("-L", "--list", action="store_true",
+                        help="show the table explicitly (also the default with no action flag)")
+    agents.add_argument("-I", "--inventory", action="store_true",
+                        help="list the skills installed in each agent folder (name, kind, resolved source)")
+    agents.add_argument("--json", action="store_true", help="print the table as JSON")
+
+    claim = subparsers.add_parser(
+        "claim",
+        help="claim one agent's skill set into another: claim X into Y",
+        description="Make Y end with X's skill set. Default mode is OVERRIDE: shared "
+                    "names are replaced (unmanaged folders replaced are backed up first), "
+                    "missing are added, and Y's extras are removed when manager-owned "
+                    "(unmanaged extras are protected unless --force). --append adds only "
+                    "what Y lacks, deduped by name, and never touches existing entries. "
+                    "X and Y are agent names from the agents table or direct folder paths. "
+                    "Deployment kind follows the source entry: links link, copies copy.",
+    )
+    add_common(claim)
+    claim.add_argument("from_agent", metavar="FROM", help="source agent name or skills folder")
+    claim.add_argument("into_agent", metavar="TO", help="destination agent name or skills folder")
+    claim.add_argument("-a", "--append", action="store_true",
+                       help="only add what the destination lacks; existing entries are kept untouched")
+    claim.add_argument("-f", "--force", action="store_true",
+                       help="override mode also removes UNMANAGED extra folders (backed up first)")
+    claim.add_argument("-d", "--dry-run", action="store_true",
+                       help="show what would happen, change nothing")
+    claim.add_argument("-B", "--no-backup", action="store_true",
+                       help="skip the automatic backup zips before replacing/removing real folders")
+
+    remote = subparsers.add_parser(
+        "remote",
+        help="register and refresh git-backed remote skill sources",
+        description="Remotes are git repositories outside this registry whose skills you can "
+                    "install with `skill --remote URL`. Manager clones them shallow into its "
+                    "cache (next to the database) and owns those copies entirely: a refresh "
+                    "re-fetches and hard-resets; --remove deletes the cache with it. --add "
+                    "registers + fetches once; --update refreshes one, several or all; with no "
+                    "action flag this lists the remotes table and fetched skill counts.",
+    )
+    add_common(remote)
+    remote.add_argument("-L", "--list", action="store_true",
+                        help="show the remotes table explicitly (default with no action flag)")
+    remote.add_argument("-a", "--add", metavar="URL", default=None,
+                        help="register a remote git URL (https://, ssh://, git@host:path or a "
+                             "local repo path for tests) and fetch it once")
+    remote.add_argument("-n", "--name", default=None,
+                        help="name for --add (default: derived from the URL/repo or --path slug)")
+    remote.add_argument("-p", "--path", default="", metavar="SUBPATH",
+                        help="path inside the repo holding the skill(s), e.g. skills/")
+    remote.add_argument("--ref", default="",
+                        help="branch or tag to track instead of the repo's default")
+    remote.add_argument("-f", "--force", action="store_true",
+                        help="--add: re-point an existing name at a different URL")
+    remote.add_argument("-u", "--update", action="store_true",
+                        help="re-fetch; named remotes follow, all remotes without")
+    remote.add_argument("-x", "--remove", metavar="NAME", default=None,
+                        help="unregister a remote and delete its manager-owned cache; agent "
+                             "links left pointing into it are reported, not silently removed")
+    remote.add_argument("names", nargs="*", help="remote name(s) for --update")
+    remote.add_argument("--json", action="store_true", help="list mode: JSON instead of a table")
+
+    interactive = subparsers.add_parser(
+        "interactive",
+        help="arrow-key checklist: pick which skills stay installed, confirm with [y/N]",
+        description="Multi-select over every registry skill, pre-checked from what the target "
+                    "folders currently hold. Toggle with space, search with /, finish with enter: "
+                    "newly checked get installed, unchecked-but-installed get uninstalled, "
+                    "everything else is left alone. A plan table follows and NOTHING changes "
+                    "until you answer y at 'Apply changes? [y/N]'. --no-tui (or a piped "
+                    "terminal) falls back to a numbered prompt. Skills installed that are not "
+                    "in the registry (hand-made, remote-only) are never touched.",
+    )
+    add_common(interactive)
+    add_deploy_flags(interactive)
+    add_mode_flag(interactive)
+    interactive.add_argument("-A", "--agents", default="all", help="comma-separated agents or 'all'")
+    interactive.add_argument("-i", "--into", default=None,
+                             help="project folder to reconcile instead of agent folders")
+    interactive.add_argument("-c", "--hard-copy", action="store_true",
+                             help="installs copy instead of linking")
+    interactive.add_argument("-l", "--lock", action="store_true",
+                             help="record installs in the manager database")
+    interactive.add_argument("-B", "--no-backup", action="store_true",
+                             help="skip the backup zips before uninstalling hard copies")
+    interactive.add_argument("-T", "--no-tui", action="store_true",
+                             help="numbered prompt instead of the arrow-key checklist")
 
     lint = subparsers.add_parser(
         "lint",
@@ -2969,6 +4285,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--no-version", action="store_true",
         help="skip skill version tracking (missing-version and unbumped-change warnings)",
     )
+    lint.add_argument(
+        "-x", "--remote", action="store_true",
+        help="also lint the skills inside every fetched remote checkout",
+    )
 
     report = subparsers.add_parser(
         "report",
@@ -2988,6 +4308,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     report.add_argument("--reverse", action="store_true", help="sort descending")
     report.add_argument("--json", action="store_true", help="emit JSON instead of a table")
+    report.add_argument("-x", "--remote", action="store_true",
+                        help="also report skills from every fetched remote checkout "
+                             "(paths prefixed remote:<name>/)")
 
     find = subparsers.add_parser(
         "find",
@@ -3003,6 +4326,8 @@ def build_parser() -> argparse.ArgumentParser:
         "skills", nargs="+",
         help="skill/module/group name(s), or directory path(s) to classify",
     )
+    find.add_argument("-x", "--remote", action="store_true",
+                      help="also search fetched remote checkouts")
 
     crossreference = subparsers.add_parser(
         "crossreference",
@@ -3069,6 +4394,8 @@ def skill_flag_labels(args: argparse.Namespace) -> list[str]:
         labels.append("-B/--no-backup")
     if args.list:
         labels.append("-L/--list")
+    if args.remote:
+        labels.append("-x/--remote")
     if args.force:
         labels.append("-f/--force")
     if args.dry_run:
@@ -3093,12 +4420,15 @@ def skill_settings(args: argparse.Namespace, registry: Path) -> list[tuple[str, 
         action = ", ".join(args.skills) if args.skills else "none"
     destination = f"into {args.into}" if args.into else f"global agents ({args.agents})"
     mode = "hard-copy" if (args.hard_copy or args.mode == "copy") else "symlink"
-    return [
+    rows = [
         ("Registry", str(registry)),
         ("Destination", destination),
         ("Mode", mode),
         ("Skills", action),
     ]
+    if getattr(args, "remote", None):
+        rows.insert(1, ("Remote", args.remote))
+    return rows
 
 
 def lint_flag_labels(args: argparse.Namespace) -> list[str]:
@@ -3113,6 +4443,8 @@ def lint_flag_labels(args: argparse.Namespace) -> list[str]:
         labels.append("--readme")
     if args.no_version:
         labels.append("--no-version")
+    if args.remote:
+        labels.append("-x/--remote")
     if args.quiet:
         labels.append("-q/--quiet")
     if args.verbose:
@@ -3132,6 +4464,8 @@ def report_flag_labels(args: argparse.Namespace) -> list[str]:
         labels.append("--reverse")
     if args.json:
         labels.append("--json")
+    if args.remote:
+        labels.append("-x/--remote")
     if args.quiet:
         labels.append("-q/--quiet")
     if args.verbose:
@@ -3180,6 +4514,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         invoked = invoked_flags(rest)
 
         # --list is a fast registry read; do not run the sync audit first.
+        if command == "agents":
+            return cmd_agents(args)
+        if command == "claim":
+            return cmd_claim(args, registry)
+        if command == "remote":
+            return cmd_remote(args)
+        if command == "interactive":
+            return cmd_interactive(args, registry, jobs, invoked)
         if command == "skill" and args.list:
             return cmd_skill(args, registry, jobs, invoked)
         if command == "viber" and args.list:
@@ -3239,6 +4581,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ],
                 flags=[
                     label for label, active in [
+                        ("-x/--remote", args.remote),
                         ("-q/--quiet", args.quiet),
                         ("-v/--verbose", args.verbose),
                         ("-C/--no-color", args.no_color),
@@ -3261,7 +4604,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 implicit=implicit,
             )
 
-        issues = audit_all(registry, DEFAULT_AGENTS, jobs)
+        issues = audit_all(registry, agent_names(), jobs)
         display_sync_banner(issues)
 
         if command == "skill":

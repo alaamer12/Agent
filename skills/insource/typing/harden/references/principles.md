@@ -52,7 +52,7 @@ Prefer the lightest representation that communicates intent and catches mistakes
 | **NewType / opaque** | nominal distinction at type-check time | Python `NewType`, Haskell newtype, Scala `opaque`, Kotlin value class |
 | **Brand / phantom** | nominal typing without a runtime wrapper | TS branded intersection, Rust newtype struct |
 | **Refinement / dependent** | encode a generic state in the type | TS template literals, refined-type libraries (Scala Iron) |
-| **Enum / union** | closed sets of allowed values | all modern languages |
+| **Enum / union** | closed sets of allowed values | all modern languages; where both spellings exist the literal is the default — [tie-breaker](wrong-type-errors.md#within-rung-2-literal-or-enum-the-tie-breaker) |
 | **Tagged union** | cases carrying different data | TS discriminated union, Rust `enum`, Go sealed interface, Python `Literal` + dataclasses |
 
 Heavy branding that forces casts on every dynamic consumer is usually worse than a well-documented alias plus a runtime creation point. (When the project adopted the tiered architecture, its laws fix which representation goes where — the `tiers` level.)
@@ -85,7 +85,7 @@ Adapt to the domain; verify the constraint against the project before reusing a 
 | Port | `Port` | positive int | 1–65535 |
 | Money amount | `MinorUnits` | int | currency minor units, never floats |
 | Non-empty text | `NonEmptyString` | text | length ≥ 1 |
-| Mode / strategy | `ScanMode`, `ReporterType` | closed set | enum / literal union |
+| Mode / strategy | `ScanMode`, `ReporterType` | closed set | literal union by default; enum only on a named need ([tie-breaker](wrong-type-errors.md#within-rung-2-literal-or-enum-the-tie-breaker)) |
 | Status | `StepStatus` | closed set | pass \| fail \| skip |
 | Opaque token / secret | `Token`, `Secret` | non-empty text | never logged |
 
@@ -132,6 +132,13 @@ Typical layout: one `types/` or `contracts/` folder per surface — public type 
 | Forcing one language's typing style on all consumers | per-ecosystem representation (§4) |
 | A rule in a comment ("must be lowercase") | the rule in a creation point the compiler enforces |
 | Partial adoption across a surface | adopt it fully or leave it (§1) |
+| Union-in/union-out flattening a correlated API (`A \| B -> C \| D`) | overloads, a generic conditional return, traits ([overloads-overrides-dispatch](./overloads-overrides-dispatch.md)) |
+| A subclass "fixing" a failed override with `Any` or an ignore | honor the base contract or restructure the hierarchy ([overloads-overrides-dispatch §2](./overloads-overrides-dispatch.md)) |
+| Wrappers/decorators typed `(args: any[]) => any` | signature-preserving wrappers (`ParamSpec`, generic rest tuples) ([overloads-overrides-dispatch §5](./overloads-overrides-dispatch.md)) |
+| Bare `list` / `dict` / `Callable` / `any` left in "typed" code | element- and parameter-typed containers; `unknown`/`object` over any ([weak-types](./weak-types.md)) |
+| One `Optional` meaning both "absent" and "explicit null" | the patch variant or a MISSING sentinel ([weak-types §4](./weak-types.md)) |
+| Growing a closed set and trusting every switch | an exhaustiveness guard turns growth into a compiler task ([weak-types §6](./weak-types.md)) |
+| A checker error silenced (`type: ignore`, `as any`, a cast) | fix the signature; suppressions only at interop, with a reason ([overloads-overrides-dispatch §3](./overloads-overrides-dispatch.md)) |
 
 Tier-architecture mistakes live in the `tiers` level.
 

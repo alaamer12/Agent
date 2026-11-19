@@ -20,9 +20,9 @@ still follows that same discipline; write a new section here — or a block in
 `source-ecosystems.md` — afterward if the technique that worked is worth
 keeping for next time (see
 `workflow.md` for when this skill accumulates a new domain's technique).
-"The ground census", "The source ledger", "The extraction bootstrap",
-"Mining technique — going from 'what' to 'why'" and "Writing the final
-document" are fully general and apply
+"The ground census", "The source ledger", "The vintage gate", "The extraction
+bootstrap", "Mining technique — going from 'what' to 'why'" and "Writing the
+final document" are fully general and apply
 regardless of source type — read the census section even for a source you
 think you already know the shape of, and write the ledger even when the run
 felt entirely local. For any artifact too big to read in one pass (book,
@@ -49,7 +49,7 @@ not free-form, and the reason is load-bearing:
   codegen layer; the two under 200k didn't") — that sentence is unwriteable
   if no checkpoint recorded the numbers, and unrecoverable after the run.
 
-### The five ground-census fields (presence is mandatory, order and voice are not)
+### The six ground-census fields (presence is mandatory, order and voice are not)
 
 | Field | Codebase source | Visual/design source | Any other source type |
 |---|---|---|---|
@@ -58,6 +58,7 @@ not free-form, and the reason is load-bearing:
 | **Composition** | language/extension split, runtime split (client vs server vs build vs docs) | palette, type families, recurring component kinds | what the thing is made of |
 | **Arrangement** | top-level directory map with a file count per entry, workspace/package manifest | layout regions and what sits in each | its sectioning or division |
 | **Reach** | which method got you here, and what that method therefore could not show you | which tool, and whether you viewed the full screen or a crop | same — always stated |
+| **Vintage** | when it was written and when it last moved (first/last commit, the release the README describes), plus **how you found that out** | when it was captured, and whether the product still ships that screen | its publication/last-update date with its evidence, or the honest "undated — here is what I checked" |
 
 Write them as a table, a paragraph, or a few scattered lines — whatever suits
 the source. What is not acceptable is a checkpoint that never says what the
@@ -83,7 +84,7 @@ An extension split is also an approximation that quietly merges things:
 production-language tally — call out the split when tests, generated code, or
 vendored paths are a big share of it.
 
-For an ecosystem outside code and design, the five fields stay identical and
+For an ecosystem outside code and design, the six fields stay identical and
 only what fills them changes — `source-ecosystems.md` names the numbers worth
 taking per ecosystem (pages, version currency, and reference-vs-tutorial mix
 for a documentation set; sections and MUST/SHOULD counts for a specification;
@@ -226,6 +227,17 @@ cite code by commit (`raw.githubusercontent.com/<o>/<r>/<sha>/path#L10-L20`, not
 its exact URL plus the date you fetched it. If all you have is `main`, say so in
 that entry — it means the line numbers may not survive the day.
 
+**The fetch date is not the source's date, and writing only the first is how a
+2014 page gets cited as if it were this year's.** `fetched 2026-11-18` records
+when *you* arrived; it says nothing about when the thing was written, and placed
+alone at the top of a ledger it reads as currency. Every ledger block therefore
+carries both, on separate terms: `fetched <date>` for the visit, and
+`published <date> (<how>)` / `updated <date> (<how>)` for the source — where
+`<how>` is the evidence the next agent could re-check, not a bare year. An
+undated page says `undated (no byline date, no metadata; earliest Wayback
+snapshot 2019-04)` rather than going quiet. How to get a date that honest is
+the next section.
+
 **Log while you fetch; never reconstruct afterwards.** Rebuilding a URL list
 from memory at write-up time reliably produces confident, invented links, which
 is the fastest way to poison a run — the parent spot-checks exactly these.
@@ -256,13 +268,213 @@ Shape of the closing block, with the tags doing the work:
 - reached  https://api.github.com/repos/<owner>/<repo>/git/trees/58e3976?recursive=1
            → cached at sources/<slug>/tree.json (truncated:false, 41,294 entries)
 - read     https://raw.githubusercontent.com/<owner>/<repo>/58e3976/src/vs/base/parts/ipc/common/ipc.ts
+           → file last touched 2023-07-14 (`git log -1 --format=%ad -- <path>`)
 - searched https://github.com/search?q=repo%3A<owner>%2F<repo>+path%3Adocs%2Fadr&type=code
            → 0 hits: no ADR directory (a negative result — the checkpoint's
            "the project keeps no ADRs" claim rests on this line)
 - partial  https://www.<vendor>.com/blog/why-we-chose-x → 1,200 chars then a signup wall
+           → published 2014-03-11 (JSON-LD `datePublished`, no `dateModified`):
+           eleven years old, and it argues for the v2 API the project deprecated
+           in 2021, so under this run's time-critical reading it backs the
+           "they chose X" claim only, not the "so X is the right call" one
 - failed   https://objects.<cdn>.githubcontent.com/<signed-path> → 403 after pin expiry;
            query string redacted
 ```
+
+## The vintage gate — how old is this source, and how do you actually know
+
+This exists because of a specific hole. A dig for database guidance accepted a
+2014 blog post. The post resolved, so link verification passed; it was a real
+source, so the plan accepted it; the agent genuinely read it, so the checkpoint
+and ledger were honest; and the ledger stamped it `fetched 2026`, which made it
+*look* current in the run record. Every check `/mine` has asks whether a source
+is **real** and whether you **actually read it**. None of them asked whether it
+is **still true** — because nothing in the run ever recorded the one fact that
+would have raised the question. A missing field can't be spot-checked: the
+parent verifies the dates a checkpoint states, and there was none to verify.
+
+**The gate is not a year.** Age is only a defect relative to what the run is
+for, and the three readings are settled per task in Phase 1, before discovery
+(`workflow.md` → "Settle the run's time-sensitivity before discovery"):
+
+- **Time-critical** — the field moved under the source, so an old page
+  misleads rather than merely pre-dating you. Tooling and library guidance,
+  framework and API usage, security practice, pricing, "which library should I
+  use", anything where the honest answer depends on what shipped this year.
+  Here an old source needs an affirmative reason to stay, not a pass by default.
+- **Time-anchored** — the date *is* the datum. "What did people believe about
+  X in 2014", the history of a decision, a postmortem of a named incident.
+  Filtering for recency here deletes the only sources that answer the question.
+- **Timeless** — age carries no penalty, and the oldest source is often the
+  best one: algorithms and theory, the classic papers, the founding spec, the
+  reasoning that still holds. A 1979 paper on B-trees is not a stale source; it
+  is the primary source, and a recency filter applied to research literature is
+  a bug, not a safeguard.
+
+So the run declares its reading once, the sources each carry their date, and the
+judgment happens against the declared reading — never against an inherited
+reflex that 2014 means obsolete or 2026 means current.
+
+### Getting a date is a reach problem, and reaches get the same rule as everything else
+
+A publish date is almost never in a search snippet, so this is not fixable by
+searching harder. The principle is the one `workflow.md` already states for
+every other reach: **manual inspection is the fallback, not the default —
+check for a purpose-built tool first**, and stay general about which tool that
+is, because the landscape turns over faster than this file does.
+
+1. **Use what this environment already has.** Some harnesses ship a professional
+   reader or search tool internally (one that returns cleaned content with its
+   structured metadata rather than a snippet), and some have a connector on
+   offer — a Firecrawl/Jina-class reader, a docs-extraction endpoint, or an MCP
+   tool for the specific platform. If one is connected, use it for dates the way
+   you'd use it for content, and note it in the plan's "Mining tool".
+2. **If none is connected, look for one, and ask.** Same sequence as the
+   reach-tool check (`workflow.md` → step 2 and step 4): search the current
+   landscape for a fitting tool, then fold the offer into the message that
+   presents the plan — connect it, or proceed manually — and say plainly if it
+   needs a paid plan or the user's own API key, so the choice is informed. A run
+   that will read forty pages has a real reason to ask; a three-source run does
+   not, and you're the one who knows which this is.
+3. **Then read what the source itself offers, strongest-as-a-*publication*
+   date first.** Stop at the first rung that answers, and record which one gave
+   it. The order below is by how well each signal supports *"this is when it was
+   written"* — which is not the same as how easy each is to find, and the two
+   get conflated into wrong dates:
+
+   - **The platform's own API or registry fields**, where one exists: registries
+     carry a per-version `time` map, arXiv carries v1 and every revision's date,
+     GitHub gives first-commit / last-push / release dates, forum and Q&A APIs
+     give `creation_date` and `last_edit_date` per post. Structured, typed, and
+     about *the object* rather than the page rendering it — nothing in HTML beats
+     these, so check for one before scraping markup.
+   - **The dateline printed on the page** — a `<time datetime="…">` element, an
+     "18 November 2026" byline, a running `29 May 2019: published` changelog the
+     author keeps in the body. This is often the **only** publication date that
+     exists, and it is the normal case for hand-authored writing: probed
+     2026-11-18 against a long-running individual engineering blog, which served
+     **no JSON-LD at all** and exposed only a *modified* stamp, while its real
+     date sat in a visible `<p class='date'>` and in the entry `<id>` URI.
+     Read the rendered page, not just its head.
+   - **Structured metadata in the document head**: JSON-LD `datePublished` /
+     `dateModified`, `<meta property="article:published_time">`,
+     `og:updated_time`. Reliable where present and typical of CMS-generated
+     sites; frequently absent where an author writes their own HTML — so its
+     absence is a finding about the source, not a licence to guess.
+   - **Feeds and sitemaps**: RSS `pubDate`, Atom `published` / `updated`,
+     `sitemap.xml <lastmod>`. All three are weaker than they look: an Atom feed
+     commonly carries **only** `<updated>` (verified on the same blog), the
+     sitemap's `<lastmod>` is a *touch* date the CMS sets on deploys, and the
+     conventional paths 404 more often than documentation admits (that same
+     blog has no `/sitemap.xml`; the Cloudflare blog does, with `<lastmod>` on
+     every entry). Try to *find* them via a `robots.txt` `Sitemap:` line or a
+     `<link rel="alternate">` in the head — but only where the site offers them,
+     since the tested blog offered neither: its robots.txt declares no sitemap
+     and its articles link no feed, so probing conventional paths is a
+     legitimate fallback before concluding the source publishes no dates at all.
+   - **Dates the prose implies**: a version number with its own release date, a
+     named incident, "we migrated in 2019 after…". Inference — label it — but a
+     page describing API v2 *is* datable when nothing on it says so.
+   - **An archival floor**: the earliest Wayback snapshot bounds the age from
+     above (a page captured in 2014 was not written in 2026) and the latest
+     bounds its *silence* — no snapshot since 2019 is evidence nobody kept it
+     current.
+   - **Nothing found** → write `undated`, list what you checked, and treat the
+     date as unknown rather than as no-date-means-new.
+
+**A modified date is not a published date, and reporting it as one is the
+specific way a machine-readable date goes wrong.** Sites publish `dateModified`
+/ `article:modified_time` / `<updated>` far more often than they publish the
+original, and a 2014 post whose typo was fixed in 2025 will hand you
+`2025-05-01` from a field you trusted because it was structured. Take the
+*earliest* defensible birth signal, name the field it came from, and when only a
+modified date exists, write it as `updated 2025-05 (article:modified_time;
+published date not stated)` — which is a real answer to a different question.
+
+**Parse, don't grep the head.** Metadata does not have one spelling: the same
+property appears as `content="…"`, `content = '…'`, with `property=` or `name=`,
+or only inside a JSON-LD block, and a pattern written for one convention misses
+the others *silently* and returns "no date found" for a page that is fully
+tagged. Ask a reader tool or an HTML parser for it; if you must scan by hand,
+scan case-insensitively for the value shape (`20\d\d-\d\d-\d\d`) across the whole
+document and then work out which field each hit came from.
+
+**What never counts as a date**: the year in the URL slug (archives get
+re-hosted, and `/2014/03/` may be a CMS path the platform chose, not a
+publication), the footer copyright range (that is the site's build year, updated
+on schedule for content nobody has touched in a decade), a search-result
+snippet's date, the domain's registration age, and your own memory of when
+something was written. Nor does HTTP `Last-Modified`: probed 2026-11-18, a page
+whose own dateline and `og:article:modified_time` both read `2019-05-29` was
+served with `Last-Modified: Thu, 12 Nov 2026` — a deploy artifact seven years and
+six months after the writing, which would date a 2019 article to six weeks ago.
+Of everything on this list, memory is the quietest
+failure: it is indistinguishable in the checkpoint from a real finding, which is
+exactly the disease the ledger was written against.
+
+**Mark the date's status the way this file marks its endpoints.** `published
+2014-03-11 (JSON-LD datePublished)` is re-checkable fact; `~2014 (earliest
+Wayback snapshot; page states no date — inferred)` is a judgment with its
+reasoning attached; a bare `2014` is neither, and reads as the first while being
+the second.
+
+### Age is not the only way a source goes stale — check whether what it describes still exists
+
+Two 2014 pages are not the same risk. One describes how to shard a database the
+project deleted in 2021; the other describes why sharding is hard, which is not
+a thing that expired. The cheap test is not the date but the **object**: name
+what the source is *about* — the version, API, product, library, standard
+revision — and check whether that thing is still current, deprecated, or gone.
+Where the object is verifiably superseded, the source's *date* stops mattering
+and its *subject* decides; where the object is stable, an old date costs you
+nothing. This is also why "actively-maintained" alone was never enough: a
+well-maintained repo can document a dead convention, and an abandoned one can
+contain the only correct explanation of how something works.
+
+### When age and authority disagree, the user decides — not the file
+
+The 2×2 has two corners the skill must not silently resolve. **Old and
+authoritative** — the engineer who built the feature writing it up in 2014, a
+commitfest thread, the original spec — often outranks anything recent, because
+recency is a proxy for relevance and authority is the thing the proxy was for.
+**New and thin** — this year's SEO listicle — passes a date filter and carries no
+knowledge at all. So judge the pair together, with the reason on the page: who
+wrote it, what gives them the standing, is it self-promotion, does it describe
+the thing or merely mention it, and what its date costs *under this run's
+reading*.
+
+Then, when the call is genuinely contestable — a source the plan's reading
+disqualifies that looks authoritative, an authoritative source you suspect is
+obsolete, or a load-bearing claim that would rest on either — **ask the user,
+with the date, the evidence for the date, and the venue in the question**, and
+let them drop it, keep it, or narrow what it may support. Don't open a separate
+round-trip per source: fold the question into the next message the run was
+sending anyway (the same batching rule the tool-offer step uses), and raise the
+whole batch once rather than interrupting mining for each page.
+
+A **subagent cannot ask.** It records the conflict in its checkpoint — source,
+date + evidence, authority read, what it would be used for, what's contestable —
+and keeps mining within whatever the plan approved; the parent collects these and
+raises them as one question, exactly as it spot-checks their ledgers. An agent
+that quietly drops a source has destroyed the only signal that the run's plan was
+wrong.
+
+### The other two modes, where vintage means something different
+
+In **run-mining** you measure the candidate today, so its *behavior* can't go
+stale — but the docs you read to write its adapter can, and the mode's known
+trap is precisely a stale favorite: abandoned-but-installed, download counts
+that lag reality (`source-ecosystems.md`). Record last release and last commit
+as census, note an unmaintained-but-winning candidate as a *result* with its
+date rather than dropping it, and prefer the current docs of the thing over any
+write-up about it.
+
+In **case-mining**, a case's date is when the incident happened and it never
+expires — a 2014 postmortem is not outdated about a 2014 failure, and filtering
+cases for recency throws away the corpus. What can expire is the **handling**:
+the remedy may name a tool that no longer exists. Date the event and the
+handling separately, and where a handling is superseded, mine what replaced it
+as the case's current form rather than quietly keeping the obsolete advice.
 
 ## The extraction bootstrap — prove the reach pipeline once, then hand it to every subagent
 
@@ -392,9 +604,14 @@ than trusting one phrasing:
 - **By authority**: `"<topic> github trending"`, or asking who the
   acknowledged reference implementations are (`"canonical <topic>
   implementation open source"`)
-- **By recency, if it matters**: append a year when freshness matters to
-  the topic (a fast-moving ecosystem's "best" list from three years ago
-  may no longer reflect the current landscape)
+- **By recency, if it matters**: append a year when the plan settled this run as
+  time-critical (a fast-moving ecosystem's "best" list from three years ago may
+  no longer reflect the current landscape). This shapes *which candidates you
+  find*; it is not a source's date and never excuses one — a 2014 post still
+  reaches your candidate list through a stale link, a quote, or a search that
+  returned it anyway. Dating and judging the sources you end up with is
+  "The vintage gate", and it runs per source on top of whatever discovery did —
+  on the candidates at plan time, and on every source actually read in Phase 2.
 
 Cross-reference at least two independent lists/sources before finalizing
 candidates — a single "top 20" blog post reflects one author's opinion,

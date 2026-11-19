@@ -750,5 +750,510 @@ class ArgumentHintTests(ManagerFixture):
         self.assertIn("Explains README command sections", verbose.stdout)
 
 
+class SkillRemoveTests(ManagerFixture):
+    def _use_sandbox_env(self) -> None:
+        """Point the in-process manager helpers at the sandbox db/home."""
+        for key in ("MANAGER_DB", "MANAGER_HOME"):
+            old = os.environ.get(key)
+            os.environ[key] = self.env[key]
+
+            def _restore(key=key, old=old) -> None:
+                if old is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = old
+
+            self.addCleanup(_restore)
+
+    def _lock_data(self) -> str:
+        import sqlite3
+        conn = sqlite3.connect(self.env["MANAGER_DB"])
+        try:
+            row = conn.execute("select data from kv where store='lock'").fetchone()
+            return row[0] if row else ""
+        finally:
+            conn.close()
+
+    def test_remove_uninstalls_agent_link_without_touching_source(self):
+        source = self.skill("solo")
+        result = self.cli("skill", "solo", "--agents", "qoder", "-l")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        link = Path(self.env["MANAGER_HOME"]) / ".qoder" / "skills" / "solo"
+        self.assertTrue(manager.is_link_like(link))
+        self.assertIn("solo", self._lock_data())
+        result = self.cli("skill", "-U", "solo", "--agents", "qoder")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(link.exists() or manager.is_link_like(link))
+        self.assertTrue((source / "SKILL.md").is_file())
+        self.assertNotIn("solo", self._lock_data())
+
+    def test_remove_hard_copy_drops_record_and_backs_up(self):
+        self._use_sandbox_env()
+        source = self.skill("solo")
+        destination = self.root / "project"
+        result = self.cli("skill", "solo", "--into", str(destination), "--hard-copy")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        target = destination / "solo"
+        self.assertTrue(target.is_dir() and not manager.is_link_like(target))
+        self.assertIsNotNone(manager.get_record(self.registry, target))
+        result = self.cli("skill", "-U", "solo", "--into", str(destination))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("removed copy", result.stdout)
+        self.assertFalse(target.exists())
+        self.assertIsNone(manager.get_record(self.registry, target))
+        self.assertTrue((source / "SKILL.md").is_file())
+        backups = list(Path(self.env["MANAGER_HOME"]).glob("skill-remove-backup-*.zip"))
+        self.assertEqual(len(backups), 1)
+
+    def test_remove_refuses_unmanaged_directory_without_force(self):
+        destination = self.root / "project"
+        handmade = destination / "handmade"
+        self.write(handmade / "SKILL.md", "# mine\n")
+        result = self.cli("skill", "-U", "handmade", "--into", str(destination))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("skipped", result.stdout)
+        self.assertTrue((handmade / "SKILL.md").is_file())
+        result = self.cli("skill", "-U", "--force", "handmade", "--into", str(destination))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(handmade.exists())
+
+    def test_remove_never_follows_nested_junctions(self):
+        destination = self.root / "project"
+        child = self.skill("child", base=self.root / "elsewhere")
+        parent = destination / "parent"
+        self.write(parent / "SKILL.md", "# parent\n")
+        manager.make_link(child, parent / "nested")
+        self.addCleanup(lambda: manager.remove_entry(parent / "nested")
+                        if manager.is_link_like(parent / "nested") else None)
+        result = self.cli("skill", "-U", "--force", "-B", "parent", "--into", str(destination))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(parent.exists())
+        self.assertTrue((child / "SKILL.md").is_file())
+
+    def test_remove_protects_registry_sources_and_dry_run_is_inert(self):
+        source = self.skill("solo")
+        destination = self.root / "project"
+        self.cli("skill", "solo", "--into", str(destination), "--hard-copy")
+        result = self.cli("skill", "-U", "solo", "--into", str(destination), "--dry-run")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("would remove copy", result.stdout)
+        self.assertTrue((destination / "solo").is_dir())
+        result = self.cli("skill", "-U", "--force", "solo", "--into", str(self.registry))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("protected", result.stdout)
+        self.assertTrue((source / "SKILL.md").is_file())
+
+    def test_remove_requires_names_or_all(self):
+        result = self.cli("skill", "-U")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("--remove", result.stdout + result.stderr)
+
+    def test_remove_accepts_multiple_names_in_one_call(self):
+        destination = self.root / "project"
+        for name, mode in (("one", []), ("two", []), ("three", ["--hard-copy"])):
+            self.skill(name)
+            result = self.cli("skill", name, "--into", str(destination), *mode)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = self.cli("skill", "-U", "one", "two", "three", "three",
+                          "--into", str(destination))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        for name in ("one", "two", "three"):
+            self.assertFalse((destination / name).exists())
+        self.assertEqual(result.stdout.count("| three "), 1)
+
+
+class AgentsTableTests(ManagerFixture):
+    def _table(self) -> dict:
+        result = self.cli("agents", "--json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads(result.stdout)
+
+    def test_defaults_are_seeded_once_from_the_builtin_locations(self):
+        table = self._table()
+        self.assertEqual(
+            sorted(table), ["claude", "gemini", "junie", "opencode", "qoder"])
+        self.assertEqual(table["qoder"]["skill_dir"], ".qoder/skills")
+        self.assertEqual(table["qoder"]["origin"], "seed")
+        # seeding is idempotent: a second call does not duplicate or reset
+        self.cli("agents", "--json")
+        self.assertEqual(sorted(self._table()), sorted(table))
+
+    def test_deploy_uses_registered_locations_not_the_builtin_paths(self):
+        source = self.skill("solo")
+        custom = self.root / "elsewhere" / "skills"
+        result = self.cli("agents", "--set", "toolmy", "--skill-dir", str(custom))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self._table()["toolmy"]["origin"], "user")
+        result = self.cli("skill", "solo", "--agents", "toolmy")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue((custom / "solo" / "SKILL.md").is_file())
+
+    def test_update_with_differing_values_errors_unless_override(self):
+        other = self.root / "second"
+        self.cli("agents", "--set", "toolmy", "--skill-dir", str(self.root / "first"))
+        result = self.cli("agents", "--set", "toolmy", "--skill-dir", str(other))
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("conflict", result.stdout + result.stderr)
+        self.assertIn("--override", result.stdout + result.stderr)
+        self.assertNotIn(str(other), self._table()["toolmy"]["skill_dir"])
+        result = self.cli("agents", "--set", "toolmy", "--skill-dir", str(other), "--override")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("updated", result.stdout)
+        self.assertEqual(self._table()["toolmy"]["skill_dir"].replace("\\", "/"),
+                         other.as_posix())
+
+    def test_sharing_another_agents_skill_dir_errors_unless_override(self):
+        shared = (self.root / "shared").as_posix()
+        self.cli("agents", "--set", "first", "--skill-dir", str(self.root / "shared"))
+        result = self.cli("agents", "--set", "second", "--skill-dir", str(self.root / "shared"))
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("already belongs to agent 'first'", result.stdout + result.stderr)
+        result = self.cli("agents", "--set", "second", "--skill-dir", str(self.root / "shared"),
+                          "--override")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("second", self._table())
+
+    def test_removed_default_stays_removed_and_rejects_deployment(self):
+        self.skill("solo")
+        result = self.cli("agents", "--remove", "qoder")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("qoder", self._table())
+        result = self.cli("agents", "--json")  # any command triggers connect + re-seed
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("qoder", self._table())
+        result = self.cli("skill", "solo", "--agents", "qoder")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("unknown agent", result.stdout + result.stderr)
+
+    def test_reregistering_a_tombstone_restores_use(self):
+        self.cli("agents", "--remove", "qoder")
+        custom = self.root / "revived"
+        result = self.cli("agents", "--set", "qoder", "--skill-dir", str(custom))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("re-registered", result.stdout)
+        self.skill("solo")
+        result = self.cli("skill", "solo", "--agents", "qoder")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue((custom / "solo" / "SKILL.md").is_file())
+
+    def test_unknown_agent_error_lists_registered_names_with_hint(self):
+        self.skill("solo")
+        result = self.cli("skill", "solo", "--agents", "ghost")
+        self.assertEqual(result.returncode, 1)
+        out = result.stdout + result.stderr
+        self.assertIn("unknown agent(s): ghost", out)
+        self.assertIn("qoder", out)
+        self.assertIn("agents --set", out)
+
+    def test_aliases_resolve_through_the_table(self):
+        self.skill("solo")
+        result = self.cli("skill", "solo", "--agents", "claude-code")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        link = Path(self.env["MANAGER_HOME"]) / ".claude" / "skills" / "solo"
+        self.assertTrue(link.exists() or manager.is_link_like(link))
+
+
+class ClaimTests(ManagerFixture):
+    def _agent(self, name: str) -> Path:
+        directory = self.root / f"{name}-skills"
+        result = self.cli("agents", "--set", name, "--skill-dir", str(directory))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        return directory
+
+    def _install(self, name: str, agent: str, *mode: str) -> None:
+        self.skill(name)
+        result = self.cli("skill", name, "--agents", agent, *mode)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_agents_inventory_lists_installed_skills(self):
+        xag = self._agent("xag")
+        self._install("solo", "xag")
+        handmade = xag / "handmade"
+        self.write(handmade / "SKILL.md", "# mine\n")
+        result = self.cli("agents", "--inventory", "--json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout)
+        skills = {s["name"]: s for s in data["xag"]["skills"]}
+        self.assertIn(skills["solo"]["kind"], ("symlink", "junction"))
+        self.assertTrue(Path(skills["solo"]["source"]).is_dir())
+        self.assertEqual(skills["handmade"]["kind"], "unmanaged-dir")
+
+    def test_claim_append_adds_missing_and_never_touches_existing(self):
+        xag, yag = self._agent("xag"), self._agent("yag")
+        self._install("one", "xag")
+        self._install("two", "xag")
+        self._install("one", "yag")
+        handmade = yag / "handmade"
+        self.write(handmade / "SKILL.md", "# mine\n")
+        result = self.cli("claim", "xag", "yag", "--append")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("kept", result.stdout)
+        self.assertTrue((yag / "two").is_dir() or manager.is_link_like(yag / "two"))
+        self.assertTrue((handmade / "SKILL.md").is_file())
+        self.assertTrue((yag / "one" / "SKILL.md").is_file())
+
+    def test_claim_override_replaces_shared_and_prunes_extras(self):
+        xag, yag = self._agent("xag"), self._agent("yag")
+        self._install("one", "xag")
+        self._install("extra", "yag", "--hard-copy")     # managed extra must go
+        result = self.cli("claim", "xag", "yag")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("removed copy", result.stdout)
+        self.assertFalse((yag / "extra").exists())
+        self.assertTrue((yag / "one" / "SKILL.md").is_file())
+        self.assertTrue((self.registry / "extra" / "SKILL.md").is_file())  # source untouched
+
+    def test_claim_override_protects_unmanaged_unless_force(self):
+        xag, yag = self._agent("xag"), self._agent("yag")
+        self._install("one", "xag")
+        handmade = yag / "handmade"
+        self.write(handmade / "SKILL.md", "# mine\n")
+        result = self.cli("claim", "xag", "yag")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("protected", result.stdout)
+        self.assertTrue((handmade / "SKILL.md").is_file())
+        result = self.cli("claim", "xag", "yag", "--force")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(handmade.exists())
+        backups = list(Path(self.env["MANAGER_HOME"]).glob("claim-remove-backup-*.zip"))
+        self.assertEqual(len(backups), 1)
+
+    def test_claim_guards_same_folder_empty_source_and_append_force(self):
+        xag = self._agent("xag")
+        self._install("one", "xag")
+        empty = self._agent("empty")
+        (self.root / "empty-skills").mkdir(parents=True, exist_ok=True)
+        result = self.cli("claim", "xag", "xag")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("same folder", result.stdout + result.stderr)
+        result = self.cli("claim", "empty", "xag")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("empty set", result.stdout + result.stderr)
+        result = self.cli("claim", "xag", "empty", "--append", "--force")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("--append never removes", result.stdout + result.stderr)
+
+    def test_claim_dry_run_is_inert(self):
+        xag, yag = self._agent("xag"), self._agent("yag")
+        self._install("one", "xag")
+        result = self.cli("claim", "xag", "yag", "--dry-run")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse((yag / "one").exists() or manager.is_link_like(yag / "one"))
+
+
+class InteractiveTests(ManagerFixture):
+    def _agent(self, name: str) -> Path:
+        directory = self.root / f"{name}-skills"
+        result = self.cli("agents", "--set", name, "--skill-dir", str(directory))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        return directory
+
+    def _run(self, stdin: str, *args: str) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [sys.executable, str(Path(manager.__file__).resolve()), "interactive",
+             "--registry", str(self.registry), "--no-color", *args],
+            env=self.env, cwd=self.root, capture_output=True, text=True,
+            input=stdin, encoding="utf-8", timeout=45,
+        )
+
+    def _seed(self, *agents_dirs: Path) -> None:
+        for name in ("aa", "bb", "cc"):
+            self.skill(name)
+        for directory in agents_dirs:
+            directory.mkdir(parents=True, exist_ok=True)
+
+    def test_checklist_step_transitions_are_pure(self):
+        visible = ["aa", "bb", "cc"]
+        cursor, selected, action = manager.checklist_step(visible, set(), 0, "down")
+        self.assertEqual((cursor, action, selected), (1, "move", set()))
+        cursor, selected, action = manager.checklist_step(visible, set(), 2, "down")
+        self.assertEqual(cursor, 2)  # clamped
+        _, selected, action = manager.checklist_step(visible, {"bb"}, 0, "space")
+        self.assertEqual((selected, action), ({"bb", "aa"}, "toggle"))
+        _, selected, action = manager.checklist_step(visible, {"aa"}, 0, "a")
+        self.assertEqual((selected, action), ({"aa", "bb", "cc"}, "all"))
+        _, selected, action = manager.checklist_step(visible, {"aa", "bb", "cc"}, 0, "a")
+        self.assertEqual((selected, action), (set(), "all"))
+        self.assertEqual(manager.checklist_step(visible, {"aa"}, 0, "enter")[2], "done")
+        for quit_key in ("q", "esc", "ctrl-c"):
+            self.assertEqual(manager.checklist_step(visible, {"aa"}, 0, quit_key)[2], "quit")
+        self.assertEqual(manager.checklist_step([], set(), 0, "space")[2], "none")
+        lines, top = manager._checklist_lines(visible, {"bb"}, 1, {"aa"}, 10)
+        self.assertEqual(top, 0)
+        self.assertIn("[x] bb", lines[1])
+        self.assertIn("installed", lines[0])
+
+    def test_interactive_installs_checked_skill(self):
+        xag = self._agent("xag")
+        self._seed(xag)
+        result = self._run("3\ndone\ny\n", "--agents", "xag")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("1 install", result.stdout)
+        self.assertTrue((xag / "cc" / "SKILL.md").is_file())
+        self.assertFalse((xag / "aa").exists())
+
+    def test_interactive_uninstalls_deselected_skill(self):
+        xag = self._agent("xag")
+        self._seed(xag)
+        result = self.cli("skill", "aa", "--agents", "xag")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = self._run("1\ndone\ny\n", "--agents", "xag")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("1 uninstall", result.stdout)
+        self.assertFalse((xag / "aa").exists())
+        self.assertTrue((self.registry / "aa" / "SKILL.md").is_file())  # source untouched
+
+    def test_interactive_confirmation_gates_everything(self):
+        xag = self._agent("xag")
+        self._seed(xag)
+        result = self._run("3\ndone\nn\n", "--agents", "xag")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("declined; nothing changed", result.stdout)
+        self.assertFalse((xag / "cc").exists())
+        result = self._run("3\nquit\n", "--agents", "xag")
+        self.assertIn("cancelled; nothing changed", result.stdout)
+        self.assertFalse((xag / "cc").exists())
+
+    def test_interactive_dry_run_shows_plan_without_touching(self):
+        xag = self._agent("xag")
+        self._seed(xag)
+        result = self._run("3\ndone\n", "--agents", "xag", "--dry-run")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("1 install", result.stdout)
+        self.assertIn("dry-run", result.stdout)
+        self.assertFalse((xag / "cc").exists())
+
+    def test_interactive_leaves_foreign_installs_untouched(self):
+        xag = self._agent("xag")
+        self._seed(xag)
+        handmade = xag / "handmade"
+        self.write(handmade / "SKILL.md", "# mine\n")
+        result = self._run("done\ny\n", "--agents", "xag")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("nothing to change", result.stdout)
+        self.assertTrue((handmade / "SKILL.md").is_file())
+
+
+class RemoteTests(ManagerFixture):
+    def _git(self, cwd: Path, *args: str) -> None:
+        proc = subprocess.run(["git", "-C", str(cwd), "-c", "user.name=t",
+                               "-c", "user.email=t@t", *args],
+                              env=self.env, capture_output=True, text=True,
+                              encoding="utf-8", timeout=60)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def _remote_repo(self, *skill_names: str) -> Path:
+        repo = self.root / "remote-repo"
+        for name in skill_names:
+            self.skill(name, base=repo)
+        repo.mkdir(parents=True, exist_ok=True)
+        self._git(repo, "init", "-q", "-b", "main")
+        self._git(repo, "add", "-A")
+        self._git(repo, "commit", "-qm", "init")
+        return repo
+
+    def _agent(self, name: str) -> Path:
+        directory = self.root / f"{name}-skills"
+        result = self.cli("agents", "--set", name, "--skill-dir", str(directory))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        return directory
+
+    def _cache(self) -> Path:
+        return self.root / "remotes" / "remote-repo"
+
+    def test_skill_remote_registers_fetches_and_links(self):
+        repo, xag = self._remote_repo("remalpha", "rembeta"), self._agent("xag")
+        result = self.cli("skill", "--remote", str(repo), "remalpha", "--agents", "xag")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(manager.is_link_like(xag / "remalpha"))
+        self.assertTrue(manager.same_path(xag / "remalpha", self._cache() / "remalpha"))
+        self.assertTrue((xag / "remalpha" / "SKILL.md").is_file())
+        self.assertFalse((xag / "rembeta").exists())
+
+    def test_skill_remote_multi_skill_repo_without_names_shows_candidates(self):
+        repo, xag = self._remote_repo("remalpha", "rembeta"), self._agent("xag")
+        result = self.cli("skill", "--remote", str(repo), "--agents", "xag")
+        self.assertEqual(result.returncode, 1)
+        output = result.stdout + result.stderr
+        self.assertIn("rembeta", output)
+        self.assertIn("name the ones to install", output)
+
+    def test_skill_remote_single_skill_repo_needs_no_name(self):
+        repo, xag = self._remote_repo("only"), self._agent("xag")
+        result = self.cli("skill", "--remote", str(repo), "--agents", "xag")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue((xag / "only" / "SKILL.md").is_file())
+
+    def test_remote_update_reflects_new_commits(self):
+        repo = self._remote_repo("remalpha")
+        self._agent("xag")
+        result = self.cli("skill", "--remote", str(repo), "--agents", "xag")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        (repo / "remalpha" / "SKILL.md").write_text(
+            (repo / "remalpha" / "SKILL.md").read_text(encoding="utf-8") + "\nMARKER\n",
+            encoding="utf-8")
+        self._git(repo, "commit", "-qam", "bump")
+        result = self.cli("remote", "--update")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("updated", result.stdout)
+        self.assertIn("MARKER", (self._cache() / "remalpha" / "SKILL.md").read_text(encoding="utf-8"))
+
+    def test_remote_remove_deletes_cache_and_warns_of_dangling_links(self):
+        repo, xag = self._remote_repo("remalpha"), self._agent("xag")
+        self.cli("skill", "--remote", str(repo), "remalpha", "--agents", "xag")
+        result = self.cli("remote", "--remove", "remote-repo")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(self._cache().exists())
+        self.assertIn("still point into the removed cache", result.stdout + result.stderr)
+
+    def test_report_and_find_and_lint_see_remotes_only_with_flag(self):
+        repo = self._remote_repo("remalpha")
+        self._agent("xag")
+        result = self.cli("skill", "--remote", str(repo), "remalpha", "--agents", "xag")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("remalpha", json.dumps(self.report()))
+        data = self.report("--remote")
+        row = next(r for r in data["skills"] if r["name"] == "remalpha")
+        self.assertEqual(row["path"], "remote:remote-repo/remalpha")
+        self.assertIn("remote:remote-repo", data["remote_heads"])
+        result = self.cli("find", "remalpha", "--remote")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("remote:remote-repo", result.stdout)
+        # a remote skill installed nowhere else is linted only via the remote root
+        self.write(repo / "rembeta" / "SKILL.md", "---\nname: rembeta\n---\n\n# beta\n")
+        self._git(repo, "add", "-A")
+        self._git(repo, "commit", "-qm", "add-beta")
+        upd = self.cli("remote", "--update")
+        self.assertEqual(upd.returncode, 0, upd.stdout + upd.stderr)
+        result = self.cli("lint", "--remote")
+        out = result.stdout + result.stderr
+        self.assertIn("remote:remote-repo", out)
+        self.assertIn("rembeta", out)
+
+    def test_skill_remote_unknown_name_lists_available(self):
+        repo, xag = self._remote_repo("remalpha", "rembeta"), self._agent("xag")
+        result = self.cli("skill", "--remote", str(repo), "nope", "--agents", "xag")
+        self.assertEqual(result.returncode, 1)
+        output = result.stdout + result.stderr
+        self.assertIn("not a skill in remote", output)
+        self.assertIn("rembeta", output)
+
+    def test_remote_add_conflict_requires_force(self):
+        repo_one, repo_two = self._remote_repo("one"), self.root / "two"
+        self.skill("solo", base=repo_two)
+        self._git(repo_two, "init", "-q", "-b", "main")
+        self._git(repo_two, "add", "-A")
+        self._git(repo_two, "commit", "-qm", "init")
+        result = self.cli("remote", "--add", str(repo_one), "--name", "shared")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        result = self.cli("remote", "--add", str(repo_two), "--name", "shared")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("--force", result.stdout + result.stderr)
+        result = self.cli("remote", "--add", str(repo_two), "--name", "shared", "--force")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        listing = self.cli("remote", "--json")
+        self.assertEqual(json.loads(listing.stdout)["shared"]["url"], str(repo_two))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,9 +1,9 @@
 ---
 name: mine
-version: 1.0.3
+version: 1.1.1
 author: Amr
 specialized: none
-description: 'Runs a deep, budgeted, multi-source dig to understand not just what a class of thing looks like but WHY - and, when asked to decide, runs the options through a fair trial and ranks them. Three modes: read-mining (census repos, docs, papers, datasets, talks and chase their why) ends in a distilled document; run-mining (one identical hard-case trial per candidate) ends in a ranked verdict with a score table; case-mining (a topic''s distinct concrete situations, each attested or labeled derived) ends in a coverage-mapped catalog where the count is a target, never padding. The user can direct the how ("/mine this PDF, 100 pages per subagent" is honored literally). Long artifacts get a noise-and-density map first; reach pipelines (PDF to text, OCR, transcription) are gated on one real sample. Resumes from plan.md. Trigger on "/mine", mining a topic, resuming a dig, "find the best 5 libraries for X and test them on hard cases", or "enumerate the cases of X". Approve a verified source plan first.'
+description: 'Runs a deep, budgeted, multi-source dig to understand not just what a class of thing looks like but WHY - and, when asked to decide, runs the options through a fair trial and ranks them. Three modes: read-mining (repos, docs, papers, talks, and their why) ends in a distilled document; run-mining (one identical hard-case trial per candidate) ends in a ranked verdict with a score table; case-mining (a topic''s distinct concrete situations, each attested or labeled derived) ends in a coverage-mapped catalog where the count is a target, never padding. The user can direct the how ("/mine this PDF, 100 pages per subagent" is honored literally). Long artifacts get a noise map first; reach pipelines are gated on one real sample. Every source is dated with evidence against the run''s declared time-sensitivity. Resumes from plan.md. Trigger on "/mine", mining a topic, resuming a dig, "find the best 5 libraries for X and test them on hard cases", or "enumerate the cases of X". Approve a verified source plan first.'
 argument-hint: "[read|run|case] <topic or source> [budget]"
 ---
 
@@ -33,7 +33,9 @@ shape — never a fill-in template —
 but with a content floor every checkpoint must clear: the source's ground
 census first — plus the noise-and-density structure split, pages read/skimmed/
 skipped, for any artifact too big to read in one pass (see
-`references/noise-and-density.md`) — the why and the cost, and a closing
+`references/noise-and-density.md`) — **the source's own vintage, dated with its
+evidence**, since a fetch date proves you arrived and never that the page is
+current, then the why and the cost, and a closing
 ledger of the URLs actually
 touched — see Phase 2 in `workflow.md`) — plus the run-state discipline: the
 plan is written to `<run>/plan/plan.md` *while it's being built* with a
@@ -81,6 +83,22 @@ that attest its cases. See `references/workflow.md` → "This skill is task-base
 what a source is, how you mine it, where candidates come from" and "Settle the
 mining method and the candidate provenance first."
 
+**A fourth reading, settled before discovery:** whether a source's *age* changes
+whether it is usable *for this task* — **time-critical** (current tooling, library
+and API guidance; an old page misleads), **time-anchored** (the date is the datum;
+recency would delete the primary sources), or **timeless** (the 1979 paper is the
+best source there is). Form it from the task's wording, state it in the plan so it
+can be corrected at approval, and ask only when it's genuinely ambiguous or would
+swing the corpus. But record every source's publication date, *with the evidence
+for the date*, under all three readings: the judgment is only ever as good as the
+field, and a run that never recorded a date has nothing for its parent to
+spot-check — a 2014 post that resolves, gets read honestly, and lands in the
+ledger stamped `fetched 2026` is exactly how a stale source survives an otherwise
+disciplined dig. Old-and-authoritative versus new-and-thin is then the **user's**
+call, raised as one batch with the dates in hand, not a threshold written here
+(`references/workflow.md` → "Settle the run's time-sensitivity before discovery";
+`references/search-and-mining-technique.md` → "The vintage gate").
+
 Alongside the three axes, the user may attach **mining directives** — explicit
 instructions about *how* to mine ("each subagent reads 100 pages", "read every
 ADR before any code", "OCR the scans, then skim"). Directives override the
@@ -96,9 +114,9 @@ performs the deep mining."
 
 | File | What it's for | Read it when |
 |---|---|---|
-| `references/workflow.md` | The full four-phase process, source-type and mining-method identification, mining directives, plan-as-file + the resume protocol, the run directory (static + dynamic folders), and every non-negotiable rule | Always, before doing anything — and first thing on any "continue/resume the mining" ask |
-| `references/source-ecosystems.md` | Every ecosystem `/mine` can mine, one block each: candidate, discovery, reach, census, where the "why" lives, dedup traps — plus what counts as a ledger entry there | Always, right after `workflow.md` — it's how you decide what kind of source this task is; the "generic shape" is what you use when nothing matches |
-| `references/search-and-mining-technique.md` | The ground census (measured size, composition and structure — commands, plus the traps that make a count quietly wrong), the source ledger (URLs touched, role tags, commit/DOI pinning, credential scrubbing), the extraction bootstrap (pick converters by searching the current landscape and gating accuracy on a real sample — never from memory, prove the pipeline once by hand, codify it in `tools/`, hand it to every subagent), then long-form technique for the two ecosystems that need it (GitHub, visual/design): concrete search technique, the what→why→cost chase, summary-vs-synthesis writing test | Always, before Phase 2 — "The ground census" and "The source ledger" are source-type-general and get read every run; the per-source-type sections only as the task needs them, "The extraction bootstrap" whenever sources need converting, and "Writing the final document" before Phase 4 |
+| `references/workflow.md` | The full four-phase process, source-type and mining-method identification, the run's time-sensitivity reading, mining directives, plan-as-file + the resume protocol, the run directory (static + dynamic folders), and every non-negotiable rule | Always, before doing anything — and first thing on any "continue/resume the mining" ask |
+| `references/source-ecosystems.md` | Every ecosystem `/mine` can mine, one block each: candidate, discovery, reach, census, where the "why" lives, dedup traps — plus what counts as a ledger entry there, and where each ecosystem's honest publication date comes from (and which naive date lies) | Always, right after `workflow.md` — it's how you decide what kind of source this task is; the "generic shape" is what you use when nothing matches |
+| `references/search-and-mining-technique.md` | The ground census (measured size, composition and structure — commands, plus the traps that make a count quietly wrong), the source ledger (URLs touched, role tags, commit/DOI pinning, credential scrubbing), the vintage gate (dating a source from real evidence — metadata, feeds, the platform's own API, an archival floor — what never counts as a date, age-versus-authority, and routing a metadata reach through the same tool check as any other), the extraction bootstrap (pick converters by searching the current landscape and gating accuracy on a real sample — never from memory, prove the pipeline once by hand, codify it in `tools/`, hand it to every subagent), then long-form technique for the two ecosystems that need it (GitHub, visual/design): concrete search technique, the what→why→cost chase, summary-vs-synthesis writing test | Always, before Phase 2 — "The ground census", "The source ledger" and "The vintage gate" are source-type-general and get read every run; the per-source-type sections only as the task needs them, "The extraction bootstrap" whenever sources need converting, and "Writing the final document" before Phase 4 |
 | `references/noise-and-density.md` | Detecting and mapping useless content before spending reading budget: front matter, indices, TOCs, running boilerplate, blank/scan artifacts, web-capture junk, media filler — measured profiling, sample-verify-before-skip, the structure split reported into the census, and page-range splitting by signal | Before reading any artifact too big to read in one pass (book, scan, long report, transcript, scraped corpus), and always before assigning page ranges to subagents |
 | `references/run-mining.md` | The run-to-decide mode: what makes a trial fair, hard-edge-case fixtures, found-vs-authored candidates, the run record + provenance ledger, safety and budget of running untrusted code, and the ranked verdict a bake-off ends in | When the task asks you to **compare, choose, or test** rather than **understand** — decided at the Phase 1 method call, then read in full before Phase 2 |
 | `references/case-mining.md` | The enumerate-the-situations mode: mapping the scenario space without padding or duplication, attested-vs-derived cases, per-case evidence, the situation→recognition→handling→cost chase, and the case catalog it ends in | When the task asks you to **collect or enumerate the concrete cases** of a topic (failure modes, hard scenarios, every way it breaks) rather than understand or rank it — decided at the Phase 1 method call, then read in full before Phase 2 |

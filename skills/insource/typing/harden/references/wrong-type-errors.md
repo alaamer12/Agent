@@ -9,12 +9,75 @@ The goal is for the **compiler** to say "this is a string, not the uppercase str
 | Rung | Mechanism | Rejects at compile time | Needs a function? |
 |------|-----------|-------------------------|-------------------|
 | 1 | A **built-in or ecosystem type** that already expresses the rule | `Uppercase<string>`, `` `${number}px` ``, refined-type libraries | no |
-| 2 | **Closed set**: literal union, enum | `"fulll"` where `"full" \| "changed"` is expected | no |
+| 2 | **Closed set**: literal union, enum — spelling tie-breaker directly below | `"fulll"` where `"full" \| "changed"` is expected | no |
 | 3 | **Nominal type**: brand, NewType, opaque type, newtype | a plain value where a named meaning is expected | only where runtime values must enter the type |
 | 4 | **Conditional / const evaluation on literals** | a bad literal, with a custom readable message | no |
 | 5 | **Runtime check** at the point dynamic data enters | nothing at compile time; throws or returns failure | yes, one boundary check |
 
 Persisted data adds a last line of defense in the database ([database constraints](./database-constraints.md)). Rungs 1 to 4 are the compiler's work. Rung 5 is used only for data that exists at runtime (input, files, network, computed strings). Do not add rung 5 functions to values the compiler can already judge.
+
+### Within rung 2: literal or enum? (the tie-breaker)
+
+**Bias warning: generators default to the enum.** Code written by agents and by habits alike tends
+to reach for `enum` / class-constants / frozen objects even when the type only has to say "one of
+these five values". An enum is the *richer* construct, and richness is not free — nominality
+friction, runtime objects leaking into JSON/DB shapes, comparison and serialization ceremony. Pay
+it only when the project needs what it provides.
+
+**The rule:** where a language offers both spellings, use the **literal spelling** (TS union of
+string literals, Python `Literal[...]`) when the set's *only* requirement is membership — a value
+must be one of these, and nothing else is asked of the type. Reach for the **enum** the moment the
+list below names a real need. "Might want it later" is not a need; the set is one edit wide to
+grow either way.
+
+| Need beyond membership | Literal spelling | Enum |
+|---|---|---|
+| a runtime object to validate boundary data against (`Object.values`, `.__members__`, iteration order, `.name`) | needs a mirrored const object | built in |
+| attach behavior (methods, docs per member) | no | yes |
+| nominal identity per set (a distinct type, not a structural alias) | structural | yes (TS enums are nominal — with assignability quirks; verify) |
+| exhaustiveness checking when switching on names | works via discriminated unions | works |
+| zero runtime footprint; values stay plain (JSON/DB/log friendly) | yes | only `[StrEnum]`-style spellings; numeric enums leak integers |
+
+**Per language — the bias only exists where both spellings exist:**
+
+- **TypeScript / Python** (both exist): this tie-breaker applies. Default literal.
+  - TS idiom for needing *both* compile and runtime presence without an `enum`: one const array,
+    both faces derived — `const ScanModes = ["full", "changed"] as const;`
+    `type ScanMode = typeof ScanModes[number];` (runtime list for guards and iteration, literal
+    union for the checker; TS's own guidance has moved away from `enum`).
+  - Python: `Literal[...]` is checker-only — at runtime the value is just the string; membership
+    for dynamic data is still a boundary check (or let the project's validation library enforce the
+    `Literal` at the edge — see [tooling-adaptation](./tooling-adaptation.md)). Use
+    `[Enum, StrEnum]` when the set is iterated, persisted by name, or behaves.
+- **Rust, Go, Scala, Kotlin, Swift, Java** (no literal types): there is no bias problem to fix —
+  the enumerated construct *is* the rung-2 spelling (`enum` with unit variants, typed string
+  constants + `iota`, `enum class`, String-backed enums). Do not invent a plain-`String` alias or a
+  magic-constant soup to dodge it; prefer the enum spelling with exhaustive `match`/`switch` over
+  scattered constants. Kotlin: `enum class` for value sets; `sealed` when cases carry data — that is
+  a tagged union, a different rung-2 neighbor.
+
+Worked contrast (same decision, two paradigms):
+
+```python
+# the mode is only ever validated for membership, then compared to plain strings
+ScanMode = Literal["full", "changed", "staged"]        # right: nothing asked beyond membership
+
+class ScanMode(StrEnum): ...                           # wrong here: nominality and import ceremony
+                                                        # bought, never used
+```
+
+```ts
+type ScanMode = "full" | "changed" | "staged";          // right: membership only
+enum ScanMode { Full = "full", Changed = "changed" }    // wrong here: a runtime object and nominal
+                                                         // assignability friction — bought, never used
+```
+
+The one-sentence test: **can you point at code that needs the enum's extra face? No → literal.
+Yes → enum (in literal-less languages, the enum spelling already is the minimal choice).**
+
+Once membership is settled, the neighboring shape questions are owned elsewhere: an input→output
+pairing beyond membership ([overloads-overrides-dispatch](./overloads-overrides-dispatch.md)), and
+silent gaps around growing or wiring such sets ([weak-types](./weak-types.md)).
 
 ## 2. Rung 1 in TypeScript (verified)
 

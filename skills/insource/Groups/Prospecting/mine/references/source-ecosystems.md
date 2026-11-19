@@ -17,7 +17,9 @@ four phases need from any domain:
 1. **Candidate** — what counts as one source here?
 2. **Discovery** — where the list of real, good ones comes from.
 3. **Reach** — how to get the actual content, cheapest-first.
-4. **Census** — what "how big / what is it made of" means for this kind.
+4. **Census** — what "how big / what is it made of" means for this kind, and
+   **when it was made** (the vintage field; where each ecosystem's honest date
+   comes from is the table below).
 5. **Why** — where rationale actually lives in this ecosystem.
 6. **Dedup / traps** — how sources fake distinctness, and what silently lies.
 
@@ -45,6 +47,27 @@ A claim with no matching ledger entry is the tell that it wasn't really
 checked — and a ledger entry you never opened is the tell that the census
 overstated reach. Both are worth catching here rather than in the
 distillation.
+
+**Where each ecosystem's honest date comes from.** Every source records its
+vintage whatever the run's time-sensitivity says — an ecosystem where old is
+*expected* is not one where old goes *unrecorded*, and the judgment is only as
+good as the field. The naive date is usually the wrong one, so the second column
+is the part that matters (`search-and-mining-technique.md` → "The vintage gate"
+holds the ladder and what never counts as a date):
+
+| Ecosystem | The date you record | Why the obvious one misleads |
+|---|---|---|
+| Codebase | first commit, last push (`pushed_at`), and the release the README describes | a repo pushed yesterday can document a convention it abandoned in 2019; READMEs lag code |
+| Visual/design | when captured, and whether the product still ships that screen | a 2026 screenshot of a UI redesigned in 2020 is a current photo of a stale product |
+| Documentation set | the **version the docs describe**, plus their build date | page build dates churn on typos; the version is the only currency that counts |
+| Research literature | publication date and **which version** (v1 vs v3) | the preprint you found is not the paper that got published, and they disagree |
+| Spec / standard | publication date **and status** — current, obsoleted by N, experimental | a 2011 RFC still normative beats a 2024 draft nobody implemented |
+| Package registry | last publish, last commit, release cadence | the three disagree, and the gap between them *is* the maintenance finding |
+| Discussion corpus | per-post `creation_date` **and** `last_edit_date` | an accepted answer quietly edited in 2025 reads as 2019 advice; an old thread can be updated by the OP |
+| Postmortem / org writing | the event date and the write-up date, both | the account is often published years after the outage, and only one of those dates tells you which |
+| Dataset / model | snapshot/collection date, and the card's last update | a 2026 model card over a 2019 corpus is not 2026 data |
+| Document file (PDF/scan/book) | edition and printing; the colophon or title-page date | PDF "CreationDate" is usually the scanner's or the conversion's, not the work's — never cite it as the book's date |
+| Time-based media | recording/broadcast date (program, episode intro, upload metadata) | upload date is when someone re-hosted it, which can be a decade late |
 
 **Verification labels are mandatory in this file.** `verified` = run against a
 live endpoint in this environment and it worked; `unverified` = plausible and

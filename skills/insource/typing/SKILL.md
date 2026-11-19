@@ -1,9 +1,9 @@
 ---
 name: typing
-version: 1.0.2
+version: 1.2.0
 author: Amr
 specialized: none
-description: 'Type-hinting experience, one skill, two levels: harden (the general craft — brands for raw types, creation points, boundary checks that turn untrusted data into typed values, compiler-first rejection, validation libraries and database constraints, in any language) and tiers (the opt-in three-tier architecture — primitives, brands, shapes — with its conversion path). The router picks ONE level and reads only its method.md. Default to harden; reach for tiers only when the project or user chose it (detect primitives/, brands/, shapes/ folders or the word tiers) — never impose the architecture or a naming scheme. Triggers: improve/tighten/audit types, stringly-typed or primitive-obsessed code, branded/NewType/opaque types, validate config or API contracts, make wrong values an error, type-up, tier-up, tiered types, primitives brands shapes, adopt the tier architecture, promote this to a brand. Golden rule: reuse existing types, never reinvent them. Tier means type-system tiers only, never architecture layers.'
+description: 'Type-hinting experience, one skill, two levels: harden (the general craft - brands for raw types, creation points, boundary checks, compiler-first rejection, the literal-vs-enum tie-breaker, overloads/overrides/dispatch/wrappers, weak-type holes (any-holes, bare containers, exhaustiveness), validation/DB constraints) and tiers (the opt-in three-tier architecture - primitives, brands, shapes - with its conversion path). The router picks ONE level and reads only its method.md. Default to harden; tiers only when the project or user chose it (detect primitives/, brands/, shapes/ or the word tiers) - never impose it. Triggers: improve/tighten/audit types, stringly-typed code, branded/NewType/opaque types, literal vs enum, overload/override/dispatch, wrapper typing, validate config or API contracts, make wrong values an error, type-up, tier-up, tiered types, adopt the tier architecture. Golden rule: reuse existing types, never reinvent them. Tier means type-system tiers only, never architecture layers.'
 when_to_use: The user asks to improve, tighten or audit a codebase's types (harden), or the project or user chose the three-tier type architecture and code must be built or converted to it (tiers).
 argument-hint: "[harden|tiers] <target>"
 ---
@@ -18,7 +18,7 @@ never run both levels' machinery for a one-level job.
 
 | Level | The request sounds like | Method |
 |---|---|---|
-| `harden` | "tighten these types", "make wrong values an error", "add brands / creation points", "validate this config or API contract", "remove stringly-typed code", "type-up" | [`harden/method.md`](./harden/method.md) |
+| `harden` | "tighten these types", "make wrong values an error", "add brands / creation points", "validate this config or API contract", "remove stringly-typed code", "type-up", "literal or enum?", "should this be an overload?", "my decorator lost its types", "the subclass broke the base contract" | [`harden/method.md`](./harden/method.md) |
 | `tiers` | "adopt the tier architecture", "tiered types", "primitives brands shapes", "convert this module to the tiers", "tier-up" | [`tiers/method.md`](./tiers/method.md) |
 
 ## Dispatch — the levels get confused

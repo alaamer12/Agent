@@ -159,6 +159,19 @@ evidence lines were never actually touched).
   case, the derivation line — which cells of the grid produced it and the reason
   it must be reachable. Scrub secrets and signed-URL query strings exactly as the
   read ledger requires; internal incident links carry credentials too.
+- **When the case happened, and whether the handling still applies** (vintage, in
+  its case-mining form — the two dates are different facts and only one of them
+  can expire). Date the **event** and keep it whatever the year: a 2014 postmortem
+  is not an outdated account of a 2014 incident, and running a recency filter over
+  a case corpus is how you throw away the testimony to keep the blogspam. Date the
+  **handling** against now: the remedy may name a tool, version, or practice that
+  no longer exists, and a card that prescribes it is a trap for the reader who
+  acts on the catalog. Where the handling is superseded, mine what replaced it and
+  present the case in its current form — old source for the event, current source
+  for the remedy, both in the evidence line. This is the one mode where the plan's
+  Time-sensitivity almost never licenses *dropping* a source: staleness
+  disqualifies advice, never evidence (`search-and-mining-technique.md` →
+  "The vintage gate").
 - **The three markers, and the two axes they sit on** — because they are easy to
   confuse and each card must carry one of each pair. **Provenance** answers where
   the *case* came from: `attested` (a source documents this situation) or

@@ -118,6 +118,19 @@ that never happened).
   ran it in, how many fixtures you actually executed vs how many were in the set,
   and the score on each metric. "Tested 6 of 20 hard cases before it hung" is a
   reach bound in exactly the way "read 15 of 32,818 files" is — state it.
+- **Vintage** (the sixth census field, and run-mining needs it for a different
+  reason than read-mining does): last release date and last commit date for every
+  contender, with how you got them (`npm view <pkg> time.modified`, the registry's
+  `time` map, `git log -1 --format=%ad`). You measure behavior today, so a
+  candidate's *result* can't go stale — but its **maintenance** can, and an
+  abandoned winner is a materially different recommendation from a current one at
+  the same score. It is a recorded result with its date, never a silent drop
+  ("unmaintained since 2021 yet still the fastest here" is the finding). The trap
+  runs twice, though: the docs you read to wire each adapter can be stale too, so
+  use the candidate's *current* documentation rather than a write-up about it from
+  its famous era — a stale instruction produces a badly-adapted contender that
+  loses the trial for the wrong reason (`search-and-mining-technique.md` →
+  "The vintage gate").
 - **Provenance ledger** (the source ledger, reused): for each candidate, the
   pinned source — registry URL **with version**, or commit-pinned repo path — and
   the path to the adapter/probe you ran and the cached raw result. A recommendation

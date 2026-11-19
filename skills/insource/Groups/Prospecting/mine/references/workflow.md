@@ -221,6 +221,21 @@ stop looking once one of them is found to not apply — if a task's source
 type doesn't obviously match one of them, that's not a signal to fall
 back to manual work; it's a signal to search for what does fit.
 
+**The same principle covers a *metadata* reach, not only a content reach.**
+Dating sources, naming authors, and judging venues is a reach problem too —
+"what is this page's publish date, across forty pages" is exactly the kind of
+thing a professional reader/search tool answers in one call (structured
+metadata rather than a snippet), and exactly the kind of thing a raw
+search-and-skim loop gets *silently* wrong, because a missing date looks like
+an unremarkable one. So run the same check here: if the harness already
+provides a reader or search tool that returns cleaned content with its
+metadata, use it; if not, look for one, offer it, and ask whether the user has
+a key or a plan for it — folded into the same approval message, per step 4
+below. And when nothing fits, that is the normal outcome, not a blocked run:
+the manual ladder in `search-and-mining-technique.md` → "The vintage gate" is
+sufficient on its own, and it degrades to a labeled inference rather than a
+guess.
+
 The check-and-offer sequence, for whatever tool (if any) turns out to
 apply:
 
@@ -372,6 +387,45 @@ explicitly which they want before starting discovery — unlike source type
 or criteria, this one isn't reliably guessable from wording. State the
 chosen reading plainly in the plan (alongside "Source type") so it can be
 corrected.
+
+### Settle the run's time-sensitivity before discovery
+
+Does the *age* of a source change whether it's usable **for this task**? Answer
+that once, up front, and write the answer in the plan — because it is the only
+thing that later makes an old source a finding instead of an unnoticed defect.
+Three readings, and `search-and-mining-technique.md` → "The vintage gate" holds
+what each one costs:
+
+- **Time-critical** — the field moved under the source, so old misleads: current
+  tooling, library and framework guidance, API usage, security practice, "which
+  one should I use in <this year>".
+- **Time-anchored** — the date is the datum: what people believed in 2014, how a
+  decision came about, the postmortem of a named incident.
+- **Timeless** — age carries no penalty and the oldest source is frequently the
+  best: algorithms and theory, the founding spec, the classic paper.
+
+This is a judgment about the task, and the task's wording is yours to read: form
+your own answer rather than asking reflexively, the same way you name the source
+type instead of polling the user for it. **Ask before discovery only when the
+reading is genuinely ambiguous or when it swings the corpus** — "how should we do
+migrations" may be a survey of durable reasoning or a bake-off of current tools,
+and the two admit a very different candidate list; a user-supplied list that is
+mostly old under the reading you'd guessed is a question, not a filter to apply
+quietly.
+
+State the chosen reading in the plan's **"Time-sensitivity"** field with its one-
+clause reason, so the user corrects it at approval alongside "Source type" rather
+than discovering afterwards that their classics were filtered as expired or
+their stale pages were accepted as current. It is settled before discovery for
+the same structural reason independence is: the reading shapes the searches
+(year qualifiers, "maintained", whether the 1979 paper is a candidate at all),
+the candidate list, and the budget — and a run that would discard half its
+corpus on date grounds should learn that before it reads them, not in Phase 4.
+
+Whatever the reading, **every source still carries its date.** Timeless and
+time-anchored runs are not runs where dates go unrecorded; they are runs where
+an old date is expected. The recording and the judgment are separate obligations,
+and only the first one is mechanical.
 
 ### Finding candidates
 
@@ -574,7 +628,16 @@ script by path — "run `tools/<script> --help` and use it on your artifact;
 read its `cache/` output; do not re-derive extraction" — and states the
 noise rule for the slice ranges it hands out (body ranges from the structure
 map, skips recorded as `skipped:<region> <range> (<evidence>)` in the
-checkpoint). One pipeline definition per run, tested once by its author, is
+checkpoint). It also states the plan's **time-sensitivity reading** with the
+vintage obligation attached — date every source and record *how* the date was
+determined, write `undated (<what I checked>)` where there is no date, and
+**record rather than resolve** any age-versus-authority conflict, because a
+subagent cannot ask the user and the parent raises those as one batch. Left out
+of the brief, twelve parallel agents supply twelve private freshness policies and
+the run's corpus silently inherits whichever one each agent happened to bring —
+the same divergence the shared census step exists to prevent, on the axis that
+decides what counts as evidence at all. One pipeline definition per run, tested
+once by its author, is
 the difference between twelve agents mining twelve versions of a book and
 twelve agents mining the same one. Each spawn then
 carries only what differs: the assigned source(s) and exact output
@@ -787,10 +850,13 @@ For each approved candidate, in order:
    facts about what this source physically *is* — its identity (exact
    instance, branch/version, license), magnitude (how many files, bytes, LOC,
    screens, entries), composition (what languages/materials/parts it's made
-   of), arrangement (its top-level structure, with counts), and which method
+   of), arrangement (its top-level structure, with counts), **its vintage (when
+   it was written and when it last changed, each with the evidence for that
+   date)**, and which method
    got you in. See `search-and-mining-technique.md` → "The ground census" for
-   the five fields, copy-paste commands that produce them in seconds, and the
-   traps that make a census quietly wrong. Run it *early*, not at write-up
+   the six fields, copy-paste commands that produce them in seconds, and the
+   traps that make a census quietly wrong; → "The vintage gate" for where the
+   dates actually come from and what never counts as one. Run it *early*, not at write-up
    time: it costs one command on a checkout or one cached API response without
    one, and it also tells you how much of the source you're about to describe.
    A number you couldn't measure gets written as "not measured: <reason>" —
@@ -876,6 +942,19 @@ For each approved candidate, in order:
      noise-map evidence behind each skip — a checkpoint summarizing "the
      book" while having read only its front matter is the document-scale
      version of the invented ledger.
+   - **Vintage, with the evidence for it and the reading it was judged under.**
+     The date the source was written and the date it last changed — each as
+     `published 2014-03 (JSON-LD datePublished)` or the honest `undated (checked
+     metadata, feed, sitemap; earliest Wayback 2014-06)` — plus one clause on what
+     that age means under the plan's time-sensitivity. This is the field that
+     makes a stale source *catchable at all*: a fetch date certifies the visit,
+     never the vintage, so without it the parent has nothing to spot-check and the
+     run cannot distinguish old-and-foundational from old-and-expired. Where age
+     and authority genuinely conflict — a 2014 page by the person who built the
+     thing, a 2026 page that is a listicle — record the conflict and what it would
+     be used for rather than settling it alone: a subagent notes it in its
+     checkpoint, the parent raises the batch to the user (see "The vintage
+     gate" in `search-and-mining-technique.md`).
    - **The *why* and *cost*** behind what's structurally notable, not a "what
      was found" list.
    - **`stated` vs `inferred` labels** on conclusions, each with its evidence
@@ -901,8 +980,9 @@ For each approved candidate, in order:
 
    Before closing the file, test it cold: could a reader who has never seen
    this source say roughly how big it is, what it's built from, how it's
-   arranged, what you actually looked at, why it's shaped that way — and
-   **where to go look to check you**? If any one of those six fails, that's
+   arranged, how old it is and whether that age is load-bearing, what you
+   actually looked at, why it's shaped that way — and **where to go look to
+   check you**? If any one of those seven fails, that's
    missing work — finish it while the source is still open rather than leaving
    a note to come back. The floor says *what must be answerable*, never what
    heading to write it under.

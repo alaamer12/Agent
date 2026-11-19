@@ -49,6 +49,22 @@ research line. Settle it here, because the budget arithmetic depends on it>
 
 **Independence model:** <"True independents — every candidate a distinct, unrelated instance" | "Industry/products — sources are whole products/platforms; one product may contribute several candidates" — settled with the user before discovery started; if the user didn't specify, ask which they want first (workflow.md → "True-independents or industry/products — settle this before discovery")>
 
+**Time-sensitivity:** <"Time-critical — the field moved, so an old source
+misleads (current tooling, library/API guidance, security practice, 'which one in
+<this year>')" | "Time-anchored — the date is the datum (what people believed in
+2014, how a decision came about, a named incident's postmortem); recency here
+would delete the primary sources" | "Timeless — age carries no penalty and the
+oldest source is often the best (algorithms, theory, the founding spec, the
+classic paper)" | "Mixed — <which categories differ>". Your own reading of the
+task, formed before discovery, with its one-clause reason; ask the user first
+only when the reading is genuinely ambiguous or would swing the corpus (workflow.md
+→ "Settle the run's time-sensitivity before discovery"). This is not a year and
+there is no default cutoff: it is the standard every source's recorded date gets
+judged against, so it must be visible here, before budget is spent on a corpus
+this run would later reject. Every candidate below carries its date whatever this
+field says — a timeless run is one where old dates are *expected*, not one where
+recording them is waived (search-and-mining-technique.md → "The vintage gate")>
+
 **Budget:** <"N sources" | "~X minutes/hours">
 <!--
   For a count-based budget, N is fixed by the user (or by "top 20" style
@@ -156,13 +172,31 @@ field entirely for read- or run-mining runs. See `references/case-mining.md` →
 
 ## Candidates
 
-| # | Source | URL | Why it's a plausible candidate | Link status |
-|---|--------|-----|-------------------------------|-------------|
-| 1 | <name> | <url> | <one clause — why it's distinct/relevant/"top"> | ✅ verified |
-| 2 | <name> | <url> | <one clause> | ✅ verified |
-| ... | | | | |
+| # | Source | URL | Date (how known) | Why it's a plausible candidate | Link status |
+|---|--------|-----|------------------|-------------------------------|-------------|
+| 1 | <name> | <url> | 2026-04 (JSON-LD) | <one clause — why it's distinct/relevant/"top"> | ✅ verified |
+| 2 | <name> | <url> | 2014-03 (RSS `published`) | <one clause> | ✅ verified |
+| ... | | | | | |
 
 <!--
+  "Date (how known)" is the source's own vintage — when it was written and, if it
+  differs, last updated — never the date you fetched it, and never bare: the
+  column shows the evidence too ("2014-03 (JSON-LD)", "~2015 (earliest Wayback;
+  no stated date — inferred)", "undated (checked metadata, feed, sitemap)").
+  Determine it before the plan is shown, per the ladder in
+  search-and-mining-technique.md → "The vintage gate"; the year in a URL, the
+  footer copyright, a snippet's date and your own memory are not evidence. The
+  column exists because age is the one property of a candidate the user cannot
+  infer from a title, and a plan approved without it is a plan nobody can
+  correct: a 2014 post that still resolves passes link verification, gets read
+  honestly, and then shows up in the run record stamped with a 2026 fetch date —
+  which is how a stale source survives an otherwise disciplined dig.
+  A candidate whose date conflicts with the run's Time-sensitivity above is not
+  quietly swapped out and not quietly kept: name it in "Why it's a plausible
+  candidate" with the conflict, and put the question to the user in this same
+  approval message — one batch, no extra round-trip. Old-and-authoritative
+  usually deserves to stay on an explicit reason; new-and-thin rarely does.
+
   Every URL must be checked before this plan is shown to the user — no
   4xx/5xx, and it must actually resolve to the claimed source (not a
   redirect to an unrelated page, a dead fork, an archived placeholder,
@@ -220,6 +254,12 @@ no URL — they carry the grid cell and the reason the situation must be possibl
   than the user asked for, present the smaller list with the reason — padding
   rows to hit N is the one outcome worse than missing the number
   (case-mining.md → "Coverage without duplication is the whole game").
+  Dates in this table mean something specific: date the **event** (when the
+  failure happened — never expires, and a 2014 postmortem is not an outdated
+  2014 incident) and, where the handling names a tool or version, whether that
+  handling is still current. Recency filtering is the wrong move for cases;
+  an obsolete *handling* under a time-critical reading is worth one line in
+  the evidence cell.
 -->
 
 ---

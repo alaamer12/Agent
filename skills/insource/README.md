@@ -28,7 +28,23 @@ Full map: [`_Docs/index.md`](_Docs/index.md).
 python manager.py lint --strict --readme   # registry vs README + _Docs must match
 python manager.py report --sort type       # per-skill inventory
 python manager.py find <name>              # where a skill exists: inventory, agents, installs
-python manager.py skill <name>             # install a skill into the agent folders
+python manager.py skill <name>...           # install one or more skills into the agent folders
+python manager.py skill --remove <name>...  # uninstall them wherever deployed: links, junctions, tracked copies (agent folders or --into)
+python manager.py agents                   # list code-agent locations from the agents table (defaults seeded on first use)
+python manager.py agents --inventory       # every skill installed in each agent folder, with kind and source
+python manager.py claim <X> <Y>            # claim X into Y: Y ends with X's skill set (default override: replace shared, add missing, remove Y's managed extras; unmanaged folders are protected unless --force)
+python manager.py claim <X> <Y> --append   # only add what Y lacks; existing Y entries are never touched (deduped by name)
+python manager.py skill --remote URL <name...>  # install skill(s) fetched from a remote git repo (https/ssh/git@/local repo); registers the remote, clones into the manager cache, deploys from it
+python manager.py remote                   # list registered remotes: url, subpath, ref, skill count, last fetch
+python manager.py remote --add URL [-n NAME] [-p SUBPATH] [--ref REF]  # register + fetch without installing; conflicts need --force
+python manager.py remote --update          # re-fetch all remotes (git fetch --depth 1, reset to the tracked ref); names narrow it
+python manager.py remote --remove NAME     # unregister and delete its cache; warns which agent links point into it
+python manager.py lint --remote          # also lint every skill found in the registered remotes
+python manager.py report --remote        # include remote skills in the inventory (their own git state shown)
+python manager.py find <name> --remote   # search remotes too: a remote skill resolves even if absent from the registry
+python manager.py interactive            # arrow-key multi-select checklist: toggle which skills stay installed (space toggles, / filters, enter plans) - shows the install/uninstall plan and applies nothing until you answer y at [y/N]; --no-tui falls back to a numbered prompt
+python manager.py agents --set NAME --skill-dir PATH [--md-path PATH ...]  # register or update an agent; conflicting values error unless --override
+python manager.py agents --remove NAME     # unregister an agent (a seeded default stays unregistered until re-set)
 ```
 
 To add or move a skill, update the catalog data in `_Docs/` (regenerate or edit `quick-index.md` / `skill-details.md` / `archive.md`), then verify with `lint --strict --readme`.

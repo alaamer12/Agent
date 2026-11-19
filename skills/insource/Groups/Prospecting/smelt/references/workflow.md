@@ -105,20 +105,29 @@ Compression here means deduplication and correction, never shortening a piece th
 
 ## 5. Verify before delivery
 
-No script runs this check; the agent walks it:
+This check has two halves, and they split on one line: **what can be measured is measured by a script; what needs judgment is walked by the agent.** A run that hand-rolls its own sweep, or samples what should have been swept, discovers neither the coverage gap nor the artifact that contradicts its own ledger.
 
-- **Evidence.** Pick a sample of claims across files. Open the cited file and confirm the quoted words are there at the cited location. A fabricated or drifted quote is a blocker, not a note.
-- **Links — exhaustive, never sampled.** Check every `unchecked` row in `provenance/links.md` with a real request (HEAD, or GET where HEAD is refused), record status and date. Where a URL 301s, record the target; where it is dead, make one rescue attempt (archive snapshot, an equivalent source the corpus itself names) — if recovered, the knowledge cites live-and-archive together; if not, mark the supported claim's provenance "reference dead as of <date>", lower its confidence, and write a gap line. The counts must reconcile: unique URLs swept = rows with a status. A single unverified row fails this check.
-- **Coverage.** Every file listed in `sources.md` is either represented by at least one claim or marked skipped with a reason. A file read but contributing nothing is recorded as confirming or as empty — not omitted.
+`scripts/smelt_check.py` runs the measurable half — `package` for structure, `quotes` for verbatim spans against the cached corpus, `links --sweep` for live status with redirect chains and retained receipts. It is **advisory**: it prints findings with ids, and nothing is blocked by them. Every finding gets one of two answers before delivery — fixed, or waived with a written reason in the waivers file, in the same shape as the skill's other recorded decisions. An unwaived, unfixed finding at delivery is the failure; a green script is not a pass, because the script cannot tell a good base from a confidently written bad one. Point it at the destination *before* the cache folder it writes is declared, and re-run after any fix, since a correction moves a count.
+
+Judged, by the agent, walked against the delivered files:
+
+- **Evidence.** Pick a sample of claims across files. Open the cited file and confirm the quoted words are there at the cited location. A fabricated or drifted quote is a blocker, not a note. (The script's full-corpus span audit narrows *what* to look at; it does not decide whether a near-match is a quotation.)
+- **Coverage.** Every file listed in `sources.md` is either represented by one claim or marked skipped with a reason. A file read but contributing nothing is recorded as confirming or as empty — not omitted.
 - **Yield.** Every `read in full` file has a smelted percentage in `provenance/yield.md`, sorted top to bottom, low yields explained, the weighted total stated; percentages reconcile with the fold tallies recorded during the fold, not recomputed from memory at the end.
-- **Uniqueness.** Search the delivered knowledge for the same claim under two names. Variants are allowed and linked; duplicates are not. No piece appears in two files.
+- **Uniqueness.** Two signals, and they are not the same claim. Near-verbatim text is a duplicate and gets fixed (`duplicated-finding`). Two passages resting on the same specific names is a **reading list**, not a verdict (`shared-evidence-review`): measured on a real package, four in ten such pairs restated one claim and the rest were one piece of evidence legitimately cited for two different claims — which no threshold separates, because the difference lives in the assertion, not the text. Read the list, merge what repeats a claim, and leave what shares evidence, naming the owner where a card borrows another's material. Judge the delivered knowledge *and* the files that describe the package: `README.md` and `INDEX.md` restate findings like anything.
 - **Lineage.** Any evidence marked independent traces to a different raw source or a different run. Anything derived from a file already in evidence is marked derived.
-- **File graph.** Every delivered file is referenced from `INDEX.md` and from at least one sibling file, every cross-file link resolves, and no file is an orphan.
 - **Gaps.** Every unresolved question and every "not measured" from the corpus appears in the gaps.
 - **Cold read.** `INDEX.md` plus the knowledge files answer the corpus's own questions without opening `experience/`.
 - **Writing.** A reader who has never seen the source can follow the claim, the mechanism, the cost, and the evidence.
 
-Fix what fails before writing the final report line.
+Measured, by the script:
+
+- **Links — exhaustive, never sampled.** Check every `unchecked` row with a real request, and record what the request actually said: the final address after every redirect and whether it still supports the claim, the check date, and the recovery attempt where it is dead (archive snapshot, or an equivalent source the corpus itself names). Recovered → the knowledge cites live-and-archive; unrecovered → the supported claim's provenance is marked "reference dead as of <date>", its confidence lowered, and a gap line written. The counts must reconcile: unique *addresses* swept = rows with a status, with the non-addresses a regex caught stated separately. A single unverified row fails this check. Label the sweep's depth, and keep a tool's own failure in its own class rather than reporting it as a property of a source.
+- **Quote fidelity** across the whole package, not a sample: every quoted span located in the cached primary bytes, in the run's own prose (consistency, not corroboration — say which), or nowhere.
+- **File graph.** Every delivered file is linked from `INDEX.md` and from at least one sibling, every cross-file link resolves, no file is an orphan — and no directory is undeclared, empty, or heavier than the knowledge it supports.
+- **Accounting integrity.** One measurement, one artifact: no two files classify the same set into different partitions without the delivered ledger naming its source; no count in prose disagrees with the tree.
+
+Fix what fails before writing the final report line, and record a reason for anything deliberately left as found.
 
 ## Large files
 
