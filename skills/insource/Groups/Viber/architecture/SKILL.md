@@ -1,9 +1,9 @@
 ---
 name: architecture
-version: 2.0.2
+version: 2.3.0
 author: Amr
 specialized: none
-description: Orchestrates and drafts an application's complete technical architecture documentation suite across its core pillars (language conventions, error handling, visual UI/interaction, relational/SQL data modeling, plugin and settings extensibility under the Open/Closed Principle, cross-platform multi-device mechanics, accessibility/sensory adaptation, and display/notation architecture (how values are expressed - precision levels, container fit, locale display, voice-typeface pairings)), invoking each specialized sub-pillar to author binding specifications into the project's documentation suite (<docs>/ or <docs>/architecture/).
+description: Orchestrates and drafts an application's complete technical architecture documentation suite across its core pillars (language conventions, error handling, visual UI/interaction, relational/SQL data modeling, plugin and settings extensibility under the Open/Closed Principle, cross-platform multi-device mechanics, accessibility/sensory adaptation, display/notation architecture (how values are expressed - precision levels, container fit, locale display, voice-typeface pairings), testing architecture (test lanes and budgets, fixture lifecycle, generator vocabulary and identity rules, the No-String Rule for test data, executable conformance tests), and media handling (asset sourcing and brand-mark policy, formats and loading posture, fonts delivery, embed facades)), invoking each specialized sub-pillar to author binding specifications into the project's documentation suite (<docs>/ or <docs>/architecture/).
 argument-hint: "<project root or app name>"
 ---
 
@@ -11,15 +11,15 @@ argument-hint: "<project root or app name>"
 
 ## Overview
 
-The **architecture** skill provides a unified, production-grade framework for establishing an application's technical architecture across 8 specialized pillars: **Language**, **Error**, **UI**, **Accessibility**, **Display**, **Database**, **Plugin & Settings**, and **Cross-Platform**.
+The **architecture** skill provides a unified, production-grade framework for establishing an application's technical architecture across 10 specialized pillars: **Language**, **Error**, **UI**, **Accessibility**, **Display**, **Database**, **Plugin & Settings**, **Cross-Platform**, **Media (imgery)**, and **Testing**.
 
-Rather than dividing into fragmented independent tools, **architecture** serves as the single unified authority. Its internal sub-directories (`language/`, `error/`, `ui/`, `accessibility/`, `display/`, `db/`, `plugin/`, and `cross-platform/`) provide modular, self-contained reference guides, templates, and polyglot examples that are invoked selectively based on project needs.
+Rather than dividing into fragmented independent tools, **architecture** serves as the single unified authority. Its internal sub-directories (`language/`, `error/`, `ui/`, `accessibility/`, `display/`, `db/`, `plugin/`, `cross-platform/`, `media/`, and `testing/`) provide modular, self-contained reference guides, templates, and polyglot examples that are invoked selectively based on project needs.
 
-The pillars are internal modules, not independent skills. `accessibility/`, `display/`, and `plugin/` each carry a `method.md` with that pillar's workflow; read it first when routing there. The other pillars are driven directly from this file through their `references/`, `assets/`, and `examples/`.
+The pillars are internal modules, not independent skills. `accessibility/`, `display/`, `plugin/`, `media/`, and `testing/` each carry a `method.md` with that pillar's workflow; read it first when routing there. The other pillars are driven directly from this file through their `references/`, `assets/`, and `examples/`.
 
 ---
 
-## The 8 Internal Pillars
+## The 10 Internal Pillars
 
 ```
 architecture/
@@ -31,7 +31,9 @@ architecture/
 ├── display/                 # Notation levels, container budgets, locale display, voice-typeface pairings
 ├── db/                      # Dumb-store rules, entity lifecycles, ANSI DDL, table references
 ├── plugin/                  # Settings-as-plugins, OCP growth gate, build-time vs runtime, composition
-└── cross-platform/          # View Barrels, #if & idiom bans, capability tokens, multi-axis isolation
+├── cross-platform/          # View Barrels, #if & idiom bans, capability tokens, multi-axis isolation
+├── media/                   # Asset sourcing & brand marks, formats, loading posture, fonts, embed facades
+└── testing/                 # Test ladder, fixtures & generators, No-String Rule, conformance tests
 ```
 
 | Pillar | Internal Directory | Artifact Generated | Scope & Authority |
@@ -44,6 +46,8 @@ architecture/
 | **Database** | `db/` | `<docs>/db-architecture.md` | Dumb-store invariant, entity lifecycles, ANSI DDL schemas, column specs, table reference. |
 | **Plugin & Settings** | `plugin/` | `<docs>/plugin-architecture.md` or `<docs>/settings-architecture.md` | Settings-as-plugins, OCP growth gate, descriptor catalogs, contribution registries, layering, scope/storage, build-time vs runtime, trust and isolation. |
 | **Cross-Platform** | `cross-platform/` | `<docs>/cross-platform.md` | PlatformComponents vs Concepts, View Barrels, #if & idiom bans, multi-axis layer resolution. |
+| **Media (imgery)** | `media/` | `<docs>/media-architecture.md` | Asset sourcing & brand-mark ledger, format pipeline, responsive/latency posture (LCP rule, space reservation), icon system grammar, fonts delivery, embed facades & consent, media caching and budgets. |
+| **Testing** | `testing/` | `<docs>/testing-architecture.md` | Test ladder and lane budgets, fixture lifecycle and isolation, generator registry with derived identity, the No-String Rule for test data, conformance tests that make documentation executable. |
 
 ---
 
@@ -93,6 +97,8 @@ Execution operates across 4 structured phases:
  │   6. Database Architecture (if DB confirmed)         │
  │   7. Plugin & Settings (if settings exist)           │
  │   8. Cross-Platform (if multi-target confirmed)      │
+ │   9. Media / imgery (if visual UI confirmed)         │
+ │  10. Testing Architecture (every app has tests)      │
  └──────────────────────────┬───────────────────────────┘
                             │
                             ▼
@@ -130,7 +136,8 @@ When invoked, the agent starts by inspecting the repository to formulate an init
   2. Consult `architecture/ui/` to draft layout stability, zero CLS skeletons, and bidi/RTL rules.
   3. Consult `architecture/accessibility/` to establish visual adaptation tiers (high contrast, warm-cream/slate presets), typographic personalization (multi-font, dyslexia-friendly fonts), cognitive density controls, and permission hygiene.
   4. Consult `architecture/display/` to set the surface-class pairing table - notation level (exact / grouped / compact / prose) per reader question, container budgets with fallback ladders, the Intl/ICU locale pipeline (numerals, separators, calendars, Arabic plurals, bidi isolation), and the voice-typeface coherence roster. Accessibility user-choices always override its defaults.
-- If headless: skip UI, accessibility, and display architectures.
+  5. Consult `architecture/media/` (imgery) to fix the media stack: format pipeline, declared LCP candidate and loading posture, space reservation, icon system + brand-mark sourcing ledger, fonts delivery, embed facade/consent policy, caching and budgets in metric units.
+- If headless: skip UI, accessibility, display, and media architectures.
 
 ### Step 4: Relational Data & Database Standards
 > *"Does this service interact with a database (PostgreSQL, SQLite, MySQL)? Would you like to establish Dumb-Store conventions, relational modeling strategies, and an application table reference?"*
@@ -150,6 +157,13 @@ When invoked, the agent starts by inspecting the repository to formulate an init
 - If confirmed:
   1. Consult `architecture/cross-platform/` to author decoupling and isolation specifications.
 
+### Step 7: Testing & Test Data Architecture
+> *"How is the suite organized today, and what must it protect? Should we establish a size ladder and lane budget (hermetic by default, live opt-in), one fixture and generator vocabulary (`UserGenerator`, `SessionGenerator`), a single source of truth for test data under the No-String Rule, and conformance tests that make the project's documentation enforceable?"*
+- Always applicable (every application has tests, even if the answer is "too few"):
+  1. **Live Research:** Search for current idioms of the confirmed runner and assertion stack (e.g. `"<runner> fixture scope isolation"`, `"<language> property-based testing library"`, `"<framework> contract testing"`).
+  2. Consult `architecture/testing/` to author `testing-architecture.md`: lanes and budgets, fixture lifecycle and isolation per resource, the generator registry with identity rules, the No-String Rule and its enforcement, determinism seams, and the conformance-test list.
+  3. Reconcile with the other pillars: the `language` strictness applies to test code, `error` payloads are asserted not re-invented, `db` constraints are what generators must satisfy, `plugin` extensions each earn a test, and `cross-platform` seams live in a platform lane.
+
 ---
 
 ## 4. Documentation Placement
@@ -161,10 +175,12 @@ The generated artifacts are written to the project's documentation root as confi
   - `ui-architecture.md` (if applicable)
   - `accessibility-architecture.md` (if applicable)
   - `display-architecture.md` (if applicable)
+  - `media-architecture.md` (if applicable)
   - `sql-architecture.md` & `table-reference.md` (if applicable)
   - `plugin-architecture.md` or `settings-architecture.md` (if applicable)
   - `cross-platform-architecture.md` (if applicable)
-- **Or Standalone Root Documents:** e.g. `<docs>/error-architecture.md`, `<docs>/accessibility-architecture.md`, `<docs>/display-architecture.md`, `<docs>/plugin-architecture.md, `<docs>/cross-platform-architecture.md`.
+  - `testing-architecture.md` (always)
+- **Or Standalone Root Documents:** e.g. `<docs>/error-architecture.md`, `<docs>/accessibility-architecture.md`, `<docs>/display-architecture.md`, `<docs>/media-architecture.md`, `<docs>/plugin-architecture.md`, `<docs>/cross-platform-architecture.md`, `<docs>/testing-architecture.md`.
 
 ---
 
@@ -178,3 +194,4 @@ The generated artifacts are written to the project's documentation root as confi
 6. **Polyglot Universality:** Keep all reference guides, examples, and rules framework-agnostic and balanced across different languages.
 7. **Open/Closed Growth Gate:** Any settings or plugin design must pass the four extensions in `plugin/method.md` — add an item, add a module, add a shape, add a scope — without editing shared code beyond the declared extension point. Name the files each extension changes; if shared code appears, the seam is wrong.
 8. **Build-Time by Default:** Prefer build-time code and contracts. Move an axis to runtime only for a written reason and only on a platform that permits it. Never propose downloadable executable code on a mobile app-store target.
+9. **Tests Are Executable Architecture:** Every binding rule a compiler cannot enforce gets a conformance test, or it is a preference. Test data has one home and one vocabulary; a test body names intent, never a value (No-String Rule). Never present coverage as evidence of correctness — name the invariant or the mutation it catches.
