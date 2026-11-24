@@ -1603,6 +1603,61 @@ def skill_parent(path: Path, skills: Iterable[Path]) -> Path | None:
     return max(parents, key=lambda parent: len(parent.parts)) if parents else None
 
 
+def diagnose_missing_skill(name: str, cwd: Path, registry_root: Path) -> str:
+    """Provide detailed, actionable diagnostic feedback when a requested skill cannot be resolved."""
+    roots: list[Path] = []
+    for root in (cwd, registry_root):
+        if root and root.is_dir() and not any(same_path(root, r) for r in roots):
+            roots.append(root)
+
+    # 1. Check if the name points to an existing directory
+    for root in roots:
+        candidate = (root / name) if not Path(name).is_absolute() else Path(name)
+        if candidate.is_dir():
+            structure = inspect_directory(candidate)
+            if structure.kind == "group":
+                child_count = len(structure.children)
+                return (
+                    f"'{name}' is an organizational group folder holding {child_count} skill(s), "
+                    f"not an independent skill.\n"
+                    f"Deploy individual skills instead, or run 'manager.py find {name}' to inspect them."
+                )
+
+            parent = skill_parent(candidate, (p for p in candidate.parents if has_skill(p)))
+            if parent and any(same_path(candidate, m) for m in inspect_directory(parent).modules):
+                return (
+                    f"'{name}' is an internal module of the '{parent.name}' battery-skill, "
+                    f"not an independent skill.\n"
+                    f"Deploy the parent skill instead: 'manager.py skill {parent.name}'"
+                )
+
+            if not has_skill(candidate):
+                return (
+                    f"directory '{name}' exists but has no SKILL.md entrypoint; "
+                    f"it cannot be deployed as an independent skill."
+                )
+
+    # 2. Check if the requested name matches an internal module of any battery-skill
+    search_roots: list[Path] = []
+    for root in (cwd, registry_root):
+        if root and root.is_dir() and not any(same_path(root, r) for r in search_roots):
+            search_roots.append(root)
+
+    for root in search_roots:
+        for skill_path in walk_skills(root, prune=False):
+            structure = inspect_directory(skill_path)
+            for module in structure.modules:
+                if module.name == name or module.name.lower() == name.lower():
+                    return (
+                        f"'{name}' is an internal module of the '{skill_path.name}' battery-skill, "
+                        f"not an independent skill.\n"
+                        f"Deploy the parent skill instead: 'manager.py skill {skill_path.name}'"
+                    )
+
+    # Default fallback
+    return f"no skill named '{name}' found in {cwd} or the registry {registry_root}"
+
+
 def resolve_skill(name: str, cwd: Path, registry_root: Path) -> Path:
     candidate = Path(name).expanduser()
     if candidate.is_dir() and has_skill(candidate):
@@ -1623,7 +1678,7 @@ def resolve_skill(name: str, cwd: Path, registry_root: Path) -> Path:
     if fallback is not None:
         return fallback.resolve()
 
-    raise ManagerError(f"no skill named '{name}' found in {cwd} or the registry {registry_root}")
+    raise ManagerError(diagnose_missing_skill(name, cwd, registry_root))
 
 
 def parse_agents(raw: str) -> list[str]:
@@ -2345,7 +2400,78 @@ def _checklist_lines(visible: Sequence[str], selected: set[str], cursor: int,
     return lines, top
 
 
+_QUESTIONARY: Any = None
+_QUESTIONARY_TRIED = False
+
+
+def _questionary() -> Any:
+    """Return the questionary module, or None when it is not installed.
+
+    Imported on demand: only the interactive picker needs it, and prompt_toolkit
+    is heavy enough to be noticed by --help and --json runs."""
+    global _QUESTIONARY, _QUESTIONARY_TRIED
+    if not _QUESTIONARY_TRIED:
+        _QUESTIONARY_TRIED = True
+        try:
+            import questionary as module
+        except Exception:  # pragma: no cover - exercised only without questionary
+            module = None
+        _QUESTIONARY = module
+    return _QUESTIONARY
+
+
+def _questionary_style(q: Any) -> Any:
+    """One palette shared by the picker and the apply confirmation."""
+    return q.Style([
+        ("qmark", "fg:ansicyan bold"),
+        ("question", "bold"),
+        ("pointer", "fg:ansicyan bold"),
+        ("highlighted", "fg:ansicyan bold"),
+        ("selected", "fg:ansigreen"),
+        ("answer", "fg:ansigreen bold"),
+        ("instruction", "fg:ansibrightblack"),
+        ("text", ""),
+    ])
+
+
+def _pick_checkbox(q: Any, names: Sequence[str], selected: set[str],
+                   installed: set[str]) -> set[str] | None:
+    """Multi-select through questionary: coloured rows, a real cursor row and
+    type-to-filter search. None means the user cancelled."""
+    width = min(36, max([len(name) for name in names] + [12]))
+    choices = [
+        q.Choice(
+            title=(f"{name}{' ' * max(2, width - len(name))}installed"
+                   if name in installed else name),
+            value=name,
+            checked=name in selected,
+        )
+        for name in names
+    ]
+    try:
+        answer = q.checkbox(
+            f"skills: {len(set(names) & selected)} of {len(names)} installed"
+            " - keep the ones you want",
+            choices=choices,
+            style=_questionary_style(q),
+            use_search_filter=True,
+            use_jk_keys=False,
+        ).ask(kbi_msg="")
+    except (KeyboardInterrupt, EOFError):
+        return None
+    return None if answer is None else set(answer)
+
+
 def _pick_tui(names: Sequence[str], selected: set[str], installed: set[str]) -> set[str] | None:
+    """Interactive multi-select: questionary when it is installed and colour is
+    on, otherwise the built-in key loop. None means the user cancelled."""
+    q = _questionary()
+    if q is not None and _DISPLAY.color:
+        return _pick_checkbox(q, names, selected, installed)
+    return _pick_keys(names, selected, installed)
+
+
+def _pick_keys(names: Sequence[str], selected: set[str], installed: set[str]) -> set[str] | None:
     """Arrow-key multi-select rendered with rich Live (or ANSI redraw). None
     means the user cancelled."""
     state_selected = set(selected)
@@ -2470,7 +2596,15 @@ def _pick_fallback(names: Sequence[str], selected: set[str], installed: set[str]
                 shown.add(name)
 
 
-def _confirm_apply() -> bool:
+def _confirm_apply(use_tui: bool) -> bool:
+    """Ask before touching anything; a TUI answer gets a TUI question."""
+    q = _questionary() if use_tui and _DISPLAY.color else None
+    if q is not None:
+        try:
+            return bool(q.confirm("Apply changes?", default=False,
+                                  style=_questionary_style(q)).ask(kbi_msg=""))
+        except (KeyboardInterrupt, EOFError):
+            return False
     try:
         answer = input("Apply changes? [y/N] ").strip().lower()
     except EOFError:
@@ -2497,10 +2631,11 @@ def cmd_interactive(args: argparse.Namespace, registry: Path, jobs: int, invoked
 
     names = sorted(skills, key=str.lower)
     selected = {name for name in names if name in installed}
-    if args.no_tui or not (sys.stdin.isatty() and sys.stdout.isatty()):
-        chosen = _pick_fallback(names, selected, installed)
-    else:
+    tui = not args.no_tui and sys.stdin.isatty() and sys.stdout.isatty()
+    if tui:
         chosen = _pick_tui(names, selected, installed)
+    else:
+        chosen = _pick_fallback(names, selected, installed)
     if chosen is None:
         display_info("[interactive] cancelled; nothing changed")
         return 0
@@ -2521,7 +2656,7 @@ def cmd_interactive(args: argparse.Namespace, registry: Path, jobs: int, invoked
     if args.dry_run:
         display_info("[interactive] dry-run: plan shown, nothing applied")
         return 0
-    if not _confirm_apply():
+    if not _confirm_apply(tui):
         display_info("[interactive] declined; nothing changed")
         return 0
 
@@ -4234,12 +4369,14 @@ def build_parser() -> argparse.ArgumentParser:
         "interactive",
         help="arrow-key checklist: pick which skills stay installed, confirm with [y/N]",
         description="Multi-select over every registry skill, pre-checked from what the target "
-                    "folders currently hold. Toggle with space, search with /, finish with enter: "
-                    "newly checked get installed, unchecked-but-installed get uninstalled, "
-                    "everything else is left alone. A plan table follows and NOTHING changes "
-                    "until you answer y at 'Apply changes? [y/N]'. --no-tui (or a piped "
-                    "terminal) falls back to a numbered prompt. Skills installed that are not "
-                    "in the registry (hand-made, remote-only) are never touched.",
+                    "folders currently hold. Space toggles, typing filters the list, ctrl-a "
+                    "selects everything, ctrl-i inverts, enter plans: newly checked get "
+                    "installed, unchecked-but-installed get uninstalled, everything else is "
+                    "left alone. A plan table follows and NOTHING changes until you confirm "
+                    "'Apply changes?'. --no-tui (or a piped terminal) falls back to a numbered "
+                    "prompt. Uses questionary when it is installed for the coloured picker. "
+                    "Skills installed that are not in the registry (hand-made, remote-only) "
+                    "are never touched.",
     )
     add_common(interactive)
     add_deploy_flags(interactive)
@@ -4475,6 +4612,36 @@ def report_flag_labels(args: argparse.Namespace) -> list[str]:
     return labels
 
 
+def parse_cli_args(parser: argparse.ArgumentParser, argv: list[str]) -> argparse.Namespace:
+    """Parse CLI arguments with helpful diagnostic hints for common shell mistakes."""
+    try:
+        return parser.parse_args(argv)
+    except SystemExit as exc:
+        if exc.code != 0:
+            try:
+                parsed, unknown = parser.parse_known_args(argv)
+                hints: list[str] = []
+                # Check for unquoted paths with spaces (e.g. --into or -i)
+                into_val = getattr(parsed, "into", None)
+                if into_val and isinstance(into_val, str) and unknown:
+                    candidate = into_val
+                    for tok in unknown:
+                        candidate += " " + tok
+                        if Path(candidate).expanduser().exists():
+                            hints.append(
+                                f"path argument '{into_val}' contains unquoted spaces and was split by your shell.\n"
+                                f"  Wrap the target path in quotes: --into \"{candidate}\""
+                            )
+                            break
+                if any(tok == "manager.py" or tok.endswith("manager.py") for tok in unknown):
+                    hints.append("manager.py appeared inside the arguments, likely due to a duplicate pasted command.")
+                if hints:
+                    sys.stderr.write("\n[hint] " + "\n[hint] ".join(hints) + "\n\n")
+            except Exception:
+                pass
+        raise
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -4493,7 +4660,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     command, rest, implicit = split_command(raw)
     try:
-        args = parser.parse_args([command] + rest)
+        args = parse_cli_args(parser, [command] + rest)
     except SystemExit as exc:
         return int(exc.code or 0)
 

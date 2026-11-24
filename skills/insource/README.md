@@ -42,7 +42,7 @@ python manager.py remote --remove NAME     # unregister and delete its cache; wa
 python manager.py lint --remote          # also lint every skill found in the registered remotes
 python manager.py report --remote        # include remote skills in the inventory (their own git state shown)
 python manager.py find <name> --remote   # search remotes too: a remote skill resolves even if absent from the registry
-python manager.py interactive            # arrow-key multi-select checklist: toggle which skills stay installed (space toggles, / filters, enter plans) - shows the install/uninstall plan and applies nothing until you answer y at [y/N]; --no-tui falls back to a numbered prompt
+python manager.py interactive            # arrow-key multi-select checklist: toggle which skills stay installed (space toggles, typing filters, ctrl-a all, ctrl-i invert, enter plans) - shows the install/uninstall plan and applies nothing until you confirm; --no-tui falls back to a numbered prompt
 python manager.py agents --set NAME --skill-dir PATH [--md-path PATH ...]  # register or update an agent; conflicting values error unless --override
 python manager.py agents --remove NAME     # unregister an agent (a seeded default stays unregistered until re-set)
 ```

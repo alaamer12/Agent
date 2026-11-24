@@ -1123,6 +1123,26 @@ class InteractiveTests(ManagerFixture):
         self.assertIn("dry-run", result.stdout)
         self.assertFalse((xag / "cc").exists())
 
+    def test_questionary_picker_toggles_filters_and_cancels(self):
+        q = manager._questionary()
+        if q is None:
+            self.skipTest("questionary is not installed")
+        from prompt_toolkit.application import create_app_session
+        from prompt_toolkit.input.defaults import create_pipe_input
+        from prompt_toolkit.output import DummyOutput
+
+        def pick(keys: str, selected: set[str], installed: set[str]) -> set[str] | None:
+            with create_pipe_input() as pipe:
+                pipe.send_text(keys)
+                with create_app_session(input=pipe, output=DummyOutput()):
+                    return manager._pick_checkbox(q, ["aa", "bb", "cc"], set(selected),
+                                                  set(installed))
+
+        self.assertEqual(pick("\x1b[B \r", set(), set()), {"bb"})       # arrow + space
+        self.assertEqual(pick("cc \r", set(), set()), {"cc"})           # type-to-filter
+        self.assertEqual(pick(" \r", {"aa"}, {"aa"}), set())            # untick aa
+        self.assertIsNone(pick("\x03", set(), set()))                   # ctrl-c cancels
+
     def test_interactive_leaves_foreign_installs_untouched(self):
         xag = self._agent("xag")
         self._seed(xag)

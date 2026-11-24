@@ -55,6 +55,17 @@ is deliberate: a single switch gives a stable, greppable format. `rich` itself
 still drops ANSI when stdout is not a TTY; the manager does not try to detect a
 TTY separately.
 
+### Interactive prompts
+
+The picker is input, not output, so it sits outside the display backends.
+`_pick_tui()` prefers `questionary` (prompt_toolkit) when the module is installed
+and colour is enabled; otherwise it falls back to the built-in `_pick_keys()`
+loop (rich `Live` or an ANSI redraw), and the numbered `_pick_fallback()` prompt
+takes over when stdin or stdout is not a TTY or `--no-tui` is passed.
+`_confirm_apply()` follows the same rule: a TUI answer gets a questionary
+confirmation, a piped answer gets `[y/N]`. `questionary` is imported on demand
+so `--help` and `--json` runs never pay for prompt_toolkit.
+
 ## 4. Primitives
 
 | Function | Purpose | Quiet behaviour |
@@ -216,6 +227,7 @@ To add a backend:
 |---|---|
 | `rich` not installed | import guard sets `RICH_AVAILABLE = False`; ASCII is used |
 | `rich` raises during import | same guard (broad `except`) |
+| `questionary` not installed, or raises during import | `_questionary()` caches None for the process; `_pick_keys()` handles the picker and `[y/N]` handles the confirmation |
 | `NO_COLOR` set | ASCII backend, regardless of `rich` |
 | stdout is not a TTY | rich still lays out; it drops ANSI on its own |
 | terminal encoding cannot render a glyph | `sys.stdout`/`stderr` are reconfigured to UTF-8 with `errors="replace"` in `main()` |
