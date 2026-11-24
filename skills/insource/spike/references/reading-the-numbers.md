@@ -108,9 +108,9 @@ A spike that finds drift worth acting on hands work to another skill and stops:
 
 | Finding | Hand to |
 | --- | --- |
-| the unit reaches the vendor around the seam, or the seam is not the only place the name lives | `seam` |
+| the unit reaches the vendor around the seam, or the seam is not the only place the name lives | `architecture/seams` |
 | the mockup and the render disagree (this is not a before/after question) | `parity` |
 | the component's model is being forced into the project's shape | `treat` |
-| the change is accepted and the tree must be swept | `seam` (migration) and `commit` |
+| the change is accepted and the tree must be swept | `architecture/seams` (migration) and `commit` |
 
 The spike itself never proposes the sweep. It reports what the claim was worth.

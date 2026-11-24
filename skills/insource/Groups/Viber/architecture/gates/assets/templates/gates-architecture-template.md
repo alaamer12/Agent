@@ -12,7 +12,7 @@
 - Does NOT own: the content of the rules. Types and compiler strictness belong to
   `language-architecture.md`; failure payloads to `error-architecture.md`; test design and
   conformance tests to `testing-architecture.md`; schema and constraints to `db-architecture.md`;
-  extension contracts to `plugin-architecture.md`; platform seams to `cross-platform-architecture.md`;
+  extension contracts to `plugin-architecture.md`; platform and vendor seams to `seams-architecture.md`;
   asset policy to `media-architecture.md`. This document decides where those rules are enforced, at
   what cost, and what happens when they fail.
 

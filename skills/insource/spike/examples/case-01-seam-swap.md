@@ -79,7 +79,7 @@ Reverted the nine-line edit, kept both run directories.
 
 **Verdict on the claim:** half refuted. The adoption does **not** cost a look fight; it costs a focus
 and identity fight, which nobody was bracing for, and the sweep it implies is not a styling pass but a
-per-component intake (`seam/references/ownership-transfer.md`).
+per-component intake (`Groups/Viber/architecture/seams/references/ownership-transfer.md`).
 
 **Cost measured:** one afternoon, 6 states captured, 1 unreachable, two files of evidence.
 

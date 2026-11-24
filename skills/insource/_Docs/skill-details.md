@@ -108,6 +108,15 @@
 
 ---
 
+#### `deep-audit`
+
+- **Path:** [`Groups/Audit/deep-audit/SKILL.md`](../Groups/Audit/deep-audit/SKILL.md)
+- **Description:** End-to-end self-consistency loop for a project whose artifacts disagree with themselves: fan out read-only census subagents over non-overlapping slices hunting a fixed defect taxonomy (boundary violations, contradictions, invented content, stale markers, terminology drift, duplicate homes), ask the owner the weight-bearing questions in blocking rounds, write the reconciliation plan, then execute it in dependency-ordered WAVES — one atomic commit per wave behind a verification gate, teammate-safe, deviations recorded — and finish with rulebook sync plus a completeness proof. One entry point; modes: census, plan, fix, verify. Use for "deep-audit", "find the contradictions", "reconcile the docs", "organize the waves of reconciling", or when scaffolds exist but content drifted. Discovery-only routes to crosscheck; proof-only to please-verify; orientation to exmaine — deep-audit REMEDIATES.
+- **Use-case:** The user wants a project's own corpus (docs, code, config, ledgers, prototypes) audited for internal inconsistency AND fixed in an organized, gated way. Also /deep-audit, "organize the waves of reconciling", or after a session that produced multiple agents' worth of drift.
+- **Usage:** `/deep-audit [census|plan|fix|verify] [scope] — bare invocation runs the full loop`
+
+---
+
 #### `exmaine`
 
 - **Path:** [`Groups/Audit/exmaine/SKILL.md`](../Groups/Audit/exmaine/SKILL.md)
@@ -356,13 +365,6 @@
 
 ---
 
-#### `stateful`
-
-- **Path:** [`Groups/Design/stateful/SKILL.md`](../Groups/Design/stateful/SKILL.md)
-- **Description:** Derive every state a user-visible screen can enter, then implement the approved ones — pending, empty, stale, partial; provider down, degraded, throttled, maintenance; no connection at launch; extreme latency; expired session; refused entitlement; unknown values; device suspended, killed, storage-full; races; integrity and breach conditions. Platform-neutral: web, mobile, desktop, terminal, kiosk, embedded, any stack, and prototypes. Never a fixed checklist: states derive from the screen's own dependencies through nine condition axes, each candidate passes four evidence gates and a severity triage, and unknown input gets a designed rendering rather than the happy path. Use for "handle all the states", "what states can this screen have", "make it state-complete", "audit for missing states", "this breaks when the network is slow or gone", "it hangs or shows nothing when the server is down", "/stateful <file|screen|app>". Not for polishing existing states, from-scratch screens, or headless state machines.
-
----
-
 ### Favor
 
 #### `design-taste-frontend`
@@ -416,6 +418,15 @@
 ---
 
 ### Generalize
+
+#### `generalize`
+
+- **Path:** [`Groups/Generalize/generalize/SKILL.md`](../Groups/Generalize/generalize/SKILL.md)
+- **Description:** Convert closed inventories into open patterns. Use when a spec, structure doc, API list, config catalog, or tree lists concrete items as if they are the complete set — rewrite as growth rules + shape + illustrative examples so a reader extends instead of replicating. Applies to any document type: file trees, endpoint registries, component catalogs, database schemas, route tables, feature lists, enum definitions.
+- **Use-case:** When a document presents a list or tree that implies nothing else should exist, when an agent is about to write a spec that enumerates concrete items without stating the rule for the next one, or when the user says "generalize", "make it a pattern", "not a closed set", "etc", "abstract the idea", or complains that a spec reads like an inventory.
+- **Usage:** `/generalize [the file or passage to generalize, or 'audit <path>' to scan a docs tree for closed-set anti-patterns]`
+
+---
 
 #### `polyglot`
 
@@ -626,7 +637,7 @@
 #### `architecture`
 
 - **Path:** [`Groups/Viber/architecture/SKILL.md`](../Groups/Viber/architecture/SKILL.md)
-- **Description:** Orchestrates and drafts an application's complete technical architecture documentation suite across its core pillars (language conventions, error handling, visual UI/interaction, relational/SQL data modeling, plugin and settings extensibility under the Open/Closed Principle, cross-platform multi-device mechanics, accessibility/sensory adaptation, and display/notation architecture (how values are expressed - precision levels, container fit, locale display, voice-typeface pairings), and media handling (asset sourcing and brand-mark policy, formats and loading posture, fonts delivery, embed facades)), invoking each specialized sub-pillar to author binding specifications into the project's documentation suite (<docs>/ or <docs>/architecture/).
+- **Description:** Orchestrates and drafts an application's complete technical architecture documentation suite across 12 pillars - language conventions, error handling contracts, visual UI/interaction, accessibility and sensory adaptation, display/notation architecture, relational/SQL data modeling, plugin and settings extensibility under the Open/Closed Principle, cross-platform multi-device mechanics, seams and third-party boundaries (the date-don't-marry doctrine - vendor sealing, utility/usability taxonomy, composition ladders, the two walls, component ownership transfer), media handling, testing architecture (lanes, fixtures, No-String Rule, conformance tests), and gates architecture (enforcement ladder, tier budgets, baselines, agent-proof checks); interviews for scope, mandates live version research, and invokes each sub-pillar to author binding specifications into <docs>/ or <docs>/architecture/.
 - **Usage:** `/architecture <project root or app name>`
 
 ---
@@ -755,6 +766,13 @@
 
 ---
 
+#### `blockiya-pattern`
+
+- **Path:** [`blockiya-pattern/SKILL.md`](../blockiya-pattern/SKILL.md)
+- **Description:** Architect, scaffold, refactor, review, and diagram component UI frontends using the Blockiya Pattern (v2.2.0, including Strict Blockiya and blockiya-core utilities) and the Blockiya UML Notation System (v2.0). The pattern is framework-agnostic—incubated and proven in React/TypeScript projects, expressed here in canonical React/TypeScript code, and portable to Svelte, Solid, Vue composables, or MAUI/Blazor C# (MVVM-adjacent). Use this skill whenever the user asks to design or build a Blockiya component, separate domain orchestration from presentational views, enforce zero-styling primitives or Emotion styled-system tokens, wrap third-party libraries in Adapters, scaffold or use blockiya-core helpers (If, Maybe, For, Repeat, Compose, useIntent, createIntent, composeIntents, useDerive, useDerivedState, useToggle, useDebounce, usePrevious, useStableCallback), generate Blockiya UML class or sequence diagrams, or audit components for Blockiya compliance and growth signals.
+
+---
+
 #### `caution`
 
 - **Path:** [`caution/SKILL.md`](../caution/SKILL.md)
@@ -827,6 +845,13 @@
 - **Path:** [`styling/specialized/daisyui/install/SKILL.md`](../styling/specialized/daisyui/install/SKILL.md)
 - **Parent:** `daisyui`
 - **Description:** Installation instructions for daisyUI 5
+
+---
+
+#### `infer`
+
+- **Path:** [`infer/SKILL.md`](../infer/SKILL.md)
+- **Description:** Disciplined inference from reference projects. Use when the user says "look at X", "infer from X", "do similar to X", "like they did", "use X as reference", or points at another project as a model. Classifies each reference decision by transferability, need-tests it against THIS project, and asks before adopting domain-specific architecture. Kills the "copy whole Y into X" anti-pattern.
 
 ---
 

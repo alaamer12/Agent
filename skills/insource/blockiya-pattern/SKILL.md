@@ -1,5 +1,7 @@
 ---
 name: blockiya-pattern
+version: 1.0.0
+specialized: none
 description: >-
   Architect, scaffold, refactor, review, and diagram component UI
   frontends using the Blockiya Pattern (v2.2.0, including Strict Blockiya and
@@ -14,8 +16,7 @@ description: >-
   Compose, useIntent, createIntent, composeIntents, useDerive,
   useDerivedState, useToggle, useDebounce, usePrevious, useStableCallback),
   generate Blockiya UML class or sequence diagrams, or audit components
-  for Blockiya compliance and growth signals. Do not use for backend APIs
-  or generic CSS styling tasks unrelated to Blockiya architecture.
+  for Blockiya compliance and growth signals.
 license: MIT
 metadata:
   author: Blockiya Architecture

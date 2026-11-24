@@ -1,5 +1,7 @@
 ---
 name: infer
+version: 1.0.0
+specialized: none
 description: Disciplined inference from reference projects. Use when the user says "look at X", "infer from X", "do similar to X", "like they did", "use X as reference", or points at another project as a model. Classifies each reference decision by transferability, need-tests it against THIS project, and asks before adopting domain-specific architecture. Kills the "copy whole Y into X" anti-pattern.
 ---
 

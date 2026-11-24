@@ -41,7 +41,7 @@ Two completeness checks worth the time:
 | **Element geometry** (box) | position and size, so overflow and shift | appearance | a crop can look identical while the box moved 4 px and now overlaps a neighbour |
 | **Node inventory** (child counts, tag tally to a depth) | structure: a wrapper appeared, a level deepened, an element was replaced | styling and meaning | the sensor that catches the change a pixel diff calls "nothing" |
 | **Identity facts** (role, aria attributes, name source, disabled, hidden) | the accessible name and its route | the full computed accessibility tree | for the real tree use the driver's built-in snapshot, and say which you used |
-| **Focus probe** (what receives focus, depth from the unit, resolved outline/box-shadow, N Tab presses) | where the ring is drawn, whether the keyboard reaches the unit, whether Tab walks into it | hover, drag, screen-reader announcements | the one the other sensors cannot substitute — it is `seam`'s intake step 4, measured |
+| **Focus probe** (what receives focus, depth from the unit, resolved outline/box-shadow, N Tab presses) | where the ring is drawn, whether the keyboard reaches the unit, whether Tab walks into it | hover, drag, screen-reader announcements | the one the other sensors cannot substitute — it is the `architecture/seams` pillar's intake step 4, measured |
 | **Interaction fact** (a click or fill, then re-measure) | a state that only exists after the user acts | anything after a second navigation | drive it; do not screenshot a resting state and call the flow covered |
 
 The rule that follows the table: **a sensor you did not run cannot exonerate the change.** "Nothing

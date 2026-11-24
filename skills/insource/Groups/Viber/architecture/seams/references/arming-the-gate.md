@@ -17,7 +17,7 @@
 - [ ] 8 A file the auditor cannot parse exits non-zero — 0 means "clean", never "could not run"
 ```
 
-**Check 1 is the highest-value line in the skill.** A rule scoped to a directory that was renamed
+**Check 1 is the highest-value line in the pillar.** A rule scoped to a directory that was renamed
 months ago stays quiet forever: the files it was meant to police go unpoliced while the gate prints
 green. Liveness must run against the *same config the auditor reads*, otherwise it proves that a
 copy of the list is alive. Point it at the real config and put it in the gate, not in a README.

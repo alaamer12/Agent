@@ -1,6 +1,6 @@
 ---
 name: spike
-version: 1.0.2
+version: 1.0.3
 author: Amr
 specialized: none
 description: Turn "will this break it?" into numbers. A measurement, not a decision - pick the smallest renderable unit that carries a claim, derive its state list from code, capture computed styles, tight crops, node inventories and interaction facts before and after one reversible change, and report drift by category, including the drift that refutes the claim. Use when someone is about to win an argument by asserting something measurable, before adopting or swapping a component, or when a pixel-perfect diff is being cited as proof about behaviour.
@@ -29,8 +29,10 @@ _Use it when someone is about to win an argument by asserting something measurab
 - Deciding whether to adopt anything — the spike ends with a verdict on the **claim**, not the plan.
   ("The look survives; the focus ring does not.")
 - Design fidelity against a mockup: that is `parity`. Before-vs-after against your own baseline is here.
-- Auditing who may import or name what: that is `seam`. A spike often triggers one; it never writes one.
-  What a spike's step 6 finds belongs to `seam/examples/case-03-ownership-transfer.md`.
+- Auditing who may import or name what: that is the `seams` pillar of `architecture`
+  (`Groups/Viber/architecture/seams/`). A spike often triggers one; it never writes one.
+  What a spike's step 6 finds belongs to
+  `Groups/Viber/architecture/seams/examples/case-03-ownership-transfer.md`.
 - Permanent tests. A spike's script is disposable; a spike that must keep passing becomes a test.
 - Building the app or serving it. The caller supplies a running URL; the script measures.
 

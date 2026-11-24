@@ -4,37 +4,22 @@
 
 ---
 
-## 1. The Three-Tier Architecture
+## 1. The Three-Tier Lineage
 
-To maintain a scalable cross-platform codebase, every reusable visual unit belongs to exactly one of three structural tiers:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Tier 3: Domain Specialization                              │
-│  Context-aware, feature-bound, platform-customized views.   │
-│  e.g., FundDetailCard.phone.tsx, DesktopProjectSidebar.xaml │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ Specializes / Composes
-┌──────────────────────────────▼──────────────────────────────┐
-│  Tier 2: Base Unit (The Architectural Contract)              │
-│  Abstract composition, standard layouts, neutral APIs.      │
-│  e.g., CardBase, MasterDetailLayout, NavigationShellBase    │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ Built From
-┌──────────────────────────────▼──────────────────────────────┐
-│  Tier 1: Core Primitive                                     │
-│  Feature-blind, atomic building blocks.                     │
-│  e.g., RawText, BaseButton, Surface, Divider, IconContainer │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Tier Definitions & Rules
+Every reusable visual unit belongs to exactly one tier. These tiers describe **reuse lineage** — what
+a unit is built from — and nothing else. Who may *know* the framework or vendor behind a unit, and how
+capability rings stack on a component, is a seam question owned by the `seams` pillar
+(`<docs>/seams-architecture.md`); it is not decided by tier count.
 
 | Tier | Name | Dependency Constraint | Rule |
 | :--- | :--- | :--- | :--- |
 | **Tier 1** | **Core Primitive** | No dependencies on features, business logic, or app domains. | Pure visual/input primitives. Framework wrappers with zero domain knowledge. |
 | **Tier 2** | **Base Unit** | May consume Tier 1 primitives; zero knowledge of concrete features. | Reusable structural patterns (e.g. Card layouts, Dialog shells). Declares extension slots. |
 | **Tier 3** | **Domain Specialization** | Consumes Tier 2 and Tier 1; bound to domain models and platforms. | The final assembled unit. Specific to a feature (e.g., `CryptoWalletBalanceCard`). |
+
+Named instances: Tier 1 `Surface`, `RawText`, `IconContainer` · Tier 2 `CardBase`,
+`MasterDetailLayout`, `NavigationShellBase` · Tier 3 `FundDetailCard.phone.tsx`,
+`DesktopProjectSidebar.xaml`.
 
 ---
 

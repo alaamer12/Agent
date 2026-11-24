@@ -86,8 +86,8 @@ the reader for no advantage.
    mechanics, the skill cannot show its migration mechanics, and the arm will look silent on a rule
    that is in fact load-bearing. After every run, list which rules were even *reachable* given the
    scenario, and say plainly which ones the scenario could not exercise. That is today's failure
-   exactly: several of the rules now in this skill were invisible to the evaluation that tested it,
-   because the scenario never had a sweep in it.
+   exactly: several of the rules now in this pillar's library were invisible to the evaluation that
+   tested them, because the scenario never had a sweep in it.
 
    Mitigation, not cure: derive the scenario from a real decision the repo recently made, so the shape
    that needed the rule is present; and re-run with a second scenario that exercises the unreachable

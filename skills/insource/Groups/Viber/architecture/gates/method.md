@@ -70,8 +70,8 @@ owns types and compiler flags — the first rung. `error` owns failure payloads 
 gate messages use them. `testing` owns test design and conformance tests — this pillar owns where
 they run, what failing means, and how long they may take. `db` owns schema and constraints — this
 pillar gates migrations and destructive changes. `plugin` owns the extension contract — this pillar
-gates the Open/Closed growth check. `cross-platform` owns platform seams — this pillar gates the
-shared-code rules. `media` owns asset policy — this pillar gates brand-mark sourcing and byte
+gates the Open/Closed growth check. `cross-platform` owns axis rules and `seams` owns the platform
+vendor seams — this pillar gates the shared-code rules. `media` owns asset policy — this pillar gates brand-mark sourcing and byte
 budgets. `ui`, `accessibility`, and `display` own their contracts — this pillar gates CLS, contrast,
 RTL, and locale rules that can be measured. This pillar owns the enforcement ladder, the tier
 budgets, the register, the fail-closed policy, the baseline and exception machinery, and the

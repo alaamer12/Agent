@@ -1,5 +1,7 @@
 ---
 name: generalize
+version: 1.0.0
+specialized: none
 description: 'Convert closed inventories into open patterns. Use when a spec, structure doc, API list, config catalog, or tree lists concrete items as if they are the complete set — rewrite as growth rules + shape + illustrative examples so a reader extends instead of replicating. Applies to any document type: file trees, endpoint registries, component catalogs, database schemas, route tables, feature lists, enum definitions.'
 when_to_use: When a document presents a list or tree that implies nothing else should exist, when an agent is about to write a spec that enumerates concrete items without stating the rule for the next one, or when the user says "generalize", "make it a pattern", "not a closed set", "etc", "abstract the idea", or complains that a spec reads like an inventory.
 argument-hint: "[the file or passage to generalize, or 'audit <path>' to scan a docs tree for closed-set anti-patterns]"

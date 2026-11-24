@@ -1,7 +1,8 @@
 # The two walls
 
 > The seam is one file that knows the third party. Two independent checks keep that true, and one
-> of them is the one most repos never build. Read this before writing any rule.
+> of them is the one most repos never build. Read this before writing any rule. The doctrine it
+> enforces — one idea, two shapes, the taxonomy — is [seam-doctrine.md](./seam-doctrine.md).
 
 ## 0. What the seam actually is
 
@@ -110,3 +111,5 @@ is two exemptions, and they will disagree within a month.
 - What the library itself wants to be used like: `treat`.
 - Whether the swap is worth it visually: `spike`.
 - The commit message on the sweep: `commit`.
+- Which gate runs these walls, at which tier, at what cost, with what evidence: the `gates` pillar
+  of this suite — the wall design is here, the register row is there.

@@ -64,8 +64,8 @@ Per component, at the moment it enters the seam. Steps 4-6 need a running page, 
 ```
 
 Steps 4 and 5 are exactly what a computed-style and pixel diff cannot see, so they belong in the
-seam's intake and in a spike's interaction step — the same fact measured by two different skills, on
-purpose.
+seam's intake and in a spike's interaction step — the same fact measured by this pillar and by
+`spike`, on purpose.
 
 ## 5. The internals ledger
 

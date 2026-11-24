@@ -1,6 +1,8 @@
 # 06 — Multi-Axis Isolation & The Escalation Ladder
 
 > Managing orthogonal variability across Platform, Distribution Channel, Audience/Region, and Multi-Tenant dimensions. The Single-Axis Filename Law and the three-level architectural escalation ladder.
+>
+> **Disambiguation:** the "layers" resolved by this ladder are *platform-variant dispatch targets* — naming and selection mechanics, which belong to cross-platform. Who may *know* the platform SDK behind a dispatch target is a seam question owned by the `seams` pillar.
 
 ---
 

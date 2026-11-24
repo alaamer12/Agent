@@ -57,6 +57,6 @@ and the diff is clean. The tell is a sentence in the report that could not have 
 the sensors that ran — "nothing else changed", "the interaction is fine", "it is safe".
 
 The connection to the other skill is direct: what this run missed is exactly the bill that
-`seam/references/ownership-transfer.md` says adoption hands you — focus mechanics, the child nodes a
+`Groups/Viber/architecture/seams/references/ownership-transfer.md` says adoption hands you — focus mechanics, the child nodes a
 component adds, prop-flag precedence, attribute fallthrough destination. A spike that adopts a
 component and does not drive it has measured one of the four and reported on all of them.

@@ -1,6 +1,6 @@
 ---
 name: smelt
-version: 1.1.0
+version: 1.2.0
 author: Amr
 specialized: none
 description: 'Turns a completed mine run — or any corpus of checkpoints, distillations, plans and witness notes — into a durable, evidence-linked knowledge base another agent can consume. Trigger on "/smelt", "smelt the mine", "build a knowledge base from these files", or any request to preserve what was learned across many large files. Works file by file into a running knowledge file, then reconciles folders globally. Verifies every URL the run left behind — exhaustively, never a sample — recording status, the address a redirect landed on, and how a dead link was handled, and reports each source file''s smelt yield. Writing is free-form — no template — and every claim stays traceable to its source. Never summarizes sources away, never deletes a finding, always keeps the evidence pointer. Keeps the run''s working material in a declared .work/ zone, and scripts/smelt_check.py measures what eyeballing cannot: redirect chains, every quote span vs the cached corpus, undeclared files, counts that disagree with the tree.'
