@@ -1,0 +1,63 @@
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#F5F3FF',
+    'primaryTextColor': '#1F2937',
+    'primaryBorderColor': '#7C3AED',
+    'lineColor': '#6B7280',
+    'actorBkg': '#FFFFFF',
+    'actorBorder': '#7C3AED',
+    'actorTextColor': '#1F2937',
+    'actorLineColor': '#9CA3AF',
+    'noteBkgColor': '#FEF3C7',
+    'noteBorderColor': '#F59E0B',
+    'noteTextColor': '#78350F',
+    'signalColor': '#374151',
+    'signalTextColor': '#111827',
+    'activationBkgColor': '#EDE9FE',
+    'activationBorderColor': '#7C3AED',
+    'labelBoxBkgColor': '#F3F4F6',
+    'labelBoxBorderColor': '#D1D5DB'
+  },
+  'sequence': {
+    'actorMargin': 60,
+    'messageMargin': 36,
+    'noteMargin': 14,
+    'boxMargin': 12,
+    'diagramMarginX': 24,
+    'diagramMarginY': 24,
+    'useMaxWidth': false
+  }
+}}%%
+sequenceDiagram
+    autonumber
+    participant User
+    participant TodoItem as TodoItem<br/>(View)
+    participant TodoBlock as TodoBlock<br/>(«Compound»)
+    participant saveEdit as useIntent<br/>(saveEdit)
+    participant TodoPage
+
+    User->>TodoItem: click "edit" button
+    TodoItem->>TodoBlock: onEditIntent(id) — view fires & stops
+    TodoBlock->>TodoBlock: setEditingId(id)
+    Note over TodoBlock: useDerivedState detects source Δ<br/>setState(editingTodo.text)
+    TodoBlock-->>TodoItem: re-render: isEditing=true, editDraft=text
+
+    Note over TodoBlock: user types in the input field
+    User->>TodoItem: onChange(newText)
+    TodoItem->>TodoBlock: onEditDraftChange(newText)
+    TodoBlock->>TodoBlock: setEditDraft(v)
+
+    Note over TodoBlock: user clicks "save"
+    User->>TodoItem: click "save"
+    TodoItem->>TodoBlock: onSaveEditIntent(id) = saveEditIntent.fire(id)
+    TodoBlock->>saveEdit: fire(id)
+    Note over saveEdit: isLoading = true
+    saveEdit-->>TodoItem: re-render: button disabled
+    Note over saveEdit: await handler(id)
+    TodoBlock->>TodoBlock: setTodos(...) · setEditingId(null)
+    Note over saveEdit: isLoading = false
+    TodoBlock->>TodoPage: onTodoCountChangeIntent(n) — block fires & stops
+    TodoPage->>TodoPage: setActiveCount(n)
+    TodoBlock-->>TodoItem: re-render: display mode restored
+    Note over TodoBlock: useDerivedState resets editDraft

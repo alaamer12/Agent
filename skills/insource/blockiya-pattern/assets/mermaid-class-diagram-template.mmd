@@ -1,0 +1,56 @@
+---
+config:
+  theme: default
+  look: handDrawn
+  layout: elk
+---
+classDiagram
+    note "VISIBILITY:
+    ● Public (exported from feature)
+    ○ Private (internal children)
+    ◆ Internal (state/hooks/queries)"
+    note "FLOW DIRECTION:
+    ▼ Props flowing in
+    ▲ Events flowing out"
+    note "STEREOTYPES:
+    <<Page>>       Route / styled orchestrator
+    <<Compound>>   Multi-component Blockiya
+    <<Atomic>>     Single-purpose Blockiya
+    <<Primitive>>  Non-behavioral design system component
+    <<Behavioral>> Behavioral design system component (owns interaction state)
+    <<Adapter>>    Third-party library wrapper
+    <<Hook/Query>> External data source"
+    note "RELATIONSHIPS:
+    *--  Strong composition (owns)
+    ..>  Dependency (uses)"
+
+    class YourPage {
+        <<Page>>
+        ▼ route params
+        ◆ state
+        ▲ renders()
+    }
+
+    class YourBlock {
+        <<Compound>> ●
+        ▼ prop: Type
+        ◆ state: Type
+        ▲ onEvent()
+    }
+
+    class YourAdapter {
+        <<Adapter>>
+        ▼ value: Type
+        ▼ onChange: Function
+        ◆ translates tokens + events
+    }
+
+    class YourBehavioral {
+        <<Behavioral>>
+        ▼ onSelect: Function
+        ◆ isOpen: boolean (internal)
+    }
+
+    YourPage ..> YourBlock : props ▼ / events ▲
+    YourBlock ..> YourAdapter : uses
+    YourBlock ..> YourBehavioral : uses

@@ -1,0 +1,164 @@
+---
+config:
+  theme: default
+  look: handDrawn
+  layout: elk
+---
+classDiagram
+    note "VISIBILITY:
+    ● Public (exported from feature)
+    ○ Private (internal children)
+    ◆ Internal (state/hooks/queries)"
+    note "FLOW DIRECTION:
+    ▼ Props flowing in
+    ▲ Events flowing out"
+    note "STEREOTYPES:
+    <<Page>>       Route / styled orchestrator
+    <<Compound>>   Multi-component Blockiya
+    <<Atomic>>     Single-purpose Blockiya
+    <<Primitive>>  Non-behavioral design system component
+    <<Behavioral>> Behavioral design system component (owns interaction state)
+    <<Adapter>>    Third-party library wrapper
+    <<Hook/Query>> External data source"
+    note "RELATIONSHIPS:
+    *--  Strong composition (owns)
+    ..>  Dependency (uses)"
+
+    %% ── Page ──────────────────────────────────────────────────
+    class BillingOverviewPage {
+        <<Page>>
+        ▼ route params
+        ◆ subscription: Subscription
+        ◆ navigate: NavigateFn
+        ▲ renders()
+    }
+
+    %% ── Main Feature Block (Public) ────────────────────────────
+    class BillingOverviewBlock {
+        <<Compound>> ●
+        ▼ subscription: Subscription
+        ▼ onUpgradeIntent: Function
+        ▼ onViewInvoicesIntent: Function
+        ◆ usage: UsageData
+        ◆ useBillingUsage() query
+        ▲ onUpgradeIntent()
+        ▲ onViewInvoicesIntent()
+    }
+
+    %% ── Child Blocks (Private) ─────────────────────────────────
+    class UsageChartsBlock {
+        <<Atomic>> ○
+        ▼ data: UsageData
+        ◆ chartConfig: Config
+        ▲ renders charts
+    }
+
+    class InvoiceHistoryBlock {
+        <<Atomic>> ○
+        ▼ onViewAll: Function
+        ◆ recentInvoices: Invoice[]
+        ◆ useRecentInvoices() query
+        ▲ onViewAll()
+    }
+
+    class PlanSummaryBlock {
+        <<Atomic>> ○
+        ▼ subscription: Subscription
+        ▼ onChangePlan: Function
+        ◆ planDetails: PlanInfo
+        ▲ onChangePlan()
+    }
+
+    %% ── Non-Behavioral Primitives ──────────────────────────────
+    class Card {
+        <<Primitive>>
+        ▼ variant?: string
+        ▼ children: ReactNode
+    }
+
+    class VStack {
+        <<Primitive>>
+        ▼ gap: SpacingToken
+        ▼ align: AlignValue
+        ▼ children: ReactNode
+    }
+
+    class HStack {
+        <<Primitive>>
+        ▼ gap: SpacingToken
+        ▼ justify: JustifyValue
+        ▼ children: ReactNode
+    }
+
+    class Text {
+        <<Primitive>>
+        ▼ variant: TypographyToken
+        ▼ children: string
+    }
+
+    class Button {
+        <<Primitive>>
+        ▼ variant: ButtonVariant
+        ▼ onClick: Function
+        ▼ children: ReactNode
+    }
+
+    %% ── Behavioral Primitives ──────────────────────────────────
+    class Dropdown {
+        <<Behavioral>>
+        ▼ onSelect: Function
+        ◆ isOpen: boolean
+        ◆ manages focus + keyboard nav
+    }
+
+    %% ── Adapters ───────────────────────────────────────────────
+    class UsageChartAdapter {
+        <<Adapter>>
+        ▼ data: UsageData
+        ▼ height: SpacingToken
+        ◆ translates tokens → chart lib
+        ◆ translates onHover → onDataPoint
+        ◆ manages chart lifecycle
+    }
+
+    %% ── Hooks / Queries ────────────────────────────────────────
+    class useBillingUsage {
+        <<Hook/Query>>
+        + fetch usage data
+        + returns UsageData
+    }
+
+    class useRecentInvoices {
+        <<Hook/Query>>
+        + fetch invoices
+        + returns Invoice[]
+    }
+
+    %% ── Relationships: Hierarchy ───────────────────────────────
+    BillingOverviewPage ..> BillingOverviewBlock : props ▼ / events ▲
+    BillingOverviewBlock *-- UsageChartsBlock : ◆ owns
+    BillingOverviewBlock *-- InvoiceHistoryBlock : ◆ owns
+    BillingOverviewBlock *-- PlanSummaryBlock : ◆ owns
+
+    %% ── Relationships: Non-Behavioral Primitive Usage ──────────
+    BillingOverviewBlock ..> Card : uses
+    BillingOverviewBlock ..> VStack : uses
+    BillingOverviewBlock ..> HStack : uses
+    BillingOverviewBlock ..> Text : uses
+    BillingOverviewBlock ..> Button : uses
+    UsageChartsBlock ..> VStack : uses
+    UsageChartsBlock ..> Card : uses
+    InvoiceHistoryBlock ..> HStack : uses
+    InvoiceHistoryBlock ..> Text : uses
+    PlanSummaryBlock ..> Card : uses
+    PlanSummaryBlock ..> Button : uses
+
+    %% ── Relationships: Behavioral Primitive Usage ──────────────
+    PlanSummaryBlock ..> Dropdown : uses
+
+    %% ── Relationships: Adapter Usage ───────────────────────────
+    UsageChartsBlock ..> UsageChartAdapter : uses
+
+    %% ── Relationships: Internal Queries ────────────────────────
+    BillingOverviewBlock ..> useBillingUsage : ◆ internal query
+    InvoiceHistoryBlock ..> useRecentInvoices : ◆ internal query
