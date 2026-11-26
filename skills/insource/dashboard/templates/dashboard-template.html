@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview - Workspace Console</title>
+
+  <!--
+    Reusable Dashboard Starter Template
+    Note: All route labels, metrics, entity names, and sample series below are fictional demo data.
+    Customize :root palette tokens and main section components freely for your domain.
+  -->
+
+  <!-- Fonts: Plus Jakarta Sans (UI) & JetBrains Mono (Metrics/Slugs) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Core Libraries -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.0/dist/apexcharts.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* =========================================================================
+       DESIGN TOKENS - 4-Tier Zero-Glare Tonal Ramp (Swap Hue Family Freely)
+       ========================================================================= */
+    :root {
+      /* Sidebar Rail */
+      --rail-bg: #15333E;
+      --rail-border: rgba(223, 236, 239, 0.09);
+      --rail-ink: #DFECEF;
+      --rail-group-ink: #8FAFB8;
+      --rail-hover-bg: rgba(223, 236, 239, 0.08);
+      --rail-pressed-bg: rgba(223, 236, 239, 0.14);
+      --rail-active-bg: #234E5D;
+      --rail-active-ink: #F2F9FA;
+      --rail-active-icon: #7ED4E2;
+
+      /* 4-Tier Surface Ramp */
+      --canvas-bg: #EAF1F3;
+      --surface-bg: #F6FAFB;
+      --surface-border: rgba(21, 52, 62, 0.08);
+      --surface-shadow: 0 2px 10px rgba(21, 52, 62, 0.04);
+
+      --zone-bg: #E2ECEF;
+      --zone-inner: #EEF5F7;
+      --chart-surface: #F9FCFD;
+      --skel-bar: #D3E1E5;
+      --skel-bar-soft: #DAE6EA;
+
+      /* Typography Ink */
+      --ink-primary: #16323B;
+      --ink-secondary: #46636C;
+
+      /* Brand Accent & Focus */
+      --accent: #1C6B7C;
+      --accent-hover: #155766;
+      --accent-pressed: #104552;
+      --accent-soft: rgba(28, 107, 124, 0.12);
+      --focus-ring: #56B4C4;
+
+      /* Semantic Status */
+      --status-ok: #2B7A5B;
+      --status-ok-bg: rgba(43, 122, 91, 0.12);
+      --status-warn: #B76E22;
+      --status-warn-bg: rgba(183, 110, 34, 0.12);
+      --status-danger: #B54545;
+      --status-danger-bg: rgba(181, 69, 69, 0.12);
+
+      /* Layout & Radii */
+      --rail-width: 280px;
+      --rail-collapsed: 76px;
+      --topbar-height: 68px;
+      --r-btn: 10px;
+      --r-pill: 12px;
+      --r-zone: 16px;
+      --r-surface: 18px;
+
+      /* Motion & Easing */
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --t-ui: 160ms;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background-color: var(--canvas-bg);
+      color: var(--ink-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    .font-mono-slug {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(21, 52, 62, 0.18); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(21, 52, 62, 0.3); }
+
+    .skip-link {
+      position: fixed;
+      top: 12px;
+      left: 14px;
+      z-index: 100;
+      padding: 10px 16px;
+      border-radius: var(--r-btn);
+      background-color: var(--accent);
+      color: var(--rail-active-ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      transform: translateY(-160%);
+      transition: transform var(--t-ui) var(--ease-out);
+    }
+    .skip-link:focus { transform: translateY(0); }
+
+    /* =========================================================================
+       APPLICATION SHELL - COLLAPSIBLE SIDEBAR & WORK AREA
+       ========================================================================= */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .sidebar-rail {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 40;
+      width: var(--rail-width);
+      background-color: var(--rail-bg);
+      color: var(--rail-ink);
+      border-right: 1px solid var(--rail-border);
+      display: flex;
+      flex-direction: column;
+      transition: width var(--t-ui) var(--ease-out), transform var(--t-ui) var(--ease-out);
+      user-select: none;
+    }
+
+    .app-shell.is-collapsed .sidebar-rail {
+      width: var(--rail-collapsed);
+    }
+
+    .rail-header {
+      height: var(--topbar-height);
+      padding: 0 16px 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--rail-border);
+      flex-shrink: 0;
+    }
+
+    .app-shell.is-collapsed .rail-header {
+      padding: 0;
+      justify-content: center;
+    }
+
+    .brand-wordmark {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .brand-title {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: var(--rail-active-ink);
+    }
+
+    .brand-role {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--rail-group-ink);
+    }
+
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      flex-shrink: 0;
+      background-color: #3DD6B5;
+      box-shadow: 0 0 0 3px rgba(61, 214, 181, 0.2);
+      transition: background-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+    }
+
+    .brand-dot.is-paused {
+      background-color: #E5A93C;
+      box-shadow: 0 0 0 3px rgba(229, 169, 60, 0.22);
+    }
+
+    .app-shell.is-collapsed .brand-wordmark {
+      display: none;
+    }
+
+    .rail-icon-btn {
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: var(--r-btn);
+      background: transparent;
+      color: var(--rail-ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background-color var(--t-ui) var(--ease-out), color var(--t-ui) var(--ease-out);
+    }
+
+    .rail-icon-btn:hover {
+      background-color: var(--rail-hover-bg);
+      color: var(--rail-active-ink);
+    }
+
+    .rail-icon-btn:active {
+      background-color: var(--rail-pressed-bg);
+    }
+
+    .rail-nav {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: visible;
+      padding: 16px 14px 24px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(223, 236, 239, 0.2) transparent;
+    }
+
+    .app-shell.is-collapsed .rail-nav {
+      overflow-y: visible;
+      padding: 16px 12px 24px;
+    }
+
+    .nav-group { margin-bottom: 20px; }
+    .nav-group:last-child { margin-bottom: 0; }
+
+    .nav-group-label {
+      padding: 0 12px 7px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--rail-group-ink);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .app-shell.is-collapsed .nav-group-label {
+      height: 1px;
+      padding: 0;
+      margin: 10px 10px;
+      background-color: var(--rail-border);
+      font-size: 0;
+      color: transparent;
+    }
+
+    .app-shell.is-collapsed .nav-group:first-child .nav-group-label {
+      display: none;
+    }
+
+    .nav-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .nav-item { position: relative; }
+
+    .nav-btn {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--rail-ink);
+      font-family: inherit;
+      font-size: 14.5px;
+      font-weight: 600;
+      line-height: 1.35;
+      text-align: left;
+      padding: 10px 14px;
+      border-radius: var(--r-pill);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: background-color var(--t-ui) var(--ease-out), color var(--t-ui) var(--ease-out);
+    }
+
+    .nav-btn:hover {
+      background-color: var(--rail-hover-bg);
+      color: var(--rail-active-ink);
+    }
+
+    .nav-btn:active {
+      background-color: var(--rail-pressed-bg);
+    }
+
+    .nav-btn[aria-current="page"] {
+      background-color: var(--rail-active-bg);
+      color: var(--rail-active-ink);
+      font-weight: 700;
+    }
+
+    .nav-btn svg {
+      width: 19px;
+      height: 19px;
+      flex-shrink: 0;
+      color: var(--rail-group-ink);
+      transition: color var(--t-ui) var(--ease-out);
+    }
+
+    .nav-btn:hover svg { color: var(--rail-ink); }
+    .nav-btn[aria-current="page"] svg { color: var(--rail-active-icon); }
+
+    .nav-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .app-shell.is-collapsed .nav-btn {
+      justify-content: center;
+      padding: 11px 0;
+    }
+
+    .app-shell.is-collapsed .nav-label {
+      position: absolute;
+      left: calc(100% + 14px);
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: #102932;
+      color: var(--rail-active-ink);
+      font-size: 13.5px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: var(--r-btn);
+      border: 1px solid var(--rail-border);
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 60;
+      transition: opacity var(--t-ui) var(--ease-out);
+    }
+
+    .app-shell.is-collapsed .nav-btn:hover .nav-label,
+    .app-shell.is-collapsed .nav-btn:focus-visible .nav-label {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* =========================================================================
+       WORK AREA & TOP BAR
+       ========================================================================= */
+    .work-area {
+      flex: 1;
+      min-width: 0;
+      margin-left: var(--rail-width);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left var(--t-ui) var(--ease-out);
+    }
+
+    .app-shell.is-collapsed .work-area {
+      margin-left: var(--rail-collapsed);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: var(--topbar-height);
+      background-color: var(--canvas-bg);
+      border-bottom: 1px solid var(--surface-border);
+      padding: 0 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--r-btn);
+      border: 1px solid var(--surface-border);
+      background-color: var(--surface-bg);
+      color: var(--ink-primary);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .route-slug {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background-color: var(--surface-bg);
+      border: 1px solid var(--surface-border);
+      border-radius: 99px;
+      padding: 5px 10px 5px 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--ink-secondary);
+    }
+
+    .sync-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 99px;
+      background-color: var(--status-ok);
+    }
+
+    .sync-dot.is-paused {
+      background-color: var(--status-warn);
+    }
+
+    .sync-refresh-btn {
+      border: 0;
+      background: transparent;
+      color: var(--ink-secondary);
+      width: 22px;
+      height: 22px;
+      border-radius: 99px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color var(--t-ui) var(--ease-out), color var(--t-ui) var(--ease-out);
+    }
+
+    .sync-refresh-btn:hover {
+      background-color: var(--zone-bg);
+      color: var(--accent);
+    }
+
+    .state-switcher {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px;
+      background-color: var(--zone-bg);
+      border-radius: var(--r-pill);
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .state-btn {
+      border: 0;
+      background: transparent;
+      color: var(--ink-secondary);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      padding: 6px 13px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background-color var(--t-ui) var(--ease-out), color var(--t-ui) var(--ease-out);
+    }
+
+    .state-btn:hover {
+      color: var(--ink-primary);
+      background-color: rgba(246, 250, 251, 0.55);
+    }
+
+    .state-btn[aria-pressed="true"] {
+      background-color: var(--surface-bg);
+      color: var(--accent);
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(21, 52, 62, 0.08);
+    }
+
+    /* =========================================================================
+       PAGE SURFACE, 1-COL ZONES, CHART SURFACES & UI ELEMENTS
+       ========================================================================= */
+    .page-canvas {
+      flex: 1;
+      width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 28px 36px 52px;
+    }
+
+    .page-surface {
+      background-color: var(--surface-bg);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--r-surface);
+      box-shadow: var(--surface-shadow);
+      padding: 32px 34px 36px;
+    }
+
+    .page-header {
+      margin-bottom: 26px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+    }
+
+    .page-title {
+      margin: 0 0 6px;
+      font-size: clamp(24px, 2.2vw, 28px);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+      color: var(--ink-primary);
+    }
+
+    .page-subtitle {
+      margin: 0;
+      max-width: 74ch;
+      font-size: 14.5px;
+      font-weight: 500;
+      color: var(--ink-secondary);
+    }
+
+    .page-stack {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .wf-zone {
+      background-color: var(--zone-bg);
+      border-radius: var(--r-zone);
+      padding: 28px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .wf-zone-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .wf-zone-title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--ink-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wf-zone-sub {
+      margin: 3px 0 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-secondary);
+    }
+
+    .chart-surface {
+      background-color: var(--chart-surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      width: 100%;
+    }
+
+    .data-card {
+      background-color: var(--chart-surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-ok { background-color: var(--status-ok-bg); color: var(--status-ok); }
+    .badge-warn { background-color: var(--status-warn-bg); color: var(--status-warn); }
+    .badge-danger { background-color: var(--status-danger-bg); color: var(--status-danger); }
+    .badge-accent { background-color: var(--accent-soft); color: var(--accent); }
+    .badge-neutral { background-color: rgba(21, 52, 62, 0.08); color: var(--ink-secondary); }
+
+    /* Buttons & Inputs */
+    .btn-primary {
+      border: 0;
+      border-radius: var(--r-btn);
+      background-color: var(--accent);
+      color: var(--rail-active-ink);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 700;
+      padding: 9px 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      transition: background-color var(--t-ui) var(--ease-out);
+    }
+    .btn-primary:hover { background-color: var(--accent-hover); }
+    .btn-primary:active { background-color: var(--accent-pressed); }
+
+    .btn-soft {
+      border: 1px solid var(--surface-border);
+      border-radius: var(--r-btn);
+      background-color: var(--chart-surface);
+      color: var(--ink-primary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background-color var(--t-ui) var(--ease-out), color var(--t-ui) var(--ease-out), border-color var(--t-ui) var(--ease-out);
+    }
+    .btn-soft:hover {
+      background-color: var(--zone-inner);
+      color: var(--accent);
+      border-color: rgba(28, 107, 124, 0.25);
+    }
+    .btn-soft.is-active {
+      background-color: var(--accent);
+      color: var(--rail-active-ink);
+      border-color: var(--accent);
+    }
+
+    .input-calm {
+      background-color: var(--chart-surface);
+      border: 1px solid rgba(21, 52, 62, 0.15);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--ink-primary);
+      outline: none;
+      transition: border-color var(--t-ui) var(--ease-out);
+    }
+    .input-calm:focus { border-color: var(--accent); }
+
+    /* Tables */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      background-color: var(--chart-surface);
+      border-radius: 14px;
+      border: 1px solid var(--surface-border);
+    }
+
+    .calm-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+
+    .calm-table th {
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-secondary);
+      border-bottom: 1px solid var(--surface-border);
+      background-color: var(--zone-inner);
+      white-space: nowrap;
+    }
+
+    .calm-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--surface-border);
+      color: var(--ink-primary);
+      vertical-align: middle;
+    }
+
+    .calm-table tbody tr:last-child td { border-bottom: 0; }
+    .calm-table tbody tr:hover { background-color: rgba(226, 236, 239, 0.35); }
+    .calm-table-fixed { table-layout: fixed; }
+
+    .cell-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .cell-truncate {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cell-truncate-title {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--ink-primary);
+    }
+
+    .cell-truncate-meta {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12.5px;
+      line-height: 1.35;
+      color: var(--ink-secondary);
+    }
+
+    [data-tooltip] { cursor: help; }
+    [data-tooltip]:hover {
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-decoration-color: rgba(28, 107, 124, 0.55);
+      text-underline-offset: 3px;
+    }
+
+    /* Global Non-Clipping Floating Tooltip */
+    .global-tooltip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      pointer-events: none;
+      background-color: #102932;
+      color: #F2F9FA;
+      border: 1px solid rgba(223, 236, 239, 0.14);
+      border-radius: 10px;
+      padding: 10px 14px;
+      max-width: 380px;
+      box-shadow: 0 10px 28px rgba(15, 35, 43, 0.22);
+      font-size: 13px;
+      line-height: 1.55;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(4px);
+      transition: opacity 140ms var(--ease-out), transform 140ms var(--ease-out), visibility 140ms;
+    }
+
+    .global-tooltip.is-visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .global-tooltip-main {
+      font-weight: 600;
+      color: #F2F9FA;
+      word-break: break-word;
+    }
+
+    .global-tooltip-sub {
+      margin-top: 5px;
+      padding-top: 5px;
+      border-top: 1px solid rgba(223, 236, 239, 0.12);
+      font-size: 12px;
+      font-weight: 500;
+      color: #9CC2CC;
+      word-break: break-word;
+    }
+
+    /* Empty & Loading States */
+    .empty-panel {
+      background-color: var(--zone-bg);
+      border-radius: var(--r-zone);
+      padding: 56px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .empty-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--r-pill);
+      background-color: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .empty-title {
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ink-primary);
+    }
+
+    .empty-desc {
+      margin: 0 0 24px;
+      max-width: 52ch;
+      font-size: 14.5px;
+      color: var(--ink-secondary);
+    }
+
+    .skel-zone {
+      background-color: var(--zone-bg);
+      border-radius: var(--r-zone);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .skel-line {
+      border-radius: 8px;
+      background-color: var(--skel-bar);
+      height: 18px;
+    }
+
+    .skel-line--soft {
+      background-color: var(--skel-bar-soft);
+      height: 14px;
+    }
+
+    .skel-block {
+      border-radius: 14px;
+      background-color: var(--skel-bar-soft);
+      width: 100%;
+    }
+
+    /* Modal & Toast */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background-color: rgba(16, 40, 48, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 160ms var(--ease-out);
+    }
+
+    .modal-card {
+      background-color: var(--surface-bg);
+      border: 1px solid var(--surface-border);
+      border-radius: 18px;
+      max-width: 620px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 18px 40px rgba(15, 38, 46, 0.25);
+      animation: modalIn 180ms var(--ease-out);
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 22px;
+      right: 24px;
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast-item {
+      pointer-events: auto;
+      background-color: var(--rail-bg);
+      color: var(--rail-active-ink);
+      border: 1px solid rgba(126, 212, 226, 0.28);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 13.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(15, 38, 46, 0.22);
+      animation: toastIn 200ms var(--ease-out);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile Drawer */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 35;
+      background-color: rgba(16, 40, 48, 0.38);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--t-ui) var(--ease-out), visibility var(--t-ui) var(--ease-out);
+    }
+    .drawer-backdrop.is-open { opacity: 1; visibility: visible; }
+    .mobile-close-btn { display: none; }
+
+    @media (max-width: 959px) {
+      .sidebar-rail { width: var(--rail-width) !important; transform: translateX(-100%); }
+      .app-shell.is-mobile-open .sidebar-rail { transform: translateX(0); }
+      .work-area, .app-shell.is-collapsed .work-area { margin-left: 0; }
+      .mobile-menu-btn { display: inline-flex; }
+      .desktop-collapse-btn { display: none; }
+      .mobile-close-btn { display: inline-flex; }
+      .app-shell.is-collapsed .brand-wordmark { display: flex; }
+      .app-shell.is-collapsed .rail-header { padding: 0 16px 0 22px; justify-content: space-between; }
+      .app-shell.is-collapsed .nav-btn { justify-content: flex-start; padding: 10px 14px; }
+      .app-shell.is-collapsed .nav-label {
+        position: static; transform: none; background: transparent; border: 0;
+        padding: 0; opacity: 1; visibility: visible; color: inherit; font-size: 14.5px;
+      }
+      .app-shell.is-collapsed .nav-group-label {
+        display: block; height: auto; padding: 0 12px 7px; margin: 0;
+        background: transparent; font-size: 12px; color: var(--rail-group-ink);
+      }
+      .topbar { padding: 0 18px; }
+      .page-canvas { padding: 20px 16px 40px; }
+      .page-surface { padding: 22px 18px 26px; }
+      .sync-pill { display: none; }
+    }
+
+    @media (max-width: 639px) {
+      .route-slug { display: none; }
+      .state-btn { padding: 6px 10px; font-size: 12.5px; }
+      .wf-zone { padding: 18px; }
+      .chart-surface { padding: 14px 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <div id="drawer-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
+  <div id="modal-root"></div>
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+  <div id="global-tooltip" class="global-tooltip" role="tooltip" aria-hidden="true"></div>
+
+  <div id="app-shell" class="app-shell">
+    <!-- LEFT NAVIGATION RAIL -->
+    <aside id="sidebar-rail" class="sidebar-rail" aria-label="Primary navigation">
+      <div class="rail-header">
+        <div class="brand-wordmark">
+          <span class="brand-title">Workspace</span>
+          <span class="brand-role">Console</span>
+          <span id="sidebar-status-dot" class="brand-dot" title="Data stream active"></span>
+        </div>
+
+        <button id="collapse-rail-btn" type="button" class="rail-icon-btn desktop-collapse-btn" aria-label="Collapse navigation sidebar" aria-expanded="true" title="Collapse sidebar">
+          <i data-lucide="panel-left-close" class="w-5 h-5"></i>
+        </button>
+
+        <button id="mobile-close-btn" type="button" class="rail-icon-btn mobile-close-btn" aria-label="Close navigation menu">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <nav id="rail-nav" class="rail-nav" aria-label="Dashboard routes"></nav>
+    </aside>
+
+    <!-- MAIN WORK AREA -->
+    <div class="work-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="mobile-menu-btn" type="button" class="mobile-menu-btn" aria-label="Open navigation menu" aria-controls="sidebar-rail" aria-expanded="false">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+
+          <span id="topbar-route-slug" class="route-slug font-mono-slug">/dashboard/overview</span>
+
+          <div class="sync-pill">
+            <span id="topbar-sync-dot" class="sync-dot"></span>
+            <span id="sync-status-text">Live · Synced</span>
+            <button id="refresh-data-btn" type="button" class="sync-refresh-btn" title="Refresh metrics">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3-Option Segmented State Switcher -->
+        <div class="state-switcher" role="group" aria-label="Preview page state">
+          <button type="button" class="state-btn" data-state="production" aria-pressed="true">Production</button>
+          <button type="button" class="state-btn" data-state="empty" aria-pressed="false">Empty</button>
+          <button type="button" class="state-btn" data-state="loading" aria-pressed="false">Loading</button>
+        </div>
+      </header>
+
+      <main id="main-content" class="page-canvas" tabindex="-1"></main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* =======================================================================
+         ROUTE REGISTRY (Replace groups & routes for your target domain)
+         ======================================================================= */
+      const NAV_GROUPS = [
+        {
+          id: 'core',
+          label: 'Analytics',
+          routes: [
+            {
+              path: '/dashboard/overview',
+              title: 'Overview',
+              icon: 'layout-grid',
+              subtitle: 'Daily summary of workspace activity, conversion momentum, and system health.',
+              emptyTitle: 'No activity recorded yet',
+              emptyDesc: 'Summary metrics and trend charts will appear here once the first data sync completes.',
+              emptyAction: 'Open Settings',
+              emptyActionRoute: '/dashboard/settings'
+            },
+            {
+              path: '/dashboard/trends',
+              title: 'Trends & Segments',
+              icon: 'trending-up',
+              subtitle: 'Compare segment performance, filter records interactively, and inspect range shifts.',
+              emptyTitle: 'Not enough segment history',
+              emptyDesc: 'Comparison matrices and range bridges populate once baseline cohort records are available.',
+              emptyAction: 'Back to Overview',
+              emptyActionRoute: '/dashboard/overview'
+            }
+          ]
+        },
+        {
+          id: 'operations',
+          label: 'Operations',
+          routes: [
+            {
+              path: '/dashboard/activity',
+              title: 'Activity & Queue',
+              icon: 'calendar-clock',
+              subtitle: 'Inspect weekly intensity heatmaps and review prioritized action items in detail.',
+              emptyTitle: 'Queue is currently empty',
+              emptyDesc: 'Activity heatmaps and prioritized items will appear here as new events arrive.',
+              emptyAction: 'Back to Overview',
+              emptyActionRoute: '/dashboard/overview'
+            },
+            {
+              path: '/dashboard/settings',
+              title: 'Settings',
+              icon: 'sliders-horizontal',
+              subtitle: 'Adjust refresh cadence, alert thresholds, and background stream status.',
+              emptyTitle: 'Using default configuration',
+              emptyDesc: 'No custom overrides are saved yet. Return to production view to edit runtime preferences.',
+              emptyAction: 'Return to Production',
+              emptyActionRoute: null
+            }
+          ]
+        }
+      ];
+
+      const ROUTE_MAP = new Map();
+      NAV_GROUPS.forEach(function (g) {
+        g.routes.forEach(function (r) {
+          ROUTE_MAP.set(r.path, Object.assign({}, r, { groupLabel: g.label }));
+        });
+      });
+
+      const DEFAULT_ROUTE = '/dashboard/overview';
+
+      /* =======================================================================
+         APPLICATION STATE & CHART LIFECYCLE REGISTRY
+         ======================================================================= */
+      const state = {
+        activePath: DEFAULT_ROUTE,
+        previewMode: 'production', // 'production' | 'empty' | 'loading'
+        isCollapsed: false,
+        isMobileOpen: false,
+        streamPaused: false,
+        segmentFilter: 'All',
+        searchQuery: '',
+        heatmapLayer: 'volume',
+        minPriority: 70,
+        settings: {
+          refreshSec: 60,
+          concurrency: 8,
+          alertThreshold: 85,
+          retentionDays: 90
+        }
+      };
+
+      let activeCharts = [];
+
+      /* =======================================================================
+         FICTIONAL DEMO DATASETS (Replace with real or domain-specific data)
+         ======================================================================= */
+      const SEGMENTS_DEMO = [
+        { name: 'Segment Alpha', category: 'Core', count: 180, growth: 24.5, avgValue: 540, load: 2.2, conv: 56.0, tier: 'High Opportunity' },
+        { name: 'Segment Beta', category: 'Growth', count: 140, growth: 18.2, avgValue: 410, load: 3.4, conv: 51.4, tier: 'High Opportunity' },
+        { name: 'Segment Gamma', category: 'Core', count: 290, growth: 8.6, avgValue: 320, load: 5.1, conv: 45.2, tier: 'Balanced' },
+        { name: 'Segment Delta', category: 'Enterprise', count: 210, growth: 12.1, avgValue: 480, load: 4.5, conv: 48.0, tier: 'Balanced' },
+        { name: 'Segment Epsilon', category: 'Legacy', count: 420, growth: -4.2, avgValue: 130, load: 12.4, conv: 31.8, tier: 'Saturated' }
+      ];
+
+      const RANGE_BRIDGE_DEMO = [
+        { label: 'Tier A -> Tier A+ (+140%)', base: 180, enhanced: 432 },
+        { label: 'Tier B -> Tier B+ (+115%)', base: 210, enhanced: 452 },
+        { label: 'Tier C -> Tier C+ (+92%)', base: 160, enhanced: 307 },
+        { label: 'Tier D -> Tier D+ (+78%)', base: 240, enhanced: 427 }
+      ];
+
+      const QUEUE_ITEMS_DEMO = [
+        {
+          id: 1001,
+          title: 'Quarterly capacity expansion review for primary cluster',
+          owner: 'Account Northwind · Enterprise Plan',
+          value: '$500-1,000',
+          age: '20m ago',
+          score: 92,
+          status: 'Ready',
+          notes: 'Includes full specification sheet and approved milestone window.'
+        },
+        {
+          id: 1002,
+          title: 'Automated report export workflow for regional operations team',
+          owner: 'Account Example Corp · Growth Plan',
+          value: '$250-500',
+          age: '45m ago',
+          score: 84,
+          status: 'Ready',
+          notes: 'Repeat requester with clear acceptance checklist and low contention.'
+        },
+        {
+          id: 1003,
+          title: 'Unified design token audit across customer portal views',
+          owner: 'Account Contoso Labs · Core Plan',
+          value: '$250-500',
+          age: '1h 15m ago',
+          score: 76,
+          status: 'In Review',
+          notes: 'Style guide attached; review window remains open for next 4 hours.'
+        },
+        {
+          id: 1004,
+          title: 'Legacy table pagination cleanup and index tuning pass',
+          owner: 'Account Fabrikam · Standard Plan',
+          value: '$100-250',
+          age: '2h 10m ago',
+          score: 68,
+          status: 'Queued',
+          notes: 'Standard maintenance ticket; moderate queue volume.'
+        }
+      ];
+
+      /* =======================================================================
+         DOM REFERENCES
+         ======================================================================= */
+      const appShell = document.getElementById('app-shell');
+      const railNav = document.getElementById('rail-nav');
+      const mainContent = document.getElementById('main-content');
+      const topbarRouteSlug = document.getElementById('topbar-route-slug');
+      const syncStatusText = document.getElementById('sync-status-text');
+      const topbarSyncDot = document.getElementById('topbar-sync-dot');
+      const sidebarStatusDot = document.getElementById('sidebar-status-dot');
+      const refreshDataBtn = document.getElementById('refresh-data-btn');
+      const collapseBtn = document.getElementById('collapse-rail-btn');
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      const mobileCloseBtn = document.getElementById('mobile-close-btn');
+      const drawerBackdrop = document.getElementById('drawer-backdrop');
+      const srAnnouncer = document.getElementById('sr-announcer');
+      const modalRoot = document.getElementById('modal-root');
+      const toastContainer = document.getElementById('toast-container');
+      const stateButtons = Array.from(document.querySelectorAll('.state-btn'));
+
+      /* =======================================================================
+         UTILITY & CHART LIFECYCLE HELPERS
+         ======================================================================= */
+      function esc(val) {
+        return String(val === undefined || val === null ? '' : val)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function prefersReducedMotion() {
+        return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      }
+
+      function refreshIcons() {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          try { window.lucide.createIcons(); } catch (_) {}
+        }
+      }
+
+      function destroyCharts() {
+        activeCharts.forEach(function (c) {
+          try { c.destroy(); } catch (_) {}
+        });
+        activeCharts = [];
+      }
+
+      function mountChart(selector, config) {
+        const el = typeof selector === 'string' ? document.querySelector(selector) : selector;
+        if (!el) return null;
+
+        if (typeof ApexCharts === 'undefined') {
+          el.innerHTML = '<div class="py-12 px-6 text-center text-sm text-[#46636C]">Chart library unavailable offline.</div>';
+          return null;
+        }
+
+        try {
+          el.innerHTML = '';
+          const chart = new ApexCharts(el, config);
+          chart.render();
+          activeCharts.push(chart);
+          return chart;
+        } catch (err) {
+          el.innerHTML = '<div class="py-10 px-6 text-center text-xs font-mono-slug text-[#B54545]">Chart error: ' + esc(err && err.message ? err.message : 'Unknown') + '</div>';
+          return null;
+        }
+      }
+
+      /* Shared ApexCharts motion & visual defaults */
+      function baseChartOpts(height) {
+        const animate = !prefersReducedMotion();
+        return {
+          chart: {
+            height: height || 320,
+            fontFamily: 'Plus Jakarta Sans, sans-serif',
+            background: 'transparent',
+            toolbar: { show: false },
+            animations: {
+              enabled: animate,
+              easing: 'easeinout',
+              speed: 320,
+              animateGradually: { enabled: animate, delay: 45 },
+              dynamicAnimation: { enabled: animate, speed: 240 }
+            }
+          },
+          grid: {
+            borderColor: 'rgba(21, 52, 62, 0.08)',
+            strokeDashArray: 4,
+            padding: { left: 8, right: 12 }
+          },
+          dataLabels: { enabled: false },
+          legend: {
+            position: 'top',
+            horizontalAlign: 'left',
+            fontSize: '13px',
+            fontWeight: 600,
+            labels: { colors: '#16323B' },
+            markers: { radius: 4 }
+          },
+          tooltip: {
+            theme: 'light',
+            style: { fontSize: '12.5px', fontFamily: 'Plus Jakarta Sans, sans-serif' }
+          }
+        };
+      }
+
+      function showToast(message) {
+        if (!toastContainer) return;
+        const item = document.createElement('div');
+        item.className = 'toast-item';
+        item.innerHTML = '<i data-lucide="check-circle-2" class="w-4 h-4 text-[#7ED4E2] shrink-0"></i><span>' + esc(message) + '</span>';
+        toastContainer.appendChild(item);
+        refreshIcons();
+        setTimeout(function () {
+          item.style.opacity = '0';
+          item.style.transition = 'opacity 180ms ease';
+          setTimeout(function () {
+            if (item.parentNode) item.parentNode.removeChild(item);
+          }, 200);
+        }, 3000);
+      }
+
+      function announce(msg) {
+        if (!srAnnouncer) return;
+        srAnnouncer.textContent = '';
+        window.requestAnimationFrame(function () {
+          srAnnouncer.textContent = msg;
+        });
+      }
+
+      function updateStatusIndicators() {
+        const paused = state.streamPaused;
+        if (syncStatusText) syncStatusText.textContent = paused ? 'Paused' : 'Live · Synced';
+        if (topbarSyncDot) topbarSyncDot.classList.toggle('is-paused', paused);
+        if (sidebarStatusDot) sidebarStatusDot.classList.toggle('is-paused', paused);
+      }
+
+      function downloadCsv(filename, headers, rows) {
+        try {
+          const lines = [
+            headers.join(','),
+            ...rows.map(function (r) {
+              return r.map(function (cell) {
+                return '"' + String(cell).replace(/"/g, '""') + '"';
+              }).join(',');
+            })
+          ];
+          const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', filename);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        } catch (_) {
+          showToast('CSV export prepared (' + rows.length + ' rows)');
+        }
+      }
+
+      function openModal(html) {
+        if (!modalRoot) return;
+        modalRoot.innerHTML = '<div class="modal-backdrop" id="active-modal-backdrop" role="dialog" aria-modal="true"><div class="modal-card">' + html + '</div></div>';
+        refreshIcons();
+        const bd = document.getElementById('active-modal-backdrop');
+        if (bd) {
+          bd.addEventListener('click', function (e) {
+            if (e.target === bd) closeModal();
+          });
+        }
+        const closeBtn = modalRoot.querySelector('[data-close-modal]');
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      }
+
+      function closeModal() {
+        if (modalRoot) modalRoot.innerHTML = '';
+      }
+
+      /* =======================================================================
+         GLOBAL NON-CLIPPING FLOATING TOOLTIP (#global-tooltip)
+         ======================================================================= */
+      let activeTooltipEl = null;
+
+      function positionGlobalTooltip(target) {
+        const tip = document.getElementById('global-tooltip');
+        if (!tip || !target) return;
+        const rect = target.getBoundingClientRect();
+        const tipRect = tip.getBoundingClientRect();
+        const pad = 12;
+
+        let left = rect.left + rect.width / 2 - tipRect.width / 2;
+        left = Math.max(pad, Math.min(window.innerWidth - tipRect.width - pad, left));
+
+        let top = rect.top - tipRect.height - 10;
+        if (top < pad) top = rect.bottom + 10;
+        if (top + tipRect.height > window.innerHeight - pad) {
+          top = Math.max(pad, window.innerHeight - tipRect.height - pad);
+        }
+
+        tip.style.left = Math.round(left) + 'px';
+        tip.style.top = Math.round(top) + 'px';
+      }
+
+      function showGlobalTooltip(target) {
+        const tip = document.getElementById('global-tooltip');
+        if (!tip || !target) return;
+        const mainText = target.getAttribute('data-tooltip');
+        if (!mainText) return;
+        const subText = target.getAttribute('data-tooltip-sub');
+
+        activeTooltipEl = target;
+        tip.innerHTML =
+          '<div class="global-tooltip-main">' + esc(mainText) + '</div>' +
+          (subText ? '<div class="global-tooltip-sub">' + esc(subText) + '</div>' : '');
+
+        tip.classList.add('is-visible');
+        tip.setAttribute('aria-hidden', 'false');
+        positionGlobalTooltip(target);
+      }
+
+      function hideGlobalTooltip() {
+        const tip = document.getElementById('global-tooltip');
+        activeTooltipEl = null;
+        if (!tip) return;
+        tip.classList.remove('is-visible');
+        tip.setAttribute('aria-hidden', 'true');
+      }
+
+      function initGlobalTooltip() {
+        document.addEventListener('mouseover', function (e) {
+          const target = e.target.closest('[data-tooltip]');
+          if (target) showGlobalTooltip(target);
+          else if (activeTooltipEl) hideGlobalTooltip();
+        });
+        document.addEventListener('mouseout', function (e) {
+          if (!activeTooltipEl) return;
+          const related = e.relatedTarget;
+          if (!related || !activeTooltipEl.contains(related)) hideGlobalTooltip();
+        });
+        document.addEventListener('focusin', function (e) {
+          const target = e.target.closest('[data-tooltip]');
+          if (target) showGlobalTooltip(target);
+        });
+        document.addEventListener('focusout', hideGlobalTooltip);
+        window.addEventListener('scroll', hideGlobalTooltip, true);
+        window.addEventListener('resize', hideGlobalTooltip);
+      }
+
+      /* =======================================================================
+         SIDEBAR & EMPTY / LOADING STATES
+         ======================================================================= */
+      function renderSidebar() {
+        if (!railNav) return;
+        railNav.innerHTML = NAV_GROUPS.map(function (group) {
+          const items = group.routes.map(function (route) {
+            const isActive = route.path === state.activePath;
+            return (
+              '<li class="nav-item">' +
+                '<button type="button" class="nav-btn" data-route="' + esc(route.path) + '" aria-current="' + (isActive ? 'page' : 'false') + '">' +
+                  '<i data-lucide="' + esc(route.icon) + '"></i>' +
+                  '<span class="nav-label">' + esc(route.title) + '</span>' +
+                '</button>' +
+              '</li>'
+            );
+          }).join('');
+
+          return (
+            '<div class="nav-group">' +
+              '<div class="nav-group-label" id="group-' + esc(group.id) + '">' + esc(group.label) + '</div>' +
+              '<ul class="nav-list" aria-labelledby="group-' + esc(group.id) + '">' + items + '</ul>' +
+            '</div>'
+          );
+        }).join('');
+        refreshIcons();
+      }
+
+      function renderEmptyState(route) {
+        return (
+          '<section class="empty-panel" aria-label="Empty state preview">' +
+            '<div class="empty-icon" aria-hidden="true">' +
+              '<i data-lucide="' + esc(route.icon) + '" class="w-6 h-6"></i>' +
+            '</div>' +
+            '<h2 class="empty-title">' + esc(route.emptyTitle) + '</h2>' +
+            '<p class="empty-desc">' + esc(route.emptyDesc) + '</p>' +
+            '<button type="button" class="btn-primary" id="empty-primary-action" data-target-route="' + esc(route.emptyActionRoute || '') + '">' +
+              esc(route.emptyAction) +
+            '</button>' +
+          '</section>'
+        );
+      }
+
+      function renderLoadingState(routeTitle) {
+        return (
+          '<div class="page-stack" role="status" aria-label="Loading ' + esc(routeTitle) + '">' +
+            '<span class="sr-only">Loading ' + esc(routeTitle) + '...</span>' +
+            '<div class="skel-zone">' +
+              '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">' +
+                '<div class="skel-block h-24"></div>' +
+                '<div class="skel-block h-24"></div>' +
+                '<div class="skel-block h-24"></div>' +
+                '<div class="skel-block h-24"></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="skel-zone">' +
+              '<div class="skel-line" style="width: 34%;"></div>' +
+              '<div class="skel-line skel-line--soft" style="width: 58%;"></div>' +
+              '<div class="skel-block h-72 mt-2"></div>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      /* =======================================================================
+         ROUTE 1: /dashboard/overview (KPIs + Mixed Bar/Line + Alerts)
+         ======================================================================= */
+      function renderOverviewPage() {
+        return (
+          '<div class="page-stack">' +
+            '<section class="wf-zone">' +
+              '<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">' +
+                '<div class="data-card">' +
+                  '<div class="flex items-center justify-between mb-2">' +
+                    '<span class="text-xs font-bold uppercase tracking-wide text-[#46636C]">Daily Volume</span>' +
+                    '<i data-lucide="activity" class="w-4 h-4 text-[#1C6B7C]"></i>' +
+                  '</div>' +
+                  '<div class="text-2xl font-extrabold font-mono-slug tabular-nums text-[#16323B]">340</div>' +
+                  '<div class="mt-2 flex items-center gap-2 text-xs text-[#46636C]"><span class="badge badge-ok">+11.2%</span> vs 7d average</div>' +
+                '</div>' +
+                '<div class="data-card">' +
+                  '<div class="flex items-center justify-between mb-2">' +
+                    '<span class="text-xs font-bold uppercase tracking-wide text-[#46636C]">Conversion Rate</span>' +
+                    '<i data-lucide="check-circle-2" class="w-4 h-4 text-[#1C6B7C]"></i>' +
+                  '</div>' +
+                  '<div class="text-2xl font-extrabold font-mono-slug tabular-nums text-[#16323B]">42.5%</div>' +
+                  '<div class="mt-2 flex items-center gap-2 text-xs text-[#46636C]"><span class="badge badge-ok">+2.4pp</span> Matured cohort</div>' +
+                '</div>' +
+                '<div class="data-card">' +
+                  '<div class="flex items-center justify-between mb-2">' +
+                    '<span class="text-xs font-bold uppercase tracking-wide text-[#46636C]">Median Turnaround</span>' +
+                    '<i data-lucide="clock" class="w-4 h-4 text-[#1C6B7C]"></i>' +
+                  '</div>' +
+                  '<div class="text-2xl font-extrabold font-mono-slug tabular-nums text-[#16323B]">6.2 hrs</div>' +
+                  '<div class="mt-2 text-xs font-mono-slug tabular-nums text-[#46636C]">P25 2.0h · P75 18.4h</div>' +
+                '</div>' +
+                '<div class="data-card">' +
+                  '<div class="flex items-center justify-between mb-2">' +
+                    '<span class="text-xs font-bold uppercase tracking-wide text-[#46636C]">Stream Health</span>' +
+                    '<i data-lucide="shield-check" class="w-4 h-4 text-[#1C6B7C]"></i>' +
+                  '</div>' +
+                  '<div class="text-2xl font-extrabold font-mono-slug tabular-nums text-[#16323B]">99.6%</div>' +
+                  '<div class="mt-2 flex items-center gap-2 text-xs text-[#46636C]"><span class="badge ' + (state.streamPaused ? 'badge-warn' : 'badge-ok') + '">' + (state.streamPaused ? 'Paused' : 'Healthy') + '</span> ' + state.settings.concurrency + ' workers</div>' +
+                '</div>' +
+              '</div>' +
+            '</section>' +
+
+            '<section class="wf-zone">' +
+              '<div class="wf-zone-header">' +
+                '<div>' +
+                  '<h2 class="wf-zone-title">14-Day Activity Pulse</h2>' +
+                  '<p class="wf-zone-sub">Daily incoming items vs. completed outcomes overlaid with conversion rate %</p>' +
+                '</div>' +
+                '<span class="badge badge-accent font-mono-slug">Mixed Bar + Line</span>' +
+              '</div>' +
+              '<div class="chart-surface"><div id="chart-overview-pulse"></div></div>' +
+            '</section>' +
+
+            '<section class="wf-zone">' +
+              '<div class="wf-zone-header">' +
+                '<div>' +
+                  '<h2 class="wf-zone-title">Actionable Notices</h2>' +
+                  '<p class="wf-zone-sub">Recent threshold alerts and operational highlights with direct navigation</p>' +
+                '</div>' +
+                '<span class="badge badge-neutral">2 Active</span>' +
+              '</div>' +
+              '<div class="grid grid-cols-1 gap-3">' +
+                '<div class="data-card flex flex-wrap items-center justify-between gap-4">' +
+                  '<div class="flex items-start gap-3">' +
+                    '<span class="badge badge-accent mt-0.5"><i data-lucide="zap" class="w-3.5 h-3.5"></i> Surge</span>' +
+                    '<div>' +
+                      '<div class="font-bold text-sm text-[#16323B]">Segment Alpha volume rose +24.5% over baseline</div>' +
+                      '<div class="text-xs text-[#46636C] mt-0.5">Peak activity concentrated between 12:00 and 15:00 UTC across weekday sessions.</div>' +
+                    '</div>' +
+                  '</div>' +
+                  '<button type="button" class="btn-soft nav-jump-btn" data-jump="/dashboard/trends">Inspect Segments <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>' +
+                '</div>' +
+                '<div class="data-card flex flex-wrap items-center justify-between gap-4">' +
+                  '<div class="flex items-start gap-3">' +
+                    '<span class="badge badge-ok mt-0.5"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Nominal</span>' +
+                    '<div>' +
+                      '<div class="font-bold text-sm text-[#16323B]">Priority queue latency steady below target threshold</div>' +
+                      '<div class="text-xs text-[#46636C] mt-0.5">All automated rollups completed within scheduled windows.</div>' +
+                    '</div>' +
+                  '</div>' +
+                  '<button type="button" class="btn-soft nav-jump-btn" data-jump="/dashboard/activity">Open Queue <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>' +
+                '</div>' +
+              '</div>' +
+            '</section>' +
+          '</div>'
+        );
+      }
+
+      function initOverviewCharts() {
+        const labels = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D13', 'D14'];
+        const incoming = [290, 315, 275, 302, 345, 368, 336, 354, 318, 288, 334, 356, 344, 340];
+        const completed = [118, 134, 112, 126, 146, 158, 142, 150, 132, 118, 141, 152, 146, 144];
+        const rate = [40.7, 42.5, 40.7, 41.7, 42.3, 42.9, 42.3, 42.4, 41.5, 41.0, 42.2, 42.7, 42.4, 42.5];
+
+        const base = baseChartOpts(340);
+        mountChart('#chart-overview-pulse', {
+          chart: Object.assign({}, base.chart, { type: 'line', stacked: false }),
+          grid: base.grid,
+          dataLabels: base.dataLabels,
+          legend: base.legend,
+          tooltip: base.tooltip,
+          colors: ['#7ED4E2', '#1C6B7C', '#15333E'],
+          stroke: { width: [0, 0, 3], curve: 'smooth' },
+          plotOptions: { bar: { columnWidth: '52%', borderRadius: 4 } },
+          series: [
+            { name: 'Incoming', type: 'column', data: incoming },
+            { name: 'Completed', type: 'column', data: completed },
+            { name: 'Conversion %', type: 'line', data: rate }
+          ],
+          xaxis: { categories: labels, labels: { style: { colors: '#46636C', fontSize: '12px' } } },
+          yaxis: [
+            {
+              seriesName: 'Incoming',
+              min: 0,
+              max: 420,
+              title: { text: 'Items', style: { color: '#46636C', fontSize: '12px', fontWeight: 600 } },
+              labels: { formatter: function (v) { return Math.round(v); }, style: { colors: '#46636C' } }
+            },
+            { seriesName: 'Incoming', show: false, min: 0, max: 420 },
+            {
+              seriesName: 'Conversion %',
+              opposite: true,
+              min: 25,
+              max: 60,
+              title: { text: 'Rate %', style: { color: '#15333E', fontSize: '12px', fontWeight: 600 } },
+              labels: { formatter: function (v) { return Math.round(v) + '%'; }, style: { colors: '#15333E' } }
+            }
+          ]
+        });
+
+        document.querySelectorAll('.nav-jump-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () { navigateTo(btn.dataset.jump, true); });
+        });
+      }
+
+      /* =======================================================================
+         ROUTE 2: /dashboard/trends (Filterable Table + Dumbbell Range Chart)
+         ======================================================================= */
+      function renderTrendsPage() {
+        const tabs = ['All', 'High Opportunity', 'Balanced', 'Saturated'];
+        const filtered = SEGMENTS_DEMO.filter(function (s) {
+          const okTier = state.segmentFilter === 'All' || s.tier === state.segmentFilter;
+          const q = state.searchQuery.trim().toLowerCase();
+          const okSearch = !q || s.name.toLowerCase().indexOf(q) !== -1 || s.category.toLowerCase().indexOf(q) !== -1;
+          return okTier && okSearch;
+        });
+
+        return (
+          '<div class="page-stack">' +
+            '<section class="wf-zone">' +
+              '<div class="wf-zone-header">' +
+                '<div>' +
+                  '<h2 class="wf-zone-title">Segment Comparison Table</h2>' +
+                  '<p class="wf-zone-sub">Filter by tier, search live, or export visible metrics to CSV</p>' +
+                '</div>' +
+                '<div class="flex flex-wrap items-center gap-2.5">' +
+                  '<div class="inline-flex items-center p-1 rounded-xl bg-[#EEF5F7] border border-[#15343E]/10 gap-1">' +
+                    tabs.map(function (tab) {
+                      const cls = state.segmentFilter === tab ? 'bg-[#F9FCFD] text-[#1C6B7C] shadow-sm' : 'text-[#46636C] hover:text-[#16323B]';
+                      return '<button type="button" class="seg-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ' + cls + '" data-tier="' + esc(tab) + '">' + esc(tab) + '</button>';
+                    }).join('') +
+                  '</div>' +
+                  '<div class="relative">' +
+                    '<i data-lucide="search" class="w-3.5 h-3.5 text-[#46636C] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>' +
+                    '<input id="segment-search-input" type="text" value="' + esc(state.searchQuery) + '" placeholder="Filter segments..." class="input-calm text-xs pl-8 w-44" />' +
+                  '</div>' +
+                  '<button id="export-segments-csv" type="button" class="btn-primary text-xs"><i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV</button>' +
+                '</div>' +
+              '</div>' +
+
+              '<div class="table-wrap">' +
+                (filtered.length === 0
+                  ? '<div class="py-10 px-6 text-center text-sm text-[#46636C]">No segments match your current filter.</div>'
+                  : '<table class="calm-table">' +
+                      '<thead><tr><th>Segment</th><th>Count (N)</th><th>WoW Change</th><th>Avg Value</th><th>Load Index</th><th>Conversion %</th><th>Tier</th></tr></thead>' +
+                      '<tbody>' +
+                        filtered.map(function (s) {
+                          const pos = s.growth >= 0;
+                          const pct = Math.min(100, Math.round((s.load / 15) * 100));
+                          const color = s.load < 4 ? '#1C6B7C' : (s.load <= 8 ? '#B76E22' : '#B54545');
+                          const badge = s.tier === 'High Opportunity' ? 'badge-ok' : (s.tier === 'Saturated' ? 'badge-danger' : 'badge-accent');
+                          return (
+                            '<tr>' +
+                              '<td class="font-bold text-[#16323B] whitespace-nowrap">' + esc(s.name) + ' <span class="text-[11px] font-semibold text-[#46636C] bg-[#EAF1F3] px-2 py-0.5 rounded-md ml-1">' + esc(s.category) + '</span></td>' +
+                              '<td class="font-mono-slug tabular-nums">' + s.count + '</td>' +
+                              '<td><span class="badge ' + (pos ? 'badge-ok' : 'badge-danger') + ' font-mono-slug tabular-nums">' + (pos ? '+' : '') + s.growth.toFixed(1) + '%</span></td>' +
+                              '<td class="font-mono-slug font-bold tabular-nums">$' + s.avgValue + '</td>' +
+                              '<td><div class="flex items-center gap-2"><span class="font-mono-slug text-xs w-8 text-right tabular-nums">' + s.load.toFixed(1) + '</span><div class="w-20 h-2 rounded-full bg-[#E2ECEF] overflow-hidden"><div class="h-full rounded-full" style="width:' + pct + '%;background:' + color + ';"></div></div></div></td>' +
+                              '<td class="font-mono-slug font-semibold text-[#1C6B7C] tabular-nums">' + s.conv.toFixed(1) + '%</td>' +
+                              '<td><span class="badge ' + badge + '">' + esc(s.tier) + '</span></td>' +
+                            '</tr>'
+                          );
+                        }).join('') +
+                      '</tbody>' +
+                    '</table>'
+                ) +
+              '</div>' +
+            '</section>' +
+
+            '<section class="wf-zone">' +
+              '<div class="wf-zone-header">' +
+                '<div>' +
+                  '<h2 class="wf-zone-title">Value Lift Comparison (Dumbbell Range)</h2>' +
+                  '<p class="wf-zone-sub">Horizontal range bridge illustrating baseline vs. upgraded tier values</p>' +
+                '</div>' +
+                '<span class="badge badge-accent">ApexCharts Dumbbell</span>' +
+              '</div>' +
+              '<div class="chart-surface"><div id="chart-trends-dumbbell"></div></div>' +
+            '</section>' +
+          '</div>'
+        );
+      }
+
+      function initTrendsCharts() {
+        const base = baseChartOpts(280);
+        mountChart('#chart-trends-dumbbell', {
+          chart: Object.assign({}, base.chart, { type: 'rangeBar', zoom: { enabled: false } }),
+          grid: base.grid,
+          dataLabels: base.dataLabels,
+          legend: { show: false },
+          colors: ['#1C6B7C'],
+          plotOptions: {
+            bar: {
+              horizontal: true,
+              isDumbbell: true,
+              dumbbellColors: [['#8FAFB8', '#1C6B7C']],
+              barHeight: '30%'
+            }
+          },
+          series: [{
+            name: 'Value Bridge',
+            data: RANGE_BRIDGE_DEMO.map(function (b) { return { x: b.label, y: [b.base, b.enhanced] }; })
+          }],
+          xaxis: { min: 0, max: 520, labels: { formatter: function (v) { return '$' + v; } } },
+          yaxis: { labels: { maxWidth: 260, style: { colors: '#16323B', fontSize: '13px', fontWeight: 600 } } }
+        });
+
+        document.querySelectorAll('.seg-tab-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            state.segmentFilter = btn.dataset.tier;
+            renderPage();
+          });
+        });
+
+        const inp = document.getElementById('segment-search-input');
+        if (inp) {
+          inp.addEventListener('input', function (e) {
+            state.searchQuery = e.target.value;
+            renderPage();
+            const nextInp = document.getElementById('segment-search-input');
+            if (nextInp) {
+              nextInp.focus();
+              nextInp.setSelectionRange(nextInp.value.length, nextInp.value.length);
+            }
+          });
+        }
+
+        const exp = document.getElementById('export-segments-csv');
+        if (exp) {
+          exp.addEventListener('click', function () {
+            downloadCsv(
+              'dashboard_segments_export.csv',
+              ['Segment', 'Category', 'Count', 'WoW %', 'Avg Value', 'Load', 'Conversion %', 'Tier'],
+              SEGMENTS_DEMO.map(function (s) { return [s.name, s.category, s.count, s.growth, s.avgValue, s.load, s.conv, s.tier]; })
+            );
+            showToast('Exported dashboard_segments_export.csv');
+          });
+        }
+      }
+
+      /* =======================================================================
+         ROUTE 3: /dashboard/activity (Heatmap + Truncated Table + Modal)
+         ======================================================================= */
+      function renderActivityPage() {
+        const visibleQueue = QUEUE_ITEMS_DEMO.filter(function (i) { return i.score >= state.minPriority; });
+
+        return (
+          '<div class="page-stack">' +
+            '<section class="wf-zone">' +
+              '<div class="wf-zone-header">' +
+                '<div>' +
+                  '<h2 class="wf-zone-title">Weekly 24x7 Activity Heatmap</h2>' +
+                  '<p class="wf-zone-sub">Switch metric layers to re-animate the intensity grid across UTC hours</p>' +
+                '</div>' +
+                '<div class="flex flex-wrap items-center gap-2">' +
+                  '<button type="button" class="btn-soft hm-layer-btn ' + (state.heatmapLayer === 'volume' ? 'is-active' : '') + '" data-layer="volume">Volume</button>' +
+                  '<button type="button" class="btn-soft hm-layer-btn ' + (state.heatmapLayer === 'value' ? 'is-active' : '') + '" data-layer="value">Avg Value</button>' +
+                '</div>' +
+              '</div>' +
+              '<div class="chart-surface"><div id="chart-activity-heatmap"></div></div>' +
+            '</section>' +
+
+            '<section class="wf-zone">' +
+              '<div class="wf-zone-header">' +
+                '<div>' +
+                  '<h2 class="wf-zone-title">Prioritized Action Queue</h2>' +
+                  '<p class="wf-zone-sub">Fixed-layout table with non-clipping hover tooltips and modal inspection</p>' +
+                '</div>' +
+                '<label class="flex items-center gap-2 text-xs font-bold text-[#16323B] bg-[#F9FCFD] px-3 py-2 rounded-xl border border-[#15343E]/10">' +
+                  '<span>Min Score: <strong class="font-mono-slug text-[#1C6B7C]">' + state.minPriority + '</strong></span>' +
+                  '<input id="priority-slider" type="range" min="60" max="95" step="1" value="' + state.minPriority + '" class="w-24 accent-[#1C6B7C]" />' +
+                '</label>' +
+              '</div>' +
+
+              '<div class="table-wrap">' +
+                '<table class="calm-table calm-table-fixed" style="min-width: 760px;">' +
+                  '<colgroup>' +
+                    '<col style="width: 44%;" />' +
+                    '<col style="width: 14%;" />' +
+                    '<col style="width: 12%;" />' +
+                    '<col style="width: 12%;" />' +
+                    '<col style="width: 18%;" />' +
+                  '</colgroup>' +
+                  '<thead><tr><th>Item</th><th>Value</th><th>Age</th><th class="text-center">Score</th><th class="text-right">Action</th></tr></thead>' +
+                  '<tbody>' +
+                    visibleQueue.map(function (item) {
+                      const sCls = item.score >= 85 ? 'badge-ok' : (item.score >= 75 ? 'badge-accent' : 'badge-warn');
+                      const meta = '#' + item.id + ' · ' + item.owner;
+                      return (
+                        '<tr>' +
+                          '<td>' +
+                            '<div class="cell-stack">' +
+                              '<span class="cell-truncate-title" tabindex="0" data-tooltip="' + esc(item.title) + '" data-tooltip-sub="' + esc(meta) + '">' + esc(item.title) + '</span>' +
+                              '<span class="cell-truncate-meta" tabindex="0" data-tooltip="' + esc(meta) + '" data-tooltip-sub="' + esc(item.notes) + '">' + esc(meta) + '</span>' +
+                            '</div>' +
+                          '</td>' +
+                          '<td class="font-mono-slug font-bold whitespace-nowrap tabular-nums">' + esc(item.value) + '</td>' +
+                          '<td class="font-mono-slug text-xs text-[#46636C] whitespace-nowrap tabular-nums">' + esc(item.age) + '</td>' +
+                          '<td class="text-center whitespace-nowrap"><span class="badge ' + sCls + ' font-mono-slug tabular-nums">' + item.score + '/100</span></td>' +
+                          '<td class="text-right whitespace-nowrap"><button type="button" class="btn-soft inspect-item-btn text-xs" data-item-id="' + item.id + '"><i data-lucide="eye" class="w-3.5 h-3.5"></i> Inspect</button></td>' +
+                        '</tr>'
+                      );
+                    }).join('') +
+                  '</tbody>' +
+                '</table>' +
+              '</div>' +
+            '</section>' +
+          '</div>'
+        );
+      }
+
+      function initActivityCharts() {
+        const days = ['Sun', 'Sat', 'Fri', 'Thu', 'Wed', 'Tue', 'Mon'];
+        const series = days.map(function (day, dIdx) {
+          const weekend = day === 'Sat' || day === 'Sun';
+          const row = [];
+          for (let h = 0; h < 24; h++) {
+            const wave = Math.sin(((h - 7) / 24) * Math.PI * 2);
+            const val = state.heatmapLayer === 'volume'
+              ? Math.max(2, Math.round((weekend ? 10 : 19) + wave * 11 + ((dIdx * 3 + h) % 5)))
+              : Math.max(90, Math.round((weekend ? 180 : 265) + wave * 85 + ((dIdx * 11 + h * 5) % 30)));
+            row.push({ x: (h < 10 ? '0' + h : '' + h) + 'h', y: val });
+          }
+          return { name: day, data: row };
+        });
+
+        const ranges = state.heatmapLayer === 'value'
+          ? [
+              { from: 0, to: 170, color: '#DAE8EC', name: '<$170' },
+              { from: 171, to: 250, color: '#97C8D4', name: '$171-250' },
+              { from: 251, to: 330, color: '#398C9E', name: '$251-330' },
+              { from: 331, to: 480, color: '#15333E', name: '$331+' }
+            ]
+          : [
+              { from: 0, to: 10, color: '#DAE8EC', name: 'Quiet' },
+              { from: 11, to: 20, color: '#97C8D4', name: 'Moderate' },
+              { from: 21, to: 28, color: '#398C9E', name: 'Busy' },
+              { from: 29, to: 45, color: '#15333E', name: 'Peak' }
+            ];
+
+        const base = baseChartOpts(320);
+        mountChart('#chart-activity-heatmap', {
+          chart: Object.assign({}, base.chart, { type: 'heatmap' }),
+          grid: base.grid,
+          dataLabels: { enabled: false },
+          legend: base.legend,
+          tooltip: base.tooltip,
+          plotOptions: { heatmap: { radius: 4, shadeIntensity: 0.3, colorScale: { ranges: ranges } } },
+          series: series,
+          xaxis: { labels: { style: { fontSize: '11px', colors: '#46636C' } } }
+        });
+
+        document.querySelectorAll('.hm-layer-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            state.heatmapLayer = btn.dataset.layer;
+            renderPage();
+          });
+        });
+
+        const slider = document.getElementById('priority-slider');
+        if (slider) {
+          slider.addEventListener('input', function (e) {
+            state.minPriority = Number(e.target.value);
+            renderPage();
+          });
+        }
+
+        document.querySelectorAll('.inspect-item-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            const id = Number(btn.dataset.itemId);
+            const item = QUEUE_ITEMS_DEMO.find(function (x) { return x.id === id; });
+            if (!item) return;
+            openModal(
+              '<div class="flex items-start justify-between gap-4 mb-4">' +
+                '<div>' +
+                  '<span class="badge badge-ok font-mono-slug mb-2">Score ' + item.score + '/100 · ' + esc(item.status) + '</span>' +
+                  '<h3 class="text-lg font-extrabold text-[#16323B] m-0">' + esc(item.title) + '</h3>' +
+                  '<p class="text-xs text-[#46636C] mt-1 mb-0">#' + item.id + ' · ' + esc(item.owner) + '</p>' +
+                '</div>' +
+                '<button type="button" class="btn-soft" data-close-modal aria-label="Close"><i data-lucide="x" class="w-4 h-4"></i></button>' +
+              '</div>' +
+              '<div class="bg-[#E2ECEF] rounded-xl p-4 text-sm text-[#16323B] mb-5"><strong>Notes:</strong> ' + esc(item.notes) + '</div>' +
+              '<div class="flex justify-end"><button type="button" class="btn-primary" data-close-modal>Close</button></div>'
+            );
+          });
+        });
+      }
+
+      /* =======================================================================
+         ROUTE 4: /dashboard/settings (Controls + Stream Toggle)
+         ======================================================================= */
+      function renderSettingsPage() {
+        const s = state.settings;
+        return (
+          '<div class="page-stack">' +
+            '<section class="wf-zone">' +
+              '<div class="wf-zone-header">' +
+                '<div>' +
+                  '<h2 class="wf-zone-title">Runtime Configuration</h2>' +
+                  '<p class="wf-zone-sub">Adjust polling intervals, concurrency limits, and stream pause state</p>' +
+                '</div>' +
+                '<div class="flex flex-wrap gap-2">' +
+                  '<button id="toggle-stream-btn" type="button" class="btn-soft">' +
+                    '<i data-lucide="' + (state.streamPaused ? 'play' : 'pause') + '" class="w-4 h-4"></i>' +
+                    (state.streamPaused ? 'Resume Stream' : 'Pause Stream') +
+                  '</button>' +
+                  '<button id="save-settings-btn" type="button" class="btn-primary"><i data-lucide="save" class="w-4 h-4"></i> Save Changes</button>' +
+                '</div>' +
+              '</div>' +
+              '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">' +
+                '<div class="data-card"><label class="block text-xs font-bold text-[#46636C] mb-1.5">Refresh Interval (sec)</label><input id="set-refresh" type="number" value="' + s.refreshSec + '" class="input-calm w-full font-mono-slug" /></div>' +
+                '<div class="data-card"><label class="block text-xs font-bold text-[#46636C] mb-1.5">Worker Concurrency</label><input id="set-concurrency" type="number" value="' + s.concurrency + '" class="input-calm w-full font-mono-slug" /></div>' +
+                '<div class="data-card"><label class="block text-xs font-bold text-[#46636C] mb-1.5">Alert Score Threshold</label><input id="set-threshold" type="number" value="' + s.alertThreshold + '" class="input-calm w-full font-mono-slug" /></div>' +
+                '<div class="data-card"><label class="block text-xs font-bold text-[#46636C] mb-1.5">Archive Retention (days)</label><input id="set-retention" type="number" value="' + s.retentionDays + '" class="input-calm w-full font-mono-slug" /></div>' +
+              '</div>' +
+            '</section>' +
+          '</div>'
+        );
+      }
+
+      function initSettingsPage() {
+        const toggleBtn = document.getElementById('toggle-stream-btn');
+        if (toggleBtn) {
+          toggleBtn.addEventListener('click', function () {
+            state.streamPaused = !state.streamPaused;
+            updateStatusIndicators();
+            renderPage();
+            showToast(state.streamPaused ? 'Background stream paused.' : 'Background stream resumed.');
+          });
+        }
+        const saveBtn = document.getElementById('save-settings-btn');
+        if (saveBtn) {
+          saveBtn.addEventListener('click', function () {
+            state.settings.refreshSec = Number(document.getElementById('set-refresh').value) || 60;
+            state.settings.concurrency = Number(document.getElementById('set-concurrency').value) || 8;
+            state.settings.alertThreshold = Number(document.getElementById('set-threshold').value) || 85;
+            state.settings.retentionDays = Number(document.getElementById('set-retention').value) || 90;
+            showToast('Configuration saved.');
+          });
+        }
+      }
+
+      /* =======================================================================
+         PAGE DISPATCHER & SHELL INTERACTIONS
+         ======================================================================= */
+      const PAGE_HANDLERS = {
+        '/dashboard/overview': { render: renderOverviewPage, init: initOverviewCharts },
+        '/dashboard/trends': { render: renderTrendsPage, init: initTrendsCharts },
+        '/dashboard/activity': { render: renderActivityPage, init: initActivityCharts },
+        '/dashboard/settings': { render: renderSettingsPage, init: initSettingsPage }
+      };
+
+      function renderPage() {
+        destroyCharts();
+        closeModal();
+
+        const route = ROUTE_MAP.get(state.activePath) || ROUTE_MAP.get(DEFAULT_ROUTE);
+        if (topbarRouteSlug) topbarRouteSlug.textContent = route.path;
+        document.title = route.title + ' - Workspace Console';
+
+        railNav.querySelectorAll('.nav-btn').forEach(function (btn) {
+          btn.setAttribute('aria-current', btn.dataset.route === route.path ? 'page' : 'false');
+        });
+        stateButtons.forEach(function (btn) {
+          btn.setAttribute('aria-pressed', btn.dataset.state === state.previewMode ? 'true' : 'false');
+        });
+
+        let bodyHtml = '';
+        if (state.previewMode === 'empty') bodyHtml = renderEmptyState(route);
+        else if (state.previewMode === 'loading') bodyHtml = renderLoadingState(route.title);
+        else {
+          const handler = PAGE_HANDLERS[route.path] || PAGE_HANDLERS[DEFAULT_ROUTE];
+          bodyHtml = handler.render();
+        }
+
+        mainContent.innerHTML =
+          '<div class="page-surface">' +
+            '<header class="page-header">' +
+              '<div>' +
+                '<h1 class="page-title">' + esc(route.title) + '</h1>' +
+                '<p class="page-subtitle">' + esc(route.subtitle) + '</p>' +
+              '</div>' +
+            '</header>' +
+            bodyHtml +
+          '</div>';
+
+        refreshIcons();
+
+        if (state.previewMode === 'empty') {
+          const emptyBtn = document.getElementById('empty-primary-action');
+          if (emptyBtn) {
+            emptyBtn.addEventListener('click', function () {
+              const target = emptyBtn.dataset.targetRoute;
+              state.previewMode = 'production';
+              if (target && ROUTE_MAP.has(target)) navigateTo(target, true);
+              else renderPage();
+            });
+          }
+        } else if (state.previewMode === 'production') {
+          const handler = PAGE_HANDLERS[route.path] || PAGE_HANDLERS[DEFAULT_ROUTE];
+          if (handler && typeof handler.init === 'function') handler.init();
+        }
+      }
+
+      function parseHashRoute() {
+        try {
+          const raw = window.location.hash.replace(/^#/, '').trim();
+          if (raw && ROUTE_MAP.has(raw)) return raw;
+        } catch (_) {}
+        return DEFAULT_ROUTE;
+      }
+
+      function navigateTo(path, updateHash) {
+        const target = ROUTE_MAP.has(path) ? path : DEFAULT_ROUTE;
+        state.activePath = target;
+        if (updateHash) {
+          try {
+            const nextHash = '#' + target;
+            if (window.location.hash !== nextHash) window.location.hash = nextHash;
+          } catch (_) {}
+        }
+        renderPage();
+        closeMobileDrawer(false);
+        announce('Opened ' + ROUTE_MAP.get(target).title);
+      }
+
+      function setPreviewMode(mode) {
+        if (['production', 'empty', 'loading'].indexOf(mode) === -1) return;
+        state.previewMode = mode;
+        renderPage();
+        announce('Preview mode switched to ' + mode);
+      }
+
+      function toggleDesktopCollapse() {
+        state.isCollapsed = !state.isCollapsed;
+        appShell.classList.toggle('is-collapsed', state.isCollapsed);
+        collapseBtn.setAttribute('aria-expanded', String(!state.isCollapsed));
+        collapseBtn.setAttribute('title', state.isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+        collapseBtn.innerHTML = '<i data-lucide="' + (state.isCollapsed ? 'panel-left-open' : 'panel-left-close') + '" class="w-5 h-5"></i>';
+        refreshIcons();
+        /* Reflow charts smoothly right after the 160ms rail transition settles */
+        setTimeout(function () {
+          window.dispatchEvent(new Event('resize'));
+        }, 200);
+      }
+
+      function openMobileDrawer() {
+        state.isMobileOpen = true;
+        appShell.classList.add('is-mobile-open');
+        drawerBackdrop.classList.add('is-open');
+        drawerBackdrop.setAttribute('aria-hidden', 'false');
+        mobileMenuBtn.setAttribute('aria-expanded', 'true');
+        mobileCloseBtn.focus();
+      }
+
+      function closeMobileDrawer(restoreFocus) {
+        if (!state.isMobileOpen) return;
+        state.isMobileOpen = false;
+        appShell.classList.remove('is-mobile-open');
+        drawerBackdrop.classList.remove('is-open');
+        drawerBackdrop.setAttribute('aria-hidden', 'true');
+        mobileMenuBtn.setAttribute('aria-expanded', 'false');
+        if (restoreFocus && mobileMenuBtn) mobileMenuBtn.focus();
+      }
+
+      function bindEvents() {
+        railNav.addEventListener('click', function (e) {
+          const btn = e.target.closest('.nav-btn');
+          if (btn && btn.dataset.route) navigateTo(btn.dataset.route, true);
+        });
+
+        railNav.addEventListener('keydown', function (e) {
+          if (['ArrowDown', 'ArrowUp', 'Home', 'End'].indexOf(e.key) === -1) return;
+          const buttons = Array.from(railNav.querySelectorAll('.nav-btn'));
+          const idx = buttons.indexOf(document.activeElement);
+          if (idx === -1) return;
+          e.preventDefault();
+          let next = idx;
+          if (e.key === 'ArrowDown') next = (idx + 1) % buttons.length;
+          else if (e.key === 'ArrowUp') next = (idx - 1 + buttons.length) % buttons.length;
+          else if (e.key === 'Home') next = 0;
+          else if (e.key === 'End') next = buttons.length - 1;
+          buttons[next].focus();
+        });
+
+        stateButtons.forEach(function (btn) {
+          btn.addEventListener('click', function () { setPreviewMode(btn.dataset.state); });
+        });
+
+        if (refreshDataBtn) {
+          refreshDataBtn.addEventListener('click', function () {
+            showToast('Metrics refreshed.');
+            renderPage();
+          });
+        }
+
+        if (collapseBtn) collapseBtn.addEventListener('click', toggleDesktopCollapse);
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openMobileDrawer);
+        if (mobileCloseBtn) mobileCloseBtn.addEventListener('click', function () { closeMobileDrawer(true); });
+        if (drawerBackdrop) drawerBackdrop.addEventListener('click', function () { closeMobileDrawer(true); });
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') {
+            if (modalRoot && modalRoot.innerHTML) closeModal();
+            else if (state.isMobileOpen) closeMobileDrawer(true);
+          }
+        });
+
+        window.addEventListener('hashchange', function () {
+          const nextRoute = parseHashRoute();
+          if (nextRoute !== state.activePath) navigateTo(nextRoute, false);
+        });
+
+        window.addEventListener('resize', function () {
+          if (window.innerWidth >= 960 && state.isMobileOpen) closeMobileDrawer(false);
+        });
+      }
+
+      function init() {
+        state.activePath = parseHashRoute();
+        renderSidebar();
+        updateStatusIndicators();
+        initGlobalTooltip();
+        bindEvents();
+        renderPage();
+      }
+
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+      else init();
+    })();
+  </script>
+</body>
+</html>
