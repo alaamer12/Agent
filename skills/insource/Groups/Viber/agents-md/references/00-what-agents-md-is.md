@@ -163,14 +163,15 @@ section 1; it belongs in section 2's table.
 
 ## The "pending" discipline
 
-An unanswered decision is written as `pending - not assumed`, numbered, and reported at the end. Never fill
-the gap with a plausible default. Two reasons:
+Disclose an unanswered decision in the same turn it is discovered: what is unknown, what it blocks, and whether the user wants to answer now or explicitly defer. During Draft [DR], only explicit deferral permits this marker:
 
-1. The agent cannot distinguish a decided rule from an invented one and will enforce the invented one with the
-   same confidence.
-2. A visible pending item invites the answer. An invented default quietly blocks it forever.
+```text
+Pending (Drafting) — <question>. Blocks: <claims or paths>. Discovered: <step>. Close before: Draft [DR] completion.
+```
 
-Count the pending markers before declaring the file finished - it can never look done while one is still open.
+Never write a bare `pending - not assumed`, `TBD`, or placeholder. Keep the marker out of imperative rule prose; it is a visible non-rule until resolved. When Viber is active, link the matching `memory.md` question.
+
+Before declaring the file or Draft [DR] finished, close every marker through `close-topics`, replace it with the decided rule, and update the memory ledger. Any unresolved marker means draft-incomplete, not done.
 
 ## What "good" looks like when reading it back
 

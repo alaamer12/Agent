@@ -50,10 +50,10 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Iterable, Sequence
+from typing import Any, Callable, Iterable, Literal, Sequence
 from urllib.parse import unquote
 
-__version__ = "2.12.0"
+__version__ = "2.13.0"
 
 # ---------------------------------------------------------------------------
 # optional dependencies
@@ -64,13 +64,17 @@ try:  # rich gives colour, boxes and wrapping; everything works without it
     from rich.console import Console
     from rich.live import Live
     from rich.panel import Panel
+    from rich.rule import Rule
     from rich.table import Table
+    from rich.text import Text
 
     RICH_AVAILABLE = True
 except Exception:  # pragma: no cover - exercised only without rich
     Console = None  # type: ignore[assignment]
     Panel = None  # type: ignore[assignment]
+    Rule = None  # type: ignore[assignment]
     Table = None  # type: ignore[assignment]
+    Text = None  # type: ignore[assignment]
     rich_box = None  # type: ignore[assignment]
     RICH_AVAILABLE = False
     Live = None  # type: ignore[assignment]
@@ -86,6 +90,7 @@ except Exception:  # pragma: no cover
 # ---------------------------------------------------------------------------
 
 DEFAULT_DESCRIPTION_LIMIT = 1024
+DEFAULT_TABLE_ROW_LIMIT = 40
 SKILL_LENGTH_LIMIT = 200
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
 SPECIALIZED_GENERAL = "none"
@@ -160,62 +165,530 @@ class ManagerError(Exception):
 
 
 # ---------------------------------------------------------------------------
-# display layer
+# display & reporting layer (Rich + ANSI + Plain, middle-truncation, capping)
 # ---------------------------------------------------------------------------
+
+
+ColumnKind = Literal["text", "name", "path", "status", "number", "detail", "type"]
+
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+URL_SCHEME_RE = re.compile(r"^([a-z][a-z0-9+.-]*://[^/]+)(/.*)?$", re.I)
+ANSI_RESET = "\x1b[0m"
+
+# Semantic style token -> (rich style, ANSI SGR code)
+THEME: dict[str, tuple[str, str]] = {
+    "title": ("bold bright_cyan", "\x1b[1;96m"),
+    "subtitle": ("dim", "\x1b[2m"),
+    "header": ("bold cyan", "\x1b[1;36m"),
+    "border": ("dim cyan", "\x1b[2;36m"),
+    "key": ("bold white", "\x1b[1;37m"),
+    "name": ("bold white", "\x1b[1;37m"),
+    "path": ("bright_blue", "\x1b[94m"),
+    "type": ("magenta", "\x1b[35m"),
+    "number": ("cyan", "\x1b[36m"),
+    "muted": ("bright_black", "\x1b[90m"),
+    "ok": ("bold green", "\x1b[1;32m"),
+    "warn": ("bold yellow", "\x1b[1;33m"),
+    "error": ("bold red", "\x1b[1;31m"),
+    "info": ("bold cyan", "\x1b[1;36m"),
+    "accent": ("bold magenta", "\x1b[1;35m"),
+}
+
+_STATUS_OK = {
+    "linked", "copied", "updated", "restored", "repaired", "created", "added",
+    "cloned", "re-registered", "clean", "ok", "yes", "install", "installed",
+    "managed-copy", "symlink", "junction", "command",
+}
+_STATUS_WARN = {
+    "relinked", "replaced", "skipped", "protected", "modified", "untracked",
+    "mixed", "stale-copy", "source-changed", "target-modified", "target-replaced",
+    "unmanaged-dir", "uninstall", "unlinked", "removed", "removed copy",
+    "removed tree", "removed file", "mandatory", "not fetched",
+}
+_STATUS_ERROR = {
+    "failed", "broken-link", "missing-source", "missing-target", "missing-skill",
+    "missing-locked", "source-unreadable", "target-unreadable", "both-changed",
+    "over", "missing", "tombstoned", "deleted", "dir absent",
+}
+_STATUS_MUTED = {"unchanged", "kept", "absent", "no", "-", "seed", "none", "no skills installed"}
+_ROUTINE_STATUSES = {"unchanged", "kept", "absent", "ok", "clean", "-"}
 
 
 @dataclass
 class DisplayConfig:
+    """Global runtime display state shared across commands."""
+
     quiet: bool = False
     color: bool = True
     verbose: bool = False
+    full: bool = False
+    max_rows: int = DEFAULT_TABLE_ROW_LIMIT
 
 
 _DISPLAY = DisplayConfig()
-_CONSOLE: Any = None
+_CONSOLE_OUT: Any = None
+_CONSOLE_ERR: Any = None
+_VT_ENABLED = False
 
 
-def configure_display(*, quiet: bool, color: bool, verbose: bool) -> None:
-    global _CONSOLE
+def _enable_windows_ansi() -> None:
+    """Enable ENABLE_VIRTUAL_TERMINAL_PROCESSING on Windows stdout/stderr."""
+    global _VT_ENABLED
+    if _VT_ENABLED or os.name != "nt":
+        return
+    _VT_ENABLED = True
+    try:
+        import ctypes
+
+        kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
+        for handle_id in (-11, -12):  # STD_OUTPUT_HANDLE, STD_ERROR_HANDLE
+            handle = kernel32.GetStdHandle(handle_id)
+            mode = ctypes.c_uint32()
+            if kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
+                kernel32.SetConsoleMode(handle, mode.value | 0x0004)
+    except Exception:
+        pass
+
+
+def configure_display(
+    *,
+    quiet: bool,
+    color: bool,
+    verbose: bool,
+    full: bool = False,
+    max_rows: int = DEFAULT_TABLE_ROW_LIMIT,
+) -> None:
+    """Configure display flags and reset cached Rich Console instances."""
+    global _CONSOLE_OUT, _CONSOLE_ERR
     _DISPLAY.quiet = quiet
     _DISPLAY.color = color
     _DISPLAY.verbose = verbose
-    _CONSOLE = None
+    _DISPLAY.full = full
+    _DISPLAY.max_rows = max(0, max_rows)
+    _CONSOLE_OUT = None
+    _CONSOLE_ERR = None
+    if color:
+        _enable_windows_ansi()
 
 
 def _rich_on() -> bool:
+    """Return True when Rich rendering is available and color is enabled."""
     return RICH_AVAILABLE and _DISPLAY.color
 
 
+def _term_width() -> int:
+    """Return the exact column width used by the active renderer (Rich or TTY)."""
+    if _rich_on():
+        con = _console()
+        if con is not None and getattr(con, "width", 0):
+            return max(60, int(con.width))
+    try:
+        cols = shutil.get_terminal_size((100, 30)).columns
+    except OSError:
+        cols = 100
+    return max(60, cols)
+
+
 def _console(*, stderr: bool = False) -> Any:
-    """Return a rich Console, or None when rich is unavailable/disabled."""
-    global _CONSOLE
+    """Return a cached Rich Console configured to always emit styled output.
+
+    Passing ``force_terminal=True`` fixes the common issue where IDE runners,
+    Git Bash/mintty, or subprocess wrappers report ``isatty() == False`` and
+    cause Rich to strip all colors silently.
+    """
+    global _CONSOLE_OUT, _CONSOLE_ERR
     if not _rich_on():
         return None
     if stderr:
-        return Console(stderr=True, no_color=False, highlight=False)
-    if _CONSOLE is None:
-        _CONSOLE = Console(no_color=False, highlight=False)
-    return _CONSOLE
+        if _CONSOLE_ERR is None:
+            _CONSOLE_ERR = Console(
+                stderr=True,
+                force_terminal=True,
+                color_system="auto",
+                no_color=False,
+                highlight=False,
+                soft_wrap=False,
+            )
+        return _CONSOLE_ERR
+    if _CONSOLE_OUT is None:
+        _CONSOLE_OUT = Console(
+            force_terminal=True,
+            color_system="auto",
+            no_color=False,
+            highlight=False,
+            soft_wrap=False,
+        )
+    return _CONSOLE_OUT
+
+
+def _ansi(text: str, token: str | None) -> str:
+    """Wrap ``text`` in ANSI SGR color sequences when color is enabled."""
+    if not _DISPLAY.color or not token or token not in THEME:
+        return text
+    return f"{THEME[token][1]}{text}{ANSI_RESET}"
+
+
+def _rich_text(text: str, token: str | None = None) -> Any:
+    """Build a markup-safe Rich Text object so ``[...]`` in strings never breaks."""
+    style = THEME[token][0] if (token and token in THEME) else ""
+    return Text(text, style=style)
+
+
+# ---------------------------------------------------------------------------
+# String, Path & List Compaction Utilities
+# ---------------------------------------------------------------------------
+
+
+def strip_ansi(text: str) -> str:
+    """Strip ANSI SGR escape sequences from ``text``."""
+    return ANSI_RE.sub("", text)
+
+
+def visible_len(text: str) -> int:
+    """Return visible printable width of ``text`` ignoring ANSI escapes."""
+    return len(strip_ansi(text))
 
 
 def _cell(value: Any) -> str:
+    """Normalize any value into a clean single-line cell string."""
     text = "" if value is None else str(value)
     return text.replace("\r", " ").replace("\n", " ").strip()
 
 
-def _ascii_table(headers: Sequence[Any], rows: Sequence[Sequence[Any]]) -> str:
-    grid = [[_cell(c) for c in headers]] + [[_cell(c) for c in row] for row in rows]
-    widths = [max(len(row[i]) for row in grid) for i in range(len(headers))]
-    sep = "+" + "+".join("-" * (width + 2) for width in widths) + "+"
+def _home_str() -> str:
+    override = os.environ.get("MANAGER_HOME")
+    base = Path(override).expanduser() if override else Path.home()
+    try:
+        return str(base.resolve())
+    except OSError:
+        return str(base)
 
-    def render(row: Sequence[str]) -> str:
-        return "| " + " | ".join(cell.ljust(widths[i]) for i, cell in enumerate(row)) + " |"
 
-    lines = [sep, render(grid[0]), sep]
-    lines.extend(render(row) for row in grid[1:])
-    lines.append(sep)
-    return "\n".join(lines)
+def shorten_home(raw: str) -> str:
+    """Replace the user home directory prefix with ``~``."""
+    if not raw or raw.startswith("~"):
+        return raw
+    home = _home_str().rstrip("\\/")
+    if not home:
+        return raw
+    norm_raw = os.path.normcase(raw)
+    norm_home = os.path.normcase(home)
+    if norm_raw == norm_home:
+        return "~"
+    sep = "\\" if ("\\" in raw and "/" not in raw) else "/"
+    for candidate in ("\\", "/"):
+        if norm_raw.startswith(norm_home + candidate):
+            return f"~{sep}{raw[len(home) + 1:]}"
+    return raw
+
+
+def truncate_middle(text: str, max_width: int, ellipsis: str = "...") -> str:
+    """Truncate ``text`` in the middle with ``ellipsis``, preserving head and tail.
+
+    Example::
+        truncate_middle("very-long-skill-identifier-v2", 18) -> "very-long...ier-v2"
+    """
+    if max_width <= 0 or len(text) <= max_width:
+        return text
+    if max_width <= len(ellipsis):
+        return text[:max_width]
+    keep = max_width - len(ellipsis)
+    head = (keep + 1) // 2
+    tail = keep - head
+    return f"{text[:head]}{ellipsis}{text[-tail:]}" if tail > 0 else text[:head] + ellipsis
+
+
+def truncate_end(text: str, max_width: int, ellipsis: str = "...") -> str:
+    """Truncate ``text`` at the right edge with ``ellipsis``."""
+    if max_width <= 0 or len(text) <= max_width:
+        return text
+    if max_width <= len(ellipsis):
+        return text[:max_width]
+    return text[: max_width - len(ellipsis)].rstrip() + ellipsis
+
+
+def truncate_path(raw: str, max_width: int, ellipsis: str = "...") -> str:
+    """Path- and URL-aware middle truncation that preserves root and leaf segments.
+
+    Examples::
+        truncate_path("Groups/Frontend/Styling/scss-modules/SKILL.md", 36)
+        -> "Groups/.../scss-modules/SKILL.md"
+        truncate_path("-> C:\\Users\\dev\\.claude\\skills\\avatar", 30)
+        -> "-> ~\\...\\skills\\avatar"
+    """
+    if not raw:
+        return raw
+    if raw.startswith("-> "):
+        inner_w = max(0, max_width - 3) if max_width > 0 else 0
+        return f"-> {truncate_path(raw[3:], inner_w, ellipsis)}"
+    if " -> " in raw:
+        left, right = raw.split(" -> ", 1)
+        combined = f"{shorten_home(left)} -> {shorten_home(right)}"
+        if max_width <= 0 or len(combined) <= max_width:
+            return combined
+        budget = max(12, max_width - 4)
+        right_w = max(8, int(budget * 0.58))
+        left_w = max(6, budget - right_w)
+        return f"{truncate_path(left, left_w, ellipsis)} -> {truncate_path(right, right_w, ellipsis)}"
+
+    compact = shorten_home(raw)
+    if max_width <= 0 or len(compact) <= max_width:
+        return compact
+
+    url_match = URL_SCHEME_RE.match(compact)
+    if url_match:
+        origin, rest = url_match.group(1), url_match.group(2) or ""
+        parts = [p for p in rest.split("/") if p]
+        if len(parts) >= 2:
+            best = f"{origin}/{ellipsis}/{parts[-1]}"
+            if len(best) <= max_width:
+                idx = len(parts) - 2
+                while idx >= 1:
+                    trial = f"{origin}/{ellipsis}/{'/'.join(parts[idx:])}"
+                    if len(trial) <= max_width:
+                        best = trial
+                        idx -= 1
+                    else:
+                        break
+                return best
+        return truncate_middle(compact, max_width, ellipsis)
+
+    sep = "\\" if ("\\" in compact and "/" not in compact) else "/"
+    parts = compact.split(sep)
+    non_empty = [p for p in parts if p]
+    if len(non_empty) >= 3:
+        prefix = sep if parts[0] == "" else ""
+        head = [non_empty[0]]
+        tail = [non_empty[-1]]
+
+        def render(h: list[str], t: list[str]) -> str:
+            return prefix + sep.join([*h, ellipsis, *t])
+
+        best = render(head, tail)
+        if len(best) <= max_width:
+            lo, hi = 1, len(non_empty) - 2
+            while lo <= hi:
+                trial_tail = [non_empty[hi], *tail]
+                cand = render(head, trial_tail)
+                if len(cand) <= max_width:
+                    tail, best, hi = trial_tail, cand, hi - 1
+                    continue
+                trial_head = [*head, non_empty[lo]]
+                cand = render(trial_head, tail)
+                if len(cand) <= max_width:
+                    head, best, lo = trial_head, cand, lo + 1
+                    continue
+                break
+            return best
+
+    return truncate_middle(compact, max_width, ellipsis)
+
+
+def format_list_compact(
+    items: Sequence[str],
+    *,
+    max_items: int = 6,
+    max_item_width: int = 28,
+    separator: str = ", ",
+) -> str:
+    """Format a potentially long list of names into a concise inline summary."""
+    cleaned = [_cell(item) for item in items if _cell(item)]
+    if not cleaned:
+        return "none"
+    if _DISPLAY.full:
+        return separator.join(cleaned)
+    shown = [truncate_middle(item, max_item_width) for item in cleaned[:max_items]]
+    extra = len(cleaned) - len(shown)
+    return separator.join(shown) + (f" (+{extra} more)" if extra > 0 else "")
+
+
+# ---------------------------------------------------------------------------
+# Column Inference, Width Budgeting & Row Prioritization
+# ---------------------------------------------------------------------------
+
+
+def _infer_column_kind(header: str) -> ColumnKind:
+    """Infer semantic column type from a header label.
+
+    Exact numeric/status/type matches are checked before substring path matches
+    so headers like ``Files`` resolve as ``number`` instead of ``path``.
+    """
+    low = header.strip().lower()
+    if low in {"count", "files", "chars", "desc chars", "mention lines", "skills"}:
+        return "number"
+    if low in {"status", "state", "action", "fetch", "git", "result", "mutual", "skill.md only"}:
+        return "status"
+    if low in {"type", "kind", "mode", "origin", "section", "rule", "phase", "version"}:
+        return "type"
+    if low in {
+        "skill", "agent", "remote", "from", "to", "entry", "parent",
+        "where", "setting", "ambiguous name",
+    }:
+        return "name"
+    if any(k in low for k in (
+        "path", "target", "source", "dir", "url", "file", "evidence", "instruction",
+    )):
+        return "path"
+    if any(k in low for k in (
+        "detail", "issue", "note", "reason", "text", "candidate",
+        "error", "accepted", "finding", "suggested",
+    )):
+        return "detail"
+    return "text"
+
+
+def status_token(value: str) -> str:
+    """Map a status/state/action cell value to a semantic theme token."""
+    low = value.strip().lower()
+    if not low or low in _STATUS_MUTED:
+        return "muted"
+    if low in _STATUS_ERROR or low.startswith(("missing", "broken", "failed")):
+        return "error"
+    if low in _STATUS_WARN or low.startswith(("would ", "stale", "unmanaged")):
+        return "warn"
+    if low in _STATUS_OK:
+        return "ok"
+    return "info"
+
+
+def _allocate_widths(
+    headers: Sequence[str],
+    kinds: Sequence[ColumnKind],
+    rows: Sequence[Sequence[str]],
+) -> list[int]:
+    """Compute column widths that fit inside the current terminal width."""
+    available = max(40, _term_width() - (len(headers) * 3 + 1))
+    natural = [
+        max(len(headers[i]), *(len(row[i]) for row in rows))
+        for i in range(len(headers))
+    ]
+    if _DISPLAY.full:
+        return natural
+
+    soft_caps: dict[ColumnKind, int] = {
+        "path": 48,
+        "detail": 46,
+        "name": 28,
+        "text": 36,
+        "type": 18,
+        "status": 18,
+        "number": 12,
+    }
+    mins: dict[ColumnKind, int] = {
+        "path": 16,
+        "detail": 16,
+        "name": 10,
+        "text": 10,
+        "type": 8,
+        "status": 8,
+        "number": 5,
+    }
+    widths = [
+        min(natural[i], max(len(headers[i]), soft_caps[kinds[i]]))
+        for i in range(len(headers))
+    ]
+
+    for shrink_group in ({"detail", "path"}, {"text", "name"}, {"type", "status"}):
+        while sum(widths) > available:
+            candidates = [
+                i for i, k in enumerate(kinds)
+                if k in shrink_group and widths[i] > mins[k]
+            ]
+            if not candidates:
+                break
+            widest = max(candidates, key=lambda i: widths[i])
+            widths[widest] -= 1
+
+    # Guarantee total width fits even on narrow 80-col terminals with 8-10 columns
+    while sum(widths) > available:
+        candidates = [i for i in range(len(widths)) if widths[i] > 4]
+        if not candidates:
+            break
+        widest = max(candidates, key=lambda i: widths[i])
+        widths[widest] -= 1
+
+    return widths
+
+
+def _format_cell(value: str, kind: ColumnKind, width: int) -> str:
+    """Apply middle/path truncation to a cell unless ``--full`` is active."""
+    if _DISPLAY.full:
+        return shorten_home(value) if kind in {"path", "detail"} else value
+    if kind == "path":
+        return truncate_path(value, width)
+    if kind == "detail":
+        if " -> " in value or value.startswith("-> "):
+            return truncate_path(value, width)
+        return truncate_middle(value, width)
+    if kind in {"name", "text"}:
+        return truncate_middle(value, width)
+    return value
+
+
+def _cell_token(value: str, kind: ColumnKind) -> str | None:
+    if value in {"", "-"}:
+        return "muted"
+    if kind == "status":
+        return status_token(value)
+    if kind in {"name", "path", "type", "number"}:
+        return kind
+    return None
+
+
+def _cap_rows(
+    kinds: Sequence[ColumnKind],
+    rows: list[list[str]],
+    limit: int | None,
+) -> tuple[list[list[str]], str | None]:
+    """Cap long tables while surfacing errors, warnings, and active changes first."""
+    effective = _DISPLAY.max_rows if limit is None else limit
+    if _DISPLAY.full or _DISPLAY.verbose or effective <= 0 or len(rows) <= effective:
+        return rows, None
+
+    status_col = next((i for i, k in enumerate(kinds) if k == "status"), None)
+    if status_col is not None:
+        rank = {"error": 0, "warn": 1, "info": 2, "ok": 3, "muted": 4}
+        indexed = list(enumerate(rows))
+        indexed.sort(
+            key=lambda pair: (
+                1 if pair[1][status_col].strip().lower() in _ROUTINE_STATUSES else 0,
+                rank.get(status_token(pair[1][status_col]), 3),
+                pair[0],
+            )
+        )
+        kept = [r for _, r in indexed[:effective]]
+        omitted = [r for _, r in indexed[effective:]]
+        breakdown = Counter(r[status_col].strip().lower() or "-" for r in omitted)
+        summary = ", ".join(f"{cnt} {lbl}" for lbl, cnt in breakdown.most_common(3))
+        footer = (
+            f"... showing {effective} of {len(rows)} rows "
+            f"({len(omitted)} omitted: {summary}); pass --full or --limit 0 to show all"
+        )
+        return kept, footer
+
+    omitted_count = len(rows) - effective
+    footer = (
+        f"... showing {effective} of {len(rows)} rows "
+        f"({omitted_count} omitted); pass --full or --limit 0 to show all"
+    )
+    return rows[:effective], footer
+
+
+# ---------------------------------------------------------------------------
+# Public Display API
+# ---------------------------------------------------------------------------
+
+
+def display_rule(title: str = "") -> None:
+    """Render a subtle horizontal section divider."""
+    if _DISPLAY.quiet:
+        return
+    if _rich_on():
+        _console().print(Rule(title, style=THEME["border"][0], align="left"))
+        return
+    prefix = f"-- {title} " if title else ""
+    line = prefix + "-" * max(4, min(72, _term_width()) - len(prefix))
+    print(_ansi(line, "border"))
 
 
 def display_table(
@@ -224,59 +697,171 @@ def display_table(
     *,
     title: str | None = None,
     always: bool = False,
+    max_rows: int | None = None,
 ) -> None:
-    """Render a table with rich when available, otherwise with ASCII borders."""
-    if _DISPLAY.quiet and not always:
+    """Render a width-aware, color-coded table via Rich or ANSI/ASCII fallback."""
+    if (_DISPLAY.quiet and not always) or not rows:
         return
-    if not rows:
-        return
-    headers = [_cell(h) for h in headers]
+
+    norm_headers = [_cell(h) for h in headers]
+    kinds = [_infer_column_kind(h) for h in norm_headers]
+    norm_rows = [[_cell(c) for c in row] for row in rows]
+    shown_rows, footer = _cap_rows(kinds, norm_rows, max_rows)
+    widths = _allocate_widths(norm_headers, kinds, shown_rows)
+    formatted = [
+        [_format_cell(row[i], kinds[i], widths[i]) for i in range(len(norm_headers))]
+        for row in shown_rows
+    ]
+    shown_headers = [
+        header if _DISPLAY.full else truncate_end(header, widths[i], ".")
+        for i, header in enumerate(norm_headers)
+    ]
+
     if _rich_on():
         table = Table(
-            title=title,
-            box=rich_box.SIMPLE_HEAVY if rich_box else None,
-            header_style="bold",
+            title=_rich_text(title, "title") if title else None,
+            caption=_rich_text(footer, "muted") if footer else None,
+            box=rich_box.ROUNDED if rich_box else None,
+            border_style=THEME["border"][0],
+            header_style=THEME["header"][0],
             title_justify="left",
+            caption_justify="left",
+            pad_edge=True,
         )
-        for header in headers:
-            table.add_column(header, overflow="fold")
-        for row in rows:
-            table.add_row(*[_cell(c) for c in row])
+        for header, kind, width in zip(shown_headers, kinds, widths):
+            table.add_column(
+                header,
+                justify="right" if kind == "number" else "left",
+                max_width=None if _DISPLAY.full else width,
+                no_wrap=not _DISPLAY.full,
+                overflow="fold" if _DISPLAY.full else "crop",
+            )
+        for row in formatted:
+            table.add_row(*[
+                _rich_text(cell, _cell_token(cell, kind))
+                for cell, kind in zip(row, kinds)
+            ])
         _console().print(table)
         return
+
+    col_w = [
+        max(len(shown_headers[i]), *(len(r[i]) for r in formatted))
+        for i in range(len(shown_headers))
+    ]
+    sep = _ansi("+" + "+".join("-" * (w + 2) for w in col_w) + "+", "border")
+
+    def render_row(cells: Sequence[str], *, is_header: bool = False) -> str:
+        rendered: list[str] = []
+        for i, cell in enumerate(cells):
+            padded = (
+                cell.rjust(col_w[i])
+                if (not is_header and kinds[i] == "number")
+                else cell.ljust(col_w[i])
+            )
+            token = "header" if is_header else _cell_token(cell, kinds[i])
+            rendered.append(_ansi(padded, token))
+        pipe = _ansi("|", "border")
+        return f"{pipe} " + f" {pipe} ".join(rendered) + f" {pipe}"
+
     if title:
-        print(title)
-    print(_ascii_table(headers, rows))
+        print(_ansi(title, "title"))
+    print(sep)
+    print(render_row(shown_headers, is_header=True))
+    print(sep)
+    for row in formatted:
+        print(render_row(row))
+    print(sep)
+    if footer:
+        print(_ansi(footer, "muted"))
 
 
 def display_banner(title: str, lines: Iterable[str], *, level: str = "warning") -> None:
-    """Render an attention banner. Banners are never suppressed by --quiet."""
-    body = "\n".join(str(line) for line in lines if str(line).strip())
-    colors = {"warning": "yellow", "error": "red", "info": "cyan", "success": "green"}
+    """Render an attention banner (never suppressed by --quiet)."""
+    token = {
+        "warning": "warn",
+        "error": "error",
+        "info": "info",
+        "success": "ok",
+    }.get(level, "warn")
+    max_w = max(44, _term_width() - 6)
+    cleaned = [
+        truncate_path(_cell(line), max_w) if not _DISPLAY.full else _cell(line)
+        for line in lines
+        if _cell(line)
+    ]
+    body = "\n".join(cleaned)
+
     if _rich_on():
         _console().print(
             Panel(
-                body,
-                title=title,
+                Text(body),
+                title=_rich_text(f" {title} ", token),
                 title_align="left",
-                border_style=colors.get(level, "yellow"),
+                border_style=THEME[token][0],
+                box=rich_box.ROUNDED if rich_box else None,
             )
         )
         return
-    label = f"{title}"
-    width = max([len(label), *(len(line) for line in body.splitlines())] + [0])
-    bar = "+" + "-" * (width + 2) + "+"
+
+    width = max([len(title), *(len(line) for line in cleaned), 20])
+    bar = _ansi("+" + "-" * (width + 2) + "+", token)
+    pipe = _ansi("|", token)
     print(bar)
-    print(f"| {label.ljust(width)} |")
+    print(f"{pipe} {_ansi(title.ljust(width), token)} {pipe}")
     print(bar)
-    for line in body.splitlines():
-        print(f"| {line.ljust(width)} |")
+    for line in cleaned:
+        print(f"{pipe} {line.ljust(width)} {pipe}")
     print(bar)
 
 
-def display_kv(pairs: Sequence[tuple[str, Any]], *, title: str | None = None, always: bool = False) -> None:
-    rows = [[key, value] for key, value in pairs]
-    display_table(["Setting", "Value"], rows, title=title, always=always)
+def display_kv(
+    pairs: Sequence[tuple[str, Any]],
+    *,
+    title: str | None = None,
+    always: bool = False,
+) -> None:
+    """Render a compact key/value summary panel."""
+    if (_DISPLAY.quiet and not always) or not pairs:
+        return
+    max_val = max(24, _term_width() - 32)
+    formatted_pairs: list[tuple[str, str]] = []
+    for key, val in pairs:
+        k_str, v_str = _cell(key), _cell(val)
+        if not _DISPLAY.full:
+            if any(w in k_str.lower() for w in ("registry", "path", "source", "root", "dir", "remote")):
+                v_str = truncate_path(v_str, max_val)
+            else:
+                v_str = truncate_middle(v_str, max_val)
+        formatted_pairs.append((k_str, v_str))
+
+    if _rich_on():
+        grid = Table.grid(padding=(0, 2))
+        grid.add_column(style=THEME["key"][0], no_wrap=True)
+        grid.add_column(overflow="fold")
+        for k_str, v_str in formatted_pairs:
+            k_low = k_str.lower()
+            if any(w in k_low for w in ("registry", "path", "source", "remote")):
+                tok: str | None = "path"
+            elif v_str.isdigit():
+                tok = "number"
+            elif v_str in {"-", "none", "0"}:
+                tok = "muted"
+            else:
+                tok = None
+            grid.add_row(k_str, _rich_text(v_str, tok))
+        _console().print(
+            Panel(
+                grid,
+                title=_rich_text(f" {title} ", "title") if title else None,
+                title_align="left",
+                border_style=THEME["border"][0],
+                box=rich_box.ROUNDED if rich_box else None,
+                expand=False,
+            )
+        )
+        return
+
+    display_table(["Setting", "Value"], formatted_pairs, title=title, always=always, max_rows=0)
 
 
 def display_command_report(
@@ -286,43 +871,104 @@ def display_command_report(
     flags: Sequence[str],
     implicit: bool = False,
 ) -> None:
+    """Render the compact command settings header card."""
     if _DISPLAY.quiet:
         return
-    rows = [[key, value] for key, value in settings]
-    rows.append(["Flags", ", ".join(flags) if flags else "none"])
-    title = f"manager {command}" + (" (default command)" if implicit else "")
-    display_table(["Setting", "Value"], rows, title=title)
-
-
-def display_info(message: str) -> None:
-    if not _DISPLAY.quiet:
-        print(message)
-
-
-def display_ok(message: str) -> None:
-    if not _DISPLAY.quiet:
-        print(f"[ok] {message}")
-
-
-def display_warn(message: str) -> None:
-    print(f"[warn] {message}", file=sys.stderr)
-
-
-def display_error(message: str) -> None:
-    print(f"[error] {message}", file=sys.stderr)
+    pairs = list(settings)
+    pairs.append(("Flags", ", ".join(flags) if flags else "none"))
+    title = f"manager {command}" + (" (default)" if implicit else "")
+    display_kv(pairs, title=title)
 
 
 def display_counts(counts: Counter[str], *, title: str = "summary") -> None:
+    """Render an inline color-coded strip summarizing operation result counts."""
     if _DISPLAY.quiet or not counts:
         return
-    order = ["linked", "relinked", "copied", "updated", "restored", "repaired",
-             "unchanged", "skipped", "created",
-             "would link", "would relink", "would copy", "would update",
-             "would restore", "would repair", "would replace", "would create",
-             "failed"]
-    rows = [[name, str(counts[name])] for name in order if counts.get(name)]
-    rows.extend([[name, str(count)] for name, count in sorted(counts.items()) if name not in order])
-    display_table(["Result", "Count"], rows, title=title)
+    order = [
+        "linked", "relinked", "copied", "updated", "restored", "repaired",
+        "replaced", "created", "unlinked", "removed", "unchanged", "kept",
+        "skipped", "protected", "absent",
+        "would link", "would relink", "would copy", "would update",
+        "would restore", "would repair", "would replace", "would create",
+        "failed",
+    ]
+    ordered = [(name, counts[name]) for name in order if counts.get(name)]
+    ordered.extend((name, cnt) for name, cnt in sorted(counts.items()) if name not in order and cnt)
+    if not ordered:
+        return
+
+    if _rich_on():
+        line = Text()
+        line.append(f"{title}: ", style=THEME["title"][0])
+        for idx, (label, count) in enumerate(ordered):
+            if idx:
+                line.append("  |  ", style=THEME["muted"][0])
+            tok = status_token(label)
+            line.append(f"{label} ", style=THEME[tok][0])
+            line.append(str(count), style=THEME["key"][0])
+        _console().print(line)
+        return
+
+    parts = [
+        f"{_ansi(label, status_token(label))} {_ansi(str(count), 'key')}"
+        for label, count in ordered
+    ]
+    print(f"{_ansi(title + ':', 'title')} " + _ansi(" | ", "muted").join(parts))
+
+
+def display_info(message: str) -> None:
+    """Render a styled informational line."""
+    if _DISPLAY.quiet:
+        return
+    raw = _cell(message)
+    text = raw if _DISPLAY.full else truncate_path(raw, max(40, _term_width() - 8))
+    if _rich_on():
+        line = Text()
+        line.append("info ", style=THEME["info"][0])
+        line.append(text)
+        _console().print(line)
+        return
+    print(f"{_ansi('[info]', 'info')} {text}")
+
+
+def display_ok(message: str) -> None:
+    """Render a styled success line."""
+    if _DISPLAY.quiet:
+        return
+    raw = _cell(message)
+    text = raw if _DISPLAY.full else truncate_path(raw, max(40, _term_width() - 8))
+    if _rich_on():
+        line = Text()
+        line.append("ok   ", style=THEME["ok"][0])
+        line.append(text)
+        _console().print(line)
+        return
+    print(f"{_ansi('[ok]', 'ok')} {text}")
+
+
+def display_warn(message: str) -> None:
+    """Render a styled warning line to stderr."""
+    raw = _cell(message)
+    text = raw if _DISPLAY.full else truncate_path(raw, max(40, _term_width() - 8))
+    if _rich_on():
+        line = Text()
+        line.append("warn ", style=THEME["warn"][0])
+        line.append(text)
+        _console(stderr=True).print(line)
+        return
+    print(f"{_ansi('[warn]', 'warn')} {text}", file=sys.stderr)
+
+
+def display_error(message: str) -> None:
+    """Render a styled error line to stderr."""
+    text = _cell(message)
+    if _rich_on():
+        line = Text()
+        line.append("err  ", style=THEME["error"][0])
+        line.append(text)
+        _console(stderr=True).print(line)
+        return
+    print(f"{_ansi('[error]', 'error')} {text}", file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -1487,7 +2133,7 @@ def display_sync_banner(issues: Sequence[SyncIssue]) -> None:
     counts = Counter(issue.state for issue in issues)
     summary = ", ".join(f"{count} {state}" for state, count in sorted(counts.items()))
     lines = [f"{len(issues)} entr{'y' if len(issues) == 1 else 'ies'} need attention: {summary}"]
-    limit = len(issues) if _DISPLAY.verbose else 6
+    limit = len(issues) if (_DISPLAY.verbose or _DISPLAY.full) else 6
     for issue in issues[:limit]:
         lines.append(f"- {issue.skill} [{issue.state}] {issue.target}")
     if len(issues) > limit:
@@ -4176,7 +4822,9 @@ def add_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument("-q", "--quiet", action="store_true", help="suppress reports; warnings still print")
     parser.add_argument("-v", "--verbose", action="store_true", help="show extra detail in reports")
-    parser.add_argument("-C", "--no-color", action="store_true", help="plain ASCII output, no rich rendering")
+    parser.add_argument("-C", "--no-color", action="store_true", help="plain monochrome ASCII output, disabling Rich and ANSI colors")
+    parser.add_argument("-F", "--full", action="store_true", help="disable row limits and middle-truncation on long names and paths")
+    parser.add_argument("--limit", type=int, default=DEFAULT_TABLE_ROW_LIMIT, metavar="N", help=f"max rows shown per table before summarizing; 0 for unlimited (default: {DEFAULT_TABLE_ROW_LIMIT})")
 
 
 def add_deploy_flags(parser: argparse.ArgumentParser) -> None:
@@ -4191,8 +4839,89 @@ def add_mode_flag(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _style_argparse_line(line: str, *, in_examples: bool = False) -> Any:
+    """Style a single argparse help line for Rich or ANSI output."""
+    stripped = line.strip()
+    is_header = (
+        not line.startswith(" ")
+        and stripped.endswith(":")
+        and stripped[:-1].replace(" ", "").isalpha()
+    )
+    if _rich_on():
+        if line.startswith("usage:"):
+            t = Text()
+            t.append("usage:", style=THEME["header"][0])
+            t.append(line[6:], style=THEME["subtitle"][0])
+            return t
+        if is_header:
+            return Text(line, style=THEME["header"][0])
+        if in_examples and stripped:
+            return Text(line, style=THEME["subtitle"][0])
+        m = re.match(r"^(\s{2,})(-[^\s,]+(?:,\s*--[^\s]+)?(?:\s+[A-Z0-9_<>\[\]|.]+)?)(.*)$", line)
+        if m:
+            t = Text()
+            t.append(m.group(1))
+            t.append(m.group(2), style=THEME["accent"][0])
+            t.append(m.group(3))
+            return t
+        m_cmd = re.match(r"^(\s{4})([a-z][a-z0-9_-]*)(\s{2,}.*)$", line)
+        if m_cmd:
+            t = Text()
+            t.append(m_cmd.group(1))
+            t.append(m_cmd.group(2), style=THEME["accent"][0])
+            t.append(m_cmd.group(3))
+            return t
+        return Text(line)
+
+    if line.startswith("usage:"):
+        return _ansi("usage:", "header") + _ansi(line[6:], "subtitle")
+    if is_header:
+        return _ansi(line, "header")
+    if in_examples and stripped:
+        return _ansi(line, "subtitle")
+    m = re.match(r"^(\s{2,})(-[^\s,]+(?:,\s*--[^\s]+)?(?:\s+[A-Z0-9_<>\[\]|.]+)?)(.*)$", line)
+    if m:
+        return f"{m.group(1)}{_ansi(m.group(2), 'accent')}{m.group(3)}"
+    m_cmd = re.match(r"^(\s{4})([a-z][a-z0-9_-]*)(\s{2,}.*)$", line)
+    if m_cmd:
+        return f"{m_cmd.group(1)}{_ansi(m_cmd.group(2), 'accent')}{m_cmd.group(3)}"
+    return line
+
+
+def _render_argparse_help(help_text: str, *, stderr: bool = False) -> None:
+    """Render argparse help or usage text using Rich when available, else ANSI."""
+    in_examples = False
+    con = _console(stderr=stderr) if _rich_on() else None
+    stream = sys.stderr if stderr else sys.stdout
+    for line in help_text.splitlines():
+        if not line.startswith(" ") and line.strip().lower() == "examples:":
+            in_examples = True
+        elif not line.startswith(" ") and line.strip().endswith(":"):
+            in_examples = False
+        styled = _style_argparse_line(line, in_examples=in_examples)
+        if con is not None:
+            con.print(styled, highlight=False)
+        else:
+            print(styled, file=stream)
+
+
+class _StyledArgumentParser(argparse.ArgumentParser):
+    """ArgumentParser that renders help, usage, and errors via Rich or ANSI."""
+
+    def print_usage(self, file: Any = None) -> None:
+        _render_argparse_help(self.format_usage(), stderr=(file is sys.stderr))
+
+    def print_help(self, file: Any = None) -> None:
+        _render_argparse_help(self.format_help(), stderr=(file is sys.stderr))
+
+    def error(self, message: str) -> None:
+        self.print_usage(sys.stderr)
+        err(f"{self.prog}: error: {message}")
+        self.exit(2)
+
+
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = _StyledArgumentParser(
         prog="manager.py",
         description="Deploy skills and agent instructions, lint and classify skills, locate installs, and discover crossreferences.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -4486,7 +5215,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 VALUE_FLAGS = {
     "-r", "--registry", "-j", "--jobs", "-A", "--agents",
-    "-i", "--into", "-m", "--max-description",
+    "-i", "--into", "-m", "--max-description", "--limit",
 }
 
 
@@ -4554,7 +5283,7 @@ def skill_settings(args: argparse.Namespace, registry: Path) -> list[tuple[str, 
     elif args.all:
         action = "all registry skills"
     else:
-        action = ", ".join(args.skills) if args.skills else "none"
+        action = format_list_compact(args.skills) if args.skills else "none"
     destination = f"into {args.into}" if args.into else f"global agents ({args.agents})"
     mode = "hard-copy" if (args.hard_copy or args.mode == "copy") else "symlink"
     rows = [
@@ -4650,12 +5379,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         pass
 
     raw = list(sys.argv[1:] if argv is None else argv)
+    configure_display(quiet=False, color="--no-color" not in raw, verbose=False)
     parser = build_parser()
     if not raw or raw[0] in {"-h", "--help"}:
         parser.print_help()
         return 0
     if raw[0] in {"-V", "--version"}:
-        print(f"manager.py {__version__}")
+        ver = f"manager.py {__version__}"
+        if _rich_on():
+            _console().print(_rich_text(ver, "accent"))
+        else:
+            print(_ansi(ver, "accent"))
         return 0
 
     command, rest, implicit = split_command(raw)
@@ -4664,10 +5398,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     except SystemExit as exc:
         return int(exc.code or 0)
 
+    is_json = bool(getattr(args, "json", False))
     configure_display(
-        quiet=args.quiet or (command in {"report", "crossreference"} and args.json),
-        color=not args.no_color and not os.environ.get("NO_COLOR"),
+        quiet=args.quiet or is_json,
+        color=not args.no_color and not os.environ.get("NO_COLOR") and not is_json,
         verbose=args.verbose,
+        full=args.full,
+        max_rows=args.limit,
     )
     registry = (args.registry or REGISTRY).expanduser().resolve()
     jobs = args.jobs if args.jobs is not None else min(32, (os.cpu_count() or 4) * 4)

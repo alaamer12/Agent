@@ -1,6 +1,6 @@
 # SVG Build Foundations
 
-> The single home of every rule shared by all 25 styles. Read this **top to bottom, once, for any build
+> The single home of every rule shared by all 100 styles. Read this **top to bottom, once, for any build
 > job**, then read your one recipe `references/<style>.md`. Style identification and routing live in
 > [`../method.md`](../method.md); each recipe is the sole home of its own geometry numbers — this file never
 > repeats them.

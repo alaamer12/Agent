@@ -25,12 +25,33 @@
 | **Business decision inside a stack file** (*"We use separate DB from partner"*) | A strategic boundary stated as a technical fact. | Move strategic decision to `perception/policy`; keep `tech/stack` strictly stating *"We use PostgreSQL"*. |
 | **Mirroring technical folders into perception** | Forcing `stack`, `structure`, or `playbook` into `perception/`. | Forbidden: Perception defines only `product`, `domain`, `capabilities`, `policy`. |
 | **Bloated product overview** | Listing every tier, entity, and state in the product overview. | Keep `product` concise (one sentence per audience pointing to `domain`); move entity and concept depth to `perception/domain`. |
+| **Tech folder written after a generic architecture chat** | The agent treated a few fork questions as a waiver for the other directories. | Interview every in-scope tech directory separately using its reference questionnaire and confirmed decision recap. |
+| **Existing code treated as user approval** | Observed behavior was copied into a design or steering document without confirmation. | Label it Observed, present it for confirmation or correction, and keep the directory unsettled until the user answers. |
+| **Whole-plan approval used to backfill skipped interviews** | A global "looks good" concealed missing per-directory decisions. | Approve each directory recap explicitly or record an explicit delegation; global approval cannot settle unasked rows. |
+| **Unresolved choice hidden in final-looking prose** | A proposal was written as though it were the approved architecture. | Keep it Proposed in the ledger and block that directory's examination, design, mapping, and steering-file authoring. |
+| **Finite tree with no growth rule** | A current directory snapshot reads as the complete permitted structure. | Label its authority, mark growable groups with `...`, and add a compact membership/extension rule. |
+| **Ellipsis without a rule** | The tree looks open but gives no way to place a new item. | State what belongs and what the next item must satisfy; the marker alone is not a pattern. |
+| **Illustrative path treated as mandatory** | An example layout becomes an unapproved architectural requirement. | Mark the tree illustrative and separate normative placement rules from examples. |
+| **Closed boundary opened for flexibility** | A security, taxonomy, or enforced contract list gains an ellipsis. | Keep true closed sets closed; open only inventories that grow by the same rule. |
+| **`shared/` used as the default bucket** | Cross-feature or common-looking content was placed without proving every-area scope. | Apply the Universal Scope Test; a subset of areas does not pass. |
+| **Shared file contains per-area sections** | The common core became a union of local documents. | Keep only the canonical common fact in `shared/`; move local material to area delta files. |
+| **Area file copies shared prose** | The same normative fact has two homes and can drift. | Link to the shared owner and write only the area's additional part. |
+| **Area file shadows or overrides shared** | A same-named local file silently changes the common rule. | Use a distinct local-delta file; flag contradictions and reopen shared scope instead of overriding. |
+| **Shared file links back to an area** | The common core depends on a local implementation or document. | Reverse the link: area → shared only. |
+| **Bare `pending` or `not defined yet` in a steering file** | A drafting question was hidden instead of disclosed and structured. | Tell the user immediately; use the structured `Pending (Drafting)` marker with question, blocker, discovery step, and closure gate. |
+| **Pending marker survives Draft [DR] completion** | The phase was declared complete while decisions were still open. | Close every marker through `close-topics`; unresolved markers keep drafting incomplete. |
+| **Second topic parked without telling the user** | An internal agenda replaced immediate disclosure. | Name the topic and its impact now; park it only after explicit user deferral. |
+| **`Moved to` banner in a living file** | Relocation was announced instead of documented as a normal reference. | State the current owner and link; remove the migration banner. |
+| **Wrong living text kept as `retired`** | Drafting preserved a tombstone instead of overriding outdated guidance. | Replace the living claim directly; keep history only in its explicit historical home. |
+| **`Assumption` label used to avoid a decision** | Uncertainty was labeled instead of asked or evidenced. | Ask immediately; use `Inferred from <evidence>` or structured `Pending (Drafting)` after explicit deferral. |
 
 ---
 
 ## 2.1 The 8 Real-World Mixed Cases (Real-Project Test Benchmark)
 
 During the real-world validation test across 51 documentation files, the agent misclassified files by treating each file as an indivisible monolithic unit rather than splitting at the passage level. Below are the 8 canonical mixed cases, the root cause of confusion, and their exact two-tier resolutions:
+
+These historical paths identify the concern folder, not an automatic `shared/` scope decision. Apply the [Universal Scope Test](layout.md#universal-scope-test) before reusing any path in a new project.
 
 ### Case 1: `portfolio-invariants`
 - **Confusion**: Combining business financial constraints with database concurrency mechanics.

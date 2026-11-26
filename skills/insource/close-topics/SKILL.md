@@ -1,9 +1,9 @@
 ---
 name: close-topics
-version: 1.0.3
+version: 1.0.4
 author: Amr
 specialized: none
-description: 'Guided, conversational, topic-by-topic technical specification: close one design area before opening the next. Use when a project has undecided architecture (scrapers, workers, pipelines, caching, data models, queues, storage, deployment) and the user wants to work through it sequentially - ask targeted questions with real options and trade-offs, collect the decision, write it into a specification document in the project''s docs, update the index, then hand off to the next topic. Stops at design: no implementation until every agreed topic is resolved and the user says go. Standalone independent skill. Not for choosing a technology stack (techstack), not for deciding how to build something the agent already owns (dtb), not for planning a task list (planner), not for reorganizing or splitting docs (document).'
+description: 'Guided, conversational, topic-by-topic technical specification: close one design area before opening the next. Use when a project has undecided architecture (scrapers, workers, pipelines, caching, data models, queues, storage, deployment) and the user wants to work through it sequentially - ask targeted questions with real options and trade-offs, collect the decision, write it into a specification document in the project''s docs, update the index, then hand off to the next topic. New topics are disclosed immediately; explicit deferrals use structured Pending (Drafting) markers, and every marker closes before Draft [DR] completes. Stops at design: no implementation until every agreed topic is resolved and the user says go. Standalone independent skill. Not for choosing a technology stack (techstack), not for deciding how to build something the agent already owns (dtb), not for planning a task list (planner), not for reorganizing or splitting docs (document).'
 when_to_use: The user wants to "work through the design topic by topic", nail down missing architecture decisions, resolve open technical questions before building, review what a project has not specified yet, or invokes /close-topics. Also when a spec is half-written and the gaps need closing one at a time.
 argument-hint: "[topic to close, or 'what is still unspecified?']"
 ---
@@ -28,7 +28,8 @@ project keeps such things.
 
 Read what already exists before asking anything: the project's docs folder, ADRs, `AGENTS.md`, existing specs,
 the code that is already written. Open topics are the ones those sources do not settle. List them, let the user
-pick, or start with the one that blocks the most other decisions.
+pick, or start with the one that blocks the most other decisions. Disclose every newly discovered topic in the
+same turn, with what it blocks; never hide it in a private agenda for a later handoff.
 
 Typical pillars, examples not a checklist: ingestion or scraping strategy, workers and scheduling, pipelines and
 ordering, caching and invalidation, data model and storage, external integrations and rate limits, error and retry
@@ -44,7 +45,25 @@ project has already decided is **not** reopened for conversation — record wher
   reasoning.
 - Do not re-ask a settled point unless the user changes direction or new evidence appears.
 - One topic at a time: do not leak a database question into a caching discussion. If a second topic surfaces,
-  write it down for the agenda and continue the current one.
+  name it and its impact immediately, then ask whether to close it now or explicitly defer it. Add it to the
+  agenda only after the user agrees to defer.
+
+### Drafting Pending Markers
+
+During Draft [DR], a topic may depend on a later step. That permits a marker, not silence:
+
+1. Disclose the question and its blocker immediately.
+2. Ask whether to answer now or explicitly defer.
+3. On explicit deferral, write only:
+
+```text
+Pending (Drafting) — <question>. Blocks: <claims or paths>. Discovered: <step>. Close before: Draft [DR] completion.
+```
+
+4. When Viber is active, also record the question in `memory.md` and link its ID from the marker.
+5. Before Draft [DR] completes, close every marker through this cycle, update the canonical document and memory ledger, and re-sweep. Any unresolved marker keeps drafting incomplete.
+
+Never write a bare `pending`, `not defined yet`, `TBD`, `TODO`, or placeholder.
 
 ### 3. Close and document
 
@@ -66,7 +85,7 @@ The drafting phase ends when implementation begins; formal `decisions/` records 
 | Where | **DR:** a provisional steering doc in the project's tech/docs convention. **IP/PP:** the project's decision-record convention (an ADR / `decisions/` folder). No new top-level folder when one exists; ask before inventing one |
 | Depth | Concrete interfaces, state-transition tables, data flow, error strategy, boundaries of ownership. A summary that a builder could misread is not a spec |
 | Alternatives | **DR:** note alternatives lightly so they can be revisited. **IP/PP:** record rejected options and why, so the next reader does not re-litigate them |
-| Open ends | Anything not decided is listed as open, not quietly omitted |
+| Open ends | Disclose immediately; write only a structured `Pending (Drafting)` marker after explicit deferral, and close it before Draft [DR] completion |
 | Index | Link the new document from the folder's map or the docs index in the same change |
 | Preserve | Existing docs are merged into, never clobbered; user edits are never reverted |
 
@@ -84,6 +103,7 @@ from the agenda and ask whether to take it. The agenda is the user's to reorder.
 - **Decisions belong to the user; the analysis belongs to you.** Recommend plainly, decide only inside the
   implementation details that were delegated.
 - **Silence is not agreement.** An unanswered question stays open; it never becomes a written "decision".
+- **Drafting cannot complete with pending topics.** Every `Pending (Drafting)` marker must close before Draft [DR] is declared complete.
 
 ## Boundaries
 

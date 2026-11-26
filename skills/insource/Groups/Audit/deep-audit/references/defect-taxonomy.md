@@ -28,8 +28,7 @@ NOT this defect. Cite file:line for every hit.
 - **Signature:** a concept gates or rejects or prices — but no domain rule, table, page, test, or
   definition anywhere defines it.
 - **Proof:** search every possible definer (schema, policy, UI, code, config). Zero hits = invented.
-- **Decoy:** a deliberately deferred decision marked PENDING/ASSUMPTION is not an invention; an
-  unmarked assertion is.
+- **Decoy:** a deliberately deferred decision marked with the structured `Pending (Drafting)` marker is not an invention; an unmarked assertion is.
 
 ## 4. Stale marker (answered, still marked open)
 
@@ -44,8 +43,7 @@ NOT this defect. Cite file:line for every hit.
 - **Signature:** many docs state a concrete choice (a library, a number, a symbol, a limit) that no
   decision record contains. Consensus without authority.
 - **Proof:** check the decision ledger for the claim; absent = the corpus voted without the owner.
-- **Action:** either ask (owner call) or downgrade to an explicit assumption tag. Never leave it as
-  fact.
+- **Action:** either ask the owner or write `Inferred from <evidence>` when evidence supports the inference. After explicit deferral, use the structured `Pending (Drafting)` marker. Never leave an assumption label as fact.
 
 ## 6. Terminology drift
 
@@ -77,6 +75,18 @@ NOT this defect. Cite file:line for every hit.
 - **Proof:** check against the ledger and the actual artifacts; on conflict, the project wins and
   the belief gets recorded as a dated fact so the next agent does not re-learn it.
 - **Decoy:** general industry truth the project agrees with needs no fact entry.
+
+## 10. Migration tombstone
+
+- **Signature:** living guidance contains `Moved to`, `Moved from`, or a `retired` block preserving outdated content instead of stating the current rule.
+- **Proof:** classify the file as living or historical. In living files, quote the migration label and the current owner or replacement.
+- **Repair:** replace wrong living content directly and use an ordinary reference to the current owner. Keep history only in its explicit historical home.
+
+## 11. Assumption label
+
+- **Signature:** living content uses `assume`, `assumed`, or `Assumption` as an epistemic label instead of evidence, a decision, or an explicit drafting deferral.
+- **Proof:** identify the claim and ask whether evidence supports `Inferred from <evidence>`, the user must decide, or the text is simply wrong and should be replaced.
+- **Repair:** write the evidence-backed inference, ask immediately, or use structured `Pending (Drafting)` after explicit deferral.
 
 ## Reporting format per census agent
 

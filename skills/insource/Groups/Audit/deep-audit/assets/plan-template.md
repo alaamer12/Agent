@@ -78,5 +78,5 @@ per wave.
 ## Honest scope trims
 
 Deliberately untouched, with why: churn-with-no-consumer moves, prototype/runtime code fixes
-outside doc scope, decisions kept as explicit assumptions, git operations left to the owner.
+outside doc scope, explicitly deferred questions with structured `Pending (Drafting)` markers, git operations left to the owner.
 Each trim is a named decision, never a silence.

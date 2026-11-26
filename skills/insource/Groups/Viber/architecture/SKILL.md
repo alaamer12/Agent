@@ -1,6 +1,6 @@
 ---
 name: architecture
-version: 2.5.0
+version: 2.5.1
 author: Amr
 specialized: none
 description: Orchestrates and drafts an application's complete technical architecture documentation suite across 12 pillars - language conventions, error handling contracts, visual UI/interaction, accessibility and sensory adaptation, display/notation architecture, relational/SQL data modeling, plugin and settings extensibility under the Open/Closed Principle, cross-platform multi-device mechanics, seams and third-party boundaries (the date-don't-marry doctrine - vendor sealing, utility/usability taxonomy, composition ladders, the two walls, component ownership transfer), media handling, testing architecture (lanes, fixtures, No-String Rule, conformance tests), and gates architecture (enforcement ladder, tier budgets, baselines, agent-proof checks); interviews for scope, mandates live version research, and invokes each sub-pillar to author binding specifications into <docs>/ or <docs>/architecture/.
@@ -62,8 +62,8 @@ Execution operates across 4 structured phases:
 
 1. **Phase 1 — Contextual Discovery & Relevance Interview.** Analyze the codebase, dependencies and project context; present the tailored §3 questions to determine scope: language stack & target versions, error philosophy, visual UI, database, plugin/settings surfaces, multi-platform targets, and which third-party capabilities the app consumes.
 2. **Phase 2 — Live Ecosystem & Version Web Research.** For each confirmed technology, target version and runtime, perform live web search before authoring (`"<language> <version> new features"`, `"<language> <version> breaking changes"`, `"<framework> best practices idiom tricks"`); cross-reference documentation to prevent applying obsolete paradigms or hallucinated legacy idioms.
-3. **Phase 3 — Sequential Pillar Execution.** Author specifications using the researched data and polyglot guidelines, in dependency order: Language → Error → UI → Accessibility → Display → Database → Plugin & Settings → Cross-Platform → **Seams** → Media → Testing (every app has tests) → Gates (every app has delivery). Conditional pillars are skipped only when their §3 gate is answered in the negative, and the skip is recorded as an open decision.
-4. **Phase 4 — Consolidation & UNITS.md Cross-Check.** Validate all generated documents for consistency; verify zero conflicting rules across pillars; register shared structural units in `UNITS.md`.
+3. **Phase 3 — Sequential Pillar Execution.** Author specifications using the researched data and polyglot guidelines, in dependency order: Language → Error → UI → Accessibility → Display → Database → Plugin & Settings → Cross-Platform → **Seams** → Media → Testing (every app has tests) → Gates (every app has delivery). Conditional pillars are skipped only when their §3 gate is answered in the negative. If a later step reveals an unanswered question, disclose it immediately and use `Pending (Drafting) — <question>. Blocks: <claims or paths>. Discovered: <step>. Close before: Draft [DR] completion.` only after explicit user deferral.
+4. **Phase 4 — Consolidation & UNITS.md Cross-Check.** Validate all generated documents for consistency; verify zero conflicting rules across pillars; register shared structural units in `UNITS.md`. Before declaring Draft [DR] complete, close every `Pending (Drafting)` marker through `close-topics`; unresolved markers keep drafting incomplete.
 
 ---
 
@@ -118,3 +118,4 @@ The generated artifacts are written to the project's documentation root as confi
 9. **Tests Are Executable Architecture:** Every binding rule a compiler cannot enforce gets a conformance test, or it is a preference. Test data has one home and one vocabulary; a test body names intent, never a value (No-String Rule). Never present coverage as evidence of correctness — name the invariant or the mutation it catches.
 10. **A Rule Without a Gate Is a Preference:** Every binding rule names its gate, tier, owner, and evidence, or is explicitly advisory. A gate the gated can edit is not a gate; a gate never observed failing is presumed broken; a gate that fails open on a missing report is worse than no gate at all.
 11. **Date, Don't Marry:** Every external capability is reachable only through one seam you own, named in the project's own vocabulary. A boundary that fails the one-file swap test is not a seam; a wall no planted fixture has ever fired against is not a check; an adopted component without a ledger row is a component nobody owns.
+12. **No Silent Drafting Gaps:** Disclose each newly discovered unanswered question immediately. During Draft [DR], use only the structured `Pending (Drafting)` marker after explicit deferral, and close every marker before declaring drafting complete.

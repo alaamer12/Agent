@@ -244,4 +244,4 @@ Use an appropriate filename and location based on the user's instructions and th
 
 Write the document the user asked for, not the document the agent would prefer to write.
 
-Respect the requested level of detail, recover the relevant context, preserve the required information, distinguish evidence from assumptions, and produce a Markdown document that fulfills the user's actual intent.
+Respect the requested level of detail, recover the relevant context, preserve the required information, distinguish evidence from inference, and produce a Markdown document that fulfills the user's actual intent.

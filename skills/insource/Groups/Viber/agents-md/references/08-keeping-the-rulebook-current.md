@@ -40,7 +40,7 @@ Pair it with a review marker a later agent can check:
 | An authority setting changed (ask-per-session vs fixed), or a grant was given/revoked | **yes** — section 9, with its reason and scope |
 | A version-control rule changed (the VCS named, a tier, parked-work policy, change identity) | **yes** — section 12, **and regenerate the block's VCS clause**; the `commit`/`branch` skills read this section before asking anything about authorship |
 | The user changed how they want to be asked (Exact/Broad/both, the named Exact list, the pre-anonymous rule), or the decision-record convention moved (docs folder renamed, ADR numbering adopted) | **yes** — section 13 |
-| A golden rule was added, retired, or reworded | **yes** — section 14, **and regenerate the block's GOLDEN clause**; the loudest change in the repo |
+| A golden rule was added, removed, or reworded | **yes** — section 14, **and regenerate the block's GOLDEN clause**; the loudest change in the repo |
 | A named review task changed (routine, docs budgets, table list) | **yes** — section 15 |
 | A version policy changed (pattern, bump rule or who, a new declaration site, an attachment, dual-versioning) | **yes** — section 3, **and the versioning doc's procedure in the same change** |
 | The docs root moved or was declared for the first time | **yes** — section 2's path and every pointer that hangs from it |

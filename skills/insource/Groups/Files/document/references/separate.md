@@ -26,7 +26,7 @@ List the files that will change, what each resulting document owns, and which cr
 
 ## 5-7. Extract, restructure, connect
 
-Move content into its new home — **move, don't rewrite**, unless the separated document needs a proper identity of its own and the old text cannot serve it. Reshape each document around its own responsibility, then wire the real relationships as accurate cross-references. A relationship the prose implies but no link states is a reader losing the other half; a relationship stated in prose is not a reason for both files to carry the same specification.
+Move content into its new home — **relocate without rewriting**, unless the separated document needs a proper identity of its own and the old text cannot serve it. Reshape each document around its own responsibility, then wire the real relationships as accurate cross-references. A relationship the prose implies but no link states is a reader losing the other half; a relationship stated in prose is not a reason for both files to carry the same specification. Never add a `Moved to` banner.
 
 ## The independence bar
 

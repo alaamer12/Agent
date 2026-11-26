@@ -1,9 +1,9 @@
 ---
 name: glossary-md
-version: 1.0.2
+version: 1.0.3
 author: Amr
 specialized: none
-description: 'Maintains one unambiguous project vocabulary in alphabetical letter blocks. Golden rule for what earns a block: the word as used here carries more than the dictionary sense - redefined or made-concrete ordinary words (''eye'', ''minimal''), project coinages (''Melody'' for a workflow), private-sense abbreviations, transliterations (Basr, بصر), Franco spellings, names/codenames. The project''s own language is the canon, never English; bilingual terms show both forms together; article-led names file under the head noun (''Pit, The'' under P). Each block: term (acronym spelled out), all forms, a 2-5 line meaning, ''Used in:'' refs; keep identities generic - run ''revoke'' before the glossary leaves the project. Lives in AGENTS.md''s `# Glossary`, extracted to GLOSSARY.md when past the section budget. Self-invoke on learning, write the block in the same task; unknown means stay pending - never invent etymology. Also /glossary-md, ''add this term'', ''what does X mean here''. Owns glossary content; agents-md owns AGENTS.md.'
+description: 'Maintains one unambiguous project vocabulary in alphabetical blocks. A block is earned when a word carries project-specific meaning: redefined common words, coinages, abbreviations, transliterations, Franco forms, names or codenames. The project language is the canon; bilingual terms show both forms; article-led names file under the head noun. Each block has the canonical term, aliases, a 2-5 line meaning, and Used in references; identities stay generic and revoke runs before external sharing. Lives in the AGENTS.md Glossary section or GLOSSARY.md when large. Self-invokes on learning and writes in the same task; unknown meanings are asked immediately, marked only with a structured Pending (Drafting) marker after explicit deferral, and closed before Draft [DR] completion. Also /glossary-md, add this term, or what does X mean here. Owns glossary content; agents-md owns AGENTS.md.'
 when_to_use: The agent encounters or uses a project-specific, foreign, transliterated, or redefined term for the first time; the user asks to record or look up a term; or terminology appears mixed across docs and needs one canonical list. Also /glossary-md.
 argument-hint: "[the term(s), or 'audit' to find mixed terminology]"
 ---
@@ -56,9 +56,10 @@ later", not a note in the report, not a mental bookmark for the next session - t
 the agent that will meet the word cold. The completion test: when finishing any task, if you used or
 learned a term that fails the golden rule, the glossary block exists *now*; a task that ends with an
 un-written new term is not finished. This covers all learning routes: reading code or docs, the user
-saying it in chat, a log file, your own coinage while naming something. (The one exception: a term whose
-meaning you had to ask about and the answer never came - that block is written as `pending - not assumed`,
-still in this task.)
+saying it in chat, a log file, your own coinage while naming something. The one exception: a term whose
+meaning requires user input is asked immediately. Only an explicit user deferral permits a structured
+`Pending (Drafting)` block; without an answer or explicit deferral, report the term as blocked and do not
+invent a canonical entry.
 
 ## When it runs
 
@@ -77,7 +78,7 @@ still in this task.)
 | Terms outgrow the section, or the project already has a docs/ convention | full list moves to `GLOSSARY.md` (or the project's docs location); AGENTS.md keeps the section as obligations + pointer: canonical-form rule + `Read: GLOSSARY.md` |
 | No AGENTS.md exists yet | do not create it - that is `agents-md`'s job; produce the ready `# Glossary` block and hand it over |
 
-The extraction trigger is the same as agents-md's: a section past ~50 lines becomes a doc with a pointer. Glossary content moves; the obligations stay ("use canonical terms; every alias is listed; unknown means are pending").
+The extraction trigger is the same as agents-md's: a section past ~50 lines becomes a doc with a pointer. Glossary content moves; the obligations stay ("use canonical terms; every alias is listed; unknown meanings are disclosed immediately and deferred only with a structured Pending (Drafting) marker").
 
 ## Entry format - alphabetical blocks
 
@@ -145,7 +146,8 @@ Rules:
   partner", "the enterprise tier"), not the identity. A glossary is one of the most-shared artifacts in a
   repo; before a glossary leaves the project - to a public doc, another team, or an issue - run `revoke`
   over it. Inside the project the real names may stay where the code already shows them.
-- **Never invent an etymology or a meaning.** Unknown term still gets its block immediately, meaning withheld:
+- **Never invent an etymology or a meaning.** Ask the user immediately. If the user explicitly defers, the
+  temporary block uses the structured drafting marker and is closed before Draft [DR] completes:
 
   ```markdown
   ## F
@@ -153,11 +155,12 @@ Rules:
   **farasa, فرسة**
   Also: faraasa
 
-  pending - not assumed. UI string label; not defined anywhere in code or docs.
+  Pending (Drafting) — What does farasa mean here? Blocks: canonical definition for the UI string label. Discovered: glossary extraction. Close before: Draft [DR] completion.
   Used in: `app/UI_strings.ar.xml`
   ```
 
-  Ask the user when the conversation allows; the block then gets its meaning in the same task.
+  Replace the marker with the confirmed meaning in the same task when the answer arrives. If Viber is active,
+  link the marker to the matching `memory.md` question and move the answer to `settled.md` when closed.
 - **Two senses, split.** A term meaning two things here gets one block with an "As X: / As Y:" line pair if
   both are core, or a pointer block plus a real block under the other word's letter if one is dominant.
 - **Language honesty**: keep the term's own script visible in the `Also:` line, because the agent must match

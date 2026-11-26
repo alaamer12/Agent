@@ -1,6 +1,6 @@
 ---
 name: deep-audit
-version: 1.0.0
+version: 1.0.2
 author: Amr
 specialized: none
 description: 'End-to-end self-consistency loop for a project whose artifacts disagree with themselves: fan out read-only census subagents over non-overlapping slices hunting a fixed defect taxonomy (boundary violations, contradictions, invented content, stale markers, terminology drift, duplicate homes), ask the owner the weight-bearing questions in blocking rounds, write the reconciliation plan, then execute it in dependency-ordered WAVES — one atomic commit per wave behind a verification gate, teammate-safe, deviations recorded — and finish with rulebook sync plus a completeness proof. One entry point; modes: census, plan, fix, verify. Use for "deep-audit", "find the contradictions", "reconcile the docs", "organize the waves of reconciling", or when scaffolds exist but content drifted. Discovery-only routes to crosscheck; proof-only to please-verify; orientation to exmaine — deep-audit REMEDIATES.'
@@ -122,6 +122,7 @@ non-negotiables:
    closed item-by-item or explicitly deferred, and the falsified-string sweep returns only
    deliberate history. "Nothing stale, right?" is answered by running the sweep, never by
    remembering what was touched.
+7. **Living-document wording:** replace wrong living content directly and use ordinary references. Reports say updated, replaced, or linked — never `Moved to`, `retired`, or assumption labels. Use `Inferred from <evidence>` or structured `Pending (Drafting)` after explicit deferral; deferral opens a marker but never closes the topic.
 
 ## Clean-empty exit
 

@@ -2,6 +2,8 @@
 
 > This document defines the `doctrine` steering folder: engineering guidelines and mandated technical behavior for a specific technical part or task. It lives exclusively in the **tech tier** (`tech/`); see [`index.md`](index.md) for the taxonomy overview.
 
+**Scope rule.** Default to `tech/<area>/doctrine/`; use `tech/shared/doctrine/` only after the [Universal Scope Test](layout.md#universal-scope-test) passes. Area files link to shared facts and contain only their delta.
+
 **Holds.** Technical guidelines and non-negotiable engineering mandates for one specific component, layer, or activity (e.g., test quality invariants, API error payload wire shapes, database transaction isolation levels, concurrency locks). Think of it as the project's technical jurisprudence: reasoned engineering standards applied consistently when writing or refactoring code.
 
 **Shape.** Flat folder of topic-named Markdown files (e.g., `test-quality.md`, `balance-concurrency.md`, `api-error-contracts.md`).
@@ -21,8 +23,18 @@
 - **Describe behavior, not fragile mechanism**: State the technical invariant that must hold rather than hardcoding SQL-specific keywords (e.g., avoid writing `ON DELETE CASCADE` or database dialect syntax directly in prose unless the standard explicitly mandates that mechanism).
 - State rationale clearly next to the mandate.
 
-**Example (`tech/shared/doctrine/concurrency-invariants`).**
+**Interview before authoring.** Complete the [Tech Directory Interview and Authoring Gate](documentation-conventions.md#mandatory-tech-directory-interview-and-authoring-gate) for this directory. Ask or explicitly confirm:
+- Which component, layer, area, or activity does each mandate govern, where does its scope end, and is the identical mandate required by every area or only this one?
+- Which business policy, technical risk, or requirement justifies each mandate, and who has authority over it?
+- Is the mandate non-negotiable, a default with exceptions, or merely recommended?
+- What behavior and verification prove compliance, and which enforcement mechanisms are stable requirements versus replaceable implementation choices?
+- Who may grant an exception, how is it recorded, and when must the mandate be revisited?
+- Do existing rules conflict with code, another doctrine, a playbook, or a perception policy? Which source wins?
+
+Record the confirmed invariant, scope, rationale, authority, verification, exceptions, and precedence in the directory's ledger row. Never invent a mandate from an agent preference or a one-off implementation.
+
+**Example (`tech/<area>/doctrine/concurrency-invariants`).**
 "Ledger mutations on a user wallet must be executed under atomic row locking or serialized transactions. Parallel mutation attempts on the same wallet ID must wait or abort with a concurrency conflict rather than risking balance desynchronization."
 
-**Example (`tech/shared/doctrine/test-invariants`).**
+**Example (`tech/<area>/doctrine/test-invariants`).**
 "Unit and integration tests must verify mathematical invariants and state transitions across edge boundaries rather than asserting simple non-null returns. Tests for ledger arithmetic must verify that total debits plus final balance strictly equal initial balance."

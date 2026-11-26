@@ -5,6 +5,8 @@
 
 This document defines the steering function folder: system-wide technical functionality and runtime mechanisms that span features across the entire application or area.
 
+**Scope rule.** Default to `tech/<area>/function/`; use `tech/shared/function/` only after the [Universal Scope Test](layout.md#universal-scope-test) passes. Area files link to shared facts and contain only their delta.
+
 **Holds.** Technical system-wide mechanisms and infrastructure-level runtime behaviors:
 - System-wide error handling and user feedback patterns (`error-ux`).
 - Cross-cutting authentication and session synchronization lifecycles.
@@ -23,5 +25,15 @@ This document defines the steering function folder: system-wide technical functi
 2. *System Capability*: A technical capability that the entire platform is built around (e.g., media streaming in a video app, or asynchronous price sync in a simulator) represents the system itself and belongs here.
 3. *System vs. Component*: System-wide error handling lives here; the specific HTTP wire error format of an API endpoint lives in `doctrine.md`.
 
-**Example (`tech/shared/function/external-feed-sync`).**
+**Interview before authoring.** Complete the [Tech Directory Interview and Authoring Gate](documentation-conventions.md#mandatory-tech-directory-interview-and-authoring-gate) for this directory. Ask or explicitly confirm:
+- Which runtime mechanisms are truly system-wide or area-wide, which are only single-feature behavior, and which pass the [Universal Scope Test](layout.md#universal-scope-test) for steering `shared/`?
+- What triggers each mechanism, who or what participates, and what data crosses each boundary?
+- What is the intended lifecycle and ordering, including synchronous versus asynchronous behavior?
+- How do failure, timeout, retry, duplicate delivery, recovery, and degraded operation work?
+- What consistency, freshness, idempotency, authentication, and authorization guarantees are required?
+- What must be observable, and which behavior is implemented today versus approved for a future design?
+
+Record the confirmed mechanism inventory, participants, flows, lifecycle guarantees, failure behavior, and scope in the directory's ledger row. Do not infer a platform-wide mechanism from one implementation path.
+
+**Example (`tech/<area>/function/external-feed-sync`).**
 "The application maintains an asynchronous synchronization pipeline that ingests external provider pricing updates, validates wire envelopes against schema contracts, and pushes updated valuation snapshots to the internal caching layer on a scheduled interval."

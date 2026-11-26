@@ -1,6 +1,6 @@
 # Mechanics This Logo Rejects
 
-> Read **only** when asked for an effect outside the 25 named styles, or when inventing a new recipe.
+> Read **only** when asked for an effect outside the 100 named styles, or when inventing a new recipe.
 > Four candidates were built, measured, and cut. Nobody should re-derive these failures.
 
 - **`bloom`** (`feMorphology` dilate swell → sharpen). Technically animates — `radius` is animatable and

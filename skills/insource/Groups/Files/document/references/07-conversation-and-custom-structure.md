@@ -34,7 +34,7 @@ Here the request itself *is* a structure spec. Build the output to that spec dir
 
 **Test to tell them apart:** does the instruction describe a *content operation* (compress X, keep Y, focus on Z) or a *layout* (put A before B, group by C, add headers per D)? Content operations → reserved structure. Layout instructions → custom structure. A request can contain both — e.g. "keep my questions verbatim, and put them all at the top" — in which case follow the layout instruction (questions grouped at top) while applying the content rule (verbatim) within it.
 
-If genuinely ambiguous which is meant, default to reserved structure (the lower-risk assumption) and note the assumption briefly rather than asking — per this job's general instruction, proceeding beats stalling on an assumption that's easy to state.
+If genuinely ambiguous which is meant, default to reserved structure (the lower-risk reading) and state the interpretation briefly rather than asking — per this job's general instruction, proceeding beats stalling on a reversible reading that's easy to state.
 
 ## Role-aware selection and compression (reserved structure, conversational sources)
 
@@ -64,4 +64,4 @@ When the request specifies layout (case B above):
 - [ ] Reserved structure with a "summarize" role: normal selection/compression/faithfulness (02/03/05) applied to that role only.
 - [ ] Custom structure: output matches the requested layout, not a default template, and any user-specified tagging/labeling scheme was followed exactly.
 - [ ] Custom structure: separated parts that were originally adjacent (e.g., a question and its answer) still carry an explicit link back to each other.
-- [ ] If the reserved-vs-custom call was ambiguous, the assumption was stated briefly rather than left silent.
+- [ ] If the reserved-vs-custom call was ambiguous, the interpretation was stated briefly rather than left silent.

@@ -33,11 +33,12 @@ Whenever the agent prepares to ask about **any topic `<X>`** (whether `<X>` is v
 Currently, `02-interview-guide.md` gives 28 fixed questions, and `SKILL.md` Step 1 checks a fixed list of bash commands. What is missing is **how the agent discovers project-specific questions that aren't in the static bank**:
 
 ### 1. The Pre-Round Slate Confirmation (For the Whole `AGENTS.md` Interview)
-Before starting the 5 interview rounds in `02-interview-guide.md`, the agent should not blindly fire preset questions. After Step 1 reconnaissance, it presents a **1-screen Discovery Summary**:
+Before starting the 6 interview rounds in `02-interview-guide.md`, the agent should not blindly fire preset questions. After Step 1 reconnaissance, it presents a **1-screen Discovery Summary**:
 - **Already answered by the repo (Skipped):** e.g., package manager, VCS, existing docs root, detected branches.
 - **Standard sections needing decisions:** Which of the 19 sections have unresolved choices.
 - **Repo-specific anomalies/gaps spotted:** Conflicts or unique traits found in the repo (e.g., multiple lockfiles, monorepo packages with mixed versions, concurrent agent markers, custom codegen steps) that need a decision.
 - **Ask the user upfront:** *"Here are the core areas I need to ask about based on your repo, plus [X] project-specific areas I spotted. Do you want to cover all of them, skip any, or add a specific concern before Round 1?"*
+- **Never skip Round 6:** Q21 (question mode and always-ask decisions) and Q26 (Voice per surface and written reflection) are explicit user choices, even when the user says the agent already knows their style.
 
 ### 2. Deepening Specific Sections Where `02-interview-guide.md` Is Currently Thin
 *(Applying the Research-Before-Asking rule to the sections that need broader horizons)*

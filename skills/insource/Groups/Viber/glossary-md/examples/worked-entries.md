@@ -15,7 +15,9 @@ string - and the export task needs to know which one it is writing about.
 
 1. It reads enough to decide the referent (one camera + detector pipeline instance) - but *what the word means
    to the team* it does not guess.
-2. Adds the block under its letter, meaning marked pending where evidence ends:
+2. It asks immediately: *"the design doc says 'the Eye' where the code says pipeline instance - same thing, or
+   the doc means the whole vision feature?"*
+3. The user's answer completes the block in the same task:
 
 ```markdown
 ## E
@@ -23,21 +25,17 @@ string - and the export task needs to know which one it is writing about.
 **eye**
 Also: eyes, the Eye, عين
 
-pending - not assumed. Code uses it for one camera+detector pipeline instance (`core/Eyes.ts`); the design
-doc may mean the whole vision feature.
-
-Used in: `core/Eyes.ts`, `docs/design.md` §2 ("the Eye")
-```
-
-3. Asks the one question the answer changes: *"the design doc says 'the Eye' where the code says pipeline
-   instance - same thing, or the doc means the whole vision feature?"* The user's answer completes the block
-   in the same task - the pending line replaced by:
-
-```markdown
 Same as the code sense: one camera + detector pipeline instance. "The Eye" in design docs is the whole
 vision feature (all eyes plus the shared scheduler) - do not use `eye` for the feature, it is not an eye.
 
 Used in: `core/Eyes.ts` (canonical `VisionInstance`), `docs/design.md` §2
+```
+
+If the user explicitly defers, the temporary block uses the structured lifecycle marker instead of a bare
+pending line:
+
+```markdown
+Pending (Drafting) — Does "the Eye" mean one pipeline instance or the whole vision feature? Blocks: canonical meaning of eye. Discovered: export task. Close before: Draft [DR] completion.
 ```
 
 ## The Franco surprise

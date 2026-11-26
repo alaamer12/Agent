@@ -654,7 +654,7 @@
 #### `glossary-md`
 
 - **Path:** [`Groups/Viber/glossary-md/SKILL.md`](../Groups/Viber/glossary-md/SKILL.md)
-- **Description:** Maintains one unambiguous project vocabulary in alphabetical letter blocks. Golden rule for what earns a block: the word as used here carries more than the dictionary sense - redefined or made-concrete ordinary words ('eye', 'minimal'), project coinages ('Melody' for a workflow), private-sense abbreviations, transliterations (Basr, بصر), Franco spellings, names/codenames. The project's own language is the canon, never English; bilingual terms show both forms together; article-led names file under the head noun ('Pit, The' under P). Each block: term (acronym spelled out), all forms, a 2-5 line meaning, 'Used in:' refs; keep identities generic - run 'revoke' before the glossary leaves the project. Lives in AGENTS.md's `# Glossary`, extracted to GLOSSARY.md when past the section budget. Self-invoke on learning, write the block in the same task; unknown means stay pending - never invent etymology. Also /glossary-md, 'add this term', 'what does X mean here'. Owns glossary content; agents-md owns AGENTS.md.
+- **Description:** Maintains one unambiguous project vocabulary in alphabetical blocks. A block is earned when a word carries project-specific meaning: redefined common words, coinages, abbreviations, transliterations, Franco forms, names or codenames. The project language is the canon; bilingual terms show both forms; article-led names file under the head noun. Each block has the canonical term, aliases, a 2-5 line meaning, and Used in references; identities stay generic and revoke runs before external sharing. Lives in the AGENTS.md Glossary section or GLOSSARY.md when large. Self-invokes on learning and writes in the same task; unknown meanings are asked immediately, marked only with a structured Pending (Drafting) marker after explicit deferral, and closed before Draft [DR] completion. Also /glossary-md, add this term, or what does X mean here. Owns glossary content; agents-md owns AGENTS.md.
 - **Use-case:** The agent encounters or uses a project-specific, foreign, transliterated, or redefined term for the first time; the user asks to record or look up a term; or terminology appears mixed across docs and needs one canonical list. Also /glossary-md.
 - **Usage:** `/glossary-md [the term(s), or 'audit' to find mixed terminology]`
 
@@ -679,7 +679,7 @@
 #### `steering`
 
 - **Path:** [`Groups/Viber/steering/SKILL.md`](../Groups/Viber/steering/SKILL.md)
-- **Description:** Interactive documentation architecture and steering taxonomy skill. Transforms project requirements or legacy documentation into the Two-Tier Steering Taxonomy (.steering/ with perception/ [product, domain, capabilities, policy] and tech/ [stack, structure, function, doctrine, playbook], plus shared-plus-area splitting) and outside-taxonomy folders (features, reference). Operates in four gated phases with deep grill-me interviewing: (1) Contextual Discovery & Architectural Grill-Me Interview, (2) Ordered Placement & Passage-Level Role Analysis, (3) Distribution Plan Proposal & Approval Gate, and (4) Materialization & Index Synchronization. Use when asked to create or organize project documentation, apply the steering taxonomy, distribute requirements into .steering/, or migrate legacy docs.
+- **Description:** Interactive documentation architecture and steering taxonomy skill. Transforms project requirements or legacy documentation into the Two-Tier Steering Taxonomy (.steering/ with perception/ [product, domain, capabilities, policy] and tech/ [stack, structure, function, doctrine, playbook], plus shared-plus-area splitting with minimalist shared and area-delta semantics) and outside-taxonomy folders (features, reference). Operates in four gated phases with mandatory per-tech-directory interviews and pattern-first structure authoring: (1) Contextual Discovery & Architectural Grill-Me Interview, (2) Ordered Placement & Passage-Level Role Analysis, (3) Distribution Plan Proposal & Approval Gate, and (4) Materialization & Index Synchronization. Use when asked to create or organize project documentation, apply the steering taxonomy, distribute requirements into .steering/, or migrate legacy docs.
 - **Use-case:** The user wants to structure a project's documentation, distribute raw requirements across .steering/ and docs/, audit or migrate existing documentation into the Two-Tier Steering Taxonomy, or invokes /steering.
 - **Usage:** `/steering [project path, raw requirements, or 'migrate']`
 
@@ -785,7 +785,7 @@
 #### `close-topics`
 
 - **Path:** [`close-topics/SKILL.md`](../close-topics/SKILL.md)
-- **Description:** Guided, conversational, topic-by-topic technical specification: close one design area before opening the next. Use when a project has undecided architecture (scrapers, workers, pipelines, caching, data models, queues, storage, deployment) and the user wants to work through it sequentially - ask targeted questions with real options and trade-offs, collect the decision, write it into a specification document in the project's docs, update the index, then hand off to the next topic. Stops at design: no implementation until every agreed topic is resolved and the user says go. Standalone independent skill. Not for choosing a technology stack (techstack), not for deciding how to build something the agent already owns (dtb), not for planning a task list (planner), not for reorganizing or splitting docs (document).
+- **Description:** Guided, conversational, topic-by-topic technical specification: close one design area before opening the next. Use when a project has undecided architecture (scrapers, workers, pipelines, caching, data models, queues, storage, deployment) and the user wants to work through it sequentially - ask targeted questions with real options and trade-offs, collect the decision, write it into a specification document in the project's docs, update the index, then hand off to the next topic. New topics are disclosed immediately; explicit deferrals use structured Pending (Drafting) markers, and every marker closes before Draft [DR] completes. Stops at design: no implementation until every agreed topic is resolved and the user says go. Standalone independent skill. Not for choosing a technology stack (techstack), not for deciding how to build something the agent already owns (dtb), not for planning a task list (planner), not for reorganizing or splitting docs (document).
 - **Use-case:** The user wants to "work through the design topic by topic", nail down missing architecture decisions, resolve open technical questions before building, review what a project has not specified yet, or invokes /close-topics. Also when a spec is half-written and the gaps need closing one at a time.
 - **Usage:** `/close-topics [topic to close, or 'what is still unspecified?']`
 
@@ -804,6 +804,15 @@
 - **Path:** [`compare/SKILL.md`](../compare/SKILL.md)
 - **Description:** Write professional, well-reasoned comparisons between two or more subjects of any kind — technologies, files, projects, code modules, books, documents, biological processes, products, strategies, or any named options. Use whenever the user asks to compare, evaluate trade-offs, distinguish, or choose between things, including "which is better," "what's the difference," or "help me decide." Supports open-ended discovery of relevant aspects and dimension-based comparison on user-specified or researched criteria. Enforces real differentiators only, "why it matters" reasoning, independent research, graded quantitative claims, and neutral context-driven conclusions.
 - **Usage:** `/compare <two or more things> [dimensions to compare on]`
+
+---
+
+#### `conform`
+
+- **Path:** [`conform/SKILL.md`](../conform/SKILL.md)
+- **Description:** Audit live project documentation for direct contradictions, cross-layer contract mismatches, scope conflicts, duplicate drift, and stale decisions. Build an evidence-linked Agreement Matrix, distinguish real conflicts from different scopes or history, ask the user when intent or authority is unclear, and reconcile affected facets jointly instead of picking a single winner. Use for "find contradictions", "check these docs agree", architecture consistency audits such as errors versus typing, after separate sessions change a decision, or /conform. Default audit is read-only; fix requires an approved reconciliation plan.
+- **Use-case:** The user wants documentation checked for contradictions or cross-layer disagreement, wants architecture documents to agree without flattening distinct responsibilities, or invokes /conform.
+- **Usage:** `/conform [audit|fix] [docs path]`
 
 ---
 
@@ -877,6 +886,15 @@
 - **Description:** Mermaid flowchart authoring discipline — a diagram shows what exists and how things connect; documents carry the policy and sentences. Use when writing or editing any .mmd or embedded mermaid flowchart, when a diagram "looks trash" or reads crowded, when adding nodes/legends/panels, or when extracting a diagram out of a document. Node labels are a name plus at most 1-2 words; status is color, not text; legends are swatches, not sentences; one node per entity; no placeholder nodes.
 - **Use-case:** Creating or editing a mermaid flowchart, reviewing a cluttered diagram, moving a diagram into its own .mmd file, adding a legend, naming a subgraph.
 - **Usage:** `/mermaid [the diagram file or node block]`
+
+---
+
+#### `og`
+
+- **Path:** [`og/SKILL.md`](../og/SKILL.md)
+- **Description:** Brand-asset and social-card pipeline for any product: one raster master in, every favicon, PWA/OS tile, store icon, splash and 1200x630 OG card out, plus a runtime renderer drawing per-entity cards in Arabic/RTL or any bidi script from live content with no browser at request time. Covers master analysis (bboxes, palette, SVG verdict), capability probing, resvg/HarfBuzz text with an embedded variable font, a hand-written indexed-PNG encoder (median cut + Floyd-Steinberg) that holds a byte ceiling without banding, per-file alpha contracts, iOS/Android icon sets, manifest, translation-key-only copy, LRU + ETag + degrade-never-fail card routes, conformance gates, an ADR, and the human platform checklist. Use for favicons, app icons, PWA tiles, splash, cards, OG/Twitter meta, RTL card rendering, dynamic images, or a blank link. Triggers: og, open graph, social card, share image, favicon, app icon, splash, maskable, mstile, apple-touch-icon, brand assets, twitter card, dynamic og, rtl card.
+- **Use-case:** The user wants the brand/social surface built, audited or fixed: favicons and app icons, PWA/OS tiles, native store icons and splash, static or per-entity Open Graph cards, OG/Twitter meta tags, Arabic or RTL share images, or a shared link that renders as a bare URL. Also /og.
+- **Usage:** `/og [all | assets | cards | dynamic | native | verify] [target]`
 
 ---
 

@@ -1,19 +1,11 @@
 ---
 name: agents-md
-version: 1.1.1
+version: 1.1.5
 author: Amr
 specialized: none
 description: 'Creates/audits AGENTS.md - agent rulebook: obligations+references not docs, rules/ per-topic referenced is the recommendation, inline stays valid; one owner per fact (brief+pointer). 19 sections: instructions; context fence value+REACH+docs-root MUST-ASK; how-to router (also owns exec/env/version policy); startup; delegation; privacy - cascade/gitignore; resourceful - local-first; authority - ask-per-session; version control - VCS tiers, parked-work, identity; ambiguity - Exact/Broad, weighty MANDATORY, 1-file records; golden rules - never-bend, violation-shaped; review - rulebook-violations lead, then named tasks; skills - per-skill rows; facts - corrections beat memory; before-between-after - per-phase rituals (read/dedup/type-check), current prompt overrides; voice - a register per surface user''s own; sync blocks - multi-home meanings, a per-block table (site+line), meaning not letters, same-change duty; sections never deleted; maintenance - same-change+date. Writes ONLY AGENTS.md.'
 when_to_use: The user asks to create, restructure, or audit AGENTS.md (or an equivalent agent instruction file), to define how the main agent delegates to subagents, or says "agents-md this project". Also /agents-md.
 argument-hint: "[project root, defaults to current repo]"
-
-
-
-
-
-
-
-
 
 ---
 
@@ -38,7 +30,8 @@ written by their owner (the `document` skill, or the user), never stubbed here.
 | Explicit active context | version, channel, and any other dimension are named **with their reach** - what the value governs and how the agent recognizes it (a docs split, a code tree, a build flag) - never as bare labels, with what to **ignore** stated too |
 | **Identity, not heading shape** | a section is recognized by its canonical title and order; heading depth, numbering, and subsection styling belong to the writer and the harness - the shape is flexible, the identity and full content never get erased |
 | User-decided | no branching strategy, package manager, secret mechanism, or debug permission invented |
-| Honest gaps | anything unanswered is written as `pending - not assumed`, never filled with plausible filler |
+| Honest gaps | disclose unanswered questions immediately; after explicit deferral use only `Pending (Drafting) — <question>. Blocks: <claims or paths>. Discovered: <step>. Close before: Draft [DR] completion.` |
+| Living wording | replace wrong rules directly; never write `Moved to`, `retired`, `assume`, `assumed`, or `Assumption` labels; use `Inferred from <evidence>` or structured `Pending (Drafting)`; deferral opens a marker but never closes the topic |
 | **All sections exist, emptiness is a state** | the created file carries every section; one with no content yet keeps its guide paragraph + "none recorded yet" - the guide is what teaches later agents what belongs there; deleting a section for being empty deletes the knowledge of what fills it |
 | **Current, not merely complete** | section 11 carries the maintenance duty and a `Last reviewed:` date; a rule that changed without updating this file is a wrong instruction that reads like an authoritative one |
 
@@ -83,17 +76,20 @@ blocks: [`03-audit-and-merge.md`](references/03-audit-and-merge.md).
 
 **The interview is the backbone, not a formality:** this file sets the path every future agent and subagent
 follows, so every answer here becomes a standing instruction downstream - which is exactly why an unanswered
-question is recorded as pending instead of guessed.
+question is disclosed immediately instead of guessed. If the user explicitly defers, use the structured
+`Pending (Drafting)` marker; never write a bare `pending - not assumed`.
 
 **Before Round 1 - research the domain, then confirm the slate** ([`02`](references/02-interview-guide.md)):
 never ask a blank question; present the models this repo's stack actually supports, and settle the Section 3
 (`How To`) topic list - the 5 common topics plus any 6th, 7th or Nth the repo suggests - before the questions.
 
-**Deliver it in rounds, not as one wall of questions** - five rounds, each settling one small group of sections
+**Deliver it in rounds, not as one wall of questions** - six rounds, each settling one small group of sections
 (2-5 questions): what this project is, right now · the toolchain as it actually is · what the project already
-has · agents working in this project · trust and boundaries. Skip a round the repository already answers; close
-each settled concern with the hidden-dimensions probe (dig to "confirmed absent", then stop); restate the
-decisions in 3-6 lines and wait for corrections; stopping early leaves numbered pending items, never defaults.
+has · agents working in this project · trust and boundaries · **Voice and human-in-loop**. Evidence-backed
+rounds may skip what the repository already answers; Round 6 always asks Q21 and Q26, even when the user says
+the agent already knows their style. Close each settled concern with the hidden-dimensions probe (dig to
+"confirmed absent", then stop); restate decisions in 3-6 lines and wait for corrections; stopping early leaves
+only explicitly deferred, structured `Pending (Drafting)` items, never defaults.
 The round-to-question map, the research-before-asking rule, the probe, the decision bank with what each row
 feeds and what to write when it stays unanswered, and how to hand a round to `inquire`:
 [`02-interview-guide.md`](references/02-interview-guide.md). State the full decision list back before drafting
@@ -117,6 +113,8 @@ file that editing the rulebook means regenerating the block ([`05`](references/0
 
 ## Step 5 - Verify, then write the one file
 
+Before drafting, confirm Q21 and Q26 have explicit user answers or explicit deferrals recorded as structured
+`Pending (Drafting)` markers. If either is missing, return to Round 6; observed style is not an answer.
 Read the draft back against the sixteen-point checklist - sections, links, scope, privacy, resourceful, version
 control, voice, sync blocks, version policy, facts, rituals, ambiguity, golden rules and review, section 1, the
 subagent block, maintenance - and fix what it finds rather than loosening it to make the draft pass:
@@ -127,9 +125,12 @@ Then write `AGENTS.md` and report:
 - the section map of anything that was already there, and what moved out (with where it went);
 - **dead or missing references** - paths the rulebook points at that do not exist. agents-md reports them and
   recommends who should create them; it does not create directories or stub files itself;
-- items left `pending - not assumed`, as a numbered list the user can answer later;
+- newly discovered questions and any explicitly deferred structured `Pending (Drafting)` markers, with what each blocks;
 - the total and longest-section line counts as advisory guidance, and - only if the user chose the referenced
   style - which section to extract first.
+
+Do not call `AGENTS.md` finished while a `Pending (Drafting)` marker remains. Close every marker through
+`close-topics` before Draft [DR] completes; otherwise report the file as draft-incomplete with exact blockers.
 
 ## Step 6 - Keep it current, every session
 
@@ -152,9 +153,10 @@ The file is only worth what it is worth today, and the maintenance duty applies 
 - **One output file.** `AGENTS.md` in the project root (or the harness's equivalent if the user names it).
   No new directories, no stub docs, no generated units file, no separate block file - those are other skills'
   jobs, and creating them here would pretend a decision was made.
-- **No invented defaults.** Unanswered means recorded as pending. The tempting failure is filling section 3
-  with a generic env story because the repo has no config layer yet; that is a fabrication the agent will
-  enforce.
+- **No invented defaults.** Unanswered questions are disclosed immediately. Record a structured
+  `Pending (Drafting)` marker only after explicit user deferral, and close it before drafting completes. The
+  tempting failure is filling section 3 with a generic env story because the repo has no config layer yet;
+  that is a fabrication the agent will enforce.
 - **No silent deletion** during merge, and another tool's managed block passes through untouched.
 - **The `# Glossary` section is `glossary-md`'s content.** agents-md may add the section as an obligation +
   pointer when writing the rulebook and keeps it through audits, but never edits term entries itself, and
@@ -172,7 +174,7 @@ The file is only worth what it is worth today, and the maintenance duty applies 
 |---|---|---|
 | [`00-what-agents-md-is.md`](references/00-what-agents-md-is.md) | The rulebook/docs boundary, the nineteen sections with worked good-vs-bad pairs, placement (`rules/` convention, inline vs referenced) and advisory size guidance | Always, before drafting |
 | [`01-conditional-context.md`](references/01-conditional-context.md) | Version and channel as independent dimensions, the active/excluded scope fence, other conditional contexts, the routing table format, dead-link handling | Section 2, 5 |
-| [`02-interview-guide.md`](references/02-interview-guide.md) | The five interview rounds and which questions travel together, the question bank, what is look-up-able vs must-ask, how to hand each round to `inquire`, how to record a "pending" answer | Step 3 |
+| [`02-interview-guide.md`](references/02-interview-guide.md) | The five interview rounds and which questions travel together, the question bank, what is look-up-able vs must-ask, how to hand each round to `inquire`, how to record decided, inferred, proposed, and explicitly deferred answers | Step 3 |
 | [`03-audit-and-merge.md`](references/03-audit-and-merge.md) | Classifying an existing file, the map table, move-out decisions, foreign managed blocks, conflict rules | Step 2 |
 | [`04-execution-env-debug.md`](references/04-execution-env-debug.md) | Command chaining and Windows shell pitfalls, package-manager evidence, the three environment strategies and how to combine them, debugging permissions and the registered-instruments block - the last two feed the how-to docs §3 routes to | Sections 6, 7 and the how-to debugging doc |
 | [`05-delegation-and-subagents.md`](references/05-delegation-and-subagents.md) | Main-agent duties, subagent duties, per-task doc lists, generating the pasteable block from the rulebook, report files, fan-out grammar with budgets, write-conflict rules | Section 10 |

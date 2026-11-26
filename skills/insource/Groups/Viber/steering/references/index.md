@@ -9,6 +9,10 @@ This document set defines how project knowledge is structured across two fundame
 
 You must update this file whenever a document is added, removed, or moved.
 
+> **Mandatory authoring gate.** Every existing or planned tech directory receives its own evidence-backed interview and user-settled decision recap before examination, design, topology, mapping, or steering-file authoring. Follow [`documentation-conventions.md`](documentation-conventions.md#mandatory-tech-directory-interview-and-authoring-gate) and the mandatory questions in each tech-folder reference. Existing code or documents are evidence, not a waiver.
+> **Shared scope rule.** `shared/` is the minimalist canonical core and passes the [Universal Scope Test](layout.md#universal-scope-test) only when every confirmed area needs the same fact. Area files link to shared content and carry only their local delta; they never copy, shadow, or override it.
+> **Drafting open-topic rule.** Disclose each new unanswered question immediately, use only the structured `Pending (Drafting)` marker, and close every marker before Draft [DR] completes. Follow the [Drafting Open-Topic Lifecycle](documentation-conventions.md#drafting-open-topic-lifecycle).
+
 ---
 
 ## Reference Documents
@@ -21,14 +25,14 @@ You must update this file whenever a document is added, removed, or moved.
 | [`capabilities.md`](capabilities.md) | Perception tier: What does the system provide or do across features? |
 | [`policy.md`](policy.md) | Perception tier: What is permitted, forbidden, and who holds decision authority? |
 | [`stack.md`](stack.md) | Tech tier: What tools, languages, frameworks, and databases is the project built with ("We use X")? |
-| [`structure.md`](structure.md) | Tech tier: How is the repository, monorepo, and codebase statically organized? |
+| [`structure.md`](structure.md) | Tech tier: Static organization plus pattern-first rules for illustrative, current, and target trees |
 | [`function.md`](function.md) | Tech tier (**steering function folder**): What system-wide technical runtime mechanisms span features? |
 | [`doctrine.md`](doctrine.md) | Tech tier: What engineering guidelines and technical mandates govern specific parts or layers? |
 | [`playbook.md`](playbook.md) | Tech tier: What step-by-step operational recipes exist to run or configure specific tasks? |
 | [`placement.md`](placement.md) | Tier Test, Ordered Decision Flow, boundary tests, and passage-level splitting |
 | [`stress-test.md`](stress-test.md) | Diagnostic self-check: 30 representative test cases covering real-project defect patterns |
-| [`layout.md`](layout.md) | Visual tree layout across both tiers, shared-plus-area non-override rules, and index.md conventions |
-| [`documentation-conventions.md`](documentation-conventions.md) | Authoring rules: one fact one file across tiers, passage-level splitting, and cross-tier link rules |
+| [`layout.md`](layout.md) | Visual tree layout, Universal Scope Test, minimalist shared and area-delta contracts, non-override rules, and index.md conventions |
+| [`documentation-conventions.md`](documentation-conventions.md) | Authoring rules plus the mandatory per-tech-directory interview, decision ledger, and examination/design authoring gate |
 | [`migration.md`](migration.md) | Rules and starting map for migrating legacy documentation into the Two-Tier taxonomy |
 
 ---
@@ -51,8 +55,8 @@ You must update this file whenever a document is added, removed, or moved.
 | Folder | Question It Answers | Sentence Shape |
 | :--- | :--- | :--- |
 | [`stack`](stack.md) | What is this project built with? | *"We use X for Y"* |
-| [`structure`](structure.md) | How is the codebase and repository organized? | *"X lives in directory Y with layout Z"* |
-| [`function`](function.md) | How does the system work technically as a whole? | *"The platform executes technical mechanism X across features"* |
+| [`structure`](structure.md) | How is the codebase organized, and how do new members join it? | *"Members of X live in Y and new members must satisfy Z"* |
+| [`steering function folder`](function.md) | How does the system work technically as a whole? | *"The platform executes technical mechanism X across features"* |
 | [`doctrine`](doctrine.md) | What engineering guidelines and mandates apply to this part? | *"When implementing part X, you must satisfy invariant Y"* |
 | [`playbook`](playbook.md) | How do I operate or run this specific task? | *"To execute X: step 1, step 2, step 3"* |
 

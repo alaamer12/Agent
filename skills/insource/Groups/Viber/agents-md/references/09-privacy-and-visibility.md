@@ -51,9 +51,9 @@ anything that travels?*
 
 When auditing an existing AGENTS.md: content of a Privacy section moves *within* the section format, never
 into other sections; if the project has private machinery but no Privacy section, that is a finding for the
-map table and an interview question, not something to fill in with an invented policy. A "pending - not
-assumed" line is honest; guessing what the user wants hidden is exactly the invented default agents-md
-forbids.
+map table and an interview question, not something to fill in with an invented policy. A structured
+`Pending (Drafting)` marker after explicit deferral is honest; guessing what the user wants hidden is
+exactly the invented default agents-md forbids.
 
 ## Subagents inherit nothing - restate the rule
 

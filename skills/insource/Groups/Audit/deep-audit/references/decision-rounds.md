@@ -55,5 +55,5 @@ never a silent overwrite — history is how drift gets diagnosed later.
 ## Refusals and deferrals are answers too
 
 If the owner says "keep it simple", "as we were", or skips a question: record what was NOT decided,
-leave the placeholder honest (pending, not assumed), and design around it. deep-audit never treats a
+leave the structured `Pending (Drafting)` marker honest, and design around it. deep-audit never treats a
 deferral as consent to invent.

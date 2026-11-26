@@ -2,7 +2,7 @@
 
 The full procedure for producing a Markdown document that does not exist yet. Self-sufficient: this file needs nothing else from the skill.
 
-Create Markdown documents that fulfill the user's actual intent — not a preferred or conventional substitute. Respect the requested level of detail, recover relevant context, preserve required information, distinguish evidence from assumptions, and match the stated purpose, scope, structure, and constraints.
+Create Markdown documents that fulfill the user's actual intent — not a preferred or conventional substitute. Respect the requested level of detail, recover relevant context, preserve required information, distinguish evidence from inference, and match the stated purpose, scope, structure, and constraints.
 
 ## Style (mode) references — load one
 
@@ -41,6 +41,24 @@ Some document types have a genre child inside this skill owning structure, evide
 | Request | Child | What it adds |
 |---|---|---|
 | postmortem, incident report, RCA, bug write-up, "what went wrong" | [`postmortem`](../postmortem/SKILL.md) | 18-section template, file vs folder output, evidence levels V0–V5, blamelessness rules, artifact package with checksums |
+
+## Living-Document Wording
+
+- **Replace wrong living content directly.** In Draft [DR], a confirmed correction overwrites the outdated passage; do not preserve it inline as `retired`, `superseded`, or historical guidance.
+- **Use ordinary references.** When content relocates, update the canonical text and link to it normally. Never add `Moved to`, `Moved from`, or a migration banner to a living document.
+- **Label inference, not assumption.** Write `Inferred from <evidence>` when evidence supports a conclusion. Do not use `assume`, `assumed`, `Assumption`, or `Working assumption` as content labels.
+- **Ask or use structured pending.** If a decision is missing, ask immediately; after explicit deferral use only `Pending (Drafting) — <question>. Blocks: <claims or paths>. Discovered: <step>. Close before: Draft [DR] completion.`
+- **Keep history in its own home.** Preserve prior decisions only in an explicit ADR, changelog, or other historical record when the project uses one. Do not create tombstones in living docs.
+- **Report the current state.** Say `updated`, `replaced`, `linked`, or `removed`; do not report living content as `moved` or `retired`.
+
+## Living-document wording
+
+- Replace wrong or outdated living content directly when the user asks for a fix or during Draft [DR]. Do not preserve it inline as a tombstone.
+- Never write `Moved to`, `Moved from`, `retired`, `assume`, `assumed`, or `Assumption` as labels in living documents or completion reports.
+- Use ordinary cross-references for relocated content: state the current owner and link it, without announcing a move.
+- Write evidence-backed inference as `Inferred from <evidence>`, not as an assumption.
+- For an unanswered drafting decision, ask immediately and use only the structured `Pending (Drafting)` marker after explicit deferral. Deferral opens the marker; it does not close the topic. Report drafting as incomplete until the marker is resolved.
+- Preserve prior decisions only in a genuine historical record the project already owns; never create history inside living guidance.
 
 ## Final rule
 

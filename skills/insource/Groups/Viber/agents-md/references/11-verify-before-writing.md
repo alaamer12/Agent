@@ -12,13 +12,13 @@ Read the draft back against this checklist; there is no lint script, so it is ch
 5. **Resourceful (section 8).** The local-over-global rule is stated.
 6. **Version control (section 12).** The VCS is named, along with its authority tiers, a parked-work policy, and
    a change-identity rule.
-7. **Voice (section 18).** The chosen register, the user's own, and the binding to written artifacts are named.
+7. **Voice (section 18).** Q26 was explicitly answered or deferred. The chosen register, the user's own, and the binding to written artifacts are named; none was inferred from chat brevity.
 8. **Sync blocks (section 19).** Every block carries its own table (locations + line anchors, the meaning law,
    the same-change duty).
 9. **Version policy.** Pattern, bump rule + who, the sync sites, and attachments are declared.
 10. **Facts (section 16).** The fixed trust-over-memory paragraph and the recording duty are present.
 11. **Before-between-after (section 17).** All three phases are named, plus the user-override rule.
-12. **Ambiguity (section 13).** The Exact/Broad question modes, the mandatory-ask rule, the pre-anonymous rule,
+12. **Ambiguity (section 13).** Q21 was explicitly answered or deferred. The Exact/Broad question modes, the always-ask decision list, the mandatory-ask rule, the pre-anonymous rule,
     and the one-file-per-decision record convention with Date/Commit/App-Version anchors are present.
 13. **Golden rules and review (sections 14-15).** Golden rules state nothing casual; Review puts
     rulebook-violation hunting first.

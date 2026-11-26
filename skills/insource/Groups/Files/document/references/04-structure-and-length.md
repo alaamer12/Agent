@@ -31,7 +31,7 @@ Before drafting, answer: *who is reading this, and what will they do with it?*
 - Will act on the summary alone → executive summary or digest.
 - Verifying or building on the work → longer digest, more supporting detail.
 
-If unclear, default to the executive-summary register in Normal mode, state the assumption, and offer to adjust.
+If unclear, default to the executive-summary register in Normal mode, state the interpretation briefly, and offer to adjust. Do not label the interpretation as an assumption.
 
 ## Length as a decision, not a residue
 

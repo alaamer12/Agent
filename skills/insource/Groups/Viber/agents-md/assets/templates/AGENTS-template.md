@@ -377,7 +377,7 @@ silently rots.
 | A procedure changes (branch flow, promotion, debug method) | 3 - the how-to doc itself, same change; a new task class adds a routing line AND a section 2 registration |
 | A version-control rule changes (the VCS named, a tier, parked-work policy, change identity) | 12 — the tier line, **and regenerate the block's VCS clause in 6.4** |
 | The user changed how they want to be asked (Exact/Broad/both, the named Exact list) | 13 — the mode, its named Exact decisions, and the pre-anonymous rule |
-| A golden rule is added, retired, or reworded | 14 — **and regenerate the block's GOLDEN clause**; a golden-rule change is the loudest change in the repo |
+| A golden rule is added, removed, or reworded | 14 — **and regenerate the block's GOLDEN clause**; a golden-rule change is the loudest change in the repo |
 | A named review task changes (new routine, docs budgets, table list) | 15 |
 | A version policy changes (scheme, bump rule or who, a site, an attachment) | 3 - version.md, same change |
 | Verification contradicted a training/prior belief (a library DOES support the thing, an API is NOT deprecated) | 16 - append the dated fact bullet in the same change; the paragraph itself is fixed text |
@@ -396,7 +396,7 @@ silently rots.
 | Debug permissions or steps change (new environment, new inspection tool) | 3 - the debugging how-to doc |
 | A startup step is added or removed | 5 |
 | Delegation rules change (naming, reports, autonomy, fan-out limits) | 6 — **and regenerate the block in 6.4** |
-| A stable behavioral rule is added, retired, or reworded | 1 |
+| A stable behavioral rule is added, removed, or reworded | 1 |
 | The owner or review cadence of this duty changes | 11 |
 
 ### What does not belong here
@@ -454,7 +454,7 @@ exists.
      never contains the questions asked, quoted user intent, or example wording - a stored sample
      question is one more fact with two owners, and it will be quoted back as if it were the rule. -->
 
-- **Question mode:** <!-- choose one and write it here:
+- **Question mode:** <!-- choose one and write it here; this is a mandatory Round 6 user choice, never inferred:
   - Exact - the user answers specifics: present named implementation options ("which channel
     cipher: X, Y, Z"), never just intent ("want encryption?") - the user owns the internals;
   - Broad - the user answers intent ("do you want E2E encryption?"); mechanisms, libraries and
@@ -473,8 +473,8 @@ exists.
   autonomous hand-offs - the condition is "the user is no longer watching", never one skill's name;
   if the project names its own such mode, write that name here) requires the critical open
   questions to be asked and settled FIRST; what
-  cannot be settled before leaving is written down as an explicit assumption with its cost, never
-  silently filled. Anonymous mode then switches the agent to self-decide (see section 9).
+  cannot be settled before leaving is recorded with a structured `Pending (Drafting)` marker after
+  explicit user deferral, never silently filled. Anonymous mode then switches the agent to self-decide (see section 9).
 - **Decision records - the project's recording convention (this section owns it):**
   - **One file per decision**, `<docs>/decisions/<slug>.md` - `<docs>` is wherever this project's
     documentation lives (here: <!-- e.g. docs/ -->); a single combined `decisions.md` is forbidden
@@ -487,8 +487,8 @@ exists.
     why losers lost, choice, consequences, reversal boundary. An answer without a question is not
     a record.
   - **The ask-or-decide call is itself a decision:** choosing NOT to ask (weight judged low, or the
-    user was asleep), and what was assumed instead of asked, gets the same one-file record -
-    especially before/while anonymous runs.
+    user was asleep), and what evidence-backed inference or explicit deferral was recorded, gets the
+    same one-file record - especially before/while anonymous runs.
   - The anonymous ledger lives beside the records: `<docs>/decisions/states.md` (status, remaining,
     decisions as links, uncertainties, parked findings) - resume reads it, handover writes it.
 
@@ -610,8 +610,8 @@ would assume**. The rules are fixed:
   lectures past them -->
 - **Written reflection:** no surface speaks off-script - every document and artifact the agent
   writes takes the register of its surface row; nothing falls back to an ungoverned default voice.
-- <!-- none recorded yet: until the user chooses, the agent keeps a neutral default and asks in the
-  first conversation that produces prose -->
+- <!-- Q26 must be answered or explicitly deferred in Round 6. Until then, keep any neutral draft voice
+  explicitly provisional; never infer surface registers from the user's chat brevity. -->
 
 ## 19. Sync Blocks
 

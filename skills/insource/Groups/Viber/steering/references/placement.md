@@ -7,7 +7,13 @@
 
 ---
 
-## 1. The Ordered Decision Flow
+## Authoring Prerequisite: Settle the Tech Directory First
+
+This flow classifies source passages; it does not authorize technical authoring. Before using it to produce examination, design, topology, mapping, or steering content for a tech directory, complete that directory's [Tech Directory Interview and Authoring Gate](documentation-conventions.md#mandatory-tech-directory-interview-and-authoring-gate). Every in-scope folder needs its own evidence, questions, decision recap, and user confirmation. A correct placement decision never compensates for an unsettled technical decision.
+
+---
+
+## 2. The Ordered Decision Flow
 
 Ask these questions in sequence and stop at the first match:
 
@@ -39,10 +45,11 @@ Ask these questions in sequence and stop at the first match:
      │   └── What is permitted/forbidden, or who has authority (must/may)?
      │       ➔ perception/<area>/policy/
      │
-     └── NO ➔ TECH TIER (tech/)
+     └── NO ➔ TECH TIER (tech/) — only after the target directory is Settled
          ├── Tools, runtimes, frameworks, external services ("We use X")?
          │   ➔ tech/<area>/stack/
-         ├── Static layout, repo boundaries, directory trees, file naming?
+         ├── Static layout, repo boundaries, extensible placement patterns,
+         │   directory snapshots, or file naming?
          │   ➔ tech/<area>/structure/
          ├── System-wide technical runtime mechanisms (steering function folder)?
          │   ➔ tech/<area>/function/
@@ -51,6 +58,10 @@ Ask these questions in sequence and stop at the first match:
          └── Step-by-step operational recipe to run/configure a task?
              ➔ tech/<area>/playbook/
 ```
+
+Placement in `structure/` does not make a tree exhaustive or mandatory. Author it with the [pattern-first rule](structure.md#pattern-first-authoring-rule): label snapshot versus example versus approved target, and make growable groups extensible.
+
+After selecting the concern folder, apply the [Universal Scope Test](layout.md#universal-scope-test) before replacing `<area>` in the path: use `shared/` only when every confirmed area needs the same fact without qualification; otherwise use the owning area and link to shared material without repeating it. A subset of areas is not shared scope.
 
 ---
 
@@ -68,10 +79,10 @@ A raw requirement typically combines business intentions with technical implemen
 **Analysis & Placement:**
 1. *"A customer's virtual wallet balance can never go below zero. There is no overdraft or leverage in any tier."*
    - Tier Test: Would remain true if the backend was rewritten in Rust, Python, or Go -> **`perception/`**.
-   - Folder Test: States a non-negotiable business constraint / forbidden state -> **`perception/shared/policy/non-negative-balance.md`**.
+   - Folder Test: States a non-negotiable business constraint / forbidden state -> **`perception/shared/policy/non-negative-balance.md`** when every area shares it; otherwise use the owning area.
 2. *"Every purchase validates amount against the available balance before execution. Concurrent requests on the same wallet are serialized or checked atomically."*
    - Tier Test: Describes technical concurrency locking and database validation mechanics -> **`tech/`**.
-   - Folder Test: Engineering mandate for a specific technical part (wallet ledger mutations) -> **`tech/shared/doctrine/balance-validation.md`**.
+   - Folder Test: Engineering mandate for a specific technical part (wallet ledger mutations) -> **`tech/shared/doctrine/balance-validation.md`** only when the mandate is identical for every area; otherwise keep the canonical rule in its owning area and link local deltas.
    - Link Direction: The technical doctrine file references the business policy it enforces (`tech` links to `perception`). The policy file does not mention the technical file.
 
 ---
@@ -113,8 +124,8 @@ A raw requirement typically combines business intentions with technical implemen
 
 When a requirement states a technical arrangement that actually represents a business or strategic boundary, apply the Tier Test:
 - *"We maintain an isolated database and distinct domain from the partner platform"* is a business independence decision that remains true across any future technical architecture.
-- **Placement**: State it once in `perception/shared/policy/` (or `perception/shared/product/overview.md`).
-- **`tech/shared/stack/platform.md`** records only the concrete tools in use (*"We use PostgreSQL 16"*).
+- **Placement**: State it once in `perception/shared/policy/` (or `perception/shared/product/overview.md`) only if it governs every area; otherwise use the owning area.
+- **`tech/<area>/stack/platform.md`** records only the concrete tools in use (*"We use PostgreSQL 16"*).
 
 ---
 
